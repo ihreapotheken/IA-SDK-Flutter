@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "ia-sdk-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ihreapotheken/IA-SDK-iOS",
+      "state" : {
+        "revision" : "a64293692f3e4911bf218e4a787c055c5ff0c7c9",
+        "version" : "0.16.8-beta"
+      }
+    },
+    {
+      "identity" : "openssl-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/gematik/OpenSSL-Swift",
+      "state" : {
+        "revision" : "bec06b51e306b84b51fe09b7d26acb3b10e5e2e3",
+        "version" : "4.3.1"
+      }
+    }
+  ],
+  "version" : 2
+}
