@@ -13,6 +13,10 @@
 		2D531D902E955D81005F66B9 /* IAOrdering in Frameworks */ = {isa = PBXBuildFile; productRef = 2D531D8F2E955D81005F66B9 /* IAOrdering */; };
 		2D531D922E955D81005F66B9 /* IAOverTheCounter in Frameworks */ = {isa = PBXBuildFile; productRef = 2D531D912E955D81005F66B9 /* IAOverTheCounter */; };
 		2D531D942E955D81005F66B9 /* IAPharmacy in Frameworks */ = {isa = PBXBuildFile; productRef = 2D531D932E955D81005F66B9 /* IAPharmacy */; };
+		2DDDBE192E9D11FF0048668F /* IaClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDDBE182E9D11FB0048668F /* IaClientDelegate.swift */; };
+		2DDDBE1B2E9D14590048668F /* IaClientBindings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDDBE1A2E9D14560048668F /* IaClientBindings.swift */; };
+		2DDDBE1D2E9D15BA0048668F /* IaClientMethods.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDDBE1C2E9D15B70048668F /* IaClientMethods.swift */; };
+		2DDDBE1F2E9D1DE60048668F /* IaClientViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDDBE1E2E9D1DE30048668F /* IaClientViews.swift */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
@@ -48,6 +52,10 @@
 /* Begin PBXFileReference section */
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
+		2DDDBE182E9D11FB0048668F /* IaClientDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IaClientDelegate.swift; sourceTree = "<group>"; };
+		2DDDBE1A2E9D14560048668F /* IaClientBindings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IaClientBindings.swift; sourceTree = "<group>"; };
+		2DDDBE1C2E9D15B70048668F /* IaClientMethods.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IaClientMethods.swift; sourceTree = "<group>"; };
+		2DDDBE1E2E9D1DE30048668F /* IaClientViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IaClientViews.swift; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
@@ -81,6 +89,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2DDDBE172E9D0FA70048668F /* IaSdk */ = {
+			isa = PBXGroup;
+			children = (
+				2DDDBE1E2E9D1DE30048668F /* IaClientViews.swift */,
+				2DDDBE1C2E9D15B70048668F /* IaClientMethods.swift */,
+				2DDDBE1A2E9D14560048668F /* IaClientBindings.swift */,
+				2DDDBE182E9D11FB0048668F /* IaClientDelegate.swift */,
+			);
+			path = IaSdk;
+			sourceTree = "<group>";
+		};
 		331C8082294A63A400263BE5 /* RunnerTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -123,6 +142,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				2DDDBE172E9D0FA70048668F /* IaSdk */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
@@ -294,8 +314,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2DDDBE1B2E9D14590048668F /* IaClientBindings.swift in Sources */,
+				2DDDBE192E9D11FF0048668F /* IaClientDelegate.swift in Sources */,
+				2DDDBE1D2E9D15BA0048668F /* IaClientMethods.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+				2DDDBE1F2E9D1DE60048668F /* IaClientViews.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
