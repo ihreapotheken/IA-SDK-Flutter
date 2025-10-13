@@ -12,14 +12,12 @@ let package = Package(
         .library(name: "appsdk-v2-flutter-plugin", targets: ["appsdk_v2_flutter_plugin"])
     ],
     dependencies: [
-        .package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", from: "0.16.8-beta")
+        .package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", from: "0.17.4-beta")
     ],
     targets: [
         .target(
             name: "appsdk_v2_flutter_plugin",
-            dependencies: [
-                .product(name: "IAPharmacy", package: "IA-SDK-iOS"),
-            ],
+            dependencies: [],
             resources: [
                 // TODO: If your plugin requires a privacy manifest
                 // (e.g. if it uses any required reason APIs), update the PrivacyInfo.xcprivacy file
