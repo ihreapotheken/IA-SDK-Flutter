@@ -25,6 +25,8 @@ class IaSdkConfiguration {
 
   /// Selected server environment specification.
   ///
+  /// Currently only available with the iOS platform.
+  ///
   /// See [IaSdkConfigServerEnvironment] for further information.
   ///
   final IaSdkConfigServerEnvironment serverEnvironment;

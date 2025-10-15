@@ -3,11 +3,29 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.2.20"
+}
+
+repositories {
+    google()
+    mavenCentral()
+    gradlePluginPortal()
+    maven {
+        url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
+    }
+    maven {
+        name = "IA SDK repo"
+        url = uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
+        credentials {
+            username = System.getenv("GITHUB_USERNAME") ?: ""
+            password = System.getenv("GITHUB_TOKEN") ?: ""
+        }
+    }
 }
 
 android {
-    namespace = "com.example.appsdkv2_flutter_plugin_demo"
-    compileSdk = flutter.compileSdkVersion
+    namespace = "test.demo.sdkv2.ios"
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -20,12 +38,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.appsdkv2_flutter_plugin_demo"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        applicationId = "test.demo.sdkv2.ios"
+        minSdk = 30
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -37,6 +52,25 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    dependencies {
+        val iaDeSdkVersion = "0.0.17-250"
+        val iaDeSdkEnv = System.getenv("IA_DE_SDK_ENV")
+        val iaDeSdkDeps = listOf(
+            "de.ihreapotheken.sdk:integrations",
+            "de.ihreapotheken.sdk:otc",
+            "de.ihreapotheken.sdk:ordering",
+            "de.ihreapotheken.sdk:pharmacy",
+            "de.ihreapotheken.sdk:rx",
+            "de.ihreapotheken.sdk:apofinder",
+        )
+        for (dep in iaDeSdkDeps) {
+            implementation(dep + (if (iaDeSdkEnv != null) "-$iaDeSdkEnv" else "") + ":$iaDeSdkVersion")
+        }
+    }
+}
+dependencies {
+    implementation("androidx.wear.compose:compose-material3:1.5.3")
 }
 
 flutter {

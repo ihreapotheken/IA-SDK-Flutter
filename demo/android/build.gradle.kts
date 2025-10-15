@@ -2,6 +2,18 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        gradlePluginPortal()
+        maven {
+            url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
+        }
+        maven {
+            name = "IA SDK repo"
+            url = uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
+            credentials {
+                username = System.getenv("GITHUB_USERNAME") ?: ""
+                password = System.getenv("GITHUB_TOKEN") ?: ""
+            }
+        }
     }
 }
 

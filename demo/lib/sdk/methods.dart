@@ -10,8 +10,11 @@ enum _IaSdkPlatformMethods {
   /// Corresponds to:
   ///
   /// - iOS `IASDK.initialize`
+  /// - Android `IaSdk.register.init`
   ///
-  initIaSdk;
+  initIaSdk,
+
+  startComposeActivity;
 
   /// Creates a [MethodChannel] with the specified [name].
   ///
@@ -72,7 +75,7 @@ enum _IaSdkPlatformMethods {
 
   /// Invokes any specified native method using a [MethodChannel] object, returning the result.
   ///
-  Future<T> invoke<T>(
+  Future<T?> invoke<T>(
     dynamic arguments,
   ) async {
     try {
@@ -103,6 +106,14 @@ enum _IaSdkPlatformMethods {
             name,
             arguments,
           );
+        case _IaSdkPlatformMethods.startComposeActivity:
+          if (Platform.isAndroid) {
+            return await _platformChannel.invokeMethod(
+              name,
+              null,
+            );
+          }
+          return null;
       }
     } catch (e) {
       throw Exception(

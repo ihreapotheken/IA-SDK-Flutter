@@ -30,55 +30,69 @@ class _ExampleAppState extends State<ExampleApp> {
       home: Scaffold(
         body: SizedBox(
           width: MediaQuery.of(context).size.width,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      child: Text('Init ia.de SDK'),
-                      onPressed: () async {
-                        await _iaSdk.init();
-                        setState(() {
-                          _platformViewKey = UniqueKey();
-                        });
-                      },
-                    ),
-                    ElevatedButton(
-                      child: Text('Show product search'),
-                      onPressed: () {
-                        setState(() {
-                          _selectedView = 0;
-                        });
-                      },
-                    ),
-                    ElevatedButton(
-                      child: Text('Show cart screen'),
-                      onPressed: () {
-                        setState(() {
-                          _selectedView = 1;
-                        });
-                      },
-                    ),
-                  ],
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 16, 16, 16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: kMinInteractiveDimension,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      ElevatedButton(
+                        child: Text('Init ia.de SDK'),
+                        onPressed: () async {
+                          await _iaSdk.init();
+                          setState(() {
+                            _platformViewKey = UniqueKey();
+                          });
+                        },
+                      ),
+                      ElevatedButton(
+                        child: Text('Show product search'),
+                        onPressed: () {
+                          setState(() {
+                            _selectedView = 0;
+                          });
+                        },
+                      ),
+                      ElevatedButton(
+                        child: Text('Show cart screen'),
+                        onPressed: () {
+                          setState(() {
+                            _selectedView = 1;
+                          });
+                        },
+                      ),
+                      ElevatedButton(
+                        child: Text('Start compose activity'),
+                        onPressed: () {
+                          _iaSdk.startComposeActivity();
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: SizedBox.expand(
-                  child: switch (_selectedView) {
-                    0 => IaSdkPlatformView.productSearch(
-                      key: _platformViewKey,
+                SizedBox(height: 10),
+                Expanded(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(color: Colors.red),
+                    child: SizedBox.expand(
+                      child: switch (_selectedView) {
+                        0 => IaSdkPlatformView.productSearch(
+                          key: _platformViewKey,
+                        ),
+                        1 => IaSdkPlatformView.cartScreen(
+                          key: _platformViewKey,
+                        ),
+                        _ => throw UnimplementedError(),
+                      },
                     ),
-                    1 => IaSdkPlatformView.cartScreen(
-                      key: _platformViewKey,
-                    ),
-                    _ => throw UnimplementedError(),
-                  },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

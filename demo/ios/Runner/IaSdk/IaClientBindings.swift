@@ -14,7 +14,7 @@ class IaClientBindings {
     let methodHandler = IaClientMethods(bindings: self)
     self.channel.setMethodCallHandler(methodHandler.callHandler)
     guard let registrar = pluginRegistrar else { return nil }
-    let factory = IaClientFlutterNativeViewFactory(messenger: registrar.messenger())
+    let factory = IaClientNativeViewFactory(messenger: registrar.messenger())
     for view in IaClientViews.allCases {
       registrar.register(
         factory,

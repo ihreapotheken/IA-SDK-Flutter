@@ -13,7 +13,7 @@ internal class IaClientMethods {
    */
   enum FlutterCall : CaseIterable {
     /**
-     * Allocates the SDK runtime resources.'
+     * Allocates the SDK runtime resources.
      */
     case initIaSdk
     
@@ -92,7 +92,7 @@ internal class IaClientMethods {
                 isAnimated: true)
               ),
             )
-            result(true)
+            result(nil)
         } catch {
           result(
             FlutterError(

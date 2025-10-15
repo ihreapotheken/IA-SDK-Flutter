@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:appsdkv2_flutter_plugin_demo/sdk/config.dart';
 import 'package:flutter/services.dart';
 
@@ -24,6 +26,12 @@ class IaSdk {
   Future<void> init() async {
     await _IaSdkPlatformMethods.initIaSdk.invoke<void>(
       _config.toJson(),
+    );
+  }
+
+  Future<void> startComposeActivity() async {
+    await _IaSdkPlatformMethods.startComposeActivity.invoke<void>(
+      null,
     );
   }
 }

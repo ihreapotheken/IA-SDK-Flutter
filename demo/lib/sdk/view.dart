@@ -48,7 +48,9 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
               id: params.id,
               viewType: widget._platformViewType.name,
               layoutDirection: TextDirection.ltr,
-              creationParams: null,
+              creationParams: {
+                'viewId': widget._platformViewType.name,
+              },
               creationParamsCodec: const StandardMessageCodec(),
               onFocus: () {
                 params.onFocusChanged(true);
