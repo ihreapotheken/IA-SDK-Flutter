@@ -1,11 +1,14 @@
-package test.demo.sdkv2.ios.ia_sdk
+package test.demo.sdkv2.ia.sdk
 
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.view.View
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -23,19 +26,33 @@ import io.flutter.plugin.platform.PlatformViewFactory
 @Suppress("EnumEntryName")
 internal enum class IaClientViews {
     /**
-     * Product search screen.
+     * Dashboard screen displaying main app content.
      */
-    productSearchScreen,
+    startScreen,
 
     /**
-     * Cart summary screen.
+     * Product legal disclaimer content screen.
      */
-    cartScreen;
+    legalDisclaimerScreen;
+
+    companion object {
+        fun getStartDestination(viewId: String): Route {
+            return when (viewId) {
+                startScreen.name -> Route.Integration.Start
+
+                legalDisclaimerScreen.name -> Route.Integration.LegalDisclaimer
+
+                else -> {
+                    throw IllegalArgumentException("No view mapped for ID: $viewId")
+                }
+            }
+        }
+    }
 
     /**
      * Visual interface representation.
      */
-    fun view(
+    fun getView(
         context: Context,
     ): View {
         fun findActivity(context: Context?): Activity? {
@@ -52,34 +69,28 @@ internal enum class IaClientViews {
 
         return ComposeView(activity).apply {
             setContent {
-                when (name) {
-                    productSearchScreen.name -> {
-                        Text("AAAA")
-                    }
+                SdkTheme {
+                    val navController = rememberNavController()
 
-                    cartScreen.name -> {
-                        SdkTheme {
-                            val navController = rememberNavController()
-
-                            Box {
-                                NavHost(
-                                    navController = navController,
-                                    startDestination = Route.Integration.Root
-                                ) {
-                                    sdkGraphProvider()
-                                }
-
-                                SdkEntryScreen(
-                                    onDestinationChanged = { },
-                                    navController = navController,
-                                    startRoute = Route.Integration,
-                                )
+                    Scaffold { innerPadding ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding)
+                        ) {
+                            NavHost(
+                                navController = navController,
+                                startDestination = Route.Integration.Root,
+                            ) {
+                                sdkGraphProvider()
                             }
-                        }
-                    }
 
-                    else -> {
-                        throw IllegalArgumentException("No view mapped for ID: $name")
+                            SdkEntryScreen(
+                                onDestinationChanged = { },
+                                navController = navController,
+                                startRoute = getStartDestination(name),
+                            )
+                        }
                     }
                 }
             }
@@ -99,7 +110,7 @@ internal class IaClientNativeView(
         if (viewId !is String) {
             throw Exception("Provided creation parameter \"viewId\" is not a String: $viewId")
         }
-        nativeView = IaClientViews.entries.first(predicate = { it.name == viewId }).view(context)
+        nativeView = IaClientViews.entries.first(predicate = { it.name == viewId }).getView(context)
     }
 
     override fun getView(): View {

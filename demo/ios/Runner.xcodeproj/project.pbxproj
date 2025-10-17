@@ -13,7 +13,6 @@
 		2D531D902E955D81005F66B9 /* IAOrdering in Frameworks */ = {isa = PBXBuildFile; productRef = 2D531D8F2E955D81005F66B9 /* IAOrdering */; };
 		2D531D922E955D81005F66B9 /* IAOverTheCounter in Frameworks */ = {isa = PBXBuildFile; productRef = 2D531D912E955D81005F66B9 /* IAOverTheCounter */; };
 		2D531D942E955D81005F66B9 /* IAPharmacy in Frameworks */ = {isa = PBXBuildFile; productRef = 2D531D932E955D81005F66B9 /* IAPharmacy */; };
-		2DDDBE192E9D11FF0048668F /* IaClientDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDDBE182E9D11FB0048668F /* IaClientDelegate.swift */; };
 		2DDDBE1B2E9D14590048668F /* IaClientBindings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDDBE1A2E9D14560048668F /* IaClientBindings.swift */; };
 		2DDDBE1D2E9D15BA0048668F /* IaClientMethods.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDDBE1C2E9D15B70048668F /* IaClientMethods.swift */; };
 		2DDDBE1F2E9D1DE60048668F /* IaClientViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDDBE1E2E9D1DE30048668F /* IaClientViews.swift */; };
@@ -52,7 +51,6 @@
 /* Begin PBXFileReference section */
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
-		2DDDBE182E9D11FB0048668F /* IaClientDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IaClientDelegate.swift; sourceTree = "<group>"; };
 		2DDDBE1A2E9D14560048668F /* IaClientBindings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IaClientBindings.swift; sourceTree = "<group>"; };
 		2DDDBE1C2E9D15B70048668F /* IaClientMethods.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IaClientMethods.swift; sourceTree = "<group>"; };
 		2DDDBE1E2E9D1DE30048668F /* IaClientViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IaClientViews.swift; sourceTree = "<group>"; };
@@ -95,7 +93,6 @@
 				2DDDBE1E2E9D1DE30048668F /* IaClientViews.swift */,
 				2DDDBE1C2E9D15B70048668F /* IaClientMethods.swift */,
 				2DDDBE1A2E9D14560048668F /* IaClientBindings.swift */,
-				2DDDBE182E9D11FB0048668F /* IaClientDelegate.swift */,
 			);
 			path = IaSdk;
 			sourceTree = "<group>";
@@ -315,7 +312,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				2DDDBE1B2E9D14590048668F /* IaClientBindings.swift in Sources */,
-				2DDDBE192E9D11FF0048668F /* IaClientDelegate.swift in Sources */,
 				2DDDBE1D2E9D15BA0048668F /* IaClientMethods.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,

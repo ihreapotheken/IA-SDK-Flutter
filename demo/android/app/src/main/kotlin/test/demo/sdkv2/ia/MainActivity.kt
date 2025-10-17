@@ -1,8 +1,8 @@
-package test.demo.sdkv2.ios
+package test.demo.sdkv2.ia
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
-import test.demo.sdkv2.ios.ia_sdk.IaClientBindings
+import test.demo.sdkv2.ia.sdk.IaClientBindings
 
 class MainActivity : FlutterFragmentActivity() {
     lateinit var bindings: IaClientBindings

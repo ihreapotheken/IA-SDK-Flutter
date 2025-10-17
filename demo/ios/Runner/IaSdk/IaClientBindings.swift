@@ -2,8 +2,6 @@
 class IaClientBindings {
   private var channel: FlutterMethodChannel!
   
-  let delegate = IaClientDelegate()
-  
   init?(
     viewController: FlutterViewController,
     pluginRegistrar: FlutterPluginRegistrar?,

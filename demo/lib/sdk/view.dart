@@ -1,24 +1,37 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
+part of 'sdk.dart';
 
 enum _IaSdkPlatformViewType {
+  /// Dashboard screen displaying main app content.
+  ///
+  startScreen,
+
+  /// Pharmacy finder main entry screen.
+  ///
+  legalDisclaimerScreen,
+
+  /// Shop screen with product search and filtering options.
+  ///
   productSearchScreen,
-  cartScreen,
 }
 
 class IaSdkPlatformView extends StatefulWidget {
-  const IaSdkPlatformView.productSearch({
+  /// Dashboard screen displaying main app content.
+  ///
+  const IaSdkPlatformView.startScreen({
+    super.key,
+  }) : _platformViewType = _IaSdkPlatformViewType.startScreen;
+
+  /// Dashboard screen displaying main app content.
+  ///
+  const IaSdkPlatformView.legalDisclaimerScreen({
+    super.key,
+  }) : _platformViewType = _IaSdkPlatformViewType.legalDisclaimerScreen;
+
+  /// Dashboard screen displaying main app content.
+  ///
+  const IaSdkPlatformView.productSearchScreen({
     super.key,
   }) : _platformViewType = _IaSdkPlatformViewType.productSearchScreen;
-
-  const IaSdkPlatformView.cartScreen({
-    super.key,
-  }) : _platformViewType = _IaSdkPlatformViewType.cartScreen;
 
   /// Identifier for the currently-specified platform view object.
   ///

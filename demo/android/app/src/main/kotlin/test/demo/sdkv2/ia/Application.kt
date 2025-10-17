@@ -1,4 +1,4 @@
-package test.demo.sdkv2.ios
+package test.demo.sdkv2.ia
 
 import android.app.Application
 

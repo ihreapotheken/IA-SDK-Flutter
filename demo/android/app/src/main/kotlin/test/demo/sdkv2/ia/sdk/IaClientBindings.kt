@@ -1,6 +1,7 @@
-package test.demo.sdkv2.ios.ia_sdk
+package test.demo.sdkv2.ia.sdk
 
 import android.content.Context
+import de.ihreapotheken.sdk.integrations.api.IaSdk
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformViewRegistry
@@ -11,6 +12,8 @@ class IaClientBindings(
     platformViewRegistry: PlatformViewRegistry,
 ) {
     private val channel: MethodChannel = MethodChannel(binaryMessenger, "de.ihreapotheken/sdk")
+
+    lateinit var sdkModule: IaSdk
 
     init {
         val methodHandler = IaClientMethods(this)

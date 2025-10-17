@@ -14,7 +14,15 @@ enum _IaSdkPlatformMethods {
   ///
   initIaSdk,
 
-  startComposeActivity;
+  /// Places a new activity object into the navigation stack.
+  ///
+  /// Defined with the ia.de Flutter plugin native bindings.
+  ///
+  launchRoute,
+
+  /// Forwards a collection of prescription objects with the ia.de checkout services.
+  ///
+  transferPrescriptions;
 
   /// Creates a [MethodChannel] with the specified [name].
   ///
@@ -102,19 +110,38 @@ enum _IaSdkPlatformMethods {
               ),
             ],
           );
-          return await _platformChannel.invokeMethod(
-            name,
+        case _IaSdkPlatformMethods.launchRoute:
+          _verifyArgumentInput(
             arguments,
+            argumentType: String,
           );
-        case _IaSdkPlatformMethods.startComposeActivity:
-          if (Platform.isAndroid) {
-            return await _platformChannel.invokeMethod(
-              name,
-              null,
-            );
-          }
-          return null;
+        case _IaSdkPlatformMethods.transferPrescriptions:
+          _verifyArgumentInput(
+            arguments,
+            argumentType: Map,
+            requiredMapFields: [
+              (
+                name: 'images',
+                type: Iterable<Uint8List>,
+                nullable: true,
+              ),
+              (
+                name: 'pdfs',
+                type: Iterable<Uint8List>,
+                nullable: true,
+              ),
+              (
+                name: 'codes',
+                type: Iterable<String>,
+                nullable: true,
+              ),
+            ],
+          );
       }
+      return await _platformChannel.invokeMethod(
+        name,
+        arguments,
+      );
     } catch (e) {
       throw Exception(
         'An error occurred invoking the $name method with:\n---\n$arguments\n---\n$e',

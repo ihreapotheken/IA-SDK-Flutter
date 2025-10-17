@@ -1,3 +1,5 @@
+part of 'sdk.dart';
+
 /// Basic definition for the ia.de SDK client configuration.
 ///
 class IaSdkConfiguration {
@@ -40,6 +42,10 @@ class IaSdkConfiguration {
       'serverEnvironment': serverEnvironment.name,
     };
   }
+
+  /// Whether the AppSDK native library `init` method was invoked successfully.
+  ///
+  bool initialised = false;
 }
 
 /// Identifier for the ia.de server environments.

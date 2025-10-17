@@ -18,6 +18,16 @@ internal class IaClientMethods {
     case initIaSdk
     
     /**
+     * Places a new [UIViewController] object into the navigation stack.
+     */
+    case launchRoute
+    
+    /**
+     * Forwards a collection of prescription objects with the ia.de checkout services.
+     */
+    case transferPrescriptions
+    
+    /**
      * String identifier getter definition.
      */
     var name: String {
@@ -41,8 +51,8 @@ internal class IaClientMethods {
     switch call.method {
     case FlutterCall.initIaSdk.name:
       let args = call.arguments
-      guard 
-        let args = args as? [String: Any] 
+      guard
+        let args = args as? [String: Any]
       else {
         return result(
           FlutterError(
@@ -65,8 +75,8 @@ internal class IaClientMethods {
           )
         )
       }
-      guard 
-        let serverEnvironment = EnvironmentID(rawValue: serverEnvString) 
+      guard
+        let serverEnvironment = EnvironmentID(rawValue: serverEnvString)
       else {
         return result(
           FlutterError(
@@ -79,20 +89,26 @@ internal class IaClientMethods {
       IASDK.configuration.apiKey = accessKey
       IASDK.configuration.clientID = clientId
       IASDK.setEnvironment(serverEnvironment)
-      IASDK.delegate = bindings.delegate
-      IAIntegrationsSDK.register()
-      IAOverTheCounterSDK.register()
-      IAOrderingSDK.register(delegate: bindings.delegate)
+      IASDK.register([
+        .integrations,
+        .overTheCounter,
+        .ordering,
+        .apofinder
+      ])
       Task.init {
         do {
-            let _ = try await IASDK.initialize(options: .init(
-              prerequisitesOptions: IASDKPrerequisitesOptions(
-                shouldShowIndicator: true,
-                isCancellable: false,
-                isAnimated: true)
-              ),
+          let _ = try await IASDK.initialize(options: .init(
+            prerequisitesOptions: IASDKPrerequisitesOptions(
+              shouldShowIndicator: true,
+              isCancellable: true,
+              isAnimated: true,
+              shouldRunLegal: false,
+              shouldRunOnboarding: false,
+              shouldRunApofinder: true,
             )
-            result(nil)
+          ),
+          )
+          result(nil)
         } catch {
           result(
             FlutterError(
@@ -102,6 +118,106 @@ internal class IaClientMethods {
           )
         }
       }
+      break
+    case FlutterCall.launchRoute.name:
+      let args = call.arguments
+      guard
+        let args = args as? String
+      else {
+        return result(
+          FlutterError(
+            code: "ARG_ERROR",
+            message: "View identifier must be provided as a String type argument \"viewId\".",
+            details: nil
+          )
+        )
+      }
+      let baseViewController: UIViewController? = UIApplication.shared.connectedScenes
+        .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+        .first?.rootViewController
+      func getTopViewController(base: UIViewController? = baseViewController) -> UIViewController? {
+        if let nav = base as? UINavigationController {
+          return getTopViewController(base: nav.visibleViewController)
+        }
+        if let tab = base as? UITabBarController,
+           let selected = tab.selectedViewController {
+          return getTopViewController(base: selected)
+        }
+        if let presented = base?.presentedViewController {
+          return getTopViewController(base: presented)
+        }
+        return base
+      }
+      guard
+        let topViewController = getTopViewController()
+      else {
+        return result(
+          FlutterError(
+            code: "LOGIC_ERROR",
+            message: "No UIViewController object found.",
+            details: nil
+          )
+        )
+      }
+      let viewController = IaClientViewUIKitViewController(viewId: args)
+      let navigationController = UINavigationController(rootViewController: viewController)
+      navigationController.modalPresentationStyle = .fullScreen
+      topViewController.present(navigationController, animated: true)
+      result(nil)
+      break
+    case FlutterCall.transferPrescriptions.name:
+      guard let data = call.arguments as? [String: Any] else {
+        result(FlutterError(
+          code: "ARG_ERROR",
+          message: "Prescription data must be provided as a Dictionary<String, Any> type argument.",
+          details: nil
+        ))
+        break
+      }
+      let prescriptionImages = data["images"]
+      if let prescriptionImages = prescriptionImages {
+        guard
+          let array = prescriptionImages as? [FlutterStandardTypedData]
+        else {
+          result(FlutterError(
+            code: "ARG_ERROR",
+            message: "Prescription image data must be provided as an Array<ByteData> type argument \"images\".",
+            details: nil
+          ))
+          break
+        }
+      }
+      let prescriptionPdfs = data["pdfs"]
+      if let prescriptionPdfs = prescriptionPdfs {
+        guard
+          let array = prescriptionPdfs as? [FlutterStandardTypedData]
+        else {
+          result(FlutterError(
+            code: "ARG_ERROR",
+            message: "Prescription PDF data must be provided as an Array<ByteData> type argument \"pdfs\".",
+            details: nil
+          ))
+          break
+        }
+      }
+      let prescriptionCodes = data["codes"]
+      if let prescriptionCodes = prescriptionCodes {
+        guard
+          let outer = prescriptionCodes as? [[String]]
+        else {
+          result(FlutterError(
+            code: "ARG_ERROR",
+            message: "Prescription code data must be provided as an Array<Array<String>> type argument \"codes\".",
+            details: nil
+          ))
+          break
+        }
+      }
+      let images: [Data] = (data["images"] as? [FlutterStandardTypedData])?.map { $0.data } ?? []
+      let pdfs: [Data] = (data["pdfs"] as? [FlutterStandardTypedData])?.map { $0.data } ?? []
+      let codes: [[String]] = data["codes"] as? [[String]] ?? []
+      // TODO
+      result(nil)
       break
     default:
       return result(FlutterMethodNotImplemented)

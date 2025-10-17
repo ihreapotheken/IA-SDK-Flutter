@@ -1,4 +1,6 @@
-import 'package:appsdkv2_flutter_plugin_demo/sdk/config.dart';
+import 'dart:io';
+
+import 'package:appsdkv2_flutter_plugin_demo/sdk/sdk.dart';
 import 'package:flutter/material.dart';
 
 /// Example client app ia.de SDK configuration.
@@ -24,7 +26,11 @@ class ExampleAppConfig {
   ///
   String get accessKey {
     if (_accessKey.isEmpty) {
-      return 'e9f3d6a12c4b8f75d1e0a93c5b7d6e2f3c1a9b8e7f4d2c0a1b6e5d3f8c7a1b9e';
+      if (Platform.isIOS) {
+        return 'e9f3d6a12c4b8f75d1e0a93c5b7d6e2f3c1a9b8e7f4d2c0a1b6e5d3f8c7a1b9e';
+      } else {
+        return 'a1f4b6e3c7d58f9032eeaa1bc02b4f44f9863d1e5c7a49f7d23e0c96b17af5cd';
+      }
     }
     return _accessKey;
   }

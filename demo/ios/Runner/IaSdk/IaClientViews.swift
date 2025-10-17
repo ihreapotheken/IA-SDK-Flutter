@@ -11,14 +11,14 @@ import IAOrdering
  */
 enum IaClientViews : CaseIterable {
   /**
-   * Product search screen.
+   * Dashboard screen displaying main app content.
    */
-  case productSearchScreen
+  case startScreen
   
   /**
-   * Cart summary screen.
+   * Product search and filtering screen.
    */
-  case cartScreen
+  case productSearchScreen
   
   /**
    * String identifier getter definition.
@@ -32,15 +32,15 @@ enum IaClientViews : CaseIterable {
    */
   var view: AnyView {
     switch self {
+    case IaClientViews.startScreen:
+      return AnyView(IAIntegrations.IAStartScreen())
     case IaClientViews.productSearchScreen:
-      return AnyView(IAProductSearchScreen())
-    case IaClientViews.cartScreen:
-      return AnyView(IACartScreen())
+      return AnyView(IAOverTheCounter.IAProductSearchScreen())
     }
   }
 }
 
-private class IaClientViewUIKitViewController: UIViewController {
+internal class IaClientViewUIKitViewController: UIViewController {
   let viewId: String!
   
   init(viewId: String!) {
@@ -104,7 +104,7 @@ internal class IaClientNativeViewFactory: NSObject, FlutterPlatformViewFactory {
     viewIdentifier viewId: Int64,
     arguments args: Any?
   ) -> FlutterPlatformView {
-    return IaClientFlutterNativeView(
+    return IaClientNativeView(
       frame: frame,
       viewIdentifier: viewId,
       arguments: args,
