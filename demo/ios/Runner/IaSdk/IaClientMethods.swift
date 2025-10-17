@@ -75,9 +75,18 @@ internal class IaClientMethods {
           )
         )
       }
-      guard
-        let serverEnvironment = EnvironmentID(rawValue: serverEnvString)
-      else {
+      let serverEnv: EnvironmentID
+      switch serverEnvString {
+      case "development":
+        serverEnv = EnvironmentID.dev
+        break
+      case "staging":
+        serverEnv = EnvironmentID.staging
+        break
+      case "production":
+        serverEnv = EnvironmentID.prod
+        break
+      default:
         return result(
           FlutterError(
             code: "ARG_ERROR",
@@ -88,7 +97,7 @@ internal class IaClientMethods {
       }
       IASDK.configuration.apiKey = accessKey
       IASDK.configuration.clientID = clientId
-      IASDK.setEnvironment(serverEnvironment)
+      IASDK.setEnvironment(serverEnv)
       IASDK.register([
         .integrations,
         .overTheCounter,
@@ -97,23 +106,25 @@ internal class IaClientMethods {
       ])
       Task.init {
         do {
-          let _ = try await IASDK.initialize(options: .init(
-            prerequisitesOptions: IASDKPrerequisitesOptions(
-              shouldShowIndicator: true,
-              isCancellable: true,
-              isAnimated: true,
-              shouldRunLegal: false,
-              shouldRunOnboarding: false,
-              shouldRunApofinder: true,
-            )
-          ),
+          let prerequisitesOptions = IASDKPrerequisitesOptions(
+            shouldShowIndicator: true,
+            isCancellable: true,
+            isAnimated: true,
+            shouldRunLegal: false,
+            shouldRunOnboarding: false,
+            shouldRunApofinder: true,
+          )
+          let _ = try await IASDK.initialize(
+            options: .init(
+              prerequisitesOptions: prerequisitesOptions
+            ),
           )
           result(nil)
         } catch {
           result(
             FlutterError(
               code: "INIT_ERROR",
-              message: error.localizedDescription,
+              message: "\(String(describing: error)) \(error.localizedDescription)",
               details: nil)
           )
         }

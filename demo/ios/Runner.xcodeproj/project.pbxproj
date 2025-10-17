@@ -692,7 +692,7 @@
 			repositoryURL = "https://github.com/ihreapotheken/IA-SDK-iOS";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = "0.16.8-beta";
+				minimumVersion = "0.17.9-beta";
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
