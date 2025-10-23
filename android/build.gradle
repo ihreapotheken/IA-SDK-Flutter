@@ -6,11 +6,23 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
+        }
+        maven {
+            name = "IA SDK repo"
+            url = uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
+            credentials {
+                username = System.getenv("GITHUB_USERNAME") ?: "TODO"
+                password = System.getenv("GITHUB_TOKEN") ?: "TODO"
+            }
+        }
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.9.1")
+        classpath("com.android.tools.build:gradle:8.12.3")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath "org.jetbrains.kotlin:compose-compiler-gradle-plugin:2.2.20"
     }
 }
 
@@ -18,14 +30,16 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        gradlePluginPortal()
     }
 }
 
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
+apply plugin: "org.jetbrains.kotlin.plugin.compose"
 
 android {
-    namespace = "com.example.appsdk_v2_flutter_plugin"
+    namespace = "de.ihreapotheken.appsdk_v2_flutter_plugin"
 
     compileSdk = 36
 
@@ -44,12 +58,7 @@ android {
     }
 
     defaultConfig {
-        minSdk = 24
-    }
-
-    dependencies {
-        testImplementation("org.jetbrains.kotlin:kotlin-test")
-        testImplementation("org.mockito:mockito-core:5.0.0")
+        minSdk = 30
     }
 
     testOptions {
@@ -63,4 +72,25 @@ android {
             }
         }
     }
+}
+
+dependencies {
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("org.mockito:mockito-core:5.20.0")
+    def iaDeSdkVersion = "0.0.17-250"
+    def iaDeSdkEnv = System.getenv("IA_DE_SDK_ENV") ?: "staging"
+    def iaDeSdkDeps = [
+            "de.ihreapotheken.sdk:integrations",
+            "de.ihreapotheken.sdk:otc",
+            "de.ihreapotheken.sdk:ordering",
+            "de.ihreapotheken.sdk:pharmacy",
+            "de.ihreapotheken.sdk:rx",
+            "de.ihreapotheken.sdk:apofinder"
+    ]
+    iaDeSdkDeps.each { dep ->
+        def fullDep = "${dep}${!iaDeSdkEnv.isBlank() ? "-${iaDeSdkEnv}" : ""}:${iaDeSdkVersion}"
+        implementation fullDep
+    }
+    implementation("androidx.compose.material3:material3:1.3.1")
+    implementation("androidx.compose.foundation:foundation-layout:1.7.6")
 }

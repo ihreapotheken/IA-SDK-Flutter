@@ -5,9 +5,27 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+repositories {
+    google()
+    mavenCentral()
+    gradlePluginPortal()
+    maven {
+        url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
+    }
+    maven {
+        name = "IA SDK repo"
+        url = uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
+        credentials {
+            username = System.getenv("GITHUB_USERNAME") ?: "TODO"
+            password = System.getenv("GITHUB_TOKEN")
+                ?: "TODO"
+        }
+    }
+}
+
 android {
     namespace = "com.example.appsdk_v2_flutter_plugin_example"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -21,11 +39,11 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.appsdk_v2_flutter_plugin_example"
+        applicationId = "de.ihreapotheken.sdk.iasdkdemo.staging"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 30
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

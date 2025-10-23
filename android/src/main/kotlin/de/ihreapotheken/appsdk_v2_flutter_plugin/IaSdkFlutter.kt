@@ -1,38 +1,30 @@
-package com.example.appsdk_v2_flutter_plugin
+package de.ihreapotheken.appsdk_v2_flutter_plugin
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import de.ihreapotheken.appsdk_v2_flutter_plugin.sdk.IaClientBindings
 
-/** AppsdkV2FlutterPlugin */
-class AppsdkV2FlutterPlugin :
+class IaSdkFlutter :
     FlutterPlugin,
     MethodCallHandler {
-    // The MethodChannel that will the communication between Flutter and native Android
-    //
-    // This local reference serves to register the plugin with the Flutter Engine and unregister it
-    // when the Flutter Engine is detached from the Activity
-    private lateinit var channel: MethodChannel
+    lateinit var bindings: IaClientBindings
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "appsdk_v2_flutter_plugin")
-        channel.setMethodCallHandler(this)
+        bindings = IaClientBindings(
+            flutterPluginBinding.applicationContext,
+            flutterPluginBinding.binaryMessenger,
+            flutterPluginBinding.platformViewRegistry,
+        )
     }
 
     override fun onMethodCall(
         call: MethodCall,
         result: Result
     ) {
-        if (call.method == "getPlatformVersion") {
-            result.success("Android ${android.os.Build.VERSION.RELEASE}")
-        } else {
-            result.notImplemented()
-        }
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        channel.setMethodCallHandler(null)
     }
 }
