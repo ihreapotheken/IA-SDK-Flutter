@@ -12,12 +12,19 @@ let package = Package(
         .library(name: "appsdk-v2-flutter-plugin", targets: ["appsdk_v2_flutter_plugin"])
     ],
     dependencies: [
-        .package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", exact: "0.17.9-beta")
+        .package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", exact: "0.17.11-beta")
     ],
     targets: [
         .target(
             name: "appsdk_v2_flutter_plugin",
-            dependencies: [],
+            dependencies: [
+                .product(name: "IAOverTheCounter", package: "IA-SDK-iOS"),
+                .product(name: "IAOrdering", package: "IA-SDK-iOS"),
+                .product(name: "IAPharmacy", package: "IA-SDK-iOS"),
+                .product(name: "IACardLink", package: "IA-SDK-iOS"),
+                .product(name: "IAIntegrations", package: "IA-SDK-iOS"),
+                .product(name: "IAPrescription", package: "IA-SDK-iOS"),
+            ],
             resources: [
                 // TODO: If your plugin requires a privacy manifest
                 // (e.g. if it uses any required reason APIs), update the PrivacyInfo.xcprivacy file

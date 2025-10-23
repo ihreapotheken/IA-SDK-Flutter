@@ -1,12 +1,13 @@
 {
+  "originHash" : "404c23a73530f9909655d30dd8419defa9ee0211a08255faea208c34cd2e64f1",
   "pins" : [
     {
       "identity" : "ia-sdk-ios",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ihreapotheken/IA-SDK-iOS",
       "state" : {
-        "revision" : "a64293692f3e4911bf218e4a787c055c5ff0c7c9",
-        "version" : "0.16.8-beta"
+        "revision" : "be6eb2fd66e17d6438f1d67c506e5ea4dfef1d42",
+        "version" : "0.17.11-beta"
       }
     },
     {
@@ -19,5 +20,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
