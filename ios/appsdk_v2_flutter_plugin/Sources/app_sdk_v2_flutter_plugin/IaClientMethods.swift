@@ -228,8 +228,26 @@ internal class IaClientMethods {
       let images: [Data] = (data["images"] as? [FlutterStandardTypedData])?.map { $0.data } ?? []
       let pdfs: [Data] = (data["pdfs"] as? [FlutterStandardTypedData])?.map { $0.data } ?? []
       let codes: [[String]] = data["codes"] as? [[String]] ?? []
-      // TODO
-      result(nil)
+      Task.init {
+        do {
+          await try IAOrderingSDK.transferPrescriptions(
+            images: images,
+            pdfs: pdfs,
+            codes: codes.flatMap { $0 },
+            orderID: nil,
+            finishAction: .noAction,
+          )
+          result(nil)
+        } catch {
+          fatalError(error.localizedDescription)
+          result(
+            FlutterError(
+              code: "INIT_ERROR",
+              message: "\(String(describing: error)) \(error.localizedDescription)",
+              details: nil)
+          )
+        }
+      }
       break
     default:
       return result(FlutterMethodNotImplemented)
