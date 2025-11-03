@@ -1,6 +1,8 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.ordering.OrderingModule
 import de.ihreapotheken.sdk.otc.OtcModule
@@ -76,7 +78,6 @@ internal class IaClientMethods(
                 )
                 result.success(null)
             }
-
             FlutterCall.launchRoute.name -> {
                 val viewId = call.arguments
                 if (viewId !is String) {
@@ -138,12 +139,21 @@ internal class IaClientMethods(
                         null,
                     )
                 }
-                @Suppress("UNCHECKED_CAST")
-                bindings.sdkModule.transferPrescriptions(
-                    images = prescriptionImages as ArrayList<ByteArray>,
-                    pdfs = prescriptionPdfs as ArrayList<ByteArray>,
-                    codes = prescriptionCodes as ArrayList<ArrayList<String>>
+                val intent = Intent(
+                    bindings.applicationContext,
+                    IaClientComponentActivity::class.java,
                 )
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.putExtra("viewId", IaClientViews.startScreen.name)
+                bindings.applicationContext.startActivity(intent)
+                Handler(Looper.getMainLooper()).postDelayed({
+                    @Suppress("UNCHECKED_CAST")
+                    bindings.sdkModule.transferPrescriptions(
+                        images = prescriptionImages as ArrayList<ByteArray>,
+                        pdfs = prescriptionPdfs as ArrayList<ByteArray>,
+                        codes = prescriptionCodes as ArrayList<ArrayList<String>>
+                    )
+                }, 2000)
                 result.success(null)
             }
 
