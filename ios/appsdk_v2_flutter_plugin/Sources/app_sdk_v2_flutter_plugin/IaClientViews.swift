@@ -57,7 +57,7 @@ internal class IaClientViewUIKitViewController: UIViewController {
     guard
       let swiftUIView = IaClientViews.allCases.first(where: { view in view.name == viewId })?.view
     else {
-      fatalError("View id \(viewId!) not defined for display.")
+      fatalError("View ID \(viewId!) not defined for display.")
     }
     let hostingController = UIHostingController(rootView: swiftUIView)
     addChild(hostingController)
@@ -70,6 +70,20 @@ internal class IaClientViewUIKitViewController: UIViewController {
       hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
     ])
     hostingController.didMove(toParent: self)
+  }
+  
+  @objc private func didTapBack() {
+      navigationController?.popViewController(animated: true)
+  }
+  
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    navigationController?.setNavigationBarHidden(true, animated: false)
+  }
+  
+  override func viewWillDisappear(_ animated: Bool) {
+      super.viewWillDisappear(animated)
+      navigationController?.setNavigationBarHidden(false, animated: animated)
   }
 }
 

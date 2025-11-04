@@ -11,9 +11,23 @@ enum _IaSdkPlatformViewType {
 
   /// Shop screen with product search and filtering options.
   ///
-  productSearchScreen,
+  productSearchScreen;
+
+  String get id {
+    if (Platform.isAndroid) {
+      return name.substring(0, 1).toUpperCase() + name.substring(1);
+    }
+    if (Platform.isIOS) {
+      return name;
+    }
+    throw Exception(
+      'Unsupported platform: ${Platform.operatingSystem}.',
+    );
+  }
 }
 
+///
+///
 class IaSdkPlatformView extends StatefulWidget {
   /// Dashboard screen displaying main app content.
   ///
@@ -48,7 +62,7 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
   Widget build(BuildContext context) {
     if (Platform.isAndroid) {
       return PlatformViewLink(
-        viewType: widget._platformViewType.name,
+        viewType: widget._platformViewType.id,
         surfaceFactory: (context, controller) {
           return AndroidViewSurface(
             controller: controller as AndroidViewController,
@@ -59,10 +73,10 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
         onCreatePlatformView: (params) {
           return PlatformViewsService.initSurfaceAndroidView(
               id: params.id,
-              viewType: widget._platformViewType.name,
+              viewType: widget._platformViewType.id,
               layoutDirection: TextDirection.ltr,
               creationParams: {
-                'viewId': widget._platformViewType.name,
+                'viewId': widget._platformViewType.id,
               },
               creationParamsCodec: const StandardMessageCodec(),
               onFocus: () {
@@ -76,10 +90,10 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
     }
     if (Platform.isIOS) {
       return UiKitView(
-        viewType: widget._platformViewType.name,
+        viewType: widget._platformViewType.id,
         layoutDirection: TextDirection.ltr,
         creationParamsCodec: const StandardMessageCodec(),
-        creationParams: widget._platformViewType.name,
+        creationParams: widget._platformViewType.id,
       );
     }
     return Text(

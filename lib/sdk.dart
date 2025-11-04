@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+part 'callbacks.dart';
 part 'config.dart';
 part 'methods.dart';
 part 'view.dart';
@@ -13,16 +15,69 @@ part 'view.dart';
 /// Base definitions for the ia.de SDK service,
 /// including any relevant methods, fields, and callbacks.
 ///
-class IaSdk {
+class IaSdk extends StatefulWidget {
   /// Constructs an instance of the [IaSdk] object using the provided [configuration].
   ///
-  IaSdk({
+  const IaSdk({
+    super.key,
+    required this.child,
     required IaSdkConfiguration configuration,
   }) : _config = configuration;
+
+  /// Property defining this [Widget] descendant.
+  ///
+  final Widget child;
 
   /// Client configuration specification.
   ///
   final IaSdkConfiguration _config;
+
+  @override
+  State<IaSdk> createState() {
+    return IaSdkApi();
+  }
+
+  /// Returns the nearest ancestor object of the [IaSdkApi] type.
+  ///
+  static IaSdkApi? of(BuildContext context) {
+    return context.findAncestorStateOfType<IaSdkApi>();
+  }
+}
+
+/// Public API methods and properties defined for the ia.de AppSDK library usage.
+///
+class IaSdkApi extends State<IaSdk> {
+  /// Creates a [MethodChannel] object for communication with the native library segments.
+  ///
+  final _channel = const MethodChannel('de.ihreapotheken/sdk');
+
+  @override
+  void initState() {
+    super.initState();
+    _channel.setMethodCallHandler(
+      (call) async {
+        try {
+          final callback = _IaPlatformCallbacks.values.firstWhere(
+            (value) {
+              return value.name == call.method;
+            },
+          );
+          try {
+            await callback.handle(call.arguments, this);
+          } catch (e) {
+            debugPrint('Callback error: ${call.method}\n$e');
+          }
+        } catch (e) {
+          debugPrint('Callback not found: ${call.method}.');
+        }
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
 
   /// Instantiate ia.de SDK runtime configuration.
   ///
@@ -30,18 +85,20 @@ class IaSdk {
   ///
   Future<void> init() async {
     await _IaSdkPlatformMethods.initIaSdk.invoke<void>(
-      _config.toJson(),
+      widget._config.toJson(),
+      this,
     );
-    _config.initialised = true;
+    widget._config.initialised = true;
   }
 
   /// Places a new route object into the navigation stack.
   ///
   Future<void> _launchRoute(
-    String viewId,
+    _IaSdkPlatformViewType view,
   ) async {
     await _IaSdkPlatformMethods.launchRoute.invoke<void>(
-      viewId,
+      view.id,
+      this,
     );
   }
 
@@ -51,13 +108,16 @@ class IaSdk {
     Iterable<Uint8List>? images,
     Iterable<Uint8List>? pdfs,
     Iterable<Iterable<String>>? codes,
+    String? orderId,
   }) async {
     await _IaSdkPlatformMethods.transferPrescriptions.invoke<void>(
       {
         'images': images,
         'pdfs': pdfs,
         'codes': codes,
+        'orderId': orderId,
       },
+      this,
     );
   }
 
@@ -65,7 +125,7 @@ class IaSdk {
   ///
   Future<void> launchDashboardRoute() async {
     await _launchRoute(
-      _IaSdkPlatformViewType.startScreen.name,
+      _IaSdkPlatformViewType.startScreen,
     );
   }
 
@@ -73,7 +133,7 @@ class IaSdk {
   ///
   Future<void> launchLegalDisclaimerRoute() async {
     await _launchRoute(
-      _IaSdkPlatformViewType.legalDisclaimerScreen.name,
+      _IaSdkPlatformViewType.legalDisclaimerScreen,
     );
   }
 
@@ -81,7 +141,31 @@ class IaSdk {
   ///
   Future<void> launchProductSearchRoute() async {
     await _launchRoute(
-      _IaSdkPlatformViewType.productSearchScreen.name,
+      _IaSdkPlatformViewType.productSearchScreen,
     );
+  }
+
+  /// [StreamController] object handling completed checkout updates.
+  ///
+  /// The object will broadcast the information on order IDs forwarded with the [transferPrescriptions] method
+  /// once the user successfully completes the checkout process.
+  ///
+  /// Subscribe to the listener object:
+  ///
+  /// ```dart
+  /// final iaSdk = IaSdk( ... );
+  /// final iaSdkOrderIdsSubscription = iaSdk.orderIdsListener.stream.listen((data) {
+  ///   ...
+  /// });
+  /// iaSdk.iaSdkOrderIdsSubscription.cancel(); // Dispose resources on finish.
+  /// ```
+  ///
+  final orderIdsListener = StreamController<List<String>>.broadcast();
+
+  @override
+  void dispose() {
+    _channel.setMethodCallHandler(null);
+    orderIdsListener.close();
+    super.dispose();
   }
 }

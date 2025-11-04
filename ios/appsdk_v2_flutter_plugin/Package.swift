@@ -12,7 +12,7 @@ let package = Package(
         .library(name: "appsdk-v2-flutter-plugin", targets: ["appsdk_v2_flutter_plugin"])
     ],
     dependencies: [
-        .package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", exact: "0.17.11-beta")
+        .package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", exact: "0.17.14-beta")
     ],
     targets: [
         .target(

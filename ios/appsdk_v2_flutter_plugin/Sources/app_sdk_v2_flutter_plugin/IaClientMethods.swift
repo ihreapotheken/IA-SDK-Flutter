@@ -1,33 +1,31 @@
+import Flutter
 import IACore
 import IAIntegrations
-import IAOverTheCounter
 import IAOrdering
-import Flutter
+import IAOverTheCounter
 
-/**
- * Flutter client service call handler.
- */
+/// Flutter client service call handler.
 @MainActor
 internal class IaClientMethods {
   /**
    * Collection of available method invocation identifiers.
    */
-  enum FlutterCall : CaseIterable {
+  enum FlutterCall: CaseIterable {
     /**
      * Allocates the SDK runtime resources.
      */
     case initIaSdk
-    
+
     /**
      * Places a new [UIViewController] object into the navigation stack.
      */
     case launchRoute
-    
+
     /**
      * Forwards a collection of prescription objects with the ia.de checkout services.
      */
     case transferPrescriptions
-    
+
     /**
      * String identifier getter definition.
      */
@@ -35,16 +33,16 @@ internal class IaClientMethods {
       return String(describing: self)
     }
   }
-  
+
   /**
    * Flutter SDK host app bindings definitions.
    */
   private let bindings: IaClientBindings!
-  
+
   init(bindings: IaClientBindings!) {
     self.bindings = bindings
   }
-  
+
   /**
    * Registers a handler for method calls from the Flutter side.
    */
@@ -71,7 +69,8 @@ internal class IaClientMethods {
         return result(
           FlutterError(
             code: "ARG_ERROR",
-            message: "Missing or invalid argument types. Expected String values for accessKey, clientId, and serverEnvironment.",
+            message:
+              "Missing or invalid argument types. Expected String values for accessKey, clientId, and serverEnvironment.",
             details: nil
           )
         )
@@ -103,7 +102,7 @@ internal class IaClientMethods {
         .integrations,
         .overTheCounter,
         .ordering,
-        .apofinder
+        .apofinder,
       ])
       Task.init {
         do {
@@ -152,7 +151,8 @@ internal class IaClientMethods {
           return getTopViewController(base: nav.visibleViewController)
         }
         if let tab = base as? UITabBarController,
-           let selected = tab.selectedViewController {
+          let selected = tab.selectedViewController
+        {
           return getTopViewController(base: selected)
         }
         if let presented = base?.presentedViewController {
@@ -179,11 +179,13 @@ internal class IaClientMethods {
       break
     case FlutterCall.transferPrescriptions.name:
       guard let data = call.arguments as? [String: Any] else {
-        result(FlutterError(
-          code: "ARG_ERROR",
-          message: "Prescription data must be provided as a Dictionary<String, Any> type argument.",
-          details: nil
-        ))
+        result(
+          FlutterError(
+            code: "ARG_ERROR",
+            message:
+              "Prescription data must be provided as a Dictionary<String, Any> type argument.",
+            details: nil
+          ))
         break
       }
       let prescriptionImages = data["images"]
@@ -191,11 +193,14 @@ internal class IaClientMethods {
         guard
           let array = prescriptionImages as? [FlutterStandardTypedData]
         else {
-          result(FlutterError(
-            code: "ARG_ERROR",
-            message: "Prescription image data must be provided as an Array<ByteData> type argument \"images\".",
-            details: nil
-          ))
+          result(
+            FlutterError(
+              code: "ARG_ERROR",
+              message:
+                "Prescription image data must be provided as an Array<ByteData> type argument \"images\".",
+              details: nil
+            )
+          )
           break
         }
       }
@@ -204,11 +209,13 @@ internal class IaClientMethods {
         guard
           let array = prescriptionPdfs as? [FlutterStandardTypedData]
         else {
-          result(FlutterError(
-            code: "ARG_ERROR",
-            message: "Prescription PDF data must be provided as an Array<ByteData> type argument \"pdfs\".",
-            details: nil
-          ))
+          result(
+            FlutterError(
+              code: "ARG_ERROR",
+              message:
+                "Prescription PDF data must be provided as an Array<ByteData> type argument \"pdfs\".",
+              details: nil
+            ))
           break
         }
       }
@@ -217,11 +224,13 @@ internal class IaClientMethods {
         guard
           let outer = prescriptionCodes as? [[String]]
         else {
-          result(FlutterError(
-            code: "ARG_ERROR",
-            message: "Prescription code data must be provided as an Array<Array<String>> type argument \"codes\".",
-            details: nil
-          ))
+          result(
+            FlutterError(
+              code: "ARG_ERROR",
+              message:
+                "Prescription code data must be provided as an Array<Array<String>> type argument \"codes\".",
+              details: nil
+            ))
           break
         }
       }
@@ -230,7 +239,7 @@ internal class IaClientMethods {
       let codes: [[String]] = data["codes"] as? [[String]] ?? []
       Task.init {
         do {
-          await try IAOrderingSDK.transferPrescriptions(
+          try await IAOrderingSDK.transferPrescriptions(
             images: images,
             pdfs: pdfs,
             codes: codes.flatMap { $0 },
@@ -239,10 +248,9 @@ internal class IaClientMethods {
           )
           result(nil)
         } catch {
-          fatalError(error.localizedDescription)
           result(
             FlutterError(
-              code: "INIT_ERROR",
+              code: "PRESCRIPTION_TRANSFER_ERROR",
               message: "\(String(describing: error)) \(error.localizedDescription)",
               details: nil)
           )

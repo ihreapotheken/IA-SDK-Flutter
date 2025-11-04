@@ -24,12 +24,6 @@ enum _IaSdkPlatformMethods {
   ///
   transferPrescriptions;
 
-  /// Creates a [MethodChannel] with the specified [name].
-  ///
-  /// Used for communication with the native ia.de library integration.
-  ///
-  final _platformChannel = const MethodChannel('de.ihreapotheken/sdk');
-
   /// Verifies [_platformChannel] argument input.
   ///
   void _verifyArgumentInput(
@@ -85,6 +79,7 @@ enum _IaSdkPlatformMethods {
   ///
   Future<T?> invoke<T>(
     dynamic arguments,
+    IaSdkApi publicApi,
   ) async {
     try {
       switch (this) {
@@ -138,7 +133,7 @@ enum _IaSdkPlatformMethods {
             ],
           );
       }
-      return await _platformChannel.invokeMethod(
+      return await publicApi._channel.invokeMethod(
         name,
         arguments,
       );

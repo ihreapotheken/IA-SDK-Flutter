@@ -1,4 +1,12 @@
 import Flutter
+import IACore
+import IAOrdering
+import IAIntegrations
+import IAPharmacy
+import IAOrdering
+import IAPrescription
+import IAOverTheCounter
+import IACardLink
 
 @MainActor
 class IaClientBindings {
@@ -20,5 +28,26 @@ class IaClientBindings {
         factory,
         withId: view.name)
     }
+    let masterDelegate = IaClientDelegate(channel: self.channel)
+    IASDK.setDelegates(
+      sdk: masterDelegate,
+      ordering: masterDelegate,
+      prescription: masterDelegate,
+      cardLink: masterDelegate,
+    )
+  }
+}
+
+class IaClientDelegate : SDKDelegate, OrderingDelegate, PrescriptionDelegate, CardLinkDelegate {
+  let channel: FlutterMethodChannel
+  
+  init(
+    channel: FlutterMethodChannel,
+  ) {
+    self.channel = channel
+  }
+  
+  func orderingDidFinishOrders(orderIDs: [String]) {
+    channel.invokeMethod("didFinishOrder", arguments: orderIDs)
   }
 }
