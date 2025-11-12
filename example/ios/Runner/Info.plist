@@ -45,5 +45,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Kamerazugriff wird für den Rezeptupload benötigt.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Wird genutzt um Apotheken in Ihrer Nähe und Wegbeschreibungen anzuzeigen.</string>
 </dict>
 </plist>

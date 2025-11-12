@@ -47,7 +47,20 @@ class IaClientDelegate : SDKDelegate, OrderingDelegate, PrescriptionDelegate, Ca
     self.channel = channel
   }
   
-  func orderingDidFinishOrders(orderIDs: [String]) {
-    channel.invokeMethod("didFinishOrder", arguments: orderIDs)
+  func orderingWillShowThankYouScreen(orders: [IAOrder], dismissable: (any Dismissable)?) -> HandlingDecision {
+    fatalError("CCCCC")
+    if let order = orders.first {
+      channel.invokeMethod(
+        "didFinishOrder",
+        arguments: [
+          "hostOrderId": order.orderCode,
+          "sdkOrderId": order.clientOrderID,
+        ],
+      )
+      fatalError("AAAAA")
+    } else {
+      fatalError("BBBBB")
+    }
+    return .performDefault
   }
 }

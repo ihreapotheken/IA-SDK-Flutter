@@ -7,12 +7,23 @@ enum _IaSdkPlatformMethods {
   ///
   /// Must be invoked before any of the available SDK methods or fields are utilised.
   ///
-  /// Corresponds to:
-  ///
-  /// - iOS `IASDK.initialize`
-  /// - Android `IaSdk.register.init`
-  ///
   initIaSdk,
+
+  /// Selects a pharmacy by providing an identifier.
+  ///
+  setPharmacyId,
+
+  /// Resets the state of user cart, clearing any added products or prescriptions.
+  ///
+  clearCart,
+
+  /// Forwards the client personal information to the ia.de library for checkout purposes.
+  ///
+  setGuestUserData,
+
+  /// Resets the user data and onboarding status (pharmacy selection, user consents statuses).
+  ///
+  logout,
 
   /// Places a new activity object into the navigation stack.
   ///
@@ -105,11 +116,61 @@ enum _IaSdkPlatformMethods {
               ),
             ],
           );
+          break;
+        case _IaSdkPlatformMethods.setPharmacyId:
+          _verifyArgumentInput(
+            arguments,
+            argumentType: String,
+          );
+          break;
+        case _IaSdkPlatformMethods.clearCart:
+          break;
+        case _IaSdkPlatformMethods.setGuestUserData:
+          _verifyArgumentInput(
+            arguments,
+            argumentType: Map,
+            requiredMapFields: [
+              (
+                name: 'salutation',
+                nullable: false,
+                type: String,
+              ),
+              (
+                name: 'firstName',
+                nullable: false,
+                type: String,
+              ),
+              (
+                name: 'lastName',
+                nullable: false,
+                type: String,
+              ),
+              (
+                name: 'email',
+                nullable: false,
+                type: String,
+              ),
+              (
+                name: 'phoneNumberCountryCode',
+                nullable: true,
+                type: String,
+              ),
+              (
+                name: 'phoneNumberWithoutCountryCode',
+                nullable: true,
+                type: String,
+              ),
+            ],
+          );
+          break;
+        case _IaSdkPlatformMethods.logout:
+          break;
         case _IaSdkPlatformMethods.launchRoute:
           _verifyArgumentInput(
             arguments,
             argumentType: String,
           );
+          break;
         case _IaSdkPlatformMethods.transferPrescriptions:
           _verifyArgumentInput(
             arguments,
@@ -132,6 +193,7 @@ enum _IaSdkPlatformMethods {
               ),
             ],
           );
+          break;
       }
       return await publicApi._channel.invokeMethod(
         name,

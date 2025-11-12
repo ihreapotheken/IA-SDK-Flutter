@@ -42,10 +42,6 @@ class IaSdkConfiguration {
       'serverEnvironment': serverEnvironment.name,
     };
   }
-
-  /// Whether the AppSDK native library `init` method was invoked successfully.
-  ///
-  bool initialised = false;
 }
 
 /// Identifier for the ia.de server environments.

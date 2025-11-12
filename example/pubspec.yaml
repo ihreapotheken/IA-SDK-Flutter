@@ -8,9 +8,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   appsdk_v2_flutter_plugin:
     path: ../
+  flutter_web_browser: ^0.17.3
+  flutter_map: ^8.2.2
+  latlong2: ^0.9.1
 
 dev_dependencies:
   integration_test:

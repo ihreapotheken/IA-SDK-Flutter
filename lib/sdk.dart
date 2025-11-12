@@ -12,8 +12,7 @@ part 'config.dart';
 part 'methods.dart';
 part 'view.dart';
 
-/// Base definitions for the ia.de SDK service,
-/// including any relevant methods, fields, and callbacks.
+/// Base definitions for the ia.de SDK service, including any relevant methods, fields, and callbacks.
 ///
 class IaSdk extends StatefulWidget {
   /// Constructs an instance of the [IaSdk] object using the provided [configuration].
@@ -85,10 +84,74 @@ class IaSdkApi extends State<IaSdk> {
   ///
   Future<void> init() async {
     await _IaSdkPlatformMethods.initIaSdk.invoke<void>(
-      widget._config.toJson(),
+      {
+        ...widget._config.toJson(),
+        if (Platform.isIOS) 'emptyPrerequisites': true,
+      },
       this,
     );
-    widget._config.initialised = true;
+  }
+
+  /// Selects a pharmacy with the specified [pharmacyId].
+  ///
+  Future<void> setPharmacyId(
+    String pharmacyId,
+  ) async {
+    await _IaSdkPlatformMethods.setPharmacyId.invoke<void>(
+      pharmacyId,
+      this,
+    );
+    if (Platform.isIOS) {
+      await _IaSdkPlatformMethods.initIaSdk.invoke<void>(
+        {
+          ...widget._config.toJson(),
+          'shouldRunLegal': true,
+          'shouldRunOnboarding': true,
+        },
+        this,
+      );
+    }
+  }
+
+  /// Resets the state of user cart, clearing any added products or prescriptions.
+  ///
+  Future<void> clearCart() async {
+    await _IaSdkPlatformMethods.clearCart.invoke<void>(
+      null,
+      this,
+    );
+  }
+
+  /// Forwards the client personal information to the ia.de library for checkout purposes.
+  ///
+  Future<void> setGuestUserData({
+    required String salutation,
+    required String firstName,
+    required String lastName,
+    required String email,
+    int? phoneNumberCountryCode,
+    int? phoneNumberWithoutCountryCode,
+  }) async {
+    await _IaSdkPlatformMethods.setGuestUserData.invoke<void>(
+      {
+        'salutation': salutation,
+        'firstName': firstName,
+        'lastName': lastName,
+        'email': email,
+        'phoneNumberCountryCode': phoneNumberCountryCode?.toString(),
+        'phoneNumberWithoutCountryCode': phoneNumberWithoutCountryCode?.toString(),
+      },
+      this,
+    );
+  }
+
+  /// Resets the user data and onboarding status (pharmacy selection, user consents statuses).
+  ///
+  Future<void> logout() async {
+    await _IaSdkPlatformMethods.logout.invoke<void>(
+      null,
+      this,
+    );
   }
 
   /// Places a new route object into the navigation stack.
@@ -107,7 +170,7 @@ class IaSdkApi extends State<IaSdk> {
   Future<void> transferPrescriptions({
     Iterable<Uint8List>? images,
     Iterable<Uint8List>? pdfs,
-    Iterable<Iterable<String>>? codes,
+    Iterable<String>? codes,
     String? orderId,
   }) async {
     await _IaSdkPlatformMethods.transferPrescriptions.invoke<void>(

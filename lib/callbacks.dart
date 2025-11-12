@@ -10,6 +10,7 @@ enum _IaPlatformCallbacks {
     switch (this) {
       case _IaPlatformCallbacks.didFinishOrder:
         print('aaaaaaaa: $arguments');
+        break;
     }
   }
 }
