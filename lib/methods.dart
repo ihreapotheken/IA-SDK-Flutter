@@ -33,7 +33,11 @@ enum _IaSdkPlatformMethods {
 
   /// Forwards a collection of prescription objects with the ia.de checkout services.
   ///
-  transferPrescriptions;
+  transferPrescriptions,
+
+  /// Closes any overlaying ia.de screen contents.
+  ///
+  finishAllActivities;
 
   /// Verifies [_platformChannel] argument input.
   ///
@@ -193,6 +197,8 @@ enum _IaSdkPlatformMethods {
               ),
             ],
           );
+          break;
+        case _IaSdkPlatformMethods.finishAllActivities:
           break;
       }
       return await publicApi._channel.invokeMethod(

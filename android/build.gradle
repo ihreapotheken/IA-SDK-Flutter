@@ -79,7 +79,7 @@ android {
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.mockito:mockito-core:5.20.0")
-    def iaDeSdkVersion = "0.0.33-1"
+    def iaDeSdkVersion = "0.0.34-1"
     def iaDeSdkEnv = System.getenv("IA_DE_SDK_ENV") ?: ""
     def iaDeSdkDeps = [
             "de.ihreapotheken.sdk:integrations",

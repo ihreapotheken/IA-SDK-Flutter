@@ -97,6 +97,7 @@ class _ExampleAppState extends State<ExampleApp> {
                             orderId: 'aaaa',
                           );
                         } catch (e) {
+                          debugPrint('ERROR TRANSFER');
                           debugPrint('$e', wrapWidth: 999999999999);
                         }
                       },

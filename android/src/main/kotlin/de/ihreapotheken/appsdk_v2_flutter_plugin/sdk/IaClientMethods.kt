@@ -1,6 +1,8 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import de.ihreapotheken.sdk.apofinder.ApofinderModule
 import de.ihreapotheken.sdk.core.api.listener.CheckoutListener
 import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigListener
@@ -69,6 +71,11 @@ internal class IaClientMethods(
          * Forwards a collection of prescription objects with the ia.de checkout services.
          */
         transferPrescriptions,
+
+        /**
+         * Closes any overlaying ia.de screen contents.
+         */
+        finishAllActivities,
     }
 
     fun callHandler(
@@ -321,29 +328,37 @@ internal class IaClientMethods(
                         }
                     }
                 )
-                @Suppress("UNCHECKED_CAST")
-                bindings.sdkModule.ordering.transferPrescriptions(
-                    transferPrescriptionRequest = TransferPrescriptionRequest(
-                        images = prescriptionImages as ArrayList<ByteArray>,
-                        pdfs = prescriptionPdfs as ArrayList<ByteArray>,
-                        codes = prescriptionCodes as ArrayList<String>,
-                        orderId = orderId,
-                    ),
-                    transferPrescriptionListener = object : TransferPrescriptionListener {
-                        override fun onTransferPrescriptionEvent(event: TransferPrescriptionEvent) {
-                            if (event is TransferPrescriptionEvent.Success) {
-                                result.success(null)
+                val handler = Handler(Looper.getMainLooper())
+                handler.postDelayed({
+                    @Suppress("UNCHECKED_CAST")
+                    bindings.sdkModule.ordering.transferPrescriptions(
+                        transferPrescriptionRequest = TransferPrescriptionRequest(
+                            images = prescriptionImages as ArrayList<ByteArray>,
+                            pdfs = prescriptionPdfs as ArrayList<ByteArray>,
+                            codes = prescriptionCodes as ArrayList<String>,
+                            orderId = orderId,
+                        ),
+                        transferPrescriptionListener = object : TransferPrescriptionListener {
+                            override fun onTransferPrescriptionEvent(event: TransferPrescriptionEvent) {
+                                if (event is TransferPrescriptionEvent.Success) {
+                                    result.success(null)
+                                }
+                                if (event is TransferPrescriptionEvent.Failed) {
+                                    result.error(
+                                        "METHOD_ERROR",
+                                        event.errorMessage,
+                                        null,
+                                    )
+                                }
                             }
-                            if (event is TransferPrescriptionEvent.Failed) {
-                                result.error(
-                                    "METHOD_ERROR",
-                                    event.errorMessage,
-                                    null,
-                                )
-                            }
-                        }
-                    },
-                )
+                        },
+                    )
+                }, 2000)
+            }
+
+            FlutterCall.finishAllActivities.name -> {
+                ClientComponentActivity.finishAllActivities()
+                result.success(null)
             }
 
             else -> {

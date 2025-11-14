@@ -9,8 +9,8 @@ enum _IaPlatformCallbacks {
   ) async {
     switch (this) {
       case _IaPlatformCallbacks.didFinishOrder:
-        print('aaaaaaaa: $arguments');
-        break;
+        await publicApi.finishAllActivities();
+        return null;
     }
   }
 }

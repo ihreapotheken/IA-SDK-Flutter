@@ -97,7 +97,7 @@ class IaSdkApi extends State<IaSdk> {
   Future<void> setPharmacyId(
     String pharmacyId,
   ) async {
-    await _IaSdkPlatformMethods.setPharmacyId.invoke<void>(
+    final result = await _IaSdkPlatformMethods.setPharmacyId.invoke<void>(
       pharmacyId,
       this,
     );
@@ -111,12 +111,13 @@ class IaSdkApi extends State<IaSdk> {
         this,
       );
     }
+    return result;
   }
 
   /// Resets the state of user cart, clearing any added products or prescriptions.
   ///
   Future<void> clearCart() async {
-    await _IaSdkPlatformMethods.clearCart.invoke<void>(
+    return await _IaSdkPlatformMethods.clearCart.invoke<void>(
       null,
       this,
     );
@@ -129,17 +130,17 @@ class IaSdkApi extends State<IaSdk> {
     required String firstName,
     required String lastName,
     required String email,
-    int? phoneNumberCountryCode,
-    int? phoneNumberWithoutCountryCode,
+    required int phoneNumberCountryCode,
+    required int phoneNumberWithoutCountryCode,
   }) async {
-    await _IaSdkPlatformMethods.setGuestUserData.invoke<void>(
+    return await _IaSdkPlatformMethods.setGuestUserData.invoke<void>(
       {
         'salutation': salutation,
         'firstName': firstName,
         'lastName': lastName,
         'email': email,
-        'phoneNumberCountryCode': phoneNumberCountryCode?.toString(),
-        'phoneNumberWithoutCountryCode': phoneNumberWithoutCountryCode?.toString(),
+        'phoneNumberCountryCode': phoneNumberCountryCode.toString(),
+        'phoneNumberWithoutCountryCode': phoneNumberWithoutCountryCode.toString(),
       },
       this,
     );
@@ -148,7 +149,7 @@ class IaSdkApi extends State<IaSdk> {
   /// Resets the user data and onboarding status (pharmacy selection, user consents statuses).
   ///
   Future<void> logout() async {
-    await _IaSdkPlatformMethods.logout.invoke<void>(
+    return await _IaSdkPlatformMethods.logout.invoke<void>(
       null,
       this,
     );
@@ -159,7 +160,7 @@ class IaSdkApi extends State<IaSdk> {
   Future<void> _launchRoute(
     _IaSdkPlatformViewType view,
   ) async {
-    await _IaSdkPlatformMethods.launchRoute.invoke<void>(
+    return await _IaSdkPlatformMethods.launchRoute.invoke<void>(
       view.id,
       this,
     );
@@ -224,6 +225,13 @@ class IaSdkApi extends State<IaSdk> {
   /// ```
   ///
   final orderIdsListener = StreamController<List<String>>.broadcast();
+
+  Future<void> finishAllActivities() async {
+    return await _IaSdkPlatformMethods.finishAllActivities.invoke<void>(
+      null,
+      this,
+    );
+  }
 
   @override
   void dispose() {

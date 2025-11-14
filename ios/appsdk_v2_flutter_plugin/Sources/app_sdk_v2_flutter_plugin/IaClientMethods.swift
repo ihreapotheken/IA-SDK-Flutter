@@ -16,37 +16,42 @@ internal class IaClientMethods {
      * Allocates the SDK runtime resources.
      */
     case initIaSdk
-    
+
     /**
      * Selects a pharmacy by providing an identifier.
      */
     case setPharmacyId
-    
+
     /**
      * Resets the state of user cart, clearing any added products or prescriptions.
      */
     case clearCart
-    
+
     /**
      * Forwards the client personal information to the ia.de library for checkout purposes.
      */
     case setGuestUserData
-    
+
     /**
      * Resets the user data and onboarding status (pharmacy selection, user consents statuses).
      */
     case logout
-    
+
     /**
      * Places a new [UIViewController] object into the navigation stack.
      */
     case launchRoute
-    
+
     /**
      * Forwards a collection of prescription objects with the ia.de checkout services.
      */
     case transferPrescriptions
-    
+
+    /**
+     * Closes any overlaying ia.de screen contents.
+     */
+    case finishAllActivities
+
     /**
      * String identifier getter definition.
      */
@@ -54,16 +59,16 @@ internal class IaClientMethods {
       return String(describing: self)
     }
   }
-  
+
   /**
    * Flutter SDK host app bindings definitions.
    */
   private let bindings: IaClientBindings!
-  
+
   init(bindings: IaClientBindings!) {
     self.bindings = bindings
   }
-  
+
   /**
    * Registers a handler for method calls from the Flutter side.
    */
@@ -138,9 +143,9 @@ internal class IaClientMethods {
       Task.init {
         do {
           let prerequisitesOptions = IASDKPrerequisitesOptions(
-            shouldShowIndicator: true,
-            isCancellable: true,
-            isAnimated: true,
+            shouldShowIndicator: false,
+            isCancellable: false,
+            isAnimated: false,
             shouldRunLegal: (args["shouldRunLegal"] as? Bool) == true,
             shouldRunOnboarding: (args["shouldRunOnboarding"] as? Bool) == true,
             shouldRunApofinder: (args["shouldRunApofinder"] as? Bool) == true,
@@ -148,7 +153,8 @@ internal class IaClientMethods {
           let _ = try await IASDK.initialize(
             options: .init(
               shouldShowIndicator: false,
-              prerequisitesOptions: (args["emptyPrerequisites"] as? Bool) == true ? nil : prerequisitesOptions,
+              prerequisitesOptions: (args["emptyPrerequisites"] as? Bool) == true
+                ? nil : prerequisitesOptions,
             ),
           )
           result(nil)
@@ -257,6 +263,7 @@ internal class IaClientMethods {
             email: email,
           )
           try await IASDK.setUserData(userData)
+          result(nil)
         } catch {
           result(
             FlutterError(
@@ -272,6 +279,7 @@ internal class IaClientMethods {
       Task.init {
         do {
           try await IASDK.deleteAllUserRelatedData()
+          result(nil)
         } catch {
           result(
             FlutterError(
@@ -296,38 +304,7 @@ internal class IaClientMethods {
           )
         )
       }
-      let baseViewController: UIViewController? = UIApplication.shared.connectedScenes
-        .compactMap { ($0 as? UIWindowScene)?.keyWindow }
-        .first?.rootViewController
-      func getTopViewController(base: UIViewController? = baseViewController) -> UIViewController? {
-        if let nav = base as? UINavigationController {
-          return getTopViewController(base: nav.visibleViewController)
-        }
-        if let tab = base as? UITabBarController,
-           let selected = tab.selectedViewController
-        {
-          return getTopViewController(base: selected)
-        }
-        if let presented = base?.presentedViewController {
-          return getTopViewController(base: presented)
-        }
-        return base
-      }
-      guard
-        let topViewController = getTopViewController()
-      else {
-        return result(
-          FlutterError(
-            code: "LOGIC_ERROR",
-            message: "No UIViewController object found.",
-            details: nil
-          )
-        )
-      }
-      let viewController = IaClientViewUIKitViewController(viewId: args)
-      let navigationController = UINavigationController(rootViewController: viewController)
-      navigationController.modalPresentationStyle = .fullScreen
-      topViewController.present(navigationController, animated: true)
+      IaClientViews.startScreen.start(viewId: args)
       result(nil)
       break
     case FlutterCall.transferPrescriptions.name:
@@ -398,7 +375,8 @@ internal class IaClientMethods {
             pdfs: pdfs.map { pdfBytes in PDFPrescription(data: pdfBytes) },
             codes: codes,
             orderID: orderId,
-            finishAction: .openCart,
+            showActivityIndicator: false,
+            finishAction: .noAction,
           )
           result(nil)
         } catch {
@@ -411,6 +389,11 @@ internal class IaClientMethods {
           )
         }
       }
+      IaClientViews.cartScreen.start()
+      break
+    case FlutterCall.finishAllActivities.name:
+      IaClientViewUIKitViewController.finishAllActivities()
+      result(nil)
       break
     default:
       return result(FlutterMethodNotImplemented)
