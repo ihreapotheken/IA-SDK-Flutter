@@ -5,12 +5,13 @@ allprojects {
         maven {
             url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
         }
+        mavenLocal()
         maven {
             name = "IA SDK repo"
             url = uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
             credentials {
-                username = System.getenv("GITHUB_USERNAME") ?: "TODO"
-                password = System.getenv("GITHUB_TOKEN") ?: "TODO"
+                username = System.getenv("GITHUB_USERNAME") ?: "mljubas@4ofthem.eu"
+                password = System.getenv("GITHUB_TOKEN") ?: "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"
             }
         }
     }

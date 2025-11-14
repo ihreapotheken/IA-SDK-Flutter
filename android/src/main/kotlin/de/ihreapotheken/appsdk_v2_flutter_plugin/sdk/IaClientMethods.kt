@@ -1,16 +1,28 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
 import android.content.Intent
-import android.os.Handler
-import android.os.Looper
+import de.ihreapotheken.sdk.apofinder.ApofinderModule
+import de.ihreapotheken.sdk.core.api.listener.CheckoutListener
+import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigListener
+import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigResult
+import de.ihreapotheken.sdk.core.api.listener.TransferPrescriptionEvent
+import de.ihreapotheken.sdk.core.api.listener.TransferPrescriptionListener
+import de.ihreapotheken.sdk.core.data.EnvironmentType
+import de.ihreapotheken.sdk.core.data.PrerequisiteFlowConfiguration
+import de.ihreapotheken.sdk.core.data.model.sdk.SdkEvent
+import de.ihreapotheken.sdk.core.data.model.sdk.SdkEventListener
+import de.ihreapotheken.sdk.core.domain.model.GuestUser
 import de.ihreapotheken.sdk.integrations.api.IaSdk
+import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
+import de.ihreapotheken.sdk.integrations.api.TransferPrescriptionRequest
+import de.ihreapotheken.sdk.integrations.ui.composables.ClientComponentActivity
+import de.ihreapotheken.sdk.integrations.ui.composables.ClientViews
 import de.ihreapotheken.sdk.ordering.OrderingModule
 import de.ihreapotheken.sdk.otc.OtcModule
 import de.ihreapotheken.sdk.pharmacy.PharmacyModule
 import de.ihreapotheken.sdk.rx.RxModule
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import kotlin.collections.get
 
 /**
  * Flutter client service call handler.
@@ -27,6 +39,26 @@ internal class IaClientMethods(
          * Allocates the SDK runtime resources.
          */
         initIaSdk,
+
+        /**
+         * Selects a pharmacy by providing an identifier.
+         */
+        setPharmacyId,
+
+        /**
+         * Resets the state of user cart, clearing any added products or prescriptions.
+         */
+        clearCart,
+
+        /**
+         * Forwards the client personal information to the ia.de library for checkout purposes.
+         */
+        setGuestUserData,
+
+        /**
+         * Resets the user data and onboarding status (pharmacy selection, user consents statuses).
+         */
+        logout,
 
         /**
          * Places a new [android.app.Activity] object into the navigation stack.
@@ -49,7 +81,7 @@ internal class IaClientMethods(
                 if (args !is Map<*, *>) {
                     result.error(
                         "ARG_ERROR",
-                        "Arguments for initIaSdk must be of Dictionary type.",
+                        "Arguments for initIaSdk must be of Map type.",
                         null,
                     )
                     return
@@ -65,36 +97,165 @@ internal class IaClientMethods(
                     )
                     return
                 }
+                val serverEnv = when (serverEnvString) {
+                    "development" -> {
+                        EnvironmentType.DEV
+                    }
+                    "staging" -> {
+                        EnvironmentType.STAGING
+                    }
+                    "production" -> {
+                        EnvironmentType.PROD
+                    }
+                    else -> {
+                        EnvironmentType.STAGING
+                    }
+                }
                 bindings.sdkModule = IaSdk.register(
                     OtcModule,
                     OrderingModule,
                     PharmacyModule,
                     RxModule,
+                    ApofinderModule,
                 )
                 bindings.sdkModule.init(
                     context = bindings.applicationContext,
                     apiKey = accessKey,
-                    clientID = clientId,
+                    clientId = clientId,
+                    configuration = IaSdkConfiguration(
+                        shouldFetchThemeFromRemote = true,
+                        prerequisiteFlowConfiguration = PrerequisiteFlowConfiguration(
+                            shouldRunLegal = true,
+                            shouldRunOnboarding = true,
+                        ),
+                    ),
+                    environmentType = serverEnv,
+                    sdkEventListener = object : SdkEventListener {
+                        override fun onSdkEvent(event: SdkEvent) {
+                            if (event is SdkEvent.InitStatus && event !is SdkEvent.InitStatus.Initializing) {
+                                result.success(null)
+                            } else if (event is SdkEvent.InitError) {
+                                result.error(
+                                    "INIT_ERROR",
+                                    event.message,
+                                    null,
+                                )
+                            }
+                        }
+                    }
+                )
+            }
+
+            FlutterCall.setPharmacyId.name -> {
+                val pharmacyId = call.arguments
+                if (pharmacyId !is String) {
+                    result.error(
+                        "ARG_ERROR",
+                        "Pharmacy identifier must be provided as a String type argument.",
+                        null,
+                    )
+                    return
+                }
+                bindings.sdkModule.setPharmacyId(
+                    pharmacyId,
+                    object : PharmacyConfigListener {
+                        override fun onPharmacyConfigResult(pharmacyConfigResult: PharmacyConfigResult) {
+                            if (pharmacyConfigResult is PharmacyConfigResult.NotInitialized
+                                || pharmacyConfigResult is PharmacyConfigResult.ValidationFailed) {
+                                result.error(
+                                    "METHOD_ERROR",
+                                    "Setting pharmacy ID failed: $pharmacyConfigResult",
+                                    null
+                                )
+                            } else {
+                                result.success(null)
+                            }
+                        }
+
+                    }
+                )
+            }
+
+            FlutterCall.clearCart.name -> {
+                val success = bindings.sdkModule.ordering.clearCart()
+                if (success) {
+                    result.success(null)
+                } else {
+                    result.error(
+                        "METHOD_ERROR",
+                        "Failed to clear cart data.",
+                        null
+                    )
+                }
+            }
+
+            FlutterCall.setGuestUserData.name -> {
+                val args = call.arguments
+                if (args !is Map<*, *>) {
+                    result.error(
+                        "ARG_ERROR",
+                        "Arguments for setGuestUserData must be of Map type.",
+                        null,
+                    )
+                    return
+                }
+                val salutation = args["salutation"] as String
+                val firstName = args["firstName"] as String
+                val lastName = args["lastName"] as String
+                val email = args["email"] as String
+                val phoneNumberCountryCode = args["phoneNumberCountryCode"] as String?
+                val phoneNumberWithoutCountryCode = args["phoneNumberWithoutCountryCode"] as String?
+                val guestUserData = GuestUser(
+                    salutation,
+                    firstName,
+                    lastName,
+                    email,
+                    if (phoneNumberCountryCode != null) {
+                        phoneNumberCountryCode.toIntOrNull() ?: 49
+                    } else {
+                        null
+                    },
+                    phoneNumberWithoutCountryCode,
+                )
+                bindings.sdkModule.setGuestUser(
+                    guestUserData
                 )
                 result.success(null)
             }
+
+            FlutterCall.logout.name -> {
+                val success = bindings.sdkModule.core.clearAllData()
+                if (success) {
+                    result.success(null)
+                } else {
+                    result.error(
+                        "METHOD_ERROR",
+                        "Failed to logout.",
+                        null
+                    )
+                }
+            }
+
             FlutterCall.launchRoute.name -> {
                 val viewId = call.arguments
                 if (viewId !is String) {
                     result.error(
                         "ARG_ERROR",
-                        "View identifier must be provided as a String type argument \"viewId\".",
+                        "View identifier must be provided as a String type argument.",
                         null,
                     )
                     return
                 }
+                val activityContext = bindings.activityContext()
                 val intent = Intent(
-                    bindings.applicationContext,
-                    IaClientComponentActivity::class.java,
+                    activityContext ?: bindings.applicationContext,
+                    ClientComponentActivity::class.java,
                 )
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                if (activityContext == null) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
                 intent.putExtra("viewId", viewId)
-                bindings.applicationContext.startActivity(intent)
+                (activityContext ?: bindings.applicationContext).startActivity(intent)
                 result.success(null)
             }
 
@@ -130,8 +291,7 @@ internal class IaClientMethods(
                 }
                 val prescriptionCodes = data["codes"]
                 if (prescriptionCodes != null && (prescriptionCodes !is ArrayList<*> ||
-                            prescriptionCodes.any { it !is ArrayList<*> } ||
-                            prescriptionCodes.all { (it as ArrayList<*>).all { it !is String } })
+                            prescriptionCodes.all { it !is String })
                 ) {
                     result.error(
                         "ARG_ERROR",
@@ -139,22 +299,51 @@ internal class IaClientMethods(
                         null,
                     )
                 }
-                val intent = Intent(
-                    bindings.applicationContext,
-                    IaClientComponentActivity::class.java,
+                val orderId = data["orderId"] as? String
+                ClientComponentActivity.start(
+                    bindings.activityContext() ?: bindings.applicationContext,
+                    ClientViews.CartScreen,
                 )
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                intent.putExtra("viewId", IaClientViews.startScreen.name)
-                bindings.applicationContext.startActivity(intent)
-                Handler(Looper.getMainLooper()).postDelayed({
-                    @Suppress("UNCHECKED_CAST")
-                    bindings.sdkModule.transferPrescriptions(
+                IaSdk.ordering.setCheckoutListener(
+                    object : CheckoutListener {
+                        override fun onCheckoutCompleted(hostOrderId: String, sdkOrderId: String) {
+                            bindings.channel.invokeMethod(
+                                "didFinishOrder",
+                                mapOf(
+                                    "iaOrderCode" to sdkOrderId,
+                                    "hostOrderCode" to hostOrderId,
+                                ),
+                            )
+                            bindings.orderSignatures.value = IaClientBindings.SignatureCodes(
+                                iaOrderCode = sdkOrderId,
+                                hostOrderCode = hostOrderId,
+                            )
+                        }
+                    }
+                )
+                @Suppress("UNCHECKED_CAST")
+                bindings.sdkModule.ordering.transferPrescriptions(
+                    transferPrescriptionRequest = TransferPrescriptionRequest(
                         images = prescriptionImages as ArrayList<ByteArray>,
                         pdfs = prescriptionPdfs as ArrayList<ByteArray>,
-                        codes = prescriptionCodes as ArrayList<ArrayList<String>>
-                    )
-                }, 2000)
-                result.success(null)
+                        codes = prescriptionCodes as ArrayList<String>,
+                        orderId = orderId,
+                    ),
+                    transferPrescriptionListener = object : TransferPrescriptionListener {
+                        override fun onTransferPrescriptionEvent(event: TransferPrescriptionEvent) {
+                            if (event is TransferPrescriptionEvent.Success) {
+                                result.success(null)
+                            }
+                            if (event is TransferPrescriptionEvent.Failed) {
+                                result.error(
+                                    "METHOD_ERROR",
+                                    event.errorMessage,
+                                    null,
+                                )
+                            }
+                        }
+                    },
+                )
             }
 
             else -> {

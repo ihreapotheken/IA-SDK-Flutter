@@ -10,7 +10,7 @@ import IACardLink
 
 @MainActor
 class IaClientBindings {
-  private var channel: FlutterMethodChannel!
+  var channel: FlutterMethodChannel!
   
   init?(
     viewController: FlutterViewController,
@@ -28,13 +28,6 @@ class IaClientBindings {
         factory,
         withId: view.name)
     }
-    let masterDelegate = IaClientDelegate(channel: self.channel)
-    IASDK.setDelegates(
-      sdk: masterDelegate,
-      ordering: masterDelegate,
-      prescription: masterDelegate,
-      cardLink: masterDelegate,
-    )
   }
 }
 
@@ -48,7 +41,6 @@ class IaClientDelegate : SDKDelegate, OrderingDelegate, PrescriptionDelegate, Ca
   }
   
   func orderingWillShowThankYouScreen(orders: [IAOrder], dismissable: (any Dismissable)?) -> HandlingDecision {
-    fatalError("CCCCC")
     if let order = orders.first {
       channel.invokeMethod(
         "didFinishOrder",
@@ -57,9 +49,6 @@ class IaClientDelegate : SDKDelegate, OrderingDelegate, PrescriptionDelegate, Ca
           "sdkOrderId": order.clientOrderID,
         ],
       )
-      fatalError("AAAAA")
-    } else {
-      fatalError("BBBBB")
     }
     return .performDefault
   }

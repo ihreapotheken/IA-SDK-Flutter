@@ -128,6 +128,13 @@ internal class IaClientMethods {
         .pharmacyDetails,
         .prescription,
       ])
+      let masterDelegate = IaClientDelegate(channel: bindings.channel)
+      IASDK.setDelegates(
+        sdk: masterDelegate,
+        ordering: masterDelegate,
+        prescription: masterDelegate,
+        cardLink: masterDelegate,
+      )
       Task.init {
         do {
           let prerequisitesOptions = IASDKPrerequisitesOptions(
@@ -390,7 +397,7 @@ internal class IaClientMethods {
             images: images,
             pdfs: pdfs.map { pdfBytes in PDFPrescription(data: pdfBytes) },
             codes: codes,
-            orderID: orderId ?? "AAAAA",
+            orderID: orderId,
             finishAction: .openCart,
           )
           result(nil)

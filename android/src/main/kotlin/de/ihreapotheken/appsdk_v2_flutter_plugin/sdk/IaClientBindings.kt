@@ -1,28 +1,52 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
+import IaClientFlutterViewFactory
 import android.content.Context
+import androidx.lifecycle.MutableLiveData
 import de.ihreapotheken.sdk.integrations.api.IaSdk
+import de.ihreapotheken.sdk.integrations.ui.composables.ClientViews
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformViewRegistry
 
 class IaClientBindings(
     val applicationContext: Context,
+    val activityContext: () -> Context?,
     binaryMessenger: BinaryMessenger,
     platformViewRegistry: PlatformViewRegistry,
 ) {
-    private val channel: MethodChannel = MethodChannel(binaryMessenger, "de.ihreapotheken/sdk")
+    val channel: MethodChannel = MethodChannel(binaryMessenger, "de.ihreapotheken/sdk")
 
     lateinit var sdkModule: IaSdk
 
     init {
         val methodHandler = IaClientMethods(this)
         channel.setMethodCallHandler(methodHandler::callHandler)
-        for (view in IaClientViews.entries) {
+        for (view in ClientViews.entries) {
             platformViewRegistry.registerViewFactory(
                 view.name,
                 IaClientFlutterViewFactory(),
             )
         }
+    }
+
+    /**
+     * Data class to hold a user's address in [PersonalData].
+     */
+    data class SignatureCodes(
+        val iaOrderCode: String,
+        val hostOrderCode: String,
+    )
+
+    /**
+     * Property holding the value of the [orderSignatureListener].
+     */
+    var orderSignatures: MutableLiveData<SignatureCodes?> = MutableLiveData<SignatureCodes?>(null)
+
+    /**
+     * Notifier implemented for receiving value updates on order IDs with prescription transfer completion.
+     */
+    val orderSignaturesListener: MutableLiveData<SignatureCodes?> by lazy {
+        orderSignatures
     }
 }
