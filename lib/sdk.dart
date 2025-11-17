@@ -174,6 +174,17 @@ class IaSdkApi extends State<IaSdk> {
     Iterable<String>? codes,
     String? orderId,
   }) async {
+    if (Platform.isIOS) {
+      await _IaSdkPlatformMethods.initIaSdk.invoke<void>(
+        {
+          ...widget._config.toJson(),
+          'shouldRunLegal': true,
+          'shouldRunOnboarding': true,
+          'shouldRunApofinder': true,
+        },
+        this,
+      );
+    }
     await _IaSdkPlatformMethods.transferPrescriptions.invoke<void>(
       {
         'images': images,
