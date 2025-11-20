@@ -124,8 +124,6 @@ class _ExampleAppState extends State<ExampleApp> {
 Using the specified method, the client implementation is enabled with access to any of the [IaSdkApi] properties,
 and may access them from any point in the widget tree.
 
-
-
 ---
 
 For further information, please see the 

@@ -6,6 +6,7 @@ allprojects {
             url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
         }
         mavenLocal()
+        maven("https://nexus.link4.health/repository/link4health-anonymous/")
         maven {
             name = "IA SDK repo"
             url = uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")

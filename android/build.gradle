@@ -12,6 +12,9 @@ buildscript {
         }
         mavenLocal()
         maven {
+            url = uri("https://nexus.link4.health/repository/link4health-anonymous/")
+        }
+        maven {
             name = "IA SDK repo"
             url = uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
             credentials {
@@ -79,7 +82,7 @@ android {
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.mockito:mockito-core:5.20.0")
-    def iaDeSdkVersion = "0.0.34-1"
+    def iaDeSdkVersion = "0.0.18-1"
     def iaDeSdkEnv = System.getenv("IA_DE_SDK_ENV") ?: ""
     def iaDeSdkDeps = [
             "de.ihreapotheken.sdk:integrations",
@@ -87,7 +90,9 @@ dependencies {
             "de.ihreapotheken.sdk:ordering",
             "de.ihreapotheken.sdk:pharmacy",
             "de.ihreapotheken.sdk:rx",
-            "de.ihreapotheken.sdk:apofinder"
+            "de.ihreapotheken.sdk:apofinder",
+            "de.ihreapotheken.sdk:appointments",
+            "de.ihreapotheken.sdk:cardlink",
     ]
     iaDeSdkDeps.each { dep ->
         def fullDep = "${dep}${!iaDeSdkEnv.isBlank() ? "-${iaDeSdkEnv}" : ""}:${iaDeSdkVersion}"
