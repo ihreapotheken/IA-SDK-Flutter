@@ -11,7 +11,7 @@ The plugin implementation is based on the native AppSDK libraries developed by t
 These native libraries offer both checkout services as well as view components in order to ensure seamless integration 
 with any client setup. 
 
-Public API Reference: TODO
+Public API Reference: https://ihreapotheken.github.io/docs/appsdk/flutter
 
 ## 2. Developer Setup
 
@@ -51,9 +51,9 @@ on using Flutter plugins.
 
 ### 4.1. Source control access
 
-TODO
+In order to enable 
 
-### 4.2. Add the package to the `pubspec.yaml` file
+### 4.2. Add the dependency to the `pubspec.yaml` file
 
 The library is accessed from Github as in below example:
 
@@ -72,6 +72,8 @@ dependencies:
       url: https://github.com/ihreapotheken/IA-SDK-Flutter
       ref: main
 ```
+
+You may reference specific branch, tag, or commit hash by specifying the `ref` field.
 
 ### 4.3. Plugin usage
 
@@ -126,4 +128,5 @@ and may access them from any point in the widget tree.
 
 ---
 
-For further information, please see the API reference: TODO
+For further information, please see the 
+[API reference](https://ihreapotheken.github.io/docs/appsdk/flutter).
