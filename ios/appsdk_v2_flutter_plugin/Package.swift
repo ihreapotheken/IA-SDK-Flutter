@@ -22,6 +22,7 @@ let package = Package(
                 .product(name: "IAOrdering", package: "IA-SDK-iOS"),
                 .product(name: "IAPharmacy", package: "IA-SDK-iOS"),
                 .product(name: "IAIntegrations", package: "IA-SDK-iOS"),
+                .product(name: "IACardLink", package: "IA-SDK-iOS"),
                 .product(name: "IAPrescription", package: "IA-SDK-iOS"),
             ],
             resources: [
