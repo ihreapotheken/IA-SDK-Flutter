@@ -63,6 +63,8 @@ enum IaClientViews: CaseIterable {
     }
   }
   
+  static public let navController = UINavigationController()
+  
   public func start(
     viewId: String? = nil,
   ) {
@@ -91,12 +93,9 @@ enum IaClientViews: CaseIterable {
     let viewController = IaClientViewUIKitViewController(
       viewId: viewId ?? name,
     )
-    let navController = UINavigationController(
-      rootViewController: viewController,
-    )
-    navController.addChild(viewController)
-    navController.modalPresentationStyle = .fullScreen
-    topViewController.present(navController, animated: true)
+    Self.navController.addChild(viewController)
+    Self.navController.modalPresentationStyle = .fullScreen
+    topViewController.present(Self.navController, animated: true)
   }
 }
 
@@ -159,13 +158,16 @@ public class IaClientViewUIKitViewController: UIViewController {
   public static func finishAllActivities() {
     Task.init {
       for controller in controllers.reversed() {
+        try await Task.sleep(nanoseconds: 1_000_000_000)
         controller.dismiss(animated: true)
         controller.navigationController?.popToRootViewController(animated: true)
         controller.navigationController?.popViewController(animated: true)
         controller.navigationController?.dismiss(animated: true)
-        try await Task.sleep(nanoseconds: 1_000_000_000)
       }
     }
+    // IaClientViews.navController.popToRootViewController(animated: false)
+    // IaClientViews.navController.popViewController(animated: false)
+    // IaClientViews.navController.dismiss(animated: false)
   }
 }
 

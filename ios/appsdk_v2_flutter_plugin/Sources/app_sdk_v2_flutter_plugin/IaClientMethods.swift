@@ -143,7 +143,7 @@ internal class IaClientMethods {
       Task.init {
         do {
           let prerequisitesOptions = IASDKPrerequisitesOptions(
-            shouldShowIndicator: false,
+            shouldShowIndicator: true,
             isCancellable: false,
             isAnimated: false,
             shouldRunLegal: (args["shouldRunLegal"] as? Bool) == true,

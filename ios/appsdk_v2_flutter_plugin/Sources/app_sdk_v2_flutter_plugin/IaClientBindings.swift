@@ -1,17 +1,16 @@
 import Flutter
-import IACore
-import IAOrdering
-import IAIntegrations
-import IAPharmacy
-import IAOrdering
-import IAPrescription
-import IAOverTheCounter
 import IACardLink
+import IACore
+import IAIntegrations
+import IAOrdering
+import IAOverTheCounter
+import IAPharmacy
+import IAPrescription
 
 @MainActor
 class IaClientBindings {
   var channel: FlutterMethodChannel!
-  
+
   init?(
     viewController: FlutterViewController,
     pluginRegistrar: FlutterPluginRegistrar?,
@@ -31,16 +30,18 @@ class IaClientBindings {
   }
 }
 
-class IaClientDelegate : SDKDelegate, OrderingDelegate, PrescriptionDelegate, CardLinkDelegate {
+class IaClientDelegate: SDKDelegate, OrderingDelegate, PrescriptionDelegate, CardLinkDelegate {
   let channel: FlutterMethodChannel
-  
+
   init(
     channel: FlutterMethodChannel,
   ) {
     self.channel = channel
   }
-  
-  func orderingWillShowThankYouScreen(orders: [IAOrder], dismissable: (any Dismissable)?) -> HandlingDecision {
+
+  func orderingWillShowThankYouScreen(orders: [IAOrder], dismissable: (any Dismissable)?)
+    -> HandlingDecision
+  {
     if let order = orders.first {
       channel.invokeMethod(
         "didFinishOrder",
@@ -50,6 +51,6 @@ class IaClientDelegate : SDKDelegate, OrderingDelegate, PrescriptionDelegate, Ca
         ],
       )
     }
-    return .performDefault
+    return .handled
   }
 }
