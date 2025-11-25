@@ -69,7 +69,7 @@ internal class IaClientMethods {
   init(bindings: IaClientBindings!) {
     self.bindings = bindings
   }
-  
+
   private let cartItemCountListener = CurrentValueSubject<Int, Never>(0)
 
   /**
@@ -201,7 +201,11 @@ internal class IaClientMethods {
       }
       Task.init {
         do {
-          if cartItemCountListener.value > 0 {
+          let currentPharmacyId = IASDK.Pharmacy.getPharmacyID() ?? -1
+          if currentPharmacyId != -1,
+            currentPharmacyId != pharmacyId,
+            cartItemCountListener.value > 0
+          {
             try await IAOrderingSDK.deleteCart()
           }
           IASDK.Pharmacy.setPharmacyID(pharmacyId)

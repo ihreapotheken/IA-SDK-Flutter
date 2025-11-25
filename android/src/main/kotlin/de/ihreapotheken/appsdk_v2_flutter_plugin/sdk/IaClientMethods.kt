@@ -183,37 +183,24 @@ internal class IaClientMethods(
                     )
                     return
                 }
-                val success = if (cartItemCountListener.value as Int > 0) {
-                    bindings.sdkModule.ordering.clearCart()
-                } else {
-                    true
-                }
-                if (success) {
-                    bindings.sdkModule.setPharmacyId(
-                        pharmacyId,
-                        object : PharmacyConfigListener {
-                            override fun onPharmacyConfigResult(pharmacyConfigResult: PharmacyConfigResult) {
-                                if (pharmacyConfigResult is PharmacyConfigResult.NotInitialized
-                                    || pharmacyConfigResult is PharmacyConfigResult.ValidationFailed) {
-                                    result.error(
-                                        "METHOD_ERROR",
-                                        "Setting pharmacy ID failed: $pharmacyConfigResult",
-                                        null
-                                    )
-                                } else {
-                                    result.success(null)
-                                }
+                bindings.sdkModule.setPharmacyId(
+                    pharmacyId,
+                    object : PharmacyConfigListener {
+                        override fun onPharmacyConfigResult(pharmacyConfigResult: PharmacyConfigResult) {
+                            if (pharmacyConfigResult is PharmacyConfigResult.NotInitialized
+                                || pharmacyConfigResult is PharmacyConfigResult.ValidationFailed) {
+                                result.error(
+                                    "METHOD_ERROR",
+                                    "Setting pharmacy ID failed: $pharmacyConfigResult",
+                                    null
+                                )
+                            } else {
+                                result.success(null)
                             }
-
                         }
-                    )
-                } else {
-                    result.error(
-                        "METHOD_ERROR",
-                        "Failed to clear cart data.",
-                        null
-                    )
-                }
+
+                    }
+                )
             }
 
             FlutterCall.clearCart.name -> {
