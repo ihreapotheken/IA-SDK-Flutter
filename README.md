@@ -49,11 +49,7 @@ For official reference, please see
 [the Flutter SDK documentation](https://docs.flutter.dev/packages-and-plugins/using-packages) 
 on using Flutter plugins.
 
-### 4.1. Source control access
-
-In order to enable 
-
-### 4.2. Add the dependency to the `pubspec.yaml` file
+### 4.1. Add the dependency to the `pubspec.yaml` file
 
 The library is accessed from Github as in below example:
 
@@ -75,7 +71,10 @@ dependencies:
 
 You may reference specific branch, tag, or commit hash by specifying the `ref` field.
 
-### 4.3. Plugin usage
+Version reference numbers can be found by reviewing 
+[the package Github repository tags](https://github.com/ihreapotheken/IA-SDK-Flutter/tags).
+
+### 4.2. Plugin usage
 
 Methods and properties made available as public APIs implemented with the `IaSdk` object. 
 
