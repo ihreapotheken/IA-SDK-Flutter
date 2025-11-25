@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
-import 'package:flutter/material.dart';
 
 /// Example client app ia.de SDK configuration.
 ///
