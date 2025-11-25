@@ -11,11 +11,15 @@ allprojects {
             name = "IA SDK repo"
             url = uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
             credentials {
-                username = System.getenv("GITHUB_USERNAME") ?: "mljubas@4ofthem.eu"
-                password = System.getenv("GITHUB_TOKEN") ?: "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"
+                username = System.getenv("GITHUB_USERNAME") ?: "appsdk-service@4ofthem.eu"
+                password = System.getenv("GITHUB_TOKEN") ?: "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"
             }
         }
     }
+}
+
+plugins {
+    id("com.google.firebase.appdistribution") version "5.2.0" apply false
 }
 
 val newBuildDir: Directory =
@@ -28,6 +32,7 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
+
 subprojects {
     project.evaluationDependsOn(":app")
 }

@@ -19,7 +19,7 @@ buildscript {
             url = uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
             credentials {
                 username = System.getenv("GITHUB_USERNAME") ?: "appsdk-service@4ofthem.eu"
-                password = System.getenv("GITHUB_TOKEN") ?: "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"
+                password = System.getenv("GITHUB_TOKEN") ?: "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"
             }
         }
     }
@@ -80,22 +80,33 @@ android {
 }
 
 dependencies {
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("org.mockito:mockito-core:5.20.0")
-    def iaDeSdkVersion = "0.0.18-1"
-    def iaDeSdkEnv = System.getenv("IA_DE_SDK_ENV") ?: ""
+    def envFile = rootProject.file("../../.env")
+    def env = [:]
+    if (envFile.exists()) {
+        envFile.eachLine { line ->
+            line = line.trim()
+            if (!line || line.startsWith("#")) return
+            def parts = line.split("=", 2)
+            env[parts[0]] = parts.length > 1 ? parts[1] : ""
+        }
+    }
+    def iaDeSdkVersion = env["ANDROID_APPSDK_VERSION"]
+    if (iaDeSdkVersion == null) {
+        throw new GradleException("No ANDROID_APPSDK_VERSION provided from .env file.")
+    }
+    iaDeSdkVersion = iaDeSdkVersion.replaceAll("\"", "")
     def iaDeSdkDeps = [
-            "de.ihreapotheken.sdk:integrations",
-            "de.ihreapotheken.sdk:otc",
-            "de.ihreapotheken.sdk:ordering",
-            "de.ihreapotheken.sdk:pharmacy",
-            "de.ihreapotheken.sdk:rx",
-            "de.ihreapotheken.sdk:apofinder",
-            "de.ihreapotheken.sdk:appointments",
-            "de.ihreapotheken.sdk:cardlink",
+            "integrations",
+            "otc",
+            "ordering",
+            "pharmacy",
+            "rx",
+            "apofinder",
+            "appointments",
+            "cardlink",
     ]
     iaDeSdkDeps.each { dep ->
-        def fullDep = "${dep}${!iaDeSdkEnv.isBlank() ? "-${iaDeSdkEnv}" : ""}:${iaDeSdkVersion}"
+        def fullDep = "de.ihreapotheken.sdk:${dep}:${iaDeSdkVersion}"
         implementation fullDep
     }
     implementation("androidx.compose.material3:material3:1.3.1")

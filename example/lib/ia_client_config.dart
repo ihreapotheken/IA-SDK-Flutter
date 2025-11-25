@@ -51,7 +51,6 @@ class ExampleAppConfig {
         return serverEnv.name == _serverEnvironment;
       });
     } catch (e) {
-      debugPrint('Server environment string not defined from CLI.');
       return IaSdkConfigServerEnvironment.staging;
     }
   }
