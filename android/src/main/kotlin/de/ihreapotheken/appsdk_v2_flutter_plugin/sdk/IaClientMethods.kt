@@ -3,7 +3,9 @@ package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import androidx.lifecycle.MutableLiveData
 import de.ihreapotheken.sdk.apofinder.ApofinderModule
+import de.ihreapotheken.sdk.core.api.listener.CartListener
 import de.ihreapotheken.sdk.core.api.listener.CheckoutListener
 import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigListener
 import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigResult
@@ -78,6 +80,11 @@ internal class IaClientMethods(
         finishAllActivities,
     }
 
+    /**
+     * Listener for the total number of cart items.
+     */
+    private val cartItemCountListener: MutableLiveData<Int> = MutableLiveData(0)
+
     fun callHandler(
         call: MethodCall,
         result: MethodChannel.Result,
@@ -133,13 +140,26 @@ internal class IaClientMethods(
                         shouldFetchThemeFromRemote = true,
                         prerequisiteFlowConfiguration = PrerequisiteFlowConfiguration(
                             shouldRunLegal = true,
-                            shouldRunOnboarding = true,
+                            shouldRunOnboarding = false,
                         ),
                     ),
                     environmentType = serverEnv,
                     sdkEventListener = object : SdkEventListener {
                         override fun onSdkEvent(event: SdkEvent) {
                             if (event is SdkEvent.InitStatus && event !is SdkEvent.InitStatus.Initializing) {
+                                if (event is SdkEvent.InitStatus.InitializationCompleted) {
+                                    bindings.sdkModule.ordering.setCartListener(
+                                        object : CartListener {
+                                            override fun onCartChanged(
+                                                totalProducts: Int,
+                                                totalPrescription: Int,
+                                                totalItems: Int
+                                            ) {
+                                                cartItemCountListener.value = totalItems
+                                            }
+                                        }
+                                    )
+                                }
                                 result.success(null)
                             } else if (event is SdkEvent.InitError) {
                                 result.error(
@@ -163,24 +183,37 @@ internal class IaClientMethods(
                     )
                     return
                 }
-                bindings.sdkModule.setPharmacyId(
-                    pharmacyId,
-                    object : PharmacyConfigListener {
-                        override fun onPharmacyConfigResult(pharmacyConfigResult: PharmacyConfigResult) {
-                            if (pharmacyConfigResult is PharmacyConfigResult.NotInitialized
-                                || pharmacyConfigResult is PharmacyConfigResult.ValidationFailed) {
-                                result.error(
-                                    "METHOD_ERROR",
-                                    "Setting pharmacy ID failed: $pharmacyConfigResult",
-                                    null
-                                )
-                            } else {
-                                result.success(null)
+                val success = if (cartItemCountListener.value as Int > 0) {
+                    bindings.sdkModule.ordering.clearCart()
+                } else {
+                    true
+                }
+                if (success) {
+                    bindings.sdkModule.setPharmacyId(
+                        pharmacyId,
+                        object : PharmacyConfigListener {
+                            override fun onPharmacyConfigResult(pharmacyConfigResult: PharmacyConfigResult) {
+                                if (pharmacyConfigResult is PharmacyConfigResult.NotInitialized
+                                    || pharmacyConfigResult is PharmacyConfigResult.ValidationFailed) {
+                                    result.error(
+                                        "METHOD_ERROR",
+                                        "Setting pharmacy ID failed: $pharmacyConfigResult",
+                                        null
+                                    )
+                                } else {
+                                    result.success(null)
+                                }
                             }
-                        }
 
-                    }
-                )
+                        }
+                    )
+                } else {
+                    result.error(
+                        "METHOD_ERROR",
+                        "Failed to clear cart data.",
+                        null
+                    )
+                }
             }
 
             FlutterCall.clearCart.name -> {

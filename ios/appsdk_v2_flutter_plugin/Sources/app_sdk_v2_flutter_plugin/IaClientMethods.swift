@@ -1,3 +1,4 @@
+import Combine
 import Flutter
 import IACore
 import IAIntegrations
@@ -68,6 +69,8 @@ internal class IaClientMethods {
   init(bindings: IaClientBindings!) {
     self.bindings = bindings
   }
+  
+  private let cartItemCountListener = CurrentValueSubject<Int, Never>(0)
 
   /**
    * Registers a handler for method calls from the Flutter side.
@@ -133,7 +136,10 @@ internal class IaClientMethods {
         .pharmacyDetails,
         .prescription,
       ])
-      let masterDelegate = IaClientDelegate(channel: bindings.channel)
+      let masterDelegate = IaClientDelegate(
+        channel: bindings.channel,
+        cartItemCountListener: self.cartItemCountListener,
+      )
       IASDK.setDelegates(
         sdk: masterDelegate,
         ordering: masterDelegate,
@@ -193,8 +199,23 @@ internal class IaClientMethods {
           )
         )
       }
-      IASDK.Pharmacy.setPharmacyID(pharmacyId)
-      result(true)
+      Task.init {
+        do {
+          if cartItemCountListener.value > 0 {
+            try await IAOrderingSDK.deleteCart()
+          }
+          IASDK.Pharmacy.setPharmacyID(pharmacyId)
+          result(true)
+        } catch {
+          result(
+            FlutterError(
+              code: "CLEAR_CART_ERROR",
+              message: "\(String(describing: error)) \(error.localizedDescription)",
+              details: nil,
+            )
+          )
+        }
+      }
       break
     case FlutterCall.clearCart.name:
       Task.init {

@@ -1,3 +1,4 @@
+import Combine
 import Flutter
 import IACardLink
 import IACore
@@ -32,11 +33,15 @@ class IaClientBindings {
 
 class IaClientDelegate: SDKDelegate, OrderingDelegate, PrescriptionDelegate, CardLinkDelegate {
   let channel: FlutterMethodChannel
+  
+  let cartItemCountListener: CurrentValueSubject<Int, Never>
 
   init(
     channel: FlutterMethodChannel,
+    cartItemCountListener: CurrentValueSubject<Int, Never>
   ) {
     self.channel = channel
+    self.cartItemCountListener = cartItemCountListener
   }
 
   func orderingWillShowThankYouScreen(orders: [IAOrder], dismissable: (any Dismissable)?)
@@ -52,5 +57,11 @@ class IaClientDelegate: SDKDelegate, OrderingDelegate, PrescriptionDelegate, Car
       )
     }
     return .handled
+  }
+  
+  func orderingDidUpdateCart(cartState: IACartState) {
+    if let cartItemCount = cartState.cartDetails?.totalAmountInCart {
+      cartItemCountListener.value = cartItemCount
+    }
   }
 }

@@ -106,7 +106,7 @@ class IaSdkApi extends State<IaSdk> {
         {
           ...widget._config.toJson(),
           'shouldRunLegal': true,
-          'shouldRunOnboarding': true,
+          'shouldRunOnboarding': false,
         },
         this,
       );
@@ -179,7 +179,7 @@ class IaSdkApi extends State<IaSdk> {
         {
           ...widget._config.toJson(),
           'shouldRunLegal': true,
-          'shouldRunOnboarding': true,
+          'shouldRunOnboarding': false,
           'shouldRunApofinder': true,
         },
         this,
