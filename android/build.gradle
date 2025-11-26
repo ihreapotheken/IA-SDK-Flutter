@@ -80,7 +80,7 @@ android {
 }
 
 dependencies {
-    def envFile = rootProject.file("../../.env")
+    def envFile = file(buildFile.parentFile.path + "/../.env")
     def env = [:]
     if (envFile.exists()) {
         envFile.eachLine { line ->
