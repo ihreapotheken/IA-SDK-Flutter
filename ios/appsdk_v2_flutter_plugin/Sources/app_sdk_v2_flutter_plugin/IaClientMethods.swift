@@ -329,7 +329,7 @@ internal class IaClientMethods {
           )
         )
       }
-      IaClientViews.startScreen.start(viewId: args)
+      IaClientViews.startScreen.iaScreen().present()
       result(nil)
       break
     case FlutterCall.transferPrescriptions.name:
@@ -400,8 +400,8 @@ internal class IaClientMethods {
             pdfs: pdfs.map { pdfBytes in PDFPrescription(data: pdfBytes) },
             codes: codes,
             orderID: orderId,
-            showActivityIndicator: false,
-            finishAction: .noAction,
+            showActivityIndicator: true,
+            finishAction: .openCart,
           )
           result(nil)
         } catch {
@@ -414,10 +414,9 @@ internal class IaClientMethods {
           )
         }
       }
-      IaClientViews.cartScreen.start()
       break
     case FlutterCall.finishAllActivities.name:
-      IaClientViewUIKitViewController.finishAllActivities()
+      UIApplication.shared.rootViewController?.dismiss(animated: true)
       result(nil)
       break
     default:
