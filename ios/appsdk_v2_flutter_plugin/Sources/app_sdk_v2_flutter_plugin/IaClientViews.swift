@@ -45,8 +45,6 @@ enum IaClientViews: CaseIterable {
     }
 }
 
-
-
 private class IaClientNativeView: NSObject, FlutterPlatformView {
     private var viewController: UIViewController?
     private var args: Any?
@@ -73,26 +71,26 @@ private class IaClientNativeView: NSObject, FlutterPlatformView {
 }
 
 internal class IaClientNativeViewFactory: NSObject, FlutterPlatformViewFactory {
-  private var messenger: FlutterBinaryMessenger
-
-  init(messenger: FlutterBinaryMessenger) {
-    self.messenger = messenger
-    super.init()
-  }
-
-  func create(
-    withFrame frame: CGRect,
-    viewIdentifier viewId: Int64,
-    arguments args: Any?
-  ) -> FlutterPlatformView {
-    return IaClientNativeView(
-      frame: frame,
-      viewIdentifier: viewId,
-      arguments: args,
-      binaryMessenger: messenger)
-  }
-
-  func createArgsCodec() -> any FlutterMessageCodec & NSObjectProtocol {
-    return FlutterStandardMessageCodec.sharedInstance()
-  }
+    private var messenger: FlutterBinaryMessenger
+    
+    init(messenger: FlutterBinaryMessenger) {
+        self.messenger = messenger
+        super.init()
+    }
+    
+    func create(
+        withFrame frame: CGRect,
+        viewIdentifier viewId: Int64,
+        arguments args: Any?
+    ) -> FlutterPlatformView {
+        return IaClientNativeView(
+            frame: frame,
+            viewIdentifier: viewId,
+            arguments: args,
+            binaryMessenger: messenger)
+    }
+    
+    func createArgsCodec() -> any FlutterMessageCodec & NSObjectProtocol {
+        return FlutterStandardMessageCodec.sharedInstance()
+    }
 }

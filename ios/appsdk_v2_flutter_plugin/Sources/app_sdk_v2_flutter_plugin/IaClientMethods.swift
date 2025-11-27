@@ -65,6 +65,7 @@ internal class IaClientMethods {
    * Flutter SDK host app bindings definitions.
    */
   private let bindings: IaClientBindings!
+  private var isRegistered: Bool = false
 
   init(bindings: IaClientBindings!) {
     self.bindings = bindings
@@ -124,18 +125,23 @@ internal class IaClientMethods {
           )
         )
       }
-      IASDK.configuration.apiKey = accessKey
-      IASDK.configuration.clientID = clientId
-      IASDK.setEnvironment(serverEnv)
-      IASDK.register([
-        .integrations,
-        .overTheCounter,
-        .ordering,
-        .apofinder,
-        .cardLink,
-        .pharmacyDetails,
-        .prescription,
-      ])
+        if !isRegistered {
+            isRegistered = true
+            IASDK.configuration.apiKey = accessKey
+            IASDK.configuration.clientID = clientId
+            IASDK.setEnvironment(serverEnv)
+            // @TODO: remove, just for testing
+            IASDK.QA.setQAFeatures([.showTestPharmaciesOnApofinder])
+            IASDK.register([
+                .integrations,
+                .overTheCounter,
+                .ordering,
+                .apofinder,
+                .cardLink,
+                .pharmacyDetails,
+                .prescription,
+            ])
+        }
       let masterDelegate = IaClientDelegate(
         channel: bindings.channel,
         cartItemCountListener: self.cartItemCountListener,
@@ -416,6 +422,7 @@ internal class IaClientMethods {
       }
       break
     case FlutterCall.finishAllActivities.name:
+      // @TODO: This will work for now but we will have to discuss how to best implement this.
       UIApplication.shared.rootViewController?.dismiss(animated: true)
       result(nil)
       break
