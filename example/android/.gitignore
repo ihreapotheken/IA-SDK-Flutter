@@ -14,3 +14,5 @@ key.properties
 **/*.jks
 
 build/
+
+fb-distribution-service-credentials.json

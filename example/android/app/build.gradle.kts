@@ -1,4 +1,6 @@
 import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -27,6 +29,12 @@ repositories {
     }
 }
 
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.example.appsdk_v2_flutter_plugin_example"
     compileSdk = 36
@@ -42,29 +50,38 @@ android {
     }
 
     defaultConfig {
-        applicationId = "de.ihreapotheken.sdk.iasdkdemo.staging"
+        applicationId = "de.ihreapotheken.sdk.iasdkdemo.staging" // applicationId = "de.ihreapotheken.flutter"
         minSdk = 30
         targetSdk = 36
         versionName = System.getenv("APP_SDK_BUILD_VERSION") ?: "1.0.0"
         versionCode = if (System.getenv("APP_SDK_BUILD_NUMBER") == null) {
             1
         } else {
-            Integer.parseInt(System.getenv("IA_BUILD_NUMBER"))
+            Integer.parseInt(System.getenv("APP_SDK_BUILD_NUMBER"))
+        }
+    }
+
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String?
+            keyPassword = keystoreProperties["keyPassword"] as String?
+            storeFile = (keystoreProperties["storeFile"] as String?)?.let { rootProject.file(it) }
+            storePassword = keystoreProperties["storePassword"] as String?
         }
     }
 
     buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+        getByName("release") {
             signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
             firebaseAppDistribution {
+                appId = "1:805028679903:android:a66b4f3fd9dba27124d96a"
                 artifactType = "APK"
-                artifactPath = rootProject.file("app/build/outputs/apk/release/app-release.apk").path
+                artifactPath = rootProject.file("../build/app/outputs/apk/release/app-release.apk").path
+                serviceCredentialsFile = rootProject.file("fb-distribution-service-credentials.json").path
                 testers = arrayOf(
                     "cvitaman@gmail.com",
                     "4ot.testing@gmail.com",

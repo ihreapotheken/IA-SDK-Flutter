@@ -10,7 +10,7 @@
     <false/>
     <key>provisioningProfiles</key>
     <dict>
-        <key>test.demo.sdkv2.ios</key>
+        <key>de.ihreapotheken.flutter</key>
         <string>IA_LIB_TF</string>
     </dict>
     <key>signingCertificate</key>

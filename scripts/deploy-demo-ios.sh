@@ -33,11 +33,5 @@ xcodebuild -exportArchive \
 set -a # Automatically export all variables
 source $PROJECT_DIR/.env
 set +a
-echo
-echo
-echo "------------------------"
-echo
-echo
-echo "iOS Flutter demo app version $APP_SDK_VERSION has been deployed with AppSDK version $IOS_APPSDK_VERSION."
-echo
-echo
+sh $SCRIPT_DIR/info.sh \
+    "iOS Flutter demo app version $APP_SDK_VERSION has been deployed with AppSDK version $IOS_APPSDK_VERSION."

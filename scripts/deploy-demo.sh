@@ -24,11 +24,5 @@ sh $SCRIPT_DIR/deploy-demo-ios.sh
 set -a # Automatically export all variables
 source $PROJECT_DIR/packages/ia-sdk/.env
 set +a
-echo
-echo
-echo "------------------------"
-echo
-echo
-echo "Demo Flutter apps version $APP_SDK_VERSION have been deployed with Android AppSDK version $ANDROID_APPSDK_VERSION and iOS AppSDK version $IOS_APPSDK_VERSION."
-echo
-echo
+sh $SCRIPT_DIR/info.sh \
+    "Demo Flutter apps version $APP_SDK_VERSION have been deployed with Android AppSDK version $ANDROID_APPSDK_VERSION and iOS AppSDK version $IOS_APPSDK_VERSION."

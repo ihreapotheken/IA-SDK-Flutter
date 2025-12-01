@@ -173,10 +173,20 @@ class _ExampleMapView extends StatefulWidget {
 }
 
 class _ExampleMapViewState extends State<_ExampleMapView> {
+  late Future<void>? _initIaSdk;
+
+  @override
+  void initState() {
+    super.initState();
+    _initIaSdk = widget._iaSdk?.init();
+  }
+
+  bool _setPharmacy = false;
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: widget._iaSdk?.init(),
+      future: _initIaSdk,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(
@@ -185,6 +195,7 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
         }
 
         if (snapshot.hasError) {
+          print('AAAAA\n${snapshot.error}');
           return Center(
             child: Text(
               snapshot.error.toString(),
@@ -265,7 +276,10 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
                                           child: const Text('Online Shopping'),
                                           onPressed: () async {
                                             Navigator.pop(context);
-                                            await widget._iaSdk?.setPharmacyId(marker.pharmacyId);
+                                            if (!_setPharmacy) {
+                                              await widget._iaSdk?.setPharmacyId(marker.pharmacyId);
+                                              _setPharmacy = true;
+                                            }
                                             if (Platform.isIOS) {
                                               await Future.delayed(const Duration(seconds: 1));
                                             }

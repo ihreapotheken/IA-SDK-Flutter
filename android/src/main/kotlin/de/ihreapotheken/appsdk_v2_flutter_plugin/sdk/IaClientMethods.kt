@@ -1,12 +1,13 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
+import android.app.Activity
 import android.content.Intent
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.MutableLiveData
 import de.ihreapotheken.sdk.apofinder.ApofinderModule
+import de.ihreapotheken.sdk.core.api.PresentationMode
 import de.ihreapotheken.sdk.core.api.listener.CartListener
 import de.ihreapotheken.sdk.core.api.listener.CheckoutListener
+import de.ihreapotheken.sdk.core.api.listener.HandlingDecision
 import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigListener
 import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigResult
 import de.ihreapotheken.sdk.core.api.listener.TransferPrescriptionEvent
@@ -183,6 +184,7 @@ internal class IaClientMethods(
                     )
                     return
                 }
+                
                 bindings.sdkModule.setPharmacyId(
                     pharmacyId,
                     object : PharmacyConfigListener {
@@ -198,7 +200,6 @@ internal class IaClientMethods(
                                 result.success(null)
                             }
                         }
-
                     }
                 )
             }
@@ -327,10 +328,12 @@ internal class IaClientMethods(
                     )
                 }
                 val orderId = data["orderId"] as? String
-                ClientComponentActivity.start(
-                    bindings.activityContext() ?: bindings.applicationContext,
-                    ClientViews.CartScreen,
-                )
+                if (1 == 2) {
+                    ClientComponentActivity.start(
+                        bindings.activityContext() ?: bindings.applicationContext,
+                        ClientViews.CartScreen,
+                    )
+                }
                 IaSdk.ordering.setCheckoutListener(
                     object : CheckoutListener {
                         override fun onCheckoutCompleted(hostOrderId: String, sdkOrderId: String) {
@@ -348,32 +351,32 @@ internal class IaClientMethods(
                         }
                     }
                 )
-                val handler = Handler(Looper.getMainLooper())
-                handler.postDelayed({
-                    @Suppress("UNCHECKED_CAST")
-                    bindings.sdkModule.ordering.transferPrescriptions(
-                        transferPrescriptionRequest = TransferPrescriptionRequest(
-                            images = prescriptionImages as ArrayList<ByteArray>,
-                            pdfs = prescriptionPdfs as ArrayList<ByteArray>,
-                            codes = prescriptionCodes as ArrayList<String>,
-                            orderId = orderId,
-                        ),
-                        transferPrescriptionListener = object : TransferPrescriptionListener {
-                            override fun onTransferPrescriptionEvent(event: TransferPrescriptionEvent) {
-                                if (event is TransferPrescriptionEvent.Success) {
-                                    result.success(null)
-                                }
-                                if (event is TransferPrescriptionEvent.Failed) {
-                                    result.error(
-                                        "METHOD_ERROR",
-                                        event.errorMessage,
-                                        null,
-                                    )
-                                }
+                @Suppress("UNCHECKED_CAST")
+                bindings.sdkModule.ordering.transferPrescriptions(
+                    context = (bindings.activityContext() ?: bindings.applicationContext) as Activity,
+                    transferPrescriptionRequest = TransferPrescriptionRequest(
+                        images = prescriptionImages as ArrayList<ByteArray>,
+                        pdfs = prescriptionPdfs as ArrayList<ByteArray>,
+                        codes = prescriptionCodes as ArrayList<String>,
+                        orderId = orderId,
+                    ),
+                    transferPrescriptionListener = object : TransferPrescriptionListener {
+                        override fun onTransferPrescriptionEvent(event: TransferPrescriptionEvent): HandlingDecision {
+                            if (event is TransferPrescriptionEvent.Success) {
+                                result.success(null)
                             }
-                        },
-                    )
-                }, 2000)
+                            if (event is TransferPrescriptionEvent.Failed) {
+                                result.error(
+                                    "METHOD_ERROR",
+                                    event.errorMessage,
+                                    null,
+                                )
+                            }
+                            return HandlingDecision.PERFORM_DEFAULT
+                        }
+                    },
+                    presentationMode = PresentationMode.FULL_FLOW,
+                )
             }
 
             FlutterCall.finishAllActivities.name -> {

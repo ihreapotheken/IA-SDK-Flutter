@@ -125,23 +125,23 @@ internal class IaClientMethods {
           )
         )
       }
-        if !isRegistered {
-            isRegistered = true
-            IASDK.configuration.apiKey = accessKey
-            IASDK.configuration.clientID = clientId
-            IASDK.setEnvironment(serverEnv)
-            // @TODO: remove, just for testing
-            IASDK.QA.setQAFeatures([.showTestPharmaciesOnApofinder])
-            IASDK.register([
-                .integrations,
-                .overTheCounter,
-                .ordering,
-                .apofinder,
-                .cardLink,
-                .pharmacyDetails,
-                .prescription,
-            ])
-        }
+      if !isRegistered {
+        isRegistered = true
+        IASDK.configuration.apiKey = accessKey
+        IASDK.configuration.clientID = clientId
+        IASDK.setEnvironment(serverEnv)
+        // @TODO: remove, just for testing
+        IASDK.QA.setQAFeatures([.showTestPharmaciesOnApofinder])
+        IASDK.register([
+          .integrations,
+          .overTheCounter,
+          .ordering,
+          .apofinder,
+          .cardLink,
+          .pharmacyDetails,
+          .prescription,
+        ])
+      }
       let masterDelegate = IaClientDelegate(
         channel: bindings.channel,
         cartItemCountListener: self.cartItemCountListener,

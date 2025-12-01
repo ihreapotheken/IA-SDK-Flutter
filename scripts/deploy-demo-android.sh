@@ -14,7 +14,7 @@ PROJECT_DIR="$SCRIPT_DIR/.."
 source $SCRIPT_DIR/dev-env-setup.sh
 
 # Change current working directory.
-cd "$PROJECT_DIR" 
+cd "$PROJECT_DIR/example" 
 
 # Clean any temporary files.
 flutter clean
@@ -23,17 +23,12 @@ flutter clean
 flutter build apk --release
 
 # Deploy the file to the Firebase App Tester service.
-
+cd android
+./gradlew appDistributionUploadRelease
 
 # Display an informative message.
 set -a # Automatically export all variables
 source $PROJECT_DIR/.env
 set +a
-echo
-echo
-echo "------------------------"
-echo
-echo
-echo "Android Flutter demo app version $APP_SDK_VERSION has been deployed with AppSDK version $ANDROID_APPSDK_VERSION."
-echo
-echo
+sh $SCRIPT_DIR/info.sh \
+    "Android Flutter demo app version $APP_SDK_VERSION has been deployed with AppSDK version $ANDROID_APPSDK_VERSION."

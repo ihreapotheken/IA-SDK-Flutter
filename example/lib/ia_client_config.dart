@@ -25,6 +25,9 @@ class ExampleAppConfig {
   ///
   String get accessKey {
     if (_accessKey.isEmpty) {
+      if (1 == 2) {
+        return 'fa0e9523f1a8b20c2038dc65241af81a3882f6f6a73d987fa2ae92e48e740d36';
+      }
       if (Platform.isIOS) {
         return 'e9f3d6a12c4b8f75d1e0a93c5b7d6e2f3c1a9b8e7f4d2c0a1b6e5d3f8c7a1b9e';
       } else {
@@ -59,7 +62,7 @@ class ExampleAppConfig {
   String get clientId {
     return switch (serverEnvironment) {
       IaSdkConfigServerEnvironment.production => '2004',
-      IaSdkConfigServerEnvironment.staging => '5004',
+      IaSdkConfigServerEnvironment.staging => '5004', // '6002',
       IaSdkConfigServerEnvironment.development => '103',
     };
   }
