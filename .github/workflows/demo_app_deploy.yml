@@ -21,7 +21,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
-      - name: Install signing certificate
+      - name: Install Signing Certificate
         run: |
           CERT_PATH=$HOME/cert.p12
           echo ${{ secrets.IOS_SIGNING_CERT }} | base64 --decode > "$CERT_PATH"
@@ -35,15 +35,14 @@ jobs:
           security set-key-partition-list \
             -S apple-tool:,apple:,codesign: \
             -s -k "$APPLE_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-        env:
-          APPLE_CERT_P12_BASE64: ${{ secrets.APPLE_CERT_P12_BASE64 }}
-          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
-          APPLE_KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
-      - name: Install provisioning profile
+      - name: Install Provisioning Profile
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           echo ${{ secrets.IOS_PROVISIONING_PROFILE }} | base64 --decode > \
             ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
         env:
           APPLE_PROVISIONING_PROFILE: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+      - run: echo ${{ secrets.ANDROID_FIREBASE_DISTRIBUTION_SERVICE_CREDENTIALS }} > example/android/fb-distribution-service-credentials.json
+      - run: echo ${{ secrets.ANDROID_SIGNING_KEY_DATA_BASE64 }} | base64 --decode > example/android/demo.jks
+      - run: echo ${{ secrets.ANDROID_SIGNING_KEY_PROPERTIES }} > example/android/key.properties
       - run: sh scripts/deploy-demo.sh
