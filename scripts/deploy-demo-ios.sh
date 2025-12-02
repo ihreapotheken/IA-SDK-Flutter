@@ -20,6 +20,9 @@ cd "$PROJECT_DIR/example"
 flutter clean
 rm -rf ios/.symlinks ios/Pods ios/Podfile.lock
 
+# Enable SPM integration.
+flutter config --enable-swift-package-manager
+
 # Build the release archive file.
 flutter build ipa --release
 
