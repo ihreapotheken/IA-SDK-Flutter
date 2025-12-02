@@ -13,10 +13,6 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-      - run: echo "${{ secrets.ANDROID_FIREBASE_DISTRIBUTION_SERVICE_CREDENTIALS }}" | base64 --decode > example/android/fb-distribution-service-credentials.json
-      - run: cat example/android/fb-distribution-service-credentials.json
-      - run: echo "${{ secrets.ANDROID_SIGNING_KEY_DATA_BASE64 }}" | base64 --decode > example/android/demo.jks
-      - run: echo "${{ secrets.ANDROID_SIGNING_KEY_PROPERTIES }}" > example/android/key.properties
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.35.6'
@@ -45,4 +41,7 @@ jobs:
             ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
         env:
           APPLE_PROVISIONING_PROFILE: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+      - run: echo "${{ secrets.ANDROID_FIREBASE_DISTRIBUTION_SERVICE_CREDENTIALS }}" | base64 --decode > example/android/fb-distribution-service-credentials.json
+      - run: echo "${{ secrets.ANDROID_SIGNING_KEY_DATA_BASE64 }}" | base64 --decode > example/android/demo.jks
+      - run: echo "${{ secrets.ANDROID_SIGNING_KEY_PROPERTIES }}" > example/android/key.properties
       - run: sh scripts/deploy-demo.sh
