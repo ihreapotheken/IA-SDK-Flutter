@@ -13,9 +13,7 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          printf '%s' "${{ secrets.ANDROID_FIREBASE_DISTRIBUTION_SERVICE_CREDENTIALS }}" \
-          > example/android/fb-distribution-service-credentials.json
+      - run: echo "${{ secrets.ANDROID_FIREBASE_DISTRIBUTION_SERVICE_CREDENTIALS }}" | base64 --decode > example/android/fb-distribution-service-credentials.json
       - run: cat example/android/fb-distribution-service-credentials.json
       - run: echo "${{ secrets.ANDROID_SIGNING_KEY_DATA_BASE64 }}" | base64 --decode > example/android/demo.jks
       - run: echo "${{ secrets.ANDROID_SIGNING_KEY_PROPERTIES }}" > example/android/key.properties
