@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 
 /// Example client app ia.de SDK configuration.
@@ -25,17 +23,7 @@ class ExampleAppConfig {
   ///
   String get accessKey {
     if (_accessKey.isEmpty) {
-      if (1 == 1) {
-        return 'c33b7d2757ff7b24613b78c9dc69950aad1588c8d519706fb69b91fcedec65d7';
-      }
-      if (1 == 1) {
-        return 'fa0e9523f1a8b20c2038dc65241af81a3882f6f6a73d987fa2ae92e48e740d36';
-      }
-      if (Platform.isIOS) {
-        return 'e9f3d6a12c4b8f75d1e0a93c5b7d6e2f3c1a9b8e7f4d2c0a1b6e5d3f8c7a1b9e';
-      } else {
-        return 'a1f4b6e3c7d58f9032eeaa1bc02b4f44f9863d1e5c7a49f7d23e0c96b17af5cd';
-      }
+      return 'fa0e9523f1a8b20c2038dc65241af81a3882f6f6a73d987fa2ae92e48e740d36';
     }
     return _accessKey;
   }
@@ -65,7 +53,7 @@ class ExampleAppConfig {
   String get clientId {
     return switch (serverEnvironment) {
       IaSdkConfigServerEnvironment.production => '2004',
-      IaSdkConfigServerEnvironment.staging => '5004', // '5004',
+      IaSdkConfigServerEnvironment.staging => '5004',
       IaSdkConfigServerEnvironment.development => '103',
     };
   }
