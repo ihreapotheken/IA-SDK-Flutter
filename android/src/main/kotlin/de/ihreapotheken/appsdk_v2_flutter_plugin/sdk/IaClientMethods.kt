@@ -328,12 +328,6 @@ internal class IaClientMethods(
                     )
                 }
                 val orderId = data["orderId"] as? String
-                if (1 == 2) {
-                    ClientComponentActivity.start(
-                        bindings.activityContext() ?: bindings.applicationContext,
-                        ClientViews.CartScreen,
-                    )
-                }
                 IaSdk.ordering.setCheckoutListener(
                     object : CheckoutListener {
                         override fun onCheckoutCompleted(hostOrderId: String, sdkOrderId: String) {
