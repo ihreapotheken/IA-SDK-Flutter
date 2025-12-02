@@ -1,0 +1,50 @@
+name: Demo App Deploy
+
+on:
+  push:
+    tags:
+      - '*'
+  
+jobs:
+  build:
+    runs-on: macos-26
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+      - uses: actions/upload-artifact@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - name: Install signing certificate
+        run: |
+          CERT_PATH=$HOME/cert.p12
+          echo ${{ secrets.IOS_SIGNING_CERT }} | base64 --decode > "$CERT_PATH"
+          KEYCHAIN_PATH=$HOME/my.keychain-db
+          APPLE_KEYCHAIN_PASSWORD="Password1!"
+          security create-keychain -p "$APPLE_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$APPLE_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -k "$KEYCHAIN_PATH" -P "" -A
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
+          security set-key-partition-list \
+            -S apple-tool:,apple:,codesign: \
+            -s -k "$APPLE_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+        env:
+          APPLE_CERT_P12_BASE64: ${{ secrets.APPLE_CERT_P12_BASE64 }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          APPLE_KEYCHAIN_PASSWORD: ${{ secrets.APPLE_KEYCHAIN_PASSWORD }}
+      - name: Install provisioning profile
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo ${{ secrets.IOS_PROVISIONING_PROFILE }} | base64 --decode > \
+            ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+        env:
+          APPLE_PROVISIONING_PROFILE: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+      - run: sh scripts/deploy-demo.sh
