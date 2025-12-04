@@ -50,7 +50,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "de.ihreapotheken.nativescript" // "de.ihreapotheken.sdk.iasdkdemo.staging" // applicationId = "de.ihreapotheken.flutter"
+        applicationId = "de.ihreapotheken.flutter"
         minSdk = 30
         targetSdk = 36
         versionName = System.getenv("APP_SDK_BUILD_VERSION") ?: "1.0.0"
