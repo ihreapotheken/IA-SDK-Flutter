@@ -137,7 +137,6 @@ internal class IaClientMethods {
           .overTheCounter,
           .ordering,
           .apofinder,
-          .cardLink,
           .pharmacyDetails,
           .prescription,
         ])
@@ -150,7 +149,6 @@ internal class IaClientMethods {
         sdk: masterDelegate,
         ordering: masterDelegate,
         prescription: masterDelegate,
-        cardLink: masterDelegate,
       )
       Task.init {
         do {
