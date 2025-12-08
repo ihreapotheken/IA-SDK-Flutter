@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ihreapotheken/IA-SDK-iOS",
       "state" : {
-        "revision" : "8ea69840d2b5d9e2c0910c491de20804c4c2b7a7",
-        "version" : "0.19.2-beta"
+        "revision" : "efb10ad3eb76751a5d479ab7b18ba6a4a4f011b6",
+        "version" : "0.19.6-beta"
       }
     },
     {

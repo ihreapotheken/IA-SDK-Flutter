@@ -79,6 +79,11 @@ internal class IaClientMethods(
          * Closes any overlaying ia.de screen contents.
          */
         finishAllActivities,
+
+        /**
+         * Configures footer visibility settings.
+         */
+        configureFooter,
     }
 
     /**
@@ -375,6 +380,31 @@ internal class IaClientMethods(
 
             FlutterCall.finishAllActivities.name -> {
                 ClientComponentActivity.finishAllActivities()
+                result.success(null)
+            }
+
+            FlutterCall.configureFooter.name -> {
+                val args = call.arguments
+                if (args !is Map<*, *>) {
+                    result.error(
+                        "ARG_ERROR",
+                        "Arguments for configureFooter must be of Map type.",
+                        null,
+                    )
+                    return
+                }
+                val shouldShowDataProcessing = args["shouldShowDataProcessing"] as? Boolean
+                val shouldShowAppSettings = args["shouldShowAppSettings"] as? Boolean
+                val shouldShowImprint = args["shouldShowImprint"] as? Boolean
+                if (shouldShowDataProcessing == null || shouldShowAppSettings == null || shouldShowImprint == null) {
+                    result.error(
+                        "ARG_ERROR",
+                        "Missing or invalid argument types. Expected Boolean values for shouldShowDataProcessing, shouldShowAppSettings, and shouldShowImprint.",
+                        null,
+                    )
+                    return
+                }
+                // TODO: Implement footer configuration logic
                 result.success(null)
             }
 
