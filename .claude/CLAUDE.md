@@ -1,4 +1,4 @@
-This is a IA SDK flutter plugin workspace that consists of:
+This is IA SDK flutter plugin workspace that consists of:
 - dart code that defines interfaces and calls native iOS/Android code
 - iOS code that calls iOS IA SDK (https://github.com/ihreapotheken/IA-SDK-iOS)
 - Android code that calls Android IA SDK (https://github.com/ihreapotheken/IA-SDK-Android)
@@ -16,12 +16,26 @@ This is a IA SDK flutter plugin workspace that consists of:
 # Dart implementation
 - location: lib
 - code structure:
-  - callbacks.dart: Used when native needs to send event to host app
-  - methods.dart: Enum that lists all methods that dart code can send to native
-  - sdk.dart: This is where dart code communicates with native code using MethodChannel
-
+  - sdk.dart
+    - Defines methods that host app can call
+    - Calls methods.dart where calls are validated and sent to native side
+  - methods.dart
+    - Enum that lists all methods that dart code can send to native, this enum is used internally from sdk.dart
+    - validates arguments that are sent from dart to sdk.dart
+    - sends raw method name and arguments to native code using MethodChannel
+  - callbacks.dart
+    - Used when native needs to send event to host app
+    
 # iOS implementation
 - location: ios/appsdk_v2_flutter_plugin/Sources/app_sdk_v2_flutter_plugin/
 
 # Android implementation
 - location: android/src/main/kotlin/de/ihreapotheken/appsdk_v2_flutter_plugin/sdk/
+
+# Coding tasks
+## How to add dart function that calls native function
+1. Define function in sdk.dart, this is what host app will call. 
+2. Add enum case and implementation to methods.dart. If you need to create dart entities, put it in config.dart.
+3. Add native function:
+  - iOS: ios/appsdk_v2_flutter_plugin/Sources/app_sdk_v2_flutter_plugin/IaClientMethods.swift
+  - Android: android/src/main/kotlin/de/ihreapotheken/appsdk_v2_flutter_plugin/sdk/IaClientMethods.kt
