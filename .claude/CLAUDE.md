@@ -15,7 +15,7 @@ This is IA SDK flutter plugin workspace that consists of:
   
 # Dart implementation
 - plugin code location: /lib
-- demo app location: /example
+- demo app location: /example (most of the code is in example/lib/main.dart)
 - code structure:
   - sdk.dart
     - Defines methods that host app can call
@@ -29,11 +29,9 @@ This is IA SDK flutter plugin workspace that consists of:
     
 # iOS implementation
 - plugin code location: /ios/appsdk_v2_flutter_plugin/Sources/app_sdk_v2_flutter_plugin/
-- demo app location: /example/ios
 
 # Android implementation
 - plugin code location: /android/src/main/kotlin/de/ihreapotheken/appsdk_v2_flutter_plugin/sdk/
-- demo app location: /example/android
 
 # Coding tasks
 ## How to add dart function that calls native function
