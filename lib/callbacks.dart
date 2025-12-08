@@ -9,7 +9,7 @@ enum _IaPlatformCallbacks {
   ) async {
     switch (this) {
       case _IaPlatformCallbacks.didFinishOrder:
-        await publicApi.finishAllActivities();
+        // TODO pass this info to host app
         return null;
     }
   }

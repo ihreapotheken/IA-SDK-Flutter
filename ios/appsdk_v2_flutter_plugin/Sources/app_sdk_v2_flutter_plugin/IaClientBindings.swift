@@ -44,6 +44,19 @@ class IaClientDelegate: SDKDelegate, OrderingDelegate, PrescriptionDelegate, Car
     self.cartItemCountListener = cartItemCountListener
   }
   
+  func orderingWillShowThankYouScreen(orders: [IAOrder], dismissable: (any Dismissable)?) -> HandlingDecision {
+    if let order = orders.first {
+      channel.invokeMethod(
+          "didFinishOrder",
+          arguments: [
+              "hostOrderId": order.orderCode,
+              "sdkOrderId": order.clientOrderID,
+          ],
+      )
+    }
+    return .performDefault
+  }
+    
   func orderingDidUpdateCart(cartState: IACartState) {
     if let cartItemCount = cartState.cartDetails?.totalAmountInCart {
       cartItemCountListener.value = cartItemCount
