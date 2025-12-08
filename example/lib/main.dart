@@ -178,6 +178,7 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
   @override
   void initState() {
     super.initState();
+    widget._iaSdk?.configureFooter(shouldShowDataProcessing: false, shouldShowAppSettings: true, shouldShowImprint: true);
     _initIaSdk = widget._iaSdk?.init();
   }
 

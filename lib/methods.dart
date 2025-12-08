@@ -37,7 +37,11 @@ enum _IaSdkPlatformMethods {
 
   /// Closes any overlaying ia.de screen contents.
   ///
-  finishAllActivities;
+  finishAllActivities,
+
+  /// Configures footer visibility settings.
+  ///
+  configureFooter;
 
   /// Verifies [_platformChannel] argument input.
   ///
@@ -199,6 +203,29 @@ enum _IaSdkPlatformMethods {
           );
           break;
         case _IaSdkPlatformMethods.finishAllActivities:
+          break;
+        case _IaSdkPlatformMethods.configureFooter:
+          _verifyArgumentInput(
+            arguments,
+            argumentType: Map,
+            requiredMapFields: [
+              (
+                name: 'shouldShowDataProcessing',
+                type: bool,
+                nullable: false,
+              ),
+              (
+                name: 'shouldShowAppSettings',
+                type: bool,
+                nullable: false,
+              ),
+              (
+                name: 'shouldShowImprint',
+                type: bool,
+                nullable: false,
+              ),
+            ],
+          );
           break;
       }
       return await publicApi._channel.invokeMethod(

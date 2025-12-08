@@ -14,7 +14,8 @@ This is IA SDK flutter plugin workspace that consists of:
   - CardLink (nfc data transfer).
   
 # Dart implementation
-- location: lib
+- plugin code location: /lib
+- demo app location: /example
 - code structure:
   - sdk.dart
     - Defines methods that host app can call
@@ -27,15 +28,17 @@ This is IA SDK flutter plugin workspace that consists of:
     - Used when native needs to send event to host app
     
 # iOS implementation
-- location: ios/appsdk_v2_flutter_plugin/Sources/app_sdk_v2_flutter_plugin/
+- plugin code location: /ios/appsdk_v2_flutter_plugin/Sources/app_sdk_v2_flutter_plugin/
+- demo app location: /example/ios
 
 # Android implementation
-- location: android/src/main/kotlin/de/ihreapotheken/appsdk_v2_flutter_plugin/sdk/
+- plugin code location: /android/src/main/kotlin/de/ihreapotheken/appsdk_v2_flutter_plugin/sdk/
+- demo app location: /example/android
 
 # Coding tasks
 ## How to add dart function that calls native function
 1. Define function in sdk.dart, this is what host app will call. 
 2. Add enum case and implementation to methods.dart. If you need to create dart entities, put it in config.dart.
 3. Add native function:
-  - iOS: ios/appsdk_v2_flutter_plugin/Sources/app_sdk_v2_flutter_plugin/IaClientMethods.swift
-  - Android: android/src/main/kotlin/de/ihreapotheken/appsdk_v2_flutter_plugin/sdk/IaClientMethods.kt
+  - iOS: /ios/appsdk_v2_flutter_plugin/Sources/app_sdk_v2_flutter_plugin/IaClientMethods.swift
+  - Android: /android/src/main/kotlin/de/ihreapotheken/appsdk_v2_flutter_plugin/sdk/IaClientMethods.kt

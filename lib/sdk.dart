@@ -244,6 +244,23 @@ class IaSdkApi extends State<IaSdk> {
     );
   }
 
+  /// Configures footer visibility settings.
+  /// IMPORTANT: Currently this works only for iOS.
+  Future<void> configureFooter({
+    required bool shouldShowDataProcessing,
+    required bool shouldShowAppSettings,
+    required bool shouldShowImprint,
+  }) async {
+    return await _IaSdkPlatformMethods.configureFooter.invoke<void>(
+      {
+        'shouldShowDataProcessing': shouldShowDataProcessing,
+        'shouldShowAppSettings': shouldShowAppSettings,
+        'shouldShowImprint': shouldShowImprint,
+      },
+      this,
+    );
+  }
+
   @override
   void dispose() {
     _channel.setMethodCallHandler(null);

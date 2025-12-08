@@ -54,6 +54,11 @@ internal class IaClientMethods {
     case finishAllActivities
 
     /**
+     * Configures footer visibility settings.
+     */
+    case configureFooter
+
+    /**
      * String identifier getter definition.
      */
     var name: String {
@@ -415,6 +420,37 @@ internal class IaClientMethods {
     case FlutterCall.finishAllActivities.name:
       // @TODO: This will work for now but we will have to discuss how to best implement this.
       UIApplication.shared.rootViewController?.dismiss(animated: true)
+      result(nil)
+      break
+    case FlutterCall.configureFooter.name:
+      let args = call.arguments
+      guard
+        let args = args as? [String: Any]
+      else {
+        return result(
+          FlutterError(
+            code: "ARG_ERROR",
+            message: "Arguments for configureFooter must be of Dictionary type.",
+            details: nil
+          )
+        )
+      }
+      guard
+        let shouldShowDataProcessing = args["shouldShowDataProcessing"] as? Bool,
+        let shouldShowAppSettings = args["shouldShowAppSettings"] as? Bool,
+        let shouldShowImprint = args["shouldShowImprint"] as? Bool
+      else {
+        return result(
+          FlutterError(
+            code: "ARG_ERROR",
+            message: "Missing or invalid argument types. Expected Bool values for shouldShowDataProcessing, shouldShowAppSettings, and shouldShowImprint.",
+            details: nil
+          )
+        )
+      }
+      IASDK.configuration.footer.shouldShowDataProcessing = shouldShowDataProcessing
+      IASDK.configuration.footer.shouldShowAppSettings = shouldShowAppSettings
+      IASDK.configuration.footer.shouldShowImprint = shouldShowImprint
       result(nil)
       break
     default:
