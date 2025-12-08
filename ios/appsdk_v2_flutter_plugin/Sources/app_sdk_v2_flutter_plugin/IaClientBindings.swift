@@ -47,11 +47,11 @@ class IaClientDelegate: SDKDelegate, OrderingDelegate, PrescriptionDelegate, Car
   func orderingWillShowThankYouScreen(orders: [IAOrder], dismissable: (any Dismissable)?) -> HandlingDecision {
     if let order = orders.first {
       channel.invokeMethod(
-          "didFinishOrder",
-          arguments: [
-              "hostOrderId": order.orderCode,
-              "sdkOrderId": order.clientOrderID,
-          ],
+        "didFinishOrder",
+        arguments: [
+          "hostOrderId": order.orderCode,
+          "sdkOrderId": order.clientOrderID,
+        ],
       )
     }
     return .performDefault
