@@ -20,8 +20,7 @@ import de.ihreapotheken.sdk.core.domain.model.GuestUser
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
 import de.ihreapotheken.sdk.integrations.api.TransferPrescriptionRequest
-import de.ihreapotheken.sdk.integrations.ui.composables.ClientComponentActivity
-import de.ihreapotheken.sdk.integrations.ui.composables.ClientViews
+import de.ihreapotheken.sdk.integrations.api.view.IaSdkActivity
 import de.ihreapotheken.sdk.ordering.OrderingModule
 import de.ihreapotheken.sdk.otc.OtcModule
 import de.ihreapotheken.sdk.pharmacy.PharmacyModule
@@ -190,7 +189,7 @@ internal class IaClientMethods(
                     return
                 }
                 
-                bindings.sdkModule.setPharmacyId(
+                bindings.sdkModule.pharmacy.setPharmacyId(
                     pharmacyId,
                     object : PharmacyConfigListener {
                         override fun onPharmacyConfigResult(pharmacyConfigResult: PharmacyConfigResult) {
@@ -210,7 +209,7 @@ internal class IaClientMethods(
             }
 
             FlutterCall.clearCart.name -> {
-                val success = bindings.sdkModule.ordering.clearCart()
+                val success = bindings.sdkModule.ordering.deleteCart()
                 if (success) {
                     result.success(null)
                 } else {
@@ -250,14 +249,14 @@ internal class IaClientMethods(
                     },
                     phoneNumberWithoutCountryCode,
                 )
-                bindings.sdkModule.setGuestUser(
+                bindings.sdkModule.setUserData(
                     guestUserData
                 )
                 result.success(null)
             }
 
             FlutterCall.logout.name -> {
-                val success = bindings.sdkModule.core.clearAllData()
+                val success = bindings.sdkModule.clearAllData()
                 if (success) {
                     result.success(null)
                 } else {
@@ -282,7 +281,7 @@ internal class IaClientMethods(
                 val activityContext = bindings.activityContext()
                 val intent = Intent(
                     activityContext ?: bindings.applicationContext,
-                    ClientComponentActivity::class.java,
+                    IaSdkActivity::class.java,
                 )
                 if (activityContext == null) {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -379,7 +378,7 @@ internal class IaClientMethods(
             }
 
             FlutterCall.finishAllActivities.name -> {
-                ClientComponentActivity.finishAllActivities()
+                IaSdkActivity.finishAllActivities()
                 result.success(null)
             }
 

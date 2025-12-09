@@ -1,6 +1,8 @@
+
 import android.content.Context
 import android.view.View
-import de.ihreapotheken.sdk.integrations.ui.composables.ClientViews
+import de.ihreapotheken.sdk.integrations.api.view.IaSdkView
+import de.ihreapotheken.sdk.integrations.api.view.SdkEntryPoint
 import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
@@ -17,7 +19,10 @@ internal class IaClientNativeView(
         if (viewId !is String) {
             throw Exception("Provided creation parameter \"viewId\" is not a String: $viewId")
         }
-        nativeView = ClientViews.entries.first(predicate = { it.name == viewId }).getView(context)
+        nativeView = IaSdkView.createView(
+            context,
+            SdkEntryPoint.entries.first(predicate = { it.name == viewId }),
+        )
     }
 
     override fun getView(): View {

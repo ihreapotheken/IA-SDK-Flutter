@@ -4,7 +4,7 @@ import IaClientFlutterViewFactory
 import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import de.ihreapotheken.sdk.integrations.api.IaSdk
-import de.ihreapotheken.sdk.integrations.ui.composables.ClientViews
+import de.ihreapotheken.sdk.integrations.api.view.SdkEntryPoint
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformViewRegistry
@@ -22,7 +22,7 @@ class IaClientBindings(
     init {
         val methodHandler = IaClientMethods(this)
         channel.setMethodCallHandler(methodHandler::callHandler)
-        for (view in ClientViews.entries) {
+        for (view in SdkEntryPoint.entries) {
             platformViewRegistry.registerViewFactory(
                 view.name,
                 IaClientFlutterViewFactory(),
