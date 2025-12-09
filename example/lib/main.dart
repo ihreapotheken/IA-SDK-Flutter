@@ -182,8 +182,6 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
     _initIaSdk = widget._iaSdk?.init();
   }
 
-  bool _setPharmacy = false;
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -277,10 +275,8 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
                                           child: const Text('Online Shopping'),
                                           onPressed: () async {
                                             Navigator.pop(context);
-                                            if (!_setPharmacy) {
-                                              await widget._iaSdk?.setPharmacyId(marker.pharmacyId);
-                                              _setPharmacy = true;
-                                            }
+                                            await widget._iaSdk?.setPharmacyId(marker.pharmacyId);
+
                                             if (Platform.isIOS) {
                                               await Future.delayed(const Duration(seconds: 1));
                                             }

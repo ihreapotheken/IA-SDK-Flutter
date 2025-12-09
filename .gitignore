@@ -34,3 +34,6 @@ migrate_working_dir/
 
 .build/
 .swiftpm/
+
+# AI
+**/.claude/settings.local.json
