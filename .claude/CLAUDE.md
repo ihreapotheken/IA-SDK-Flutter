@@ -1,7 +1,13 @@
+References:
+- iOS IA SDK: https://github.com/ihreapotheken/IA-SDK-iOS
+- Android IA SDK: https://github.com/ihreapotheken/IA-SDK-Android
+- General Flutter packages docs: https://docs.flutter.dev/packages-and-plugins/developing-packages
+- General Flutter platform channels docs: https://docs.flutter.dev/platform-integration/platform-channels
+
 This is IA SDK flutter plugin workspace that consists of:
 - dart code that defines interfaces and calls native iOS/Android code
-- iOS code that calls iOS IA SDK (https://github.com/ihreapotheken/IA-SDK-iOS)
-- Android code that calls Android IA SDK (https://github.com/ihreapotheken/IA-SDK-Android)
+- iOS code that calls iOS IA SDK (see reference above)
+- Android code that calls Android IA SDK (see reference above)
 
 # IA SDK high level overview
 - prerequisites: at start users must select their pharmacy, this is mandatory. Also users can be presented with onboarding flow and legal documents
