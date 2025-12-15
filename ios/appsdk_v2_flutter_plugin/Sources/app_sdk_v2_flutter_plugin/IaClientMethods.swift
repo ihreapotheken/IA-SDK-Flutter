@@ -150,11 +150,8 @@ internal class IaClientMethods {
         channel: bindings.channel,
         cartItemCountListener: self.cartItemCountListener,
       )
-      IASDK.setDelegates(
-        sdk: masterDelegate,
-        ordering: masterDelegate,
-        prescription: masterDelegate,
-      )
+      IASDK.setDelegate(masterDelegate)
+      
       Task.init {
         do {
           let prerequisitesOptions = IASDKPrerequisitesOptions(

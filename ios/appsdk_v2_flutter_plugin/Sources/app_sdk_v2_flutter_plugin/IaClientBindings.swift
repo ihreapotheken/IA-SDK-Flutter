@@ -31,7 +31,7 @@ class IaClientBindings {
   }
 }
 
-class IaClientDelegate: SDKDelegate, OrderingDelegate, PrescriptionDelegate, CardLinkDelegate {
+class IaClientDelegate: SDKDelegate {
   let channel: FlutterMethodChannel
   
   let cartItemCountListener: CurrentValueSubject<Int, Never>
@@ -44,6 +44,7 @@ class IaClientDelegate: SDKDelegate, OrderingDelegate, PrescriptionDelegate, Car
     self.cartItemCountListener = cartItemCountListener
   }
   
+  // @TODO delegate
   func orderingWillShowThankYouScreen(orders: [IAOrder], dismissable: (any Dismissable)?) -> HandlingDecision {
     if let order = orders.first {
       channel.invokeMethod(
@@ -57,6 +58,7 @@ class IaClientDelegate: SDKDelegate, OrderingDelegate, PrescriptionDelegate, Car
     return .performDefault
   }
     
+  // @TODO delegate
   func orderingDidUpdateCart(cartState: IACartState) {
     if let cartItemCount = cartState.cartDetails?.totalAmountInCart {
       cartItemCountListener.value = cartItemCount
