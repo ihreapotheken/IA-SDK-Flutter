@@ -41,8 +41,33 @@ This is IA SDK flutter plugin workspace that consists of:
 
 # Coding tasks
 ## How to add dart function that calls native function
-1. Define function in sdk.dart, this is what host app will call. 
+1. Define function in sdk.dart, this is what host app will call.
 2. Add enum case and implementation to methods.dart. If you need to create dart entities, put it in config.dart.
 3. Add native function:
   - iOS: /ios/appsdk_v2_flutter_plugin/Sources/app_sdk_v2_flutter_plugin/IaClientMethods.swift
   - Android: /android/src/main/kotlin/de/ihreapotheken/appsdk_v2_flutter_plugin/sdk/IaClientMethods.kt
+
+## How to add SDK callbacks (native → Dart → host app)
+When adding delegate/callback functions from iOS SDKDelegate or Android callbacks:
+
+### Architecture
+- **IaSdkConfiguration** (config.dart): Only setup parameters, NO callbacks
+- **IaSdkApi methods** (sdk.dart): Functions for calling INTO the SDK
+- **IaSdkCallbacks** (sdk.dart): All callbacks for receiving events FROM the SDK
+
+### Steps
+1. Add supporting enums to config.dart if needed (with _nativeValue and _fromNativeValue)
+2. Add callback property to IaSdkCallbacks class in sdk.dart
+3. Add enum case to _IaPlatformCallbacks in callbacks.dart
+4. Implement handler in _IaPlatformCallbacks.handle() in callbacks.dart
+5. Implement iOS side in IaClientDelegate class in IaClientBindings.swift
+6. Implement Android side if needed
+7. Update example/lib/main.dart
+
+### Important
+- Method call handler in sdk.dart must RETURN the result for callbacks that need responses
+- Callbacks are optional (nullable) - provide sensible defaults if not set
+- Use `Future<T>` for callbacks that need responses, `void` for fire-and-forget
+
+### Reference
+See `sdkShouldOverrideRoute` implementation in: config.dart, sdk.dart, callbacks.dart, IaClientBindings.swift, example/lib/main.dart

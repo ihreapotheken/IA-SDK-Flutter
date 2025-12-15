@@ -178,6 +178,25 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
   @override
   void initState() {
     super.initState();
+
+    // Set up SDK callbacks
+    widget._iaSdk?.callbacks.onShouldOverrideRoute = (routeOverride) async {
+      debugPrint('SDK wants to navigate to: $routeOverride');
+
+      // For demonstration purposes, let's handle the cart route
+      // and let the SDK handle all other routes
+      switch (routeOverride) {
+        case IaRouteOverride.cart:
+          debugPrint('Handling cart route in host app');
+          // Here you could switch to your own cart tab or perform other actions
+          // For this example, we'll just log and let the SDK handle it
+          return IaHandlingDecision.handled;
+        default:
+          debugPrint('Letting SDK handle route: $routeOverride');
+          return IaHandlingDecision.performDefault;
+      }
+    };
+
     widget._iaSdk?.configureFooter(shouldShowDataProcessing: false, shouldShowAppSettings: true, shouldShowImprint: true);
     _initIaSdk = widget._iaSdk?.init();
   }
