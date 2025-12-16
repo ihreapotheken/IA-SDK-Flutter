@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_route_override.dart';
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
 import 'package:flutter/material.dart';

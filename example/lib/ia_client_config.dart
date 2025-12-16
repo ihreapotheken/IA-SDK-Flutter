@@ -1,3 +1,4 @@
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_configuration.dart';
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 
 /// Example client app ia.de SDK configuration.
