@@ -13,14 +13,11 @@ import Flutter
 class IaClientDelegate: SDKDelegate {
     let channel: FlutterMethodChannel
     
-    let cartItemCountListener: CurrentValueSubject<Int, Never>
     
     init(
         channel: FlutterMethodChannel,
-        cartItemCountListener: CurrentValueSubject<Int, Never>
     ) {
         self.channel = channel
-        self.cartItemCountListener = cartItemCountListener
     }
     
     func sdkShouldOverrideRoute(_ routeOverride: IARouteOverride, decisionHandler: @escaping (HandlingDecision) -> Void) {
@@ -81,11 +78,6 @@ class IaClientDelegate: SDKDelegate {
     }
         
     func orderingDidUpdateCart(cartState: IACartState) {
-        // Update cart item count listener
-        if let cartItemCount = cartState.cartDetails?.totalAmountInCart {
-            cartItemCountListener.value = cartItemCount
-        }
-
         // @TODO: Check with android if we can just send json instead of sending dictionaries like this.
         // Convert cart state to dictionary
         var cartDetailsDict: [String: Any]? = nil
