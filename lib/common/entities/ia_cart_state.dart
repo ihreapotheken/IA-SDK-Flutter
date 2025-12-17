@@ -15,7 +15,10 @@ class IaCartState {
   });
 
   factory IaCartState.fromJson(Map<String, dynamic> json) {
-    final cartDetailsJson = json['cartDetails'] as Map<String, dynamic>?;
+    final cartDetailsRaw = json['cartDetails'];
+    final cartDetailsJson = cartDetailsRaw != null
+        ? Map<String, dynamic>.from(cartDetailsRaw as Map)
+        : null;
     final clientOrderIDsList = json['clientOrderIDs'] as List<dynamic>;
 
     return IaCartState(

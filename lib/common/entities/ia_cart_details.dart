@@ -17,7 +17,7 @@ class IaCartDetails {
   factory IaCartDetails.fromJson(Map<String, dynamic> json) {
     final productsList = json['products'] as List<dynamic>;
     final products = productsList
-        .map((p) => IaOrderProduct.fromJson(p as Map<String, dynamic>))
+        .map((p) => IaOrderProduct.fromJson(Map<String, dynamic>.from(p as Map)))
         .toList();
 
     return IaCartDetails(

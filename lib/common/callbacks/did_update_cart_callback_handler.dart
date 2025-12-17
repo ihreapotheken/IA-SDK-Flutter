@@ -20,7 +20,9 @@ class DidUpdateCartCallbackHandler {
     }
 
     try {
-      final cartState = IaCartState.fromJson(arguments as Map<String, dynamic>);
+      // Convert Map<Object?, Object?> to Map<String, dynamic>
+      final argumentsMap = Map<String, dynamic>.from(arguments);
+      final cartState = IaCartState.fromJson(argumentsMap);
 
       // Call the callback (fire and forget)
       callback(cartState);
