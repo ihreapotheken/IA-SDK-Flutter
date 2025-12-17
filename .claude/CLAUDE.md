@@ -47,10 +47,18 @@ This is IA SDK flutter plugin workspace that consists of:
   - iOS: /ios/appsdk_v2_flutter_plugin/Sources/app_sdk_v2_flutter_plugin/IaClientMethods.swift
   - Android: /android/src/main/kotlin/de/ihreapotheken/appsdk_v2_flutter_plugin/sdk/IaClientMethods.kt
 
-## How to add SDK callbacks (native → Dart → host app)
-When adding delegate/callback functions from iOS SDKDelegate or Android callbacks:
+## How to add callback (native → Dart → host app)
+### How it works?
+1. Swift/Kotlin: Native plugin code listens to SDK and passes events to plugin via method channel. 
+IaClientDelegate.sdkShouldOverrideRoute: sends event with method channel
+2. Dart: IaSdkApi listens for method channel and routes it to IaSdkCallbackManager
+3. Dart: IaSdkCallbackManager maps call to appropriate handler (ShouldOverrideRouteCallbackHandler)
+4. Dart: ShouldOverrideRouteCallbackHandler calls iaSdk?.callbacks.onShouldOverrideRoute that is set by host app.
 
 ### What is where
+- **IaClientDelegate.swift**: native plugin code (iOS)
+- **lib/common/sdk.dart**: Listens to method channel
+- **lib/common/callbacks/ia_sdk_callback_manager**: Routes method channel to appropriate callback handler
 - **IaSdkCallbacks**: Class with list of all callbacks that host app can set. Example: iaSdk?.callbacks.onShouldOverrideRoute = ...
 - **lib/common/entities/**: Supporting types and enums used by callbacks
 - **lib/common/callbacks/**: Individual callback handler classes (one per callback)
