@@ -1,0 +1,29 @@
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_route_override.dart';
+
+/// Callbacks that allow the host app to observe and respond to SDK events.
+///
+/// Set these callbacks to receive events from the SDK, such as navigation requests
+/// or state changes.
+///
+class IaSdkCallbacks {
+  /// Called when the SDK is about to navigate to a destination that your app can override.
+  ///
+  /// For example, if the SDK would present the Cart by default, your app can switch to its
+  /// own Cart tab and return [IaHandlingDecision.handled]. Return [IaHandlingDecision.performDefault]
+  /// to let the SDK proceed with its built-in presentation.
+  ///
+  /// Example:
+  /// ```dart
+  /// final iaSdk = IaSdk.of(context);
+  /// iaSdk?.callbacks.onShouldOverrideRoute = (routeOverride) async {
+  ///   if (routeOverride == IaRouteOverride.cart) {
+  ///     // Switch to your own cart tab
+  ///     switchToTab(TabType.cart);
+  ///     return IaHandlingDecision.handled;
+  ///   }
+  ///   return IaHandlingDecision.performDefault;
+  /// };
+  /// ```
+  Future<IaHandlingDecision> Function(IaRouteOverride routeOverride)? onShouldOverrideRoute;
+}

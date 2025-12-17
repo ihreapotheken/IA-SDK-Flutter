@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:appsdk_v2_flutter_plugin/common/callbacks/should_override_route_callback_handler.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_route_override.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_callbacks.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_configuration.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -11,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-part 'callbacks.dart';
+part 'common/callbacks/ia_sdk_callback_manager.dart';
 part 'methods.dart';
 part 'view.dart';
 
@@ -46,33 +47,6 @@ class IaSdk extends StatefulWidget {
   }
 }
 
-/// Callbacks that allow the host app to observe and respond to SDK events.
-///
-/// Set these callbacks to receive events from the SDK, such as navigation requests
-/// or state changes.
-///
-class IaSdkCallbacks {
-  /// Called when the SDK is about to navigate to a destination that your app can override.
-  ///
-  /// For example, if the SDK would present the Cart by default, your app can switch to its
-  /// own Cart tab and return [IaHandlingDecision.handled]. Return [IaHandlingDecision.performDefault]
-  /// to let the SDK proceed with its built-in presentation.
-  ///
-  /// Example:
-  /// ```dart
-  /// final iaSdk = IaSdk.of(context);
-  /// iaSdk?.callbacks.onShouldOverrideRoute = (routeOverride) async {
-  ///   if (routeOverride == IaRouteOverride.cart) {
-  ///     // Switch to your own cart tab
-  ///     switchToTab(TabType.cart);
-  ///     return IaHandlingDecision.handled;
-  ///   }
-  ///   return IaHandlingDecision.performDefault;
-  /// };
-  /// ```
-  Future<IaHandlingDecision> Function(IaRouteOverride routeOverride)? onShouldOverrideRoute;
-}
-
 /// Public API methods and properties defined for the ia.de AppSDK library usage.
 ///
 class IaSdkApi extends State<IaSdk> {
@@ -101,7 +75,7 @@ class IaSdkApi extends State<IaSdk> {
     _channel.setMethodCallHandler(
       (call) async {
         try {
-          final callback = _IaPlatformCallbacks.values.firstWhere(
+          final callback = IaSdkCallbackManager.values.firstWhere(
             (value) {
               return value.name == call.method;
             },

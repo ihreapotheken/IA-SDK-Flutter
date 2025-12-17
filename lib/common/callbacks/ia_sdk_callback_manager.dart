@@ -1,7 +1,7 @@
-part of 'sdk.dart';
+part of '../../sdk.dart';
 
 
-enum _IaPlatformCallbacks {
+enum IaSdkCallbackManager {
   didFinishOrder,
   shouldOverrideRoute;
 
@@ -10,10 +10,10 @@ enum _IaPlatformCallbacks {
     IaSdkApi publicApi,
   ) async {
     switch (this) {
-      case _IaPlatformCallbacks.didFinishOrder:
+      case IaSdkCallbackManager.didFinishOrder:
         // TODO pass this info to host app
         return null;
-      case _IaPlatformCallbacks.shouldOverrideRoute:
+      case IaSdkCallbackManager.shouldOverrideRoute:
         return ShouldOverrideRouteCallbackHandler().handle<T>(arguments, publicApi);
     }
   }

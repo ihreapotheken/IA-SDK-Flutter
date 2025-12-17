@@ -50,24 +50,20 @@ This is IA SDK flutter plugin workspace that consists of:
 ## How to add SDK callbacks (native → Dart → host app)
 When adding delegate/callback functions from iOS SDKDelegate or Android callbacks:
 
-### Architecture
-- **IaSdkConfiguration** (config.dart): Only setup parameters, NO callbacks
-- **IaSdkApi methods** (sdk.dart): Functions for calling INTO the SDK
-- **IaSdkCallbacks** (sdk.dart): All callbacks for receiving events FROM the SDK
+### What is where
+- **IaSdkCallbacks**: Class with list of all callbacks that host app can set. Example: iaSdk?.callbacks.onShouldOverrideRoute = ...
+- **lib/common/entities/**: Supporting types and enums used by callbacks
+- **lib/common/callbacks/**: Individual callback handler classes (one per callback)
 
 ### Steps
-1. Add supporting enums to config.dart if needed (with _nativeValue and _fromNativeValue)
-2. Add callback property to IaSdkCallbacks class in sdk.dart
-3. Add enum case to _IaPlatformCallbacks in callbacks.dart
-4. Implement handler in _IaPlatformCallbacks.handle() in callbacks.dart
+1. Create a new handler class in lib/common/callbacks/ (example: ShouldOverrideRouteCallbackHandler).
+2. Supporting types/enums for callbacks should be added to lib/common/entities/. Use "rawValue" and "fromRawValue" for mapping strings to enums. (Example: IaRouteOverride)
+3. Add variable to your handler in IaSdkCallbacks. This is set by host app. (example: onShouldOverrideRoute).
+4. In _IaPlatformCallbacks.handle() switch statement, instantiate your handler and call its handle() method
 5. Implement iOS side in IaClientDelegate class in IaClientBindings.swift
-6. Implement Android side if needed
-7. Update example/lib/main.dart
+6. Implement Android side (@TODO instructions on how to do that).
+7. Update example/lib/main.dart if needed.
 
 ### Important
-- Method call handler in sdk.dart must RETURN the result for callbacks that need responses
 - Callbacks are optional (nullable) - provide sensible defaults if not set
 - Use `Future<T>` for callbacks that need responses, `void` for fire-and-forget
-
-### Reference
-See `sdkShouldOverrideRoute` implementation in: config.dart, sdk.dart, callbacks.dart, IaClientBindings.swift, example/lib/main.dart
