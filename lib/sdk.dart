@@ -8,8 +8,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 part 'callbacks.dart';
+
 part 'config.dart';
+
 part 'methods.dart';
+
 part 'view.dart';
 
 /// Base definitions for the ia.de SDK service, including any relevant methods, fields, and callbacks.
@@ -121,6 +124,12 @@ class IaSdkApi extends State<IaSdk> {
       null,
       this,
     );
+  }
+
+  ///Testing method can be deleted
+  ///
+  Future<void> showPharmacyId() async {
+    return await _IaSdkPlatformMethods.showPharmacyId.invoke<void>(null, this);
   }
 
   /// Forwards the client personal information to the ia.de library for checkout purposes.

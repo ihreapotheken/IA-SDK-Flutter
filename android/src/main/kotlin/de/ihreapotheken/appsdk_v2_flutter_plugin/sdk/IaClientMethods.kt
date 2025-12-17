@@ -83,6 +83,11 @@ internal class IaClientMethods(
          * Configures footer visibility settings.
          */
         configureFooter,
+
+        /**
+         * Testing functionality, can be deleted.
+         */
+        showPharmacyId,
     }
 
     /**
@@ -219,6 +224,11 @@ internal class IaClientMethods(
                         null
                     )
                 }
+            }
+
+            FlutterCall.showPharmacyId.name -> {
+                IaSdk.pharmacy.showPharmacyId()
+                result.success(null)
             }
 
             FlutterCall.setGuestUserData.name -> {

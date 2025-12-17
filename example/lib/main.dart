@@ -102,6 +102,18 @@ class _ExampleAppState extends State<ExampleApp> {
                         }
                       },
                     ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      child: Text('Show Pharmacy ID'),
+                      onPressed: () async {
+                        try {
+                          await _iaSdk?.showPharmacyId();
+                        } catch (e) {
+                          debugPrint('ERROR SHOW PHARMACY ID');
+                          debugPrint('$e', wrapWidth: 999999999999);
+                        }
+                      },
+                    ),
                   ],
                 ),
                 _ => throw UnimplementedError('Tab view not defined for index #$_selectedTabIndex.'),

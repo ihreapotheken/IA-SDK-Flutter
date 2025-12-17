@@ -39,6 +39,10 @@ enum _IaSdkPlatformMethods {
   ///
   finishAllActivities,
 
+  /// Testing example, can be deleted
+  ///
+  showPharmacyId,
+
   /// Configures footer visibility settings.
   ///
   configureFooter;
@@ -226,6 +230,8 @@ enum _IaSdkPlatformMethods {
               ),
             ],
           );
+          break;
+        case _IaSdkPlatformMethods.showPharmacyId:
           break;
       }
       return await publicApi._channel.invokeMethod(
