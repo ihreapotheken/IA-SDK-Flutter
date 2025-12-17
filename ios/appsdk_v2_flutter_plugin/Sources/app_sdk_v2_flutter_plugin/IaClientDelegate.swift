@@ -86,6 +86,7 @@ class IaClientDelegate: SDKDelegate {
             cartItemCountListener.value = cartItemCount
         }
 
+        // @TODO: Check with android if we can just send json instead of sending dictionaries like this.
         // Convert cart state to dictionary
         var cartDetailsDict: [String: Any]? = nil
         if let cartDetails = cartState.cartDetails {
