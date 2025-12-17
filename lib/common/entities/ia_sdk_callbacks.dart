@@ -1,3 +1,4 @@
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_cart_state.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_order.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_route_override.dart';
@@ -41,4 +42,18 @@ class IaSdkCallbacks {
   /// };
   /// ```
   void Function(IaOrder order)? onDidFinishOrder;
+
+  /// Called when the shopping cart state changes.
+  ///
+  /// This callback is triggered whenever items are added to or removed from the cart,
+  /// or when quantities change.
+  ///
+  /// Example:
+  /// ```dart
+  /// final iaSdk = IaSdk.of(context);
+  /// iaSdk?.callbacks.onDidUpdateCart = (cartState) {
+  ///   print('Cart updated: ${cartState.cartDetails?.totalAmountInCart ?? 0} items');
+  /// };
+  /// ```
+  void Function(IaCartState cartState)? onDidUpdateCart;
 }

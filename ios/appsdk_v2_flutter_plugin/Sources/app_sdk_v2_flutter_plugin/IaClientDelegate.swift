@@ -45,9 +45,7 @@ class IaClientDelegate: SDKDelegate {
         channel.invokeMethod(
             "shouldOverrideRoute",
             arguments: ["routeOverride": routeOverrideString]
-        ) { result in
-            print(">>> Got result: \(result)")
-            
+        ) { result in            
             // Parse the response
             guard let decisionString = result as? String else {
                 // If no valid response, perform default
@@ -71,7 +69,6 @@ class IaClientDelegate: SDKDelegate {
     }
     
     func orderingDidFinishOrders(orders: [IAOrder]) {
-        print(">>> orderingDidFinishOrders \(orders.map { $0.clientOrderID })")
         if let order = orders.first {
             channel.invokeMethod(
                 "didFinishOrder",
@@ -83,10 +80,37 @@ class IaClientDelegate: SDKDelegate {
         }
     }
         
-    // @TODO delegate
     func orderingDidUpdateCart(cartState: IACartState) {
+        // Update cart item count listener
         if let cartItemCount = cartState.cartDetails?.totalAmountInCart {
             cartItemCountListener.value = cartItemCount
         }
+
+        // Convert cart state to dictionary
+        var cartDetailsDict: [String: Any]? = nil
+        if let cartDetails = cartState.cartDetails {
+            let productsArray = cartDetails.products.map { product in
+                return [
+                    "pzn": product.pzn,
+                    "amount": product.amount
+                ]
+            }
+
+            cartDetailsDict = [
+                "products": productsArray,
+                "totalAmountInCart": cartDetails.totalAmountInCart
+            ]
+        }
+
+        let arguments: [String: Any] = [
+            "cartDetails": cartDetailsDict as Any,
+            "clientOrderIDs": cartState.clientOrderIDs
+        ]
+
+        // Send to Flutter
+        channel.invokeMethod(
+            "didUpdateCart",
+            arguments: arguments
+        )
     }
 }
