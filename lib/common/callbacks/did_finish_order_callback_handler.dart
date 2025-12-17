@@ -7,6 +7,12 @@ class DidFinishOrderCallbackHandler {
     dynamic arguments,
     IaSdkApi publicApi,
   ) async {
+    // Check if callback is set first - no point processing if host app isn't listening
+    final callback = publicApi.callbacks.onDidFinishOrder;
+    if (callback == null) {
+      return null;
+    }
+
     // Extract order info from arguments
     if (arguments is! Map) {
       debugPrint('didFinishOrder: Invalid arguments type');
@@ -25,14 +31,6 @@ class DidFinishOrderCallbackHandler {
       orderCode: orderCode,
       clientOrderID: clientOrderID,
     );
-
-    // Get the callback from the callbacks object
-    final callback = publicApi.callbacks.onDidFinishOrder;
-    if (callback == null) {
-      // No callback set, just return
-      debugPrint('didFinishOrder: No callback set');
-      return null;
-    }
 
     // Call the callback (fire and forget)
     try {

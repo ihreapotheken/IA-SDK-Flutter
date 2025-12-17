@@ -8,6 +8,13 @@ class ShouldOverrideRouteCallbackHandler {
     dynamic arguments,
     IaSdkApi publicApi,
   ) async {
+    // Check if callback is set first - no point processing if host app isn't listening
+    final callback = publicApi.callbacks.onShouldOverrideRoute;
+    if (callback == null) {
+      // No callback set, always perform default
+      return IaHandlingDecision.performDefault.rawValue as T?;
+    }
+
     // Extract route override from arguments
     if (arguments is! Map) {
       debugPrint('shouldOverrideRoute: Invalid arguments type');
@@ -23,13 +30,6 @@ class ShouldOverrideRouteCallbackHandler {
     final routeOverride = IaRouteOverride.fromRawValue(routeOverrideString);
     if (routeOverride == null) {
       debugPrint('shouldOverrideRoute: Unknown routeOverride: $routeOverrideString');
-      return IaHandlingDecision.performDefault.rawValue as T?;
-    }
-
-    // Get the callback from the callbacks object
-    final callback = publicApi.callbacks.onShouldOverrideRoute;
-    if (callback == null) {
-      // No callback set, always perform default
       return IaHandlingDecision.performDefault.rawValue as T?;
     }
 
