@@ -1,4 +1,5 @@
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_order.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_route_override.dart';
 
 /// Callbacks that allow the host app to observe and respond to SDK events.
@@ -26,4 +27,18 @@ class IaSdkCallbacks {
   /// };
   /// ```
   Future<IaHandlingDecision> Function(IaRouteOverride routeOverride)? onShouldOverrideRoute;
+
+  /// Called when the user completes an order.
+  ///
+  /// This is a fire-and-forget callback that notifies the host app when an order
+  /// has been successfully placed.
+  ///
+  /// Example:
+  /// ```dart
+  /// final iaSdk = IaSdk.of(context);
+  /// iaSdk?.callbacks.onDidFinishOrder = (order) {
+  ///   print('Order completed: ${order}');
+  /// };
+  /// ```
+  void Function(IaOrder order)? onDidFinishOrder;
 }

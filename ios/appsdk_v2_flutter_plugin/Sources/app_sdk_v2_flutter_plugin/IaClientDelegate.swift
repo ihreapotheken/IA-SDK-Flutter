@@ -76,8 +76,8 @@ class IaClientDelegate: SDKDelegate {
             channel.invokeMethod(
                 "didFinishOrder",
                 arguments: [
-                    "hostOrderId": order.orderCode,
-                    "sdkOrderId": order.clientOrderID,
+                    "orderCode": order.orderCode,
+                    "clientOrderID": order.clientOrderID,
                 ],
             )
         }

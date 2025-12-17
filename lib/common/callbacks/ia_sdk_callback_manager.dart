@@ -11,8 +11,7 @@ enum IaSdkCallbackManager {
   ) async {
     switch (this) {
       case IaSdkCallbackManager.didFinishOrder:
-        // TODO pass this info to host app
-        return null;
+        return DidFinishOrderCallbackHandler().handle<T>(arguments, publicApi);
       case IaSdkCallbackManager.shouldOverrideRoute:
         return ShouldOverrideRouteCallbackHandler().handle<T>(arguments, publicApi);
     }

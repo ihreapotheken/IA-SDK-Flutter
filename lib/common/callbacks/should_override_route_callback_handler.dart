@@ -1,7 +1,7 @@
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_route_override.dart';
+import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:flutter/foundation.dart';
-import '../../sdk.dart';
 
 class ShouldOverrideRouteCallbackHandler {
   Future<T?> handle<T>(

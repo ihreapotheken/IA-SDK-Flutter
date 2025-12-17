@@ -66,6 +66,7 @@ IaClientDelegate.sdkShouldOverrideRoute: sends event with method channel
 ### Steps
 1. Create a new handler class in lib/common/callbacks/ (example: ShouldOverrideRouteCallbackHandler).
 2. Supporting types/enums for callbacks should be added to lib/common/entities/. Use "rawValue" and "fromRawValue" for mapping strings to enums. (Example: IaRouteOverride)
+   Note: Try to use same names for entitites and properties as they are in native code (if unclear whether to use iOS or android namings then ask).
 3. Add variable to your handler in IaSdkCallbacks. This is set by host app. (example: onShouldOverrideRoute).
 4. In _IaPlatformCallbacks.handle() switch statement, instantiate your handler and call its handle() method
 5. Implement iOS side in IaClientDelegate class in IaClientBindings.swift

@@ -96,7 +96,7 @@ class _ExampleAppState extends State<ExampleApp> {
                             codes: [
                               '{"urls":["Task/test9ba2fee0d07e4ef2b6205f8012e1445b/\$accept?ac=5e24cc059ff244bdbb01efcccf834a6329bdac67a4a64733938fe1b799ac19a9"]}',
                             ],
-                            orderId: 'aaaa',
+                            orderId: 'Some order id from host app',
                           );
                         } catch (e) {
                           debugPrint('ERROR TRANSFER');
@@ -183,20 +183,24 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
 
     // Set up SDK callbacks
     widget._iaSdk?.callbacks.onShouldOverrideRoute = (routeOverride) async {
-      debugPrint('SDK wants to navigate to: $routeOverride');
+      debugPrint('Host app: SDK wants to navigate to: $routeOverride');
 
       // For demonstration purposes, let's handle the cart route
       // and let the SDK handle all other routes
       switch (routeOverride) {
         case IaRouteOverride.pharmacyDetails:
-          debugPrint('Handling cart route in host app');
+          debugPrint('Host app: Handling cart route in host app');
           // Here you could switch to your own cart tab or perform other actions
           // For this example, we'll just log and let the SDK handle it
           return IaHandlingDecision.handled;
         default:
-          debugPrint('Letting SDK handle route: $routeOverride');
+          debugPrint('Host app: Letting SDK handle route: $routeOverride');
           return IaHandlingDecision.performDefault;
       }
+    };
+
+    widget._iaSdk?.callbacks.onDidFinishOrder = (order) {
+      debugPrint('Host app: Order completed! Order Code: ${order.orderCode}, client order ID: ${order.clientOrderID}');
     };
 
     widget._iaSdk?.configureFooter(shouldShowDataProcessing: false, shouldShowAppSettings: true, shouldShowImprint: true);
