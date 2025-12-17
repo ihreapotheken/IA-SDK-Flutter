@@ -1,4 +1,4 @@
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_order_product.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_order_product.dart';
 
 /// Cart details containing products and amounts.
 ///
@@ -16,9 +16,7 @@ class IaCartDetails {
 
   factory IaCartDetails.fromJson(Map<String, dynamic> json) {
     final productsList = json['products'] as List<dynamic>;
-    final products = productsList
-        .map((p) => IaOrderProduct.fromJson(Map<String, dynamic>.from(p as Map)))
-        .toList();
+    final products = productsList.map((p) => IaOrderProduct.fromJson(Map<String, dynamic>.from(p as Map))).toList();
 
     return IaCartDetails(
       products: products,

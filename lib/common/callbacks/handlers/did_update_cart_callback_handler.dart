@@ -1,4 +1,4 @@
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_cart_state.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_cart_state.dart';
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:flutter/foundation.dart';
 

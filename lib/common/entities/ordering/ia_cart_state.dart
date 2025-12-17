@@ -1,4 +1,4 @@
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_cart_details.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_cart_details.dart';
 
 /// State of the shopping cart.
 ///
@@ -16,15 +16,11 @@ class IaCartState {
 
   factory IaCartState.fromJson(Map<String, dynamic> json) {
     final cartDetailsRaw = json['cartDetails'];
-    final cartDetailsJson = cartDetailsRaw != null
-        ? Map<String, dynamic>.from(cartDetailsRaw as Map)
-        : null;
+    final cartDetailsJson = cartDetailsRaw != null ? Map<String, dynamic>.from(cartDetailsRaw as Map) : null;
     final clientOrderIDsList = json['clientOrderIDs'] as List<dynamic>;
 
     return IaCartState(
-      cartDetails: cartDetailsJson != null
-          ? IaCartDetails.fromJson(cartDetailsJson)
-          : null,
+      cartDetails: cartDetailsJson != null ? IaCartDetails.fromJson(cartDetailsJson) : null,
       clientOrderIDs: clientOrderIDsList.map((id) => id as String).toList(),
     );
   }

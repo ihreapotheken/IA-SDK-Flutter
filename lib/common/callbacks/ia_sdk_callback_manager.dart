@@ -1,6 +1,5 @@
 part of '../../sdk.dart';
 
-
 enum IaSdkCallbackManager {
   didFinishOrder,
   didUpdateCart,

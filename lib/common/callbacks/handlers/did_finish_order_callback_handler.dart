@@ -1,4 +1,4 @@
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_order.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_order.dart';
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:flutter/foundation.dart';
 
