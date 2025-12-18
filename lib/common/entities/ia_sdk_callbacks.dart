@@ -1,7 +1,7 @@
 import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_cart.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_order.dart';
-import 'package:appsdk_v2_flutter_plugin/common/entities/sdk_navigation_target.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_navigation_target.dart';
 
 /// Callbacks that allow the host app to observe and respond to SDK events.
 ///

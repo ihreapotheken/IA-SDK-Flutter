@@ -1,5 +1,5 @@
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
-import 'package:appsdk_v2_flutter_plugin/common/entities/sdk_navigation_target.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_navigation_target.dart';
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:flutter/foundation.dart';
 
@@ -27,7 +27,7 @@ class SdkWillNavigateToTargetCallbackHandler {
       return IaHandlingDecision.performDefault.rawValue as T?;
     }
 
-    final navigationTarget = SdkNavigationTarget.fromRawValue(navigationTargetString);
+    final navigationTarget = IaSdkNavigationTarget.fromRawValue(navigationTargetString);
     if (navigationTarget == null) {
       debugPrint('sdkWillNavigateToTarget: Unknown navigationTarget: $navigationTargetString');
       return IaHandlingDecision.performDefault.rawValue as T?;

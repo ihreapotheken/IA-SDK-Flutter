@@ -50,24 +50,24 @@ This is IA SDK flutter plugin workspace that consists of:
 ## How to add callback (native → Dart → host app)
 ### How it works?
 1. Swift/Kotlin: Native plugin code listens to SDK and passes events to plugin via method channel. 
-IaClientDelegate.sdkShouldOverrideRoute: sends event with method channel
+IaClientDelegate.sdkShouldOverrideRoute: sends event (sdkWillNavigateToTarget) with method channel
 2. Dart: IaSdkApi listens for method channel and routes it to IaSdkCallbackManager
-3. Dart: IaSdkCallbackManager maps call to appropriate handler (ShouldOverrideRouteCallbackHandler)
-4. Dart: ShouldOverrideRouteCallbackHandler calls iaSdk?.callbacks.onShouldOverrideRoute that is set by host app.
+3. Dart: IaSdkCallbackManager maps call to appropriate handler (SdkWillNavigateToTargetCallbackHandler)
+4. Dart: SdkWillNavigateToTargetCallbackHandler calls iaSdk?.callbacks.onSdkWillNavigateToTarget that is set by host app.
 
 ### What is where
 - **IaClientDelegate.swift**: native plugin code (iOS)
 - **lib/common/sdk.dart**: Listens to method channel
 - **lib/common/callbacks/ia_sdk_callback_manager**: Routes method channel to appropriate callback handler
-- **IaSdkCallbacks**: Class with list of all callbacks that host app can set. Example: iaSdk?.callbacks.onShouldOverrideRoute = ...
+- **IaSdkCallbacks**: Class with list of all callbacks that host app can set. Example: iaSdk?.callbacks.onSdkWillNavigateToTarget = ...
 - **lib/common/entities/**: Supporting types and enums used by callbacks
 - **lib/common/callbacks/**: Individual callback handler classes (one per callback)
 
 ### Steps
-1. Create a new handler class in lib/common/callbacks/ (example: ShouldOverrideRouteCallbackHandler).
-2. Supporting types/enums for callbacks should be added to lib/common/entities/. Use "rawValue" and "fromRawValue" for mapping strings to enums. (Example: IaRouteOverride)
+1. Create a new handler class in lib/common/callbacks/ (example: SdkWillNavigateToTargetCallbackHandler).
+2. Supporting types/enums for callbacks should be added to lib/common/entities/. Use "rawValue" and "fromRawValue" for mapping strings to enums. (Example: IaSdkNavigationTarget)
    Note: Try to use same names for entitites and properties as they are in native code (if unclear whether to use iOS or android namings then ask).
-3. Add variable to your handler in IaSdkCallbacks. This is set by host app. (example: onShouldOverrideRoute).
+3. Add variable to your handler in IaSdkCallbacks. This is set by host app. (example: onSdkWillNavigateToTarget).
 4. In _IaPlatformCallbacks.handle() switch statement, instantiate your handler and call its handle() method
 5. Implement iOS side in IaClientDelegate class in IaClientBindings.swift
 6. Implement Android side (@TODO instructions on how to do that).
