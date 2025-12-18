@@ -1,21 +1,21 @@
 part of '../../sdk.dart';
 
 enum IaSdkCallbackManager {
-  orderingDidFinishOrders,
+  orderingDidFinishOrder,
   orderingDidUpdateCart,
-  shouldOverrideRoute;
+  sdkWillNavigateToTarget;
 
   Future<T?> handle<T>(
     dynamic arguments,
     IaSdkApi publicApi,
   ) async {
     switch (this) {
-      case IaSdkCallbackManager.orderingDidFinishOrders:
-        return OrderingDidFinishOrdersCallbackHandler().handle<T>(arguments, publicApi);
+      case IaSdkCallbackManager.orderingDidFinishOrder:
+        return OrderingDidFinishOrderCallbackHandler().handle<T>(arguments, publicApi);
       case IaSdkCallbackManager.orderingDidUpdateCart:
         return OrderingDidUpdateCartCallbackHandler().handle<T>(arguments, publicApi);
-      case IaSdkCallbackManager.shouldOverrideRoute:
-        return ShouldOverrideRouteCallbackHandler().handle<T>(arguments, publicApi);
+      case IaSdkCallbackManager.sdkWillNavigateToTarget:
+        return SdkWillNavigateToTargetCallbackHandler().handle<T>(arguments, publicApi);
     }
   }
 }

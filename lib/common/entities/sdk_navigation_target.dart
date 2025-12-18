@@ -1,6 +1,6 @@
-/// Routes that the SDK may navigate to, which the host app can optionally override.
+/// Navigation targets that the SDK may navigate to, which the host app can optionally override.
 ///
-enum IaRouteOverride {
+enum SdkNavigationTarget {
   /// SDK intends to open cart screen. This can be called from multiple points in the SDK.
   cart,
 
@@ -24,23 +24,23 @@ enum IaRouteOverride {
 
   String get rawValue {
     return switch (this) {
-      IaRouteOverride.cart => 'cart',
-      IaRouteOverride.pharmacyDetails => 'pharmacyDetails',
-      IaRouteOverride.thankYou => 'thankYou',
-      IaRouteOverride.imprint => 'imprint',
-      IaRouteOverride.hostAppPrivacyPolicy => 'hostAppPrivacyPolicy',
-      IaRouteOverride.apofinder => 'apofinder',
+      SdkNavigationTarget.cart => 'cart',
+      SdkNavigationTarget.pharmacyDetails => 'pharmacyDetails',
+      SdkNavigationTarget.thankYou => 'thankYou',
+      SdkNavigationTarget.imprint => 'imprint',
+      SdkNavigationTarget.hostAppPrivacyPolicy => 'hostAppPrivacyPolicy',
+      SdkNavigationTarget.apofinder => 'apofinder',
     };
   }
 
-  static IaRouteOverride? fromRawValue(String value) {
+  static SdkNavigationTarget? fromRawValue(String value) {
     return switch (value) {
-      'cart' => IaRouteOverride.cart,
-      'pharmacyDetails' => IaRouteOverride.pharmacyDetails,
-      'thankYou' => IaRouteOverride.thankYou,
-      'imprint' => IaRouteOverride.imprint,
-      'hostAppPrivacyPolicy' => IaRouteOverride.hostAppPrivacyPolicy,
-      'apofinder' => IaRouteOverride.apofinder,
+      'cart' => SdkNavigationTarget.cart,
+      'pharmacyDetails' => SdkNavigationTarget.pharmacyDetails,
+      'thankYou' => SdkNavigationTarget.thankYou,
+      'imprint' => SdkNavigationTarget.imprint,
+      'hostAppPrivacyPolicy' => SdkNavigationTarget.hostAppPrivacyPolicy,
+      'apofinder' => SdkNavigationTarget.apofinder,
       _ => null,
     };
   }

@@ -1,7 +1,7 @@
 import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_cart.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_order.dart';
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_route_override.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/sdk_navigation_target.dart';
 
 /// Callbacks that allow the host app to observe and respond to SDK events.
 ///
@@ -18,8 +18,8 @@ class IaSdkCallbacks {
   /// Example:
   /// ```dart
   /// final iaSdk = IaSdk.of(context);
-  /// iaSdk?.callbacks.onShouldOverrideRoute = (routeOverride) async {
-  ///   if (routeOverride == IaRouteOverride.cart) {
+  /// iaSdk?.callbacks.onSdkWillNavigateToTarget = (navigationTarget) async {
+  ///   if (navigationTarget == SdkNavigationTarget.cart) {
   ///     // Switch to your own cart tab
   ///     switchToTab(TabType.cart);
   ///     return IaHandlingDecision.handled;
@@ -27,7 +27,7 @@ class IaSdkCallbacks {
   ///   return IaHandlingDecision.performDefault;
   /// };
   /// ```
-  Future<IaHandlingDecision> Function(IaRouteOverride routeOverride)? onShouldOverrideRoute;
+  Future<IaHandlingDecision> Function(SdkNavigationTarget navigationTarget)? onSdkWillNavigateToTarget;
 
   /// Called when the user completes an order.
   ///
@@ -37,11 +37,11 @@ class IaSdkCallbacks {
   /// Example:
   /// ```dart
   /// final iaSdk = IaSdk.of(context);
-  /// iaSdk?.callbacks.onOrderingDidFinishOrders = (order) {
+  /// iaSdk?.callbacks.onOrderingDidFinishOrder = (order) {
   ///   print('Order completed: ${order}');
   /// };
   /// ```
-  void Function(IaOrder order)? onOrderingDidFinishOrders;
+  void Function(IaOrder order)? onOrderingDidFinishOrder;
 
   /// Called when the shopping cart state changes.
   ///

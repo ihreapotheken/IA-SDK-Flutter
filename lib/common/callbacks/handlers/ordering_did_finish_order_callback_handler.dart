@@ -2,20 +2,20 @@ import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_order.dart'
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:flutter/foundation.dart';
 
-class OrderingDidFinishOrdersCallbackHandler {
+class OrderingDidFinishOrderCallbackHandler {
   Future<T?> handle<T>(
     dynamic arguments,
     IaSdkApi publicApi,
   ) async {
     // Check if callback is set first - no point processing if host app isn't listening
-    final callback = publicApi.callbacks.onOrderingDidFinishOrders;
+    final callback = publicApi.callbacks.onOrderingDidFinishOrder;
     if (callback == null) {
       return null;
     }
 
     // Extract order info from arguments
     if (arguments is! Map) {
-      debugPrint('orderingDidFinishOrders: Invalid arguments type');
+      debugPrint('orderingDidFinishOrder: Invalid arguments type');
       return null;
     }
 
@@ -23,7 +23,7 @@ class OrderingDidFinishOrdersCallbackHandler {
     final clientOrderID = arguments['clientOrderID'] as String?;
 
     if (orderCode == null) {
-      debugPrint('orderingDidFinishOrders: Missing orderCode');
+      debugPrint('orderingDidFinishOrder: Missing orderCode');
       return null;
     }
 
@@ -37,7 +37,7 @@ class OrderingDidFinishOrdersCallbackHandler {
       callback(order);
       return null;
     } catch (e) {
-      debugPrint('orderingDidFinishOrders: Error calling callback: $e');
+      debugPrint('orderingDidFinishOrder: Error calling callback: $e');
       return null;
     }
   }

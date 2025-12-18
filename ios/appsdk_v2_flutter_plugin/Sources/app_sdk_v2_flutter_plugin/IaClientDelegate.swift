@@ -21,35 +21,35 @@ class IaClientDelegate: SDKDelegate {
     }
     
     func sdkShouldOverrideRoute(_ routeOverride: IARouteOverride, decisionHandler: @escaping (HandlingDecision) -> Void) {
-        // Convert route override to string
-        let routeOverrideString: String
+        // Convert navigation target to string
+        let navigationTargetString: String
         switch routeOverride {
         case .cart:
-            routeOverrideString = "cart"
+            navigationTargetString = "cart"
         case .pharmacyDetails:
-            routeOverrideString = "pharmacyDetails"
+            navigationTargetString = "pharmacyDetails"
         case .thankYou:
-            routeOverrideString = "thankYou"
+            navigationTargetString = "thankYou"
         case .imprint:
-            routeOverrideString = "imprint"
+            navigationTargetString = "imprint"
         case .hostAppPrivacyPolicy:
-            routeOverrideString = "hostAppPrivacyPolicy"
+            navigationTargetString = "hostAppPrivacyPolicy"
         case .apofinder:
-            routeOverrideString = "apofinder"
+            navigationTargetString = "apofinder"
         }
-        
+
         // Call Flutter callback and wait for response
         channel.invokeMethod(
-            "shouldOverrideRoute",
-            arguments: ["routeOverride": routeOverrideString]
-        ) { result in            
+            "sdkWillNavigateToTarget",
+            arguments: ["navigationTarget": navigationTargetString]
+        ) { result in
             // Parse the response
             guard let decisionString = result as? String else {
                 // If no valid response, perform default
                 decisionHandler(.performDefault)
                 return
             }
-            
+
             // Convert string to HandlingDecision
             let decision: HandlingDecision
             switch decisionString {
@@ -60,7 +60,7 @@ class IaClientDelegate: SDKDelegate {
             default:
                 decision = .performDefault
             }
-            
+
             decisionHandler(decision)
         }
     }
@@ -68,7 +68,7 @@ class IaClientDelegate: SDKDelegate {
     func orderingDidFinishOrders(orders: [IAOrder]) {
         if let order = orders.first {
             channel.invokeMethod(
-                "orderingDidFinishOrders",
+                "orderingDidFinishOrder",
                 arguments: [
                     "orderCode": order.orderCode,
                     "clientOrderID": order.clientOrderID,

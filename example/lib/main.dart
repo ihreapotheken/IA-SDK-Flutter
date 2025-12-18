@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_route_override.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/sdk_navigation_target.dart';
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
 import 'package:flutter/material.dart';
@@ -182,24 +182,24 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
     super.initState();
 
     // Set up SDK callbacks
-    widget._iaSdk?.callbacks.onShouldOverrideRoute = (routeOverride) async {
-      debugPrint('Host app: SDK wants to navigate to: $routeOverride');
+    widget._iaSdk?.callbacks.onSdkWillNavigateToTarget = (navigationTarget) async {
+      debugPrint('Host app: SDK wants to navigate to: $navigationTarget');
 
       // For demonstration purposes, let's handle the cart route
       // and let the SDK handle all other routes
-      switch (routeOverride) {
-        case IaRouteOverride.pharmacyDetails:
+      switch (navigationTarget) {
+        case SdkNavigationTarget.pharmacyDetails:
           debugPrint('Host app: Handling cart route in host app');
           // Here you could switch to your own cart tab or perform other actions
           // For this example, we'll just log and let the SDK handle it
           return IaHandlingDecision.handled;
         default:
-          debugPrint('Host app: Letting SDK handle route: $routeOverride');
+          debugPrint('Host app: Letting SDK handle route: $navigationTarget');
           return IaHandlingDecision.performDefault;
       }
     };
 
-    widget._iaSdk?.callbacks.onOrderingDidFinishOrders = (order) {
+    widget._iaSdk?.callbacks.onOrderingDidFinishOrder = (order) {
       debugPrint('Host app: Order completed! Order Code: ${order.orderCode}, client order ID: ${order.clientOrderID}');
     };
 
