@@ -20,7 +20,9 @@ class OrderingDidFinishOrderCallbackHandler {
     }
 
     final orderCode = arguments['orderCode'] as String?;
-    final clientOrderID = arguments['clientOrderID'] as String?;
+    // Method channel provides List<dynamic>, need to convert to List<String>
+    final clientOrderIDsDynamic = arguments['clientOrderIDs'] as List<dynamic>?;
+    final clientOrderIDs = clientOrderIDsDynamic?.map((e) => e as String).toList();
 
     if (orderCode == null) {
       debugPrint('orderingDidFinishOrder: Missing orderCode');
@@ -29,7 +31,7 @@ class OrderingDidFinishOrderCallbackHandler {
 
     final order = IaOrder(
       orderCode: orderCode,
-      clientOrderID: clientOrderID,
+      clientOrderIDs: clientOrderIDs,
     );
 
     // Call the callback (fire and forget)

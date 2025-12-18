@@ -66,15 +66,16 @@ class IaClientDelegate: SDKDelegate {
     }
     
     func orderingDidFinishOrders(orders: [IAOrder]) {
-        if let order = orders.first {
-            channel.invokeMethod(
-                "orderingDidFinishOrder",
-                arguments: [
-                    "orderCode": order.orderCode,
-                    "clientOrderID": order.clientOrderID,
-                ],
-            )
-        }
+        guard let orderCode = orders.first?.orderCode else { return }
+        let clientOrderIDs = orders.compactMap(\.clientOrderID)
+        
+        channel.invokeMethod(
+            "orderingDidFinishOrder",
+            arguments: [
+                "orderCode": orderCode,
+                "clientOrderIDs": clientOrderIDs,
+            ],
+        )
     }
         
     func orderingDidUpdateCart(cartState: IACartState) {

@@ -5,10 +5,10 @@ class IaOrder {
   final String orderCode;
 
   /// Order ID provided by host app using transferPrescriptions (optional).
-  final String? clientOrderID;
+  final List<String>? clientOrderIDs;
 
   const IaOrder({
     required this.orderCode,
-    this.clientOrderID,
+    this.clientOrderIDs,
   });
 }

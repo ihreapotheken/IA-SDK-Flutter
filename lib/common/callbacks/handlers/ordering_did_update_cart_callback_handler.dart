@@ -13,22 +13,33 @@ class OrderingDidUpdateCartCallbackHandler {
       return null;
     }
 
-    // Extract cart from arguments
+    // Extract cart info from arguments
     if (arguments is! Map) {
       debugPrint('orderingDidUpdateCart: Invalid arguments type');
       return null;
     }
 
-    try {
-      // Convert Map<Object?, Object?> to Map<String, dynamic>
-      final argumentsMap = Map<String, dynamic>.from(arguments);
-      final cart = IaCart.fromJson(argumentsMap);
+    final totalAmountInCart = arguments['totalAmountInCart'] as int?;
+    // Method channel provides List<dynamic>, need to convert to List<String>
+    final clientOrderIDsDynamic = arguments['clientOrderIDs'] as List<dynamic>?;
+    final clientOrderIDs = clientOrderIDsDynamic?.map((e) => e as String).toList();
 
-      // Call the callback (fire and forget)
+    if (totalAmountInCart == null || clientOrderIDs == null) {
+      debugPrint('orderingDidUpdateCart: Missing required fields');
+      return null;
+    }
+
+    final cart = IaCart(
+      totalAmountInCart: totalAmountInCart,
+      clientOrderIDs: clientOrderIDs,
+    );
+
+    // Call the callback (fire and forget)
+    try {
       callback(cart);
       return null;
     } catch (e) {
-      debugPrint('orderingDidUpdateCart: Error processing cart: $e');
+      debugPrint('orderingDidUpdateCart: Error calling callback: $e');
       return null;
     }
   }
