@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
-import 'package:appsdk_v2_flutter_plugin/common/entities/sdk_navigation_target.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_navigation_target.dart';
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
 import 'package:flutter/material.dart';
@@ -188,7 +188,7 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
       // For demonstration purposes, let's handle the cart route
       // and let the SDK handle all other routes
       switch (navigationTarget) {
-        case SdkNavigationTarget.pharmacyDetails:
+        case IaSdkNavigationTarget.pharmacyDetails:
           debugPrint('Host app: Letting SDK handle route: $navigationTarget');
           return IaHandlingDecision.performDefault;
         default:

@@ -27,7 +27,7 @@ class IaSdkCallbacks {
   ///   return IaHandlingDecision.performDefault;
   /// };
   /// ```
-  Future<IaHandlingDecision> Function(SdkNavigationTarget navigationTarget)? onSdkWillNavigateToTarget;
+  Future<IaHandlingDecision> Function(IaSdkNavigationTarget navigationTarget)? onSdkWillNavigateToTarget;
 
   /// Called when the user completes an order.
   ///
