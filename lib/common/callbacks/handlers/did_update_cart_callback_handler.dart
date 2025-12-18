@@ -1,4 +1,4 @@
-import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_cart_state.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_cart.dart';
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:flutter/foundation.dart';
 
@@ -13,7 +13,7 @@ class DidUpdateCartCallbackHandler {
       return null;
     }
 
-    // Extract cart state from arguments
+    // Extract cart from arguments
     if (arguments is! Map) {
       debugPrint('didUpdateCart: Invalid arguments type');
       return null;
@@ -22,13 +22,13 @@ class DidUpdateCartCallbackHandler {
     try {
       // Convert Map<Object?, Object?> to Map<String, dynamic>
       final argumentsMap = Map<String, dynamic>.from(arguments);
-      final cartState = IaCartState.fromJson(argumentsMap);
+      final cart = IaCart.fromJson(argumentsMap);
 
       // Call the callback (fire and forget)
-      callback(cartState);
+      callback(cart);
       return null;
     } catch (e) {
-      debugPrint('didUpdateCart: Error processing cart state: $e');
+      debugPrint('didUpdateCart: Error processing cart: $e');
       return null;
     }
   }

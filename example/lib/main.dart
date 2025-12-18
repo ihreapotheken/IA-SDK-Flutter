@@ -203,11 +203,10 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
       debugPrint('Host app: Order completed! Order Code: ${order.orderCode}, client order ID: ${order.clientOrderID}');
     };
 
-    widget._iaSdk?.callbacks.onDidUpdateCart = (cartState) {
-      final itemCount = cartState.cartDetails?.totalAmountInCart ?? 0;
-      final productCount = cartState.cartDetails?.products.length ?? 0;
-      final orderCount = cartState.clientOrderIDs.length;
-      debugPrint('Host app: Cart updated - $itemCount items, $productCount products, $orderCount orders');
+    widget._iaSdk?.callbacks.onDidUpdateCart = (cart) {
+      final itemCount = cart.totalAmountInCart;
+      final orderCount = cart.clientOrderIDs.length;
+      debugPrint('Host app: Cart updated - $itemCount items, $orderCount orders');
     };
 
     widget._iaSdk?.configureFooter(shouldShowDataProcessing: false, shouldShowAppSettings: true, shouldShowImprint: true);

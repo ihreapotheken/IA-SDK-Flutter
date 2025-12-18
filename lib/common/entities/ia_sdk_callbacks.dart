@@ -1,4 +1,4 @@
-import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_cart_state.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_cart.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_order.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_route_override.dart';
@@ -51,9 +51,9 @@ class IaSdkCallbacks {
   /// Example:
   /// ```dart
   /// final iaSdk = IaSdk.of(context);
-  /// iaSdk?.callbacks.onDidUpdateCart = (cartState) {
-  ///   print('Cart updated: ${cartState.cartDetails?.totalAmountInCart ?? 0} items');
+  /// iaSdk?.callbacks.onDidUpdateCart = (cart) {
+  ///   print('Cart updated: ${cart.totalAmountInCart} items');
   /// };
   /// ```
-  void Function(IaCartState cartState)? onDidUpdateCart;
+  void Function(IaCart cart)? onDidUpdateCart;
 }

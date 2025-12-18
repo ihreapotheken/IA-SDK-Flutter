@@ -78,25 +78,11 @@ class IaClientDelegate: SDKDelegate {
     }
         
     func orderingDidUpdateCart(cartState: IACartState) {
-        // @TODO: Check with android if we can just send json instead of sending dictionaries like this.
-        // Convert cart state to dictionary
-        var cartDetailsDict: [String: Any]? = nil
-        if let cartDetails = cartState.cartDetails {
-            let productsArray = cartDetails.products.map { product in
-                return [
-                    "pzn": product.pzn,
-                    "amount": product.amount
-                ]
-            }
-
-            cartDetailsDict = [
-                "products": productsArray,
-                "totalAmountInCart": cartDetails.totalAmountInCart
-            ]
-        }
+        // Extract totalAmountInCart from cartDetails, default to 0 if nil
+        let totalAmountInCart = cartState.cartDetails?.totalAmountInCart ?? 0
 
         let arguments: [String: Any] = [
-            "cartDetails": cartDetailsDict as Any,
+            "totalAmountInCart": totalAmountInCart,
             "clientOrderIDs": cartState.clientOrderIDs
         ]
 
