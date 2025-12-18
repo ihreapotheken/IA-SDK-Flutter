@@ -189,10 +189,8 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
       // and let the SDK handle all other routes
       switch (navigationTarget) {
         case SdkNavigationTarget.pharmacyDetails:
-          debugPrint('Host app: Handling cart route in host app');
-          // Here you could switch to your own cart tab or perform other actions
-          // For this example, we'll just log and let the SDK handle it
-          return IaHandlingDecision.handled;
+          debugPrint('Host app: Letting SDK handle route: $navigationTarget');
+          return IaHandlingDecision.performDefault;
         default:
           debugPrint('Host app: Letting SDK handle route: $navigationTarget');
           return IaHandlingDecision.performDefault;
