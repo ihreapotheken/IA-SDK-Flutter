@@ -203,7 +203,7 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
       debugPrint('Host app: Order completed! Order Code: ${order.orderCode}, client order ID: ${order.clientOrderID}');
     };
 
-    widget._iaSdk?.callbacks.onDidUpdateCart = (cart) {
+    widget._iaSdk?.callbacks.onOrderingDidUpdateCart = (cart) {
       final itemCount = cart.totalAmountInCart;
       final orderCount = cart.clientOrderIDs.length;
       debugPrint('Host app: Cart updated - $itemCount items, $orderCount orders');

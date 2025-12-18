@@ -51,9 +51,9 @@ class IaSdkCallbacks {
   /// Example:
   /// ```dart
   /// final iaSdk = IaSdk.of(context);
-  /// iaSdk?.callbacks.onDidUpdateCart = (cart) {
+  /// iaSdk?.callbacks.onOrderingDidUpdateCart = (cart) {
   ///   print('Cart updated: ${cart.totalAmountInCart} items');
   /// };
   /// ```
-  void Function(IaCart cart)? onDidUpdateCart;
+  void Function(IaCart cart)? onOrderingDidUpdateCart;
 }

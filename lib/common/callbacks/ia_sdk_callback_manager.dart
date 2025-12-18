@@ -2,7 +2,7 @@ part of '../../sdk.dart';
 
 enum IaSdkCallbackManager {
   orderingDidFinishOrders,
-  didUpdateCart,
+  orderingDidUpdateCart,
   shouldOverrideRoute;
 
   Future<T?> handle<T>(
@@ -12,8 +12,8 @@ enum IaSdkCallbackManager {
     switch (this) {
       case IaSdkCallbackManager.orderingDidFinishOrders:
         return OrderingDidFinishOrdersCallbackHandler().handle<T>(arguments, publicApi);
-      case IaSdkCallbackManager.didUpdateCart:
-        return DidUpdateCartCallbackHandler().handle<T>(arguments, publicApi);
+      case IaSdkCallbackManager.orderingDidUpdateCart:
+        return OrderingDidUpdateCartCallbackHandler().handle<T>(arguments, publicApi);
       case IaSdkCallbackManager.shouldOverrideRoute:
         return ShouldOverrideRouteCallbackHandler().handle<T>(arguments, publicApi);
     }

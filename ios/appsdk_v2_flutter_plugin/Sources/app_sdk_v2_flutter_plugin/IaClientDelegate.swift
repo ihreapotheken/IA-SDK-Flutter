@@ -88,7 +88,7 @@ class IaClientDelegate: SDKDelegate {
 
         // Send to Flutter
         channel.invokeMethod(
-            "didUpdateCart",
+            "orderingDidUpdateCart",
             arguments: arguments
         )
     }
