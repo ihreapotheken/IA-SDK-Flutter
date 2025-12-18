@@ -68,7 +68,7 @@ class IaClientDelegate: SDKDelegate {
     func orderingDidFinishOrders(orders: [IAOrder]) {
         if let order = orders.first {
             channel.invokeMethod(
-                "didFinishOrder",
+                "orderingDidFinishOrders",
                 arguments: [
                     "orderCode": order.orderCode,
                     "clientOrderID": order.clientOrderID,

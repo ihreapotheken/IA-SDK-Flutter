@@ -199,7 +199,7 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
       }
     };
 
-    widget._iaSdk?.callbacks.onDidFinishOrder = (order) {
+    widget._iaSdk?.callbacks.onOrderingDidFinishOrders = (order) {
       debugPrint('Host app: Order completed! Order Code: ${order.orderCode}, client order ID: ${order.clientOrderID}');
     };
 

@@ -37,11 +37,11 @@ class IaSdkCallbacks {
   /// Example:
   /// ```dart
   /// final iaSdk = IaSdk.of(context);
-  /// iaSdk?.callbacks.onDidFinishOrder = (order) {
+  /// iaSdk?.callbacks.onOrderingDidFinishOrders = (order) {
   ///   print('Order completed: ${order}');
   /// };
   /// ```
-  void Function(IaOrder order)? onDidFinishOrder;
+  void Function(IaOrder order)? onOrderingDidFinishOrders;
 
   /// Called when the shopping cart state changes.
   ///
