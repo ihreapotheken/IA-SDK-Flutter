@@ -9,6 +9,8 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformViewRegistry
 
+// @TODO send callbacks (sdkWillNavigateToTarget, orderingDidFinishOrder, orderingDidUpdateCart) to dart. See IaClientDelegate.swift.
+
 class IaClientBindings(
     val applicationContext: Context,
     val activityContext: () -> Context?,
