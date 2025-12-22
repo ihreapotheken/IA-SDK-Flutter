@@ -95,6 +95,14 @@ internal class IaClientMethods {
           )
         )
       }
+
+      // Decode and print configuration
+      guard let arguments = IaInitSdkArguments.fromJson(args) else {
+          return 
+      }
+
+      print("IA SDK Configuration: \(arguments) \(arguments.serverEnvironment.mappedToSDK())")
+
       guard
         let accessKey = args["accessKey"] as? String,
         let clientId = args["clientId"] as? String,
@@ -109,31 +117,12 @@ internal class IaClientMethods {
           )
         )
       }
-      let serverEnv: EnvironmentID
-      switch serverEnvString {
-      case "development":
-        serverEnv = EnvironmentID.dev
-        break
-      case "staging":
-        serverEnv = EnvironmentID.staging
-        break
-      case "production":
-        serverEnv = EnvironmentID.prod
-        break
-      default:
-        return result(
-          FlutterError(
-            code: "ARG_ERROR",
-            message: "Invalid environment ID: \(serverEnvString)",
-            details: nil
-          )
-        )
-      }
+
       if !isRegistered {
         isRegistered = true
         IASDK.configuration.apiKey = accessKey
         IASDK.configuration.clientID = clientId
-        IASDK.setEnvironment(serverEnv)
+          IASDK.setEnvironment(arguments.serverEnvironment.mappedToSDK())
         // @TODO: remove, just for testing
         IASDK.QA.setQAFeatures([.showTestPharmaciesOnApofinder])
         IASDK.register([

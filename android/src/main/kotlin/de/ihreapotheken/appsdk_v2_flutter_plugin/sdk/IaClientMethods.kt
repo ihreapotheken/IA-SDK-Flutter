@@ -137,6 +137,13 @@ internal class IaClientMethods(
                     RxModule,
                     ApofinderModule,
                 )
+                // TODO: Parse configuration options from args (similar to iOS implementation)
+                // The following configuration options should be extracted from args:
+                // - shouldFetchThemeFromRemote (args["shouldFetchThemeFromRemote"])
+                // - footer configuration (args["footer"])
+                // - initialization configuration (args["initialization"])
+                // - prerequisites configuration (args["initialization"]["prerequisites"])
+                // See iOS implementation in IaClientMethods.swift for reference
                 bindings.sdkModule.init(
                     context = bindings.applicationContext,
                     apiKey = accessKey,
