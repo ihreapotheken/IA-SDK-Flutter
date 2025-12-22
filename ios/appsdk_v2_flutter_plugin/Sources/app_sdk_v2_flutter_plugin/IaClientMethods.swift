@@ -17,47 +17,47 @@ internal class IaClientMethods {
      * Allocates the SDK runtime resources.
      */
     case initIaSdk
-
+    
     /**
      * Selects a pharmacy by providing an identifier.
      */
     case setPharmacyId
-
+    
     /**
      * Resets the state of user cart, clearing any added products or prescriptions.
      */
     case clearCart
-
+    
     /**
      * Forwards the client personal information to the ia.de library for checkout purposes.
      */
     case setGuestUserData
-
+    
     /**
      * Resets the user data and onboarding status (pharmacy selection, user consents statuses).
      */
     case logout
-
+    
     /**
      * Places a new [UIViewController] object into the navigation stack.
      */
     case launchRoute
-
+    
     /**
      * Forwards a collection of prescription objects with the ia.de checkout services.
      */
     case transferPrescriptions
-
+    
     /**
      * Closes any overlaying ia.de screen contents.
      */
     case finishAllActivities
-
+    
     /**
      * Configures footer visibility settings.
      */
     case configureFooter
-
+    
     /**
      * String identifier getter definition.
      */
@@ -65,18 +65,18 @@ internal class IaClientMethods {
       return String(describing: self)
     }
   }
-
+  
   /**
    * Flutter SDK host app bindings definitions.
    */
   private let bindings: IaClientBindings!
   private var isRegistered: Bool = false
-
+  
   init(bindings: IaClientBindings!) {
     self.bindings = bindings
   }
-
-
+  
+  
   /**
    * Registers a handler for method calls from the Flutter side.
    */
@@ -145,26 +145,27 @@ internal class IaClientMethods {
           .prescription,
         ])
       }
-      let masterDelegate = IaClientDelegate(
-        channel: bindings.channel,
+      IASDK.setDelegate(IaClientDelegate(channel: bindings.channel))
+      
+      // @TODO pass this via configuration.
+      let prerequsitesOptions = IASDKPrerequisitesOptions(
+        shouldShowIndicator: false, 
+        isCancellable: false, 
+        isAnimated: true, 
+        shouldRunLegal: true, 
+        shouldRunOnboarding: false,
+        shouldRunApofinder: true
       )
-      IASDK.setDelegate(masterDelegate)
+      
+      // @TODO: Auto initialization is enabled to match Android behavior in terms of prerequisites. Values are hardcoded.
+      IASDK.configuration.isAutoInitializationEnabled = true
       
       Task.init {
         do {
-          let prerequisitesOptions = IASDKPrerequisitesOptions(
-            shouldShowIndicator: true,
-            isCancellable: false,
-            isAnimated: false,
-            shouldRunLegal: (args["shouldRunLegal"] as? Bool) == true,
-            shouldRunOnboarding: (args["shouldRunOnboarding"] as? Bool) == true,
-            shouldRunApofinder: (args["shouldRunApofinder"] as? Bool) == true,
-          )
           let _ = try await IASDK.initialize(
             options: .init(
               shouldShowIndicator: false,
-              prerequisitesOptions: (args["emptyPrerequisites"] as? Bool) == true
-                ? nil : prerequisitesOptions,
+              prerequisitesOptions: nil
             ),
           )
           result(nil)

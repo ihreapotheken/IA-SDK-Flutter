@@ -107,7 +107,6 @@ class IaSdkApi extends State<IaSdk> {
     await _IaSdkPlatformMethods.initIaSdk.invoke<void>(
       {
         ...widget._config.toJson(),
-        if (Platform.isIOS) 'emptyPrerequisites': true,
       },
       this,
     );
@@ -122,16 +121,6 @@ class IaSdkApi extends State<IaSdk> {
       pharmacyId,
       this,
     );
-    if (Platform.isIOS) {
-      await _IaSdkPlatformMethods.initIaSdk.invoke<void>(
-        {
-          ...widget._config.toJson(),
-          'shouldRunLegal': true,
-          'shouldRunOnboarding': false,
-        },
-        this,
-      );
-    }
     return result;
   }
 
@@ -195,17 +184,6 @@ class IaSdkApi extends State<IaSdk> {
     Iterable<String>? codes,
     String? orderId,
   }) async {
-    if (Platform.isIOS) {
-      await _IaSdkPlatformMethods.initIaSdk.invoke<void>(
-        {
-          ...widget._config.toJson(),
-          'shouldRunLegal': true,
-          'shouldRunOnboarding': false,
-          'shouldRunApofinder': true,
-        },
-        this,
-      );
-    }
     await _IaSdkPlatformMethods.transferPrescriptions.invoke<void>(
       {
         'images': images,
