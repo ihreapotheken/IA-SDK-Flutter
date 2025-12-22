@@ -1,12 +1,39 @@
 {
   "pins" : [
     {
-      "identity" : "ia-sdk-ios",
+      "identity" : "asn1kit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ihreapotheken/IA-SDK-iOS",
+      "location" : "https://github.com/gematik/ASN1Kit.git",
       "state" : {
-        "revision" : "564fcec3adefc3582044241406914563d4e0ed44",
-        "version" : "0.20.0-beta"
+        "revision" : "09df8959217517065d7022061cb36a4915430150",
+        "version" : "1.3.1"
+      }
+    },
+    {
+      "identity" : "commandant",
+      "kind" : "remoteSourceControl",
+      "location" : "http://github.com/Carthage/Commandant",
+      "state" : {
+        "revision" : "a1671cf728db837cf5ec1980a80d276bbba748f6",
+        "version" : "0.18.0"
+      }
+    },
+    {
+      "identity" : "devicekit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/devicekit/DeviceKit.git",
+      "state" : {
+        "revision" : "d37e70cb2646666dcf276d7d3d4a9760a41ff8a6",
+        "version" : "4.9.0"
+      }
+    },
+    {
+      "identity" : "link4health-sdk-ios-swiftpackage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/gedisa-cardlink/link4health-sdk-ios-swiftPackage",
+      "state" : {
+        "revision" : "94a5de4442c3b161cee4b12c029b2f8e3f3015d3",
+        "version" : "2.2.4"
       }
     },
     {
@@ -16,6 +43,15 @@
       "state" : {
         "revision" : "bec06b51e306b84b51fe09b7d26acb3b10e5e2e3",
         "version" : "4.3.1"
+      }
+    },
+    {
+      "identity" : "ref-openhealthcardkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/gematik/ref-OpenHealthCardKit.git",
+      "state" : {
+        "revision" : "1831d7e1ee5725c1dfe8d44a4c8e044c17f79494",
+        "version" : "5.11.0"
       }
     }
   ],

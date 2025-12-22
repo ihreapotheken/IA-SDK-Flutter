@@ -49,7 +49,7 @@ func parseVersion(_ versionId: String) -> Version {
 }
 
 let appSdkVersion = parseVersion(appSdkVersionId)
-
+/*
 let package = Package(
     name: "appsdk_v2_flutter_plugin",
     platforms: [
@@ -59,7 +59,8 @@ let package = Package(
         .library(name: "appsdk-v2-flutter-plugin", targets: ["appsdk_v2_flutter_plugin"])
     ],
     dependencies: [
-	.package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", exact: appSdkVersion)
+	//.package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", exact: appSdkVersion)
+	.package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", exact: "0.19.6-beta")
     ],
     targets: [
         .target(
@@ -83,6 +84,34 @@ let package = Package(
                 // TODO: If you have other resources that need to be bundled with your plugin, refer to
                 // the following instructions to add them:
                 // https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package
+            ]
+        )
+    ]
+)
+*/
+let package = Package(
+    name: "appsdk_v2_flutter_plugin",
+    platforms: [
+        .iOS("15.0")
+    ],
+    products: [
+        .library(name: "appsdk-v2-flutter-plugin", targets: ["appsdk_v2_flutter_plugin"])
+    ],
+    dependencies: [
+        .package(path: "/Users/danijelhuis/git/git_fourOfThem/IA-SDK-Dev-iOS")
+    ],
+    targets: [
+        .target(
+            name: "appsdk_v2_flutter_plugin",
+            dependencies: [
+                .product(name: "IAOverTheCounter", package: "IA-SDK-Dev-iOS"),
+                .product(name: "IAOrdering", package: "IA-SDK-Dev-iOS"),
+                .product(name: "IAPharmacy", package: "IA-SDK-Dev-iOS"),
+                .product(name: "IAIntegrations", package: "IA-SDK-Dev-iOS"),
+                .product(name: "IAPrescription", package: "IA-SDK-Dev-iOS"),
+                .product(name: "IACardLink", package: "IA-SDK-Dev-iOS"),
+            ],
+            resources: [
             ]
         )
     ]
