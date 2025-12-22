@@ -185,14 +185,11 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
     widget._iaSdk?.callbacks.onSdkWillNavigateToTarget = (navigationTarget) async {
       debugPrint('Host app: SDK wants to navigate to: $navigationTarget');
 
-      // For demonstration purposes, let's handle the cart route
-      // and let the SDK handle all other routes
       switch (navigationTarget) {
+        // Just as an example.
         case IaSdkNavigationTarget.pharmacyDetails:
-          debugPrint('Host app: Letting SDK handle route: $navigationTarget');
           return IaHandlingDecision.performDefault;
         default:
-          debugPrint('Host app: Letting SDK handle route: $navigationTarget');
           return IaHandlingDecision.performDefault;
       }
     };
