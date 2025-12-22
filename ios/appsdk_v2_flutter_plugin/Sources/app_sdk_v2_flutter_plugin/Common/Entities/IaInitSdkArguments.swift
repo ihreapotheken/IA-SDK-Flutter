@@ -1,3 +1,11 @@
+//
+//  IaInitSdkArguments.swift
+//  appsdk_v2_flutter_plugin
+//
+//  Created by Danijel Huis on 22.12.2025..
+//
+
+
 import Foundation
 import IACore
 
@@ -20,23 +28,16 @@ struct IaInitSdkArguments: Decodable {
     
     /// Initialization configuration options.
     let initialization: IaInitializationConfiguration
-    
-    /// Creates an instance from a JSON dictionary using JSONDecoder.
-    /// - Parameter json: Dictionary containing the initialization arguments
-    /// - Returns: A new IaInitSdkArguments instance, or nil if decoding fails
-    static func fromJson(_ json: [String: Any]) -> IaInitSdkArguments? {
-        return JSONDecoder().decode(IaInitSdkArguments.self, from: json)
-    }
 }
 
 /// Configuration options for SDK footer buttons.
 struct IaFooterConfiguration: Decodable {
     /// Whether to show the data processing button in the footer.
     let shouldShowDataProcessing: Bool
-
+    
     /// Whether to show the app settings button in the footer.
     let shouldShowAppSettings: Bool
-
+    
     /// Whether to show the imprint button in the footer.
     let shouldShowImprint: Bool
 }
@@ -45,19 +46,19 @@ struct IaFooterConfiguration: Decodable {
 struct IaPrerequisitesConfiguration: Decodable {
     /// Whether to show a loading indicator during prerequisites.
     let shouldShowIndicator: Bool
-
+    
     /// Whether the prerequisites flow can be cancelled.
     let isCancellable: Bool
-
+    
     /// Whether to show animations during prerequisites flow.
     let isAnimated: Bool
-
+    
     /// Whether to run legal documents flow if needed.
     let runLegalIfNeeded: Bool
-
+    
     /// Whether to run onboarding flow if needed.
     let runOnboardingIfNeeded: Bool
-
+    
     /// Whether to run pharmacy finder (Apofinder) flow if needed.
     let runApofinderIfNeeded: Bool
 }
@@ -66,7 +67,7 @@ struct IaPrerequisitesConfiguration: Decodable {
 struct IaInitializationConfiguration: Decodable {
     /// Whether to show a loading indicator during initialization.
     let shouldShowIndicator: Bool
-
+    
     /// Prerequisites configuration options.
     let prerequisites: IaPrerequisitesConfiguration
 }
@@ -82,5 +83,5 @@ enum IaEnvironment: String, Decodable {
         case .production: .prod
         case .staging: .staging
         }
-    } 
+    }
 }
