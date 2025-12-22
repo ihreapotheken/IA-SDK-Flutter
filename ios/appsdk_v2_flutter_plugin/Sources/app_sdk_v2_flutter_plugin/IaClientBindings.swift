@@ -30,36 +30,3 @@ class IaClientBindings {
     }
   }
 }
-
-class IaClientDelegate: SDKDelegate, OrderingDelegate, PrescriptionDelegate, CardLinkDelegate {
-  let channel: FlutterMethodChannel
-  
-  let cartItemCountListener: CurrentValueSubject<Int, Never>
-
-  init(
-    channel: FlutterMethodChannel,
-    cartItemCountListener: CurrentValueSubject<Int, Never>
-  ) {
-    self.channel = channel
-    self.cartItemCountListener = cartItemCountListener
-  }
-  
-  func orderingWillShowThankYouScreen(orders: [IAOrder], dismissable: (any Dismissable)?) -> HandlingDecision {
-    if let order = orders.first {
-      channel.invokeMethod(
-        "didFinishOrder",
-        arguments: [
-          "hostOrderId": order.orderCode,
-          "sdkOrderId": order.clientOrderID,
-        ],
-      )
-    }
-    return .performDefault
-  }
-    
-  func orderingDidUpdateCart(cartState: IACartState) {
-    if let cartItemCount = cartState.cartDetails?.totalAmountInCart {
-      cartItemCountListener.value = cartItemCount
-    }
-  }
-}

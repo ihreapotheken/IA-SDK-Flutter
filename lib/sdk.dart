@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:appsdk_v2_flutter_plugin/common/callbacks/handlers/ordering_did_finish_order_callback_handler.dart';
+import 'package:appsdk_v2_flutter_plugin/common/callbacks/handlers/ordering_did_update_cart_callback_handler.dart';
+import 'package:appsdk_v2_flutter_plugin/common/callbacks/handlers/sdk_will_navigate_to_target_callback_handler.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_callbacks.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_configuration.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-part 'callbacks.dart';
-part 'config.dart';
+part 'common/callbacks/ia_sdk_callback_manager.dart';
 part 'methods.dart';
 part 'view.dart';
 
@@ -50,24 +54,41 @@ class IaSdkApi extends State<IaSdk> {
   ///
   final _channel = const MethodChannel('de.ihreapotheken/sdk');
 
+  /// Callbacks for receiving events from the SDK.
+  ///
+  /// Set callback functions on this object to handle SDK events such as navigation
+  /// requests, state changes, and more.
+  ///
+  /// Example:
+  /// ```dart
+  /// final iaSdk = IaSdk.of(context);
+  /// iaSdk?.callbacks.onShouldOverrideRoute = (route) async {
+  ///   // Handle route override
+  ///   return IaHandlingDecision.performDefault;
+  /// };
+  /// ```
+  final callbacks = IaSdkCallbacks();
+
   @override
   void initState() {
     super.initState();
     _channel.setMethodCallHandler(
       (call) async {
         try {
-          final callback = _IaPlatformCallbacks.values.firstWhere(
+          final callback = IaSdkCallbackManager.values.firstWhere(
             (value) {
               return value.name == call.method;
             },
           );
           try {
-            await callback.handle(call.arguments, this);
+            return await callback.handle(call.arguments, this);
           } catch (e) {
             debugPrint('Callback error: ${call.method}\n$e');
+            return null;
           }
         } catch (e) {
           debugPrint('Callback not found: ${call.method}.');
+          return null;
         }
       },
     );

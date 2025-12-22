@@ -76,7 +76,6 @@ internal class IaClientMethods {
     self.bindings = bindings
   }
 
-  private let cartItemCountListener = CurrentValueSubject<Int, Never>(0)
 
   /**
    * Registers a handler for method calls from the Flutter side.
@@ -148,13 +147,9 @@ internal class IaClientMethods {
       }
       let masterDelegate = IaClientDelegate(
         channel: bindings.channel,
-        cartItemCountListener: self.cartItemCountListener,
       )
-      IASDK.setDelegates(
-        sdk: masterDelegate,
-        ordering: masterDelegate,
-        prescription: masterDelegate,
-      )
+      IASDK.setDelegate(masterDelegate)
+      
       Task.init {
         do {
           let prerequisitesOptions = IASDKPrerequisitesOptions(

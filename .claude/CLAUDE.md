@@ -1,7 +1,13 @@
+References:
+- iOS IA SDK: https://github.com/ihreapotheken/IA-SDK-iOS
+- Android IA SDK: https://github.com/ihreapotheken/IA-SDK-Android
+- General Flutter packages docs: https://docs.flutter.dev/packages-and-plugins/developing-packages
+- General Flutter platform channels docs: https://docs.flutter.dev/platform-integration/platform-channels
+
 This is IA SDK flutter plugin workspace that consists of:
 - dart code that defines interfaces and calls native iOS/Android code
-- iOS code that calls iOS IA SDK (https://github.com/ihreapotheken/IA-SDK-iOS)
-- Android code that calls Android IA SDK (https://github.com/ihreapotheken/IA-SDK-Android)
+- iOS code that calls iOS IA SDK (see reference above)
+- Android code that calls Android IA SDK (see reference above)
 
 # IA SDK high level overview
 - prerequisites: at start users must select their pharmacy, this is mandatory. Also users can be presented with onboarding flow and legal documents
@@ -35,8 +41,38 @@ This is IA SDK flutter plugin workspace that consists of:
 
 # Coding tasks
 ## How to add dart function that calls native function
-1. Define function in sdk.dart, this is what host app will call. 
+1. Define function in sdk.dart, this is what host app will call.
 2. Add enum case and implementation to methods.dart. If you need to create dart entities, put it in config.dart.
 3. Add native function:
   - iOS: /ios/appsdk_v2_flutter_plugin/Sources/app_sdk_v2_flutter_plugin/IaClientMethods.swift
   - Android: /android/src/main/kotlin/de/ihreapotheken/appsdk_v2_flutter_plugin/sdk/IaClientMethods.kt
+
+## How to add callback (native → Dart → host app)
+### How it works?
+1. Swift/Kotlin: Native plugin code listens to SDK and passes events to plugin via method channel. 
+IaClientDelegate.sdkShouldOverrideRoute: sends event (sdkWillNavigateToTarget) with method channel
+2. Dart: IaSdkApi listens for method channel and routes it to IaSdkCallbackManager
+3. Dart: IaSdkCallbackManager maps call to appropriate handler (SdkWillNavigateToTargetCallbackHandler)
+4. Dart: SdkWillNavigateToTargetCallbackHandler calls iaSdk?.callbacks.onSdkWillNavigateToTarget that is set by host app.
+
+### What is where
+- **IaClientDelegate.swift**: native plugin code (iOS)
+- **lib/common/sdk.dart**: Listens to method channel
+- **lib/common/callbacks/ia_sdk_callback_manager**: Routes method channel to appropriate callback handler
+- **IaSdkCallbacks**: Class with list of all callbacks that host app can set. Example: iaSdk?.callbacks.onSdkWillNavigateToTarget = ...
+- **lib/common/entities/**: Supporting types and enums used by callbacks
+- **lib/common/callbacks/**: Individual callback handler classes (one per callback)
+
+### Steps
+1. Create a new handler class in lib/common/callbacks/ (example: SdkWillNavigateToTargetCallbackHandler).
+2. Supporting types/enums for callbacks should be added to lib/common/entities/. Use "rawValue" and "fromRawValue" for mapping strings to enums. (Example: IaSdkNavigationTarget)
+   Note: Try to use same names for entitites and properties as they are in native code (if unclear whether to use iOS or android namings then ask).
+3. Add variable to your handler in IaSdkCallbacks. This is set by host app. (example: onSdkWillNavigateToTarget).
+4. In _IaPlatformCallbacks.handle() switch statement, instantiate your handler and call its handle() method
+5. Implement iOS side in IaClientDelegate class in IaClientBindings.swift
+6. Implement Android side (@TODO instructions on how to do that).
+7. Update example/lib/main.dart if needed.
+
+### Important
+- Callbacks are optional (nullable) - provide sensible defaults if not set
+- Use `Future<T>` for callbacks that need responses, `void` for fire-and-forget

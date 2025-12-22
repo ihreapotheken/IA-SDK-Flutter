@@ -1,5 +1,3 @@
-part of 'sdk.dart';
-
 /// Basic definition for the ia.de SDK client configuration.
 ///
 class IaSdkConfiguration {

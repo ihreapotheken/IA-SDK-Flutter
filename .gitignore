@@ -29,7 +29,7 @@ migrate_working_dir/
 **/doc/api/
 .dart_tool/
 .flutter-plugins-dependencies
-/build/
+build/
 /coverage/
 
 .build/
@@ -37,3 +37,6 @@ migrate_working_dir/
 
 # AI
 **/.claude/settings.local.json
+
+# Other
+IASDKSecrets.swift

@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_navigation_target.dart';
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
 import 'package:flutter/material.dart';
@@ -94,7 +96,7 @@ class _ExampleAppState extends State<ExampleApp> {
                             codes: [
                               '{"urls":["Task/test9ba2fee0d07e4ef2b6205f8012e1445b/\$accept?ac=5e24cc059ff244bdbb01efcccf834a6329bdac67a4a64733938fe1b799ac19a9"]}',
                             ],
-                            orderId: 'aaaa',
+                            orderId: 'Some order id from host app',
                           );
                         } catch (e) {
                           debugPrint('ERROR TRANSFER');
@@ -178,6 +180,33 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
   @override
   void initState() {
     super.initState();
+
+    // Set up SDK callbacks
+    widget._iaSdk?.callbacks.onSdkWillNavigateToTarget = (navigationTarget) async {
+      debugPrint('Host app: SDK wants to navigate to: $navigationTarget');
+
+      // For demonstration purposes, let's handle the cart route
+      // and let the SDK handle all other routes
+      switch (navigationTarget) {
+        case IaSdkNavigationTarget.pharmacyDetails:
+          debugPrint('Host app: Letting SDK handle route: $navigationTarget');
+          return IaHandlingDecision.performDefault;
+        default:
+          debugPrint('Host app: Letting SDK handle route: $navigationTarget');
+          return IaHandlingDecision.performDefault;
+      }
+    };
+
+    widget._iaSdk?.callbacks.onOrderingDidFinishOrder = (order) {
+      debugPrint('Host app: Order completed! Order Code: ${order.orderCode}, client order ID: ${order.clientOrderIDs}');
+    };
+
+    widget._iaSdk?.callbacks.onOrderingDidUpdateCart = (cart) {
+      final itemCount = cart.totalAmountInCart;
+      final orderCount = cart.clientOrderIDs.length;
+      debugPrint('Host app: Cart updated - $itemCount items, $orderCount orders');
+    };
+
     widget._iaSdk?.configureFooter(shouldShowDataProcessing: false, shouldShowAppSettings: true, shouldShowImprint: true);
     _initIaSdk = widget._iaSdk?.init();
   }
