@@ -6,6 +6,7 @@ import 'package:appsdk_v2_flutter_plugin/common/callbacks/handlers/ordering_did_
 import 'package:appsdk_v2_flutter_plugin/common/callbacks/handlers/sdk_will_navigate_to_target_callback_handler.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_callbacks.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_configuration.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_module.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -107,6 +108,22 @@ class IaSdkApi extends State<IaSdk> {
     await _IaSdkPlatformMethods.initIaSdk.invoke<void>(
       {
         ...widget._config.toJson(),
+      },
+      this,
+    );
+  }
+
+  /// Registers the specified SDK [modules] for use in the application.
+  ///
+  /// This method determines which SDK modules will be available for use.
+  /// Must be called before accessing module-specific functionality.
+  ///
+  Future<void> register(
+    List<IaSdkModule> modules,
+  ) async {
+    await _IaSdkPlatformMethods.register.invoke<void>(
+      {
+        'modules': modules.map((module) => module.name).toList(),
       },
       this,
     );

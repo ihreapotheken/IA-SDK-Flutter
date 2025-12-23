@@ -9,6 +9,10 @@ enum _IaSdkPlatformMethods {
   ///
   initIaSdk,
 
+  /// Registers SDK modules for use in the application.
+  ///
+  register,
+
   /// Selects a pharmacy by providing an identifier.
   ///
   setPharmacyId,
@@ -116,6 +120,19 @@ enum _IaSdkPlatformMethods {
               (
                 name: 'serverEnvironment',
                 type: String,
+                nullable: false,
+              ),
+            ],
+          );
+          break;
+        case _IaSdkPlatformMethods.register:
+          _verifyArgumentInput(
+            arguments,
+            argumentType: Map,
+            requiredMapFields: [
+              (
+                name: 'modules',
+                type: List<String>,
                 nullable: false,
               ),
             ],

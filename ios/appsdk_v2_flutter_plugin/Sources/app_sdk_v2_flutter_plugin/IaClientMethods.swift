@@ -17,7 +17,12 @@ internal class IaClientMethods {
          * Allocates the SDK runtime resources.
          */
         case initIaSdk
-        
+
+        /**
+         * Registers SDK modules for use in the application.
+         */
+        case register
+
         /**
          * Selects a pharmacy by providing an identifier.
          */
@@ -65,7 +70,6 @@ internal class IaClientMethods {
      * Flutter SDK host app bindings definitions.
      */
     private let bindings: IaClientBindings!
-    private var isRegistered: Bool = false
     private let argumentDecoder = IaArgumentDecoder()
 
     init(bindings: IaClientBindings!) {
@@ -89,22 +93,30 @@ internal class IaClientMethods {
 
     func callHandlerInternal(call: FlutterMethodCall) async throws -> Any? {
         switch call.method {
+        case FlutterCall.register.name:
+            let arguments = try argumentDecoder.decode(IaRegisterModulesArguments.self, from: call.arguments)
+            let modules = arguments.modules
+            
+            // Map Flutter modules to SDK modules, doing it here and not in decoder because it requires all imports.
+            var sdkModules = [IASDKModule]()
+            for module in modules {
+                switch module {
+                case .integrations: sdkModules.append(.integrations)
+                case .overTheCounter: sdkModules.append(.overTheCounter)
+                case .ordering: sdkModules.append(.ordering)
+                case .apofinder: sdkModules.append(.apofinder)
+                case .pharmacyDetails: sdkModules.append(.pharmacyDetails)
+                case .prescription: sdkModules.append(.prescription)
+                case .cardLink: sdkModules.append(.cardLink)
+                }
+            }
+            
+            IASDK.register(sdkModules)
+            return nil
+
         case FlutterCall.initIaSdk.name:
             let arguments = try argumentDecoder.decode(IaInitSdkArguments.self, from: call.arguments)
             let initializationOptions = arguments.initialization.mappedToSDK()
-            
-            // @TODO registration will be handled separately
-            if !isRegistered {
-                isRegistered = true
-                IASDK.register([
-                    .integrations,
-                    .overTheCounter,
-                    .ordering,
-                    .apofinder,
-                    .pharmacyDetails,
-                    .prescription,
-                ])
-            }
             
             // Set delegate
             IASDK.setDelegate(IaClientDelegate(channel: bindings.channel))

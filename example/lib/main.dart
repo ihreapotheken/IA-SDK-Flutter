@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_module.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_navigation_target.dart';
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
@@ -204,7 +205,19 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
       debugPrint('Host app: Cart updated - $itemCount items, $orderCount orders');
     };
 
-    _initIaSdk = widget._iaSdk?.init();
+    _initIaSdk = _initializeSdk();
+  }
+
+  Future<void> _initializeSdk() async {
+    await widget._iaSdk?.register([
+      IaSdkModule.integrations,
+      IaSdkModule.overTheCounter,
+      IaSdkModule.ordering,
+      IaSdkModule.apofinder,
+      IaSdkModule.pharmacyDetails,
+      IaSdkModule.prescription,
+    ]);
+    await widget._iaSdk?.init();
   }
 
   @override

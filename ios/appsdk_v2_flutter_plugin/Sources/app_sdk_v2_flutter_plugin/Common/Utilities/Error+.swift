@@ -37,6 +37,7 @@ extension Error {
     private func codeFromFlutterCall(_ flutterCall: IaClientMethods.FlutterCall) -> String {
         switch flutterCall {
         case .initIaSdk: "INIT_ERROR"
+        case .register: "REGISTER_ERROR"
         case .setPharmacyId: "SET_PHARMACY_ERROR"
         case .clearCart: "CLEAR_CART_ERROR"
         case .setGuestUserData: "SET_GUEST_USER_DATA_ERROR"
