@@ -30,6 +30,7 @@ struct IaSetGuestUserDataArguments: Decodable {
 }
 
 enum IaSalutation: String, Decodable {
+    // @TODO: this is how flutter sends it, see if we can send english ids.
     case male = "herr"
     case female = "frau"
     case notSpecified = "keine angabe"

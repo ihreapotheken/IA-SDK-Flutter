@@ -181,16 +181,25 @@ internal class IaClientMethods(
             }
 
             FlutterCall.setPharmacyId.name -> {
-                val pharmacyId = call.arguments
-                if (pharmacyId !is String) {
+                val args = call.arguments
+                if (args !is Map<*, *>) {
                     result.error(
                         "ARG_ERROR",
-                        "Pharmacy identifier must be provided as a String type argument.",
+                        "Arguments for setPharmacyId must be of Map type.",
                         null,
                     )
                     return
                 }
-                
+                val pharmacyId = args["pharmacyId"] as? String
+                if (pharmacyId == null) {
+                    result.error(
+                        "ARG_ERROR",
+                        "Missing or invalid pharmacyId. Expected String value for pharmacyId.",
+                        null,
+                    )
+                    return
+                }
+
                 bindings.sdkModule.pharmacy.setPharmacyId(
                     pharmacyId,
                     object : PharmacyConfigListener {

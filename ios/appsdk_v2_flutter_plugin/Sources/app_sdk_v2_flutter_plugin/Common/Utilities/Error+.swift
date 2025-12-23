@@ -23,7 +23,7 @@ extension Error {
             if let flutterCall = IaClientMethods.FlutterCall.allCases.first(where: { $0.name == methodName }) {
                 errorCode = codeFromFlutterCall(flutterCall)
             } else {
-                errorCode = "UNKNOWN_METHOD_ERROR"
+                errorCode = "METHOD_ERROR"
             }
 
             return FlutterError(
