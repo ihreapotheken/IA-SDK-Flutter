@@ -11,7 +11,7 @@ func loadEnv() -> [String: String] {
     var splitText = text.split(whereSeparator: \.isNewline)
     splitText.removeAll(where: { it in it.isEmpty || it.starts(with: "#") })
     return
-        splitText
+    splitText
         .map { $0.split(separator: "=", maxSplits: 1).map(String.init) }
         .reduce(into: [:]) { dict, pair in
             if pair.count == 2 { dict[pair[0]] = pair[1] }
@@ -26,7 +26,7 @@ guard let appSdkVersionId = env["IOS_APPSDK_VERSION"] else {
 
 func parseVersion(_ versionId: String) -> Version {
     let parts =
-        versionId
+    versionId
         .replacingOccurrences(of: "\"", with: "")
         .split(separator: ".")
         .map {
@@ -36,20 +36,20 @@ func parseVersion(_ versionId: String) -> Version {
     let patchId = hasPatch ? parts[2] : nil
     let hasPrereleaseId = patchId?.contains("-") == true
     let prereleaseIdentifiers =
-        hasPrereleaseId ? [String(patchId!.split(separator: "-").last!)] : nil
+    hasPrereleaseId ? [String(patchId!.split(separator: "-").last!)] : nil
     return Version(
         Int(parts[0])!,
         parts.count > 1 ? Int(parts[1])! : 0,
         parts.count > 2
-            ? hasPrereleaseId
-                ? Int(parts[2].split(separator: "-").first ?? "0")! : Int(parts[2])!
-            : 0,
+        ? hasPrereleaseId
+        ? Int(parts[2].split(separator: "-").first ?? "0")! : Int(parts[2])!
+        : 0,
         prereleaseIdentifiers: prereleaseIdentifiers ?? [],
     )
 }
 
 let appSdkVersion = parseVersion(appSdkVersionId)
-/*
+
 let package = Package(
     name: "appsdk_v2_flutter_plugin",
     platforms: [
@@ -59,8 +59,7 @@ let package = Package(
         .library(name: "appsdk-v2-flutter-plugin", targets: ["appsdk_v2_flutter_plugin"])
     ],
     dependencies: [
-	//.package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", exact: appSdkVersion)
-	.package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", exact: "0.19.6-beta")
+        .package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", exact: appSdkVersion)
     ],
     targets: [
         .target(
@@ -80,38 +79,10 @@ let package = Package(
                 // For more information, see:
                 // https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
                 // .process("PrivacyInfo.xcprivacy"),
-
+                
                 // TODO: If you have other resources that need to be bundled with your plugin, refer to
                 // the following instructions to add them:
                 // https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package
-            ]
-        )
-    ]
-)
-*/
-let package = Package(
-    name: "appsdk_v2_flutter_plugin",
-    platforms: [
-        .iOS("15.0")
-    ],
-    products: [
-        .library(name: "appsdk-v2-flutter-plugin", targets: ["appsdk_v2_flutter_plugin"])
-    ],
-    dependencies: [
-        .package(path: "/Users/danijelhuis/git/git_fourOfThem/IA-SDK-Dev-iOS")
-    ],
-    targets: [
-        .target(
-            name: "appsdk_v2_flutter_plugin",
-            dependencies: [
-                .product(name: "IAOverTheCounter", package: "IA-SDK-Dev-iOS"),
-                .product(name: "IAOrdering", package: "IA-SDK-Dev-iOS"),
-                .product(name: "IAPharmacy", package: "IA-SDK-Dev-iOS"),
-                .product(name: "IAIntegrations", package: "IA-SDK-Dev-iOS"),
-                .product(name: "IAPrescription", package: "IA-SDK-Dev-iOS"),
-                .product(name: "IACardLink", package: "IA-SDK-Dev-iOS"),
-            ],
-            resources: [
             ]
         )
     ]
