@@ -16,7 +16,7 @@ class IaArgumentDecoder {
     /// - Throws: IaArgumentError if decoding fails
     func decode<T: Decodable>(_ type: T.Type, from arguments: Any) throws -> T {
         guard let dictionary = arguments as? [String: Any] else {
-            throw IaArgumentError.invalidArgumentType
+            throw IaArgumentError.invalidInputArguments
         }
 
         guard let jsonData = try? JSONSerialization.data(withJSONObject: dictionary) else {

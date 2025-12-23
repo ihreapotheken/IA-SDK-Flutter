@@ -12,8 +12,8 @@ class IaSdkConfiguration {
     this.shouldFetchThemeFromRemote = false,
     IaFooterConfiguration? footer,
     IaInitializationConfiguration? initialization,
-  })  : footer = footer ?? IaFooterConfiguration(),
-        initialization = initialization ?? IaInitializationConfiguration();
+  }) : footer = footer ?? IaFooterConfiguration(),
+       initialization = initialization ?? IaInitializationConfiguration();
 
   /// Key used to authenticate the client setup with the backend service.
   ///
@@ -125,17 +125,12 @@ class IaPrerequisitesConfiguration {
   /// Generates an instance of prerequisites configuration.
   ///
   IaPrerequisitesConfiguration({
-    this.shouldShowIndicator = true,
     this.isCancellable = false,
     this.isAnimated = true,
     this.runLegalIfNeeded = true,
     this.runOnboardingIfNeeded = true,
     this.runApofinderIfNeeded = true,
   });
-
-  /// Whether to show a loading indicator during prerequisites.
-  ///
-  final bool shouldShowIndicator;
 
   /// Whether the prerequisites flow can be cancelled.
   ///
@@ -161,7 +156,6 @@ class IaPrerequisitesConfiguration {
   ///
   Map<String, dynamic> toJson() {
     return {
-      'shouldShowIndicator': shouldShowIndicator,
       'isCancellable': isCancellable,
       'isAnimated': isAnimated,
       'runLegalIfNeeded': runLegalIfNeeded,

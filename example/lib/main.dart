@@ -204,7 +204,6 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
       debugPrint('Host app: Cart updated - $itemCount items, $orderCount orders');
     };
 
-    widget._iaSdk?.configureFooter(shouldShowDataProcessing: false, shouldShowAppSettings: true, shouldShowImprint: true);
     _initIaSdk = widget._iaSdk?.init();
   }
 

@@ -118,7 +118,9 @@ class IaSdkApi extends State<IaSdk> {
     String pharmacyId,
   ) async {
     final result = await _IaSdkPlatformMethods.setPharmacyId.invoke<void>(
-      pharmacyId,
+      {
+        'pharmacyId': pharmacyId,
+      },
       this,
     );
     return result;
@@ -239,23 +241,6 @@ class IaSdkApi extends State<IaSdk> {
   Future<void> finishAllActivities() async {
     return await _IaSdkPlatformMethods.finishAllActivities.invoke<void>(
       null,
-      this,
-    );
-  }
-
-  /// Configures footer visibility settings.
-  /// IMPORTANT: Currently this works only for iOS.
-  Future<void> configureFooter({
-    required bool shouldShowDataProcessing,
-    required bool shouldShowAppSettings,
-    required bool shouldShowImprint,
-  }) async {
-    return await _IaSdkPlatformMethods.configureFooter.invoke<void>(
-      {
-        'shouldShowDataProcessing': shouldShowDataProcessing,
-        'shouldShowAppSettings': shouldShowAppSettings,
-        'shouldShowImprint': shouldShowImprint,
-      },
       this,
     );
   }

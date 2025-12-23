@@ -9,14 +9,17 @@ import Foundation
 
 /// Errors that can occur during argument decoding.
 enum IaArgumentError: Error {
-    case invalidArgumentType
+    case invalidInputArguments
+    case decodingArgumentFailed(description: String)
     case jsonSerializationFailed
     case decodingFailed(Error)
 
     var localizedDescription: String {
         switch self {
-        case .invalidArgumentType:
+        case .invalidInputArguments:
             return "Arguments must be of type [String: Any]"
+        case let .decodingArgumentFailed(description):
+            return "Failed to decode argument: \(description)"
         case .jsonSerializationFailed:
             return "Failed to serialize arguments to JSON data"
         case .decodingFailed(let error):

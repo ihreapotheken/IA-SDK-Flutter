@@ -13,7 +13,6 @@ import Flutter
 class IaClientDelegate: SDKDelegate {
     let channel: FlutterMethodChannel
     
-    
     init(
         channel: FlutterMethodChannel,
     ) {
