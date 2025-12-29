@@ -23,59 +23,34 @@ This is IA SDK flutter plugin workspace that consists of:
 - It consists of multiple independent binaries (listed below).
 - All modules depend on IACore.
 - IACore doesn't know about modules and modules don't know about each other. 
-
-## Binaries
-- IACore: 
-  - reusable UI and non UI components (on iOS some of code is in separate IOSKit module but that is not relevant).
-  - some common entities that are used between modules (pharmacy, product etc.)
-  - interfaces through which other modules communicate with each other
-  - it has no dependencies (doesn't know about any other module)
-  - all other modules depend on it
-- IAIntegrations:
-  - bigger common features used in modules or directly by host app
-- IAOverTheCounter:
-  - product search
-- IAOrdering: 
-  - cart and checkout
-- IAPharmacy:
-  - pharmacy details (basic pharmacy logic is inside IACore because it is needed everywhere).
-- IAPrescription:
-  - prescription scanner
-- IACardLink:
-  - CardLink feature (NFC scanning)
-  
-## Communication between binaries
 - Because all modules are delivered as independent binaries, they don’t reference each other directly. Instead, any cross-module communication happens 
 through interfaces that live in IACore. If a module needs functionality that is implemented in another module, it calls an interface defined in IACore. 
-The concrete implementation of that interface is then supplied by the host app at runtime.
+The concrete implementation of that interface is then supplied by the host app at runtime via register function, e.g. IASDK.register(.ordering).
 
-Example (iOS):
-If a module wants to display the cart button, it uses the interface exposed by IACore:
-`IACore.DICore.sharedSDKModuleProvider.ordering.cartButton`
-where sharedSDKModuleProvider.ordering is an interface that is instantiated by host app like this:
-```
-import IAOrdering
-IASDK.register(.ordering)
-```
+## Binaries
+- IACore: reusable UI and non UI components, entities, interfaces, it has no dependencies (doesn't know about any other module)
+- IAIntegrations: bigger common features used in modules or directly by host app
+- IAOverTheCounter: product search
+- IAOrdering: cart and checkout
+- IAPharmacy: pharmacy details (basic pharmacy logic is inside IACore because it is needed everywhere).
+- IAPrescription: prescription scanner
+- IACardLink: CardLink feature (NFC scanning)
 
 # Dart implementation
 - plugin code location: /lib
 - demo app location: /example (most of the code is in example/lib/main.dart)
 - code structure:
-  - modules/ia_sdk.dart
-    - Main SDK class (IaSdkWidget wrapper and IaSdk API class)
-    - Defines core SDK methods that host app can call (init, register, setPharmacyId, etc.)
-    - Each method validates arguments using ArgumentValidator and invokes native via shared IaSdkChannel
-    - Contains module properties (e.g., ordering)
-  - modules/{module}/
-    - Individual module classes (e.g., ia_ordering.dart)
-    - Each module is self-contained and invokes native directly via IaSdkChannel
-  - common/utilities/
-    - ia_sdk_channel.dart: Singleton providing shared MethodChannel
+  - common/callback: manager and handlers for incoming communication: native (some event in SDK happens) → Dart → host app (receives event and returns value) -> Dart -> native (native gets returned value from host app)
+  - common/entities: entitites that don't belong to any specific module (ordering, overt the counter etc.)
+  - common/utilities: 
+    - ia_sdk_channel.dart: Singleton providing shared MethodChannel that is used for communicating with native code (one channel for everything)
     - argument_validator.dart: Reusable argument validation utility
-  - common/callbacks/
-    - Callback handlers for native → Dart → host app communication
-    
+  - features/ia_sdk/
+    - IaSdk.dart: Main SDK class (IaSdkWidget wrapper and IaSdk API class). Mirror of native IASDK plus some additional fluter stuff.
+    - IaSdkPlatformViewLauncher: Represents SDK views, defines identifiers etc.
+  - features/{module}/
+    - code for specific module, e.g. everything related to IAOrdering goes to features/ia_ordering.
+
 # iOS implementation
 - plugin code location: /ios/appsdk_v2_flutter_plugin/Sources/app_sdk_v2_flutter_plugin/
 
@@ -88,47 +63,41 @@ IASDK.register(.ordering)
 - even though plugin is not modularized, we want to create similar classes/intefaces as in native so in case we want to modularize it in the future, host 
 app developers won't have to change code, e.g. if something in native is defined in IAOrdering (e.g. transferprescriptions) then Dart code should also expose 
 it through its IaOrdering class and just proxy the call to native function.
-- we want plugin to be just a proxy to native SDK, meaning it should reflect native implementations as much as possible and not add additional functionality.
+- we want plugin to be just a proxy/mirror to native SDK, meaning it should reflect native implementations as much as possible and not add additional functionality.
 - when sending something with method channel from dart to native, always use map type for arguments, even if there is only one argument. This is because 
 we want to be able to convert arguments to json and then convert that json to swift/kotlin objects.
 
-## How to add dart function that calls native function
+## How to proxy SDK function in dart
+@TODO Kotlin
+Example: Proxying IAOrdering.transferPrescriptions SDK function.
 
-All functions follow the same pattern - validate arguments and call the native method directly via IaSdkChannel.
-
-### For module-specific functions (e.g., IaOrdering, IaPharmacy)
-1. Add function to appropriate module class in /lib/modules/{module}/ (e.g., ia_ordering.dart)
-2. Create arguments map, validate with ArgumentValidator.verify(), invoke via IaSdkChannel
-3. Add native implementation
-
-Example:
-```dart
-Future<void> someFunction({String? param}) async {
-  final arguments = {'param': param};
-  ArgumentValidator.verify(arguments, argumentType: Map, requiredMapFields: [...]);
-  await IaSdkChannel.instance.channel.invokeMethod('someFunction', arguments);
-}
+1. As input to this task, you should be given native SDK signature of the function and in which module it is located, e.g. IAOrdering.transferPrescriptions
 ```
-
-### For core SDK functions (non-module specific)
-1. Add function to IaSdk class in /lib/modules/ia_sdk.dart
-2. Create arguments map, validate with ArgumentValidator.verify(), invoke via _channel (which uses IaSdkChannel)
-3. Add native implementation
-
-Example (same pattern as modules):
-```dart
-Future<void> someFunction({String? param}) async {
-  final arguments = {'param': param};
-  ArgumentValidator.verify(arguments, argumentType: Map, requiredMapFields: [...]);
-  await _channel.invokeMethod('someFunction', arguments);
-}
+public static func transferPrescriptions(
+    images: [Data]? = nil,
+    pdfs: [PDFPrescription]? = nil,
+    codes: [String]? = nil,
+    orderID: String?,
+) async throws
 ```
+2. Locate dart class in which you have to add that function: /lib/features/{module}/{module.dart}/. In this case /lib/features/ia_ordering/ia_ordering.dart.
+3. Add function to that class, mirroring the native arguments (IaOrdering.transferPrescriptions).
+4. In that dart function, use ArgumentValidator to validate arguments.
+5. Invoke method on IaSdkChannel.instance.channel to pass the call to native code.
+6. In native plugin code, first add enum case to FlutterCall enum (iOS). In this case we add transferPrescriptions case.
+7. Add function to appropriate class - on iOS, code for ordering module goes to /Features/IAOrdering/IAOrderingWrapper.swift. So add transferPrescriptions function there.
+8. In IASDKPlugin, handle FlutterCall.transferPrescriptions case and call IAOrderingWrapper.transferPrescriptions (iOS).
 
-Native implementation:
-- iOS: /ios/appsdk_v2_flutter_plugin/Sources/app_sdk_v2_flutter_plugin/IaClientMethods.swift
-- Android: /android/src/main/kotlin/de/ihreapotheken/appsdk_v2_flutter_plugin/sdk/IaClientMethods.kt
+## How to proxy SDK view in dart
+@TODO Kotlin
+Example: SDK has cart screen, we want to enable flutter host app to show it.
 
-## How to add callback (native → Dart → host app)
+1. Locate features/ia_sdk/ia_sdk_platform_view_launcher.dart and add const to IaSdkPlatformView (example: IaSdkPlatformView.startRoute).
+2. Add function to launch the screen to IaSdkPlatformViewLauncher, (example: IaSdkPlatformViewLauncher.launchStartRoute)
+3. Once this is done, IaSdkPlatformViewLauncher._launchRoute will send launchRoute event on method channel when launchStartRoute function is called.
+4. Now in native, define view identifier and create the view: for iOS add case to Features/IASDK/IASDKViewIdentifier.swift and handle it in IASDKViewIdentifier.iaScreen function.
+
+## How to proxy callback (native → Dart → host app)
 ### How it works?
 1. Swift/Kotlin: Native plugin code listens to SDK and passes events to plugin via method channel.
 IaClientDelegate.sdkShouldOverrideRoute: sends event (sdkWillNavigateToTarget) with method channel

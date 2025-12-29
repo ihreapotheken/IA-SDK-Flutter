@@ -290,12 +290,6 @@ class IaSdk extends State<IaSdkWidget> {
     await IaSdkPlatformViewLauncher.launchStartRoute();
   }
 
-  /// Launches the product legal disclaimer screen experience on top of the navigation stack.
-  ///
-  Future<void> launchLegalDisclaimerRoute() async {
-    await IaSdkPlatformViewLauncher.launchLegalDisclaimerRoute();
-  }
-
   /// [StreamController] object handling completed checkout updates.
   ///
   /// The object will broadcast the information on order IDs forwarded with the [transferPrescriptions] method

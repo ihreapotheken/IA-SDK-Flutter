@@ -19,12 +19,6 @@ class IaSdkPlatformViewLauncher {
     await _launchRoute('startScreen');
   }
 
-  /// Launches the product legal disclaimer screen experience on top of the navigation stack.
-  ///
-  static Future<void> launchLegalDisclaimerRoute() async {
-    await _launchRoute('legalDisclaimerScreen');
-  }
-
   /// Launches the product search screen experience on top of the navigation stack.
   ///
   static Future<void> launchProductSearchRoute() async {
@@ -79,13 +73,7 @@ class IaSdkPlatformView extends StatefulWidget {
     super.key,
   }) : _viewId = 'startScreen';
 
-  /// Pharmacy finder main entry screen.
-  ///
-  const IaSdkPlatformView.legalDisclaimerScreen({
-    super.key,
-  }) : _viewId = 'legalDisclaimerScreen';
-
-  /// Shop screen with product search and filtering options.
+  /// Product search screen with product search and filtering options.
   ///
   const IaSdkPlatformView.productSearchScreen({
     super.key,
