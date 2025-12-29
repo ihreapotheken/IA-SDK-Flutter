@@ -1,4 +1,4 @@
-part of '../../modules/ia_sdk/ia_sdk.dart';
+part of '../../features/ia_sdk/ia_sdk.dart';
 
 enum IaSdkCallbackManager {
   orderingDidFinishOrder,

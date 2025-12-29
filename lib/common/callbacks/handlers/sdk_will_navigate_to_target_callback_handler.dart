@@ -1,6 +1,6 @@
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_navigation_target.dart';
-import 'package:appsdk_v2_flutter_plugin/modules/ia_sdk/ia_sdk.dart';
+import 'package:appsdk_v2_flutter_plugin/features/ia_sdk/ia_sdk.dart';
 import 'package:flutter/foundation.dart';
 
 class SdkWillNavigateToTargetCallbackHandler {

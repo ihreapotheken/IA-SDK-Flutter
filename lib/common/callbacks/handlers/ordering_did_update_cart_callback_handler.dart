@@ -1,5 +1,5 @@
 import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_cart.dart';
-import 'package:appsdk_v2_flutter_plugin/modules/ia_sdk/ia_sdk.dart';
+import 'package:appsdk_v2_flutter_plugin/features/ia_sdk/ia_sdk.dart';
 import 'package:flutter/foundation.dart';
 
 class OrderingDidUpdateCartCallbackHandler {

@@ -1,4 +1,4 @@
-import 'package:appsdk_v2_flutter_plugin/modules/ia_sdk/ia_sdk_platform_view_launcher.dart';
+import 'package:appsdk_v2_flutter_plugin/features/ia_sdk/ia_sdk_platform_view_launcher.dart';
 
 /// Over the counter module for the IA SDK.
 ///

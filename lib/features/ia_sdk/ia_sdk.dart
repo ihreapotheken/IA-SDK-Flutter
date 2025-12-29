@@ -9,9 +9,9 @@ import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_configuration.da
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_module.dart';
 import 'package:appsdk_v2_flutter_plugin/common/utilities/argument_validator.dart';
 import 'package:appsdk_v2_flutter_plugin/common/utilities/ia_sdk_channel.dart';
-import 'package:appsdk_v2_flutter_plugin/modules/ia_sdk/ia_sdk_platform_view_launcher.dart';
-import 'package:appsdk_v2_flutter_plugin/modules/ordering/ia_ordering.dart';
-import 'package:appsdk_v2_flutter_plugin/modules/over_the_counter/ia_over_the_counter.dart';
+import 'package:appsdk_v2_flutter_plugin/features/ia_sdk/ia_sdk_platform_view_launcher.dart';
+import 'package:appsdk_v2_flutter_plugin/features/ordering/ia_ordering.dart';
+import 'package:appsdk_v2_flutter_plugin/features/over_the_counter/ia_over_the_counter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

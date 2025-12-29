@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_module.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_navigation_target.dart';
-import 'package:appsdk_v2_flutter_plugin/modules/ia_sdk/ia_sdk.dart';
+import 'package:appsdk_v2_flutter_plugin/features/ia_sdk/ia_sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
