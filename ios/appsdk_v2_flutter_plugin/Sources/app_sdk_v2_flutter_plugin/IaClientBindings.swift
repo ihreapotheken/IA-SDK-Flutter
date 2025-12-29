@@ -23,11 +23,12 @@ class IaClientBindings {
         let plugin = IaSdkPlugin(bindings: self)
         self.channel.setMethodCallHandler(plugin.callHandler)
         guard let registrar = pluginRegistrar else { return nil }
-        let factory = IaClientNativeViewFactory(messenger: registrar.messenger())
-        for view in IaClientViews.allCases {
+        let viewFactory = IASDKViewFactory(messenger: registrar.messenger())
+        for view in IASDKViewIdentifier.allCases {
             registrar.register(
-                factory,
-                withId: view.name)
+                viewFactory,
+                withId: view.rawValue
+            )
         }
     }
 }
