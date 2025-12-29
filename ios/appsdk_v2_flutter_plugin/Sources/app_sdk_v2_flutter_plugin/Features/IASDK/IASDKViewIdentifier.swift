@@ -11,6 +11,7 @@ import IAIntegrations
 import IAOverTheCounter
 import IAOrdering
 import IAPharmacy
+import IAPrescription
 
 enum IASDKViewIdentifier: String, CaseIterable {
     /**
@@ -34,6 +35,16 @@ enum IASDKViewIdentifier: String, CaseIterable {
     case pharmacyDetails
 
     /**
+     * Prescription scanner screen from IAPrescription module.
+     */
+    case prescriptionScanner
+
+    /**
+     * E-Prescription scanner screen from IAPrescription module.
+     */
+    case ePrescriptionScanner
+
+    /**
      * Visual interface representation.
      */
     func iaScreen() -> any IAScreen {
@@ -49,6 +60,12 @@ enum IASDKViewIdentifier: String, CaseIterable {
 
         case IASDKViewIdentifier.pharmacyDetails:
             IAPharmacyScreen()
+
+        case IASDKViewIdentifier.prescriptionScanner:
+            IAScannerScreen(type: .prescription)
+
+        case IASDKViewIdentifier.ePrescriptionScanner:
+            IAScannerScreen(type: .ePrescription)
         }
     }
 }
