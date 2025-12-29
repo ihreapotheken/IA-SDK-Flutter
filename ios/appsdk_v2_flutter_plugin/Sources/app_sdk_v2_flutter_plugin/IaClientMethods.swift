@@ -161,8 +161,9 @@ internal class IaClientMethods {
             return nil
 
         case FlutterCall.launchRoute.name:
-            // @TODO read which view to launch from arguments
-            IaClientViews.startScreen.iaScreen().present()
+            let arguments = try argumentDecoder.decode(IaLaunchRouteArguments.self, from: call.arguments)
+            let screen = try arguments.view.iaScreen()
+            screen.present()
             return nil
 
         case FlutterCall.transferPrescriptions.name:

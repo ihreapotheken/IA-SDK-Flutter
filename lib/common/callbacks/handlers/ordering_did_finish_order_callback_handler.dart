@@ -1,14 +1,14 @@
 import 'package:appsdk_v2_flutter_plugin/common/entities/ordering/ia_order.dart';
-import 'package:appsdk_v2_flutter_plugin/sdk.dart';
+import 'package:appsdk_v2_flutter_plugin/modules/ia_sdk/ia_sdk.dart';
 import 'package:flutter/foundation.dart';
 
 class OrderingDidFinishOrderCallbackHandler {
   Future<T?> handle<T>(
     dynamic arguments,
-    IaSdkApi publicApi,
+    IaSdk iaSdk,
   ) async {
     // Check if callback is set first - no point processing if host app isn't listening
-    final callback = publicApi.callbacks.onOrderingDidFinishOrder;
+    final callback = iaSdk.callbacks.onOrderingDidFinishOrder;
     if (callback == null) {
       return null;
     }

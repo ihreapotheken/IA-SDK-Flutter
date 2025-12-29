@@ -8,7 +8,7 @@ import UIKit
 
 enum IaClientViews: CaseIterable {
     /**
-     * Dashboard screen displaying main app content.
+     * Start screen displaying main app content.
      */
     case startScreen
 
@@ -16,6 +16,11 @@ enum IaClientViews: CaseIterable {
      * Cart screen displaying order overview.
      */
     case cartScreen
+    
+    /**
+     * Product search screen.
+     */
+    case productSearchScreen
 
     init?(name: String) {
         guard let value = IaClientViews.allCases.first(where: { view in view.name == name }) else {
@@ -41,6 +46,9 @@ enum IaClientViews: CaseIterable {
 
         case IaClientViews.cartScreen:
             IACartScreen()
+            
+        case IaClientViews.productSearchScreen:
+            IAProductSearchScreen()
         }
     }
 }

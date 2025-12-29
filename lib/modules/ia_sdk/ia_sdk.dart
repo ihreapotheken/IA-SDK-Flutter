@@ -7,22 +7,25 @@ import 'package:appsdk_v2_flutter_plugin/common/callbacks/handlers/sdk_will_navi
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_callbacks.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_configuration.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_module.dart';
+import 'package:appsdk_v2_flutter_plugin/common/utilities/argument_validator.dart';
+import 'package:appsdk_v2_flutter_plugin/common/utilities/ia_sdk_channel.dart';
+import 'package:appsdk_v2_flutter_plugin/modules/ia_sdk/ia_sdk_platform_view_launcher.dart';
+import 'package:appsdk_v2_flutter_plugin/modules/ordering/ia_ordering.dart';
+import 'package:appsdk_v2_flutter_plugin/modules/over_the_counter/ia_over_the_counter.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-part 'common/callbacks/ia_sdk_callback_manager.dart';
-part 'methods.dart';
-part 'view.dart';
+part '../../common/callbacks/ia_sdk_callback_manager.dart';
 
-/// Base definitions for the ia.de SDK service, including any relevant methods, fields, and callbacks.
+/// Widget wrapper for the ia.de SDK service.
 ///
-class IaSdk extends StatefulWidget {
-  /// Constructs an instance of the [IaSdk] object using the provided [configuration].
+/// Wraps your app to provide SDK functionality throughout the widget tree.
+///
+class IaSdkWidget extends StatefulWidget {
+  /// Constructs an instance of the [IaSdkWidget] object using the provided [configuration].
   ///
-  const IaSdk({
+  const IaSdkWidget({
     super.key,
     required this.child,
     required IaSdkConfiguration configuration,
@@ -37,23 +40,23 @@ class IaSdk extends StatefulWidget {
   final IaSdkConfiguration _config;
 
   @override
-  State<IaSdk> createState() {
-    return IaSdkApi();
+  State<IaSdkWidget> createState() {
+    return IaSdk();
   }
 
-  /// Returns the nearest ancestor object of the [IaSdkApi] type.
+  /// Returns the nearest ancestor object of the [IaSdk] type.
   ///
-  static IaSdkApi? of(BuildContext context) {
-    return context.findAncestorStateOfType<IaSdkApi>();
+  static IaSdk? of(BuildContext context) {
+    return context.findAncestorStateOfType<IaSdk>();
   }
 }
 
 /// Public API methods and properties defined for the ia.de AppSDK library usage.
 ///
-class IaSdkApi extends State<IaSdk> {
-  /// Creates a [MethodChannel] object for communication with the native library segments.
+class IaSdk extends State<IaSdkWidget> {
+  /// Gets the shared [MethodChannel] object for communication with the native library segments.
   ///
-  final _channel = const MethodChannel('de.ihreapotheken/sdk');
+  MethodChannel get _channel => IaSdkChannel.instance.channel;
 
   /// Callbacks for receiving events from the SDK.
   ///
@@ -69,6 +72,31 @@ class IaSdkApi extends State<IaSdk> {
   /// };
   /// ```
   final callbacks = IaSdkCallbacks();
+
+  /// Ordering module providing prescription transfer, cart, and checkout functionality.
+  ///
+  /// This mirrors the IAOrdering module from the native SDKs.
+  ///
+  /// Example:
+  /// ```dart
+  /// final iaSdk = IaSdk.of(context);
+  /// await iaSdk?.ordering.transferPrescriptions(
+  ///   images: [...],
+  ///   codes: [...],
+  /// );
+  /// ```
+  late final ordering = const IaOrdering();
+
+  /// Over the counter module providing product search functionality.
+  ///
+  /// This mirrors the IAOverTheCounter module from the native SDKs.
+  ///
+  /// Example:
+  /// ```dart
+  /// final iaSdk = IaSdk.of(context);
+  /// await iaSdk?.overTheCounter.launchProductSearchRoute();
+  /// ```
+  late final overTheCounter = const IaOverTheCounter();
 
   @override
   void initState() {
@@ -105,12 +133,33 @@ class IaSdkApi extends State<IaSdk> {
   /// This method must be invoked before accessing any of the available resources.
   ///
   Future<void> init() async {
-    await _IaSdkPlatformMethods.initIaSdk.invoke<void>(
-      {
-        ...widget._config.toJson(),
-      },
-      this,
+    final arguments = {
+      ...widget._config.toJson(),
+    };
+
+    ArgumentValidator.verify(
+      arguments,
+      argumentType: Map,
+      requiredMapFields: [
+        (
+          name: 'accessKey',
+          type: String,
+          nullable: false,
+        ),
+        (
+          name: 'clientId',
+          type: String,
+          nullable: false,
+        ),
+        (
+          name: 'serverEnvironment',
+          type: String,
+          nullable: false,
+        ),
+      ],
     );
+
+    await _channel.invokeMethod('initIaSdk', arguments);
   }
 
   /// Registers the specified SDK [modules] for use in the application.
@@ -121,12 +170,23 @@ class IaSdkApi extends State<IaSdk> {
   Future<void> register(
     List<IaSdkModule> modules,
   ) async {
-    await _IaSdkPlatformMethods.register.invoke<void>(
-      {
-        'modules': modules.map((module) => module.name).toList(),
-      },
-      this,
+    final arguments = {
+      'modules': modules.map((module) => module.name).toList(),
+    };
+
+    ArgumentValidator.verify(
+      arguments,
+      argumentType: Map,
+      requiredMapFields: [
+        (
+          name: 'modules',
+          type: List<String>,
+          nullable: false,
+        ),
+      ],
     );
+
+    await _channel.invokeMethod('register', arguments);
   }
 
   /// Selects a pharmacy with the specified [pharmacyId].
@@ -134,22 +194,29 @@ class IaSdkApi extends State<IaSdk> {
   Future<void> setPharmacyId(
     String pharmacyId,
   ) async {
-    final result = await _IaSdkPlatformMethods.setPharmacyId.invoke<void>(
-      {
-        'pharmacyId': pharmacyId,
-      },
-      this,
+    final arguments = {
+      'pharmacyId': pharmacyId,
+    };
+
+    ArgumentValidator.verify(
+      arguments,
+      argumentType: Map,
+      requiredMapFields: [
+        (
+          name: 'pharmacyId',
+          type: String,
+          nullable: false,
+        ),
+      ],
     );
-    return result;
+
+    await _channel.invokeMethod('setPharmacyId', arguments);
   }
 
   /// Resets the state of user cart, clearing any added products or prescriptions.
   ///
   Future<void> clearCart() async {
-    return await _IaSdkPlatformMethods.clearCart.invoke<void>(
-      null,
-      this,
-    );
+    await _channel.invokeMethod('clearCart', null);
   }
 
   /// Forwards the client personal information to the ia.de library for checkout purposes.
@@ -162,80 +229,71 @@ class IaSdkApi extends State<IaSdk> {
     required int phoneNumberCountryCode,
     required int phoneNumberWithoutCountryCode,
   }) async {
-    return await _IaSdkPlatformMethods.setGuestUserData.invoke<void>(
-      {
-        'salutation': salutation,
-        'firstName': firstName,
-        'lastName': lastName,
-        'email': email,
-        'phoneNumberCountryCode': phoneNumberCountryCode.toString(),
-        'phoneNumberWithoutCountryCode': phoneNumberWithoutCountryCode.toString(),
-      },
-      this,
+    final arguments = {
+      'salutation': salutation,
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
+      'phoneNumberCountryCode': phoneNumberCountryCode.toString(),
+      'phoneNumberWithoutCountryCode': phoneNumberWithoutCountryCode.toString(),
+    };
+
+    ArgumentValidator.verify(
+      arguments,
+      argumentType: Map,
+      requiredMapFields: [
+        (
+          name: 'salutation',
+          nullable: false,
+          type: String,
+        ),
+        (
+          name: 'firstName',
+          nullable: false,
+          type: String,
+        ),
+        (
+          name: 'lastName',
+          nullable: false,
+          type: String,
+        ),
+        (
+          name: 'email',
+          nullable: false,
+          type: String,
+        ),
+        (
+          name: 'phoneNumberCountryCode',
+          nullable: true,
+          type: String,
+        ),
+        (
+          name: 'phoneNumberWithoutCountryCode',
+          nullable: true,
+          type: String,
+        ),
+      ],
     );
+
+    await _channel.invokeMethod('setGuestUserData', arguments);
   }
 
   /// Resets the user data and onboarding status (pharmacy selection, user consents statuses).
   ///
   Future<void> logout() async {
-    return await _IaSdkPlatformMethods.logout.invoke<void>(
-      null,
-      this,
-    );
-  }
-
-  /// Places a new route object into the navigation stack.
-  ///
-  Future<void> _launchRoute(
-    _IaSdkPlatformViewType view,
-  ) async {
-    return await _IaSdkPlatformMethods.launchRoute.invoke<void>(
-      view.id,
-      this,
-    );
-  }
-
-  /// Forwards the specified [images], [pdfs], or eRezept [codes] prescription collection to the ia.de backend.
-  ///
-  Future<void> transferPrescriptions({
-    Iterable<Uint8List>? images,
-    Iterable<Uint8List>? pdfs,
-    Iterable<String>? codes,
-    String? orderId,
-  }) async {
-    await _IaSdkPlatformMethods.transferPrescriptions.invoke<void>(
-      {
-        'images': images,
-        'pdfs': pdfs,
-        'codes': codes,
-        'orderId': orderId,
-      },
-      this,
-    );
+    await _channel.invokeMethod('logout', null);
   }
 
   /// Launches the start screen experience on top of the navigation stack.
   ///
-  Future<void> launchDashboardRoute() async {
-    await _launchRoute(
-      _IaSdkPlatformViewType.startScreen,
-    );
+  Future<void> launchStartRoute() async {
+    await IaSdkPlatformViewLauncher.launchStartRoute();
   }
 
   /// Launches the product legal disclaimer screen experience on top of the navigation stack.
   ///
   Future<void> launchLegalDisclaimerRoute() async {
-    await _launchRoute(
-      _IaSdkPlatformViewType.legalDisclaimerScreen,
-    );
-  }
-
-  /// Launches the product search screen experience on top of the navigation stack.
-  ///
-  Future<void> launchProductSearchRoute() async {
-    await _launchRoute(
-      _IaSdkPlatformViewType.productSearchScreen,
-    );
+    await IaSdkPlatformViewLauncher.launchLegalDisclaimerRoute();
   }
 
   /// [StreamController] object handling completed checkout updates.
@@ -255,11 +313,10 @@ class IaSdkApi extends State<IaSdk> {
   ///
   final orderIdsListener = StreamController<List<String>>.broadcast();
 
+  /// Closes any overlaying ia.de screen contents.
+  ///
   Future<void> finishAllActivities() async {
-    return await _IaSdkPlatformMethods.finishAllActivities.invoke<void>(
-      null,
-      this,
-    );
+    await _channel.invokeMethod('finishAllActivities', null);
   }
 
   @override

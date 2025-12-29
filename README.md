@@ -106,21 +106,21 @@ is placed in the widget tree in order to be accessed using any available
 
 ```dart
 class _ExampleAppState extends State<ExampleApp> {
-  /// Getter method for retrieving of the nearest ancestor object of [IaSdkApi] type.
-  /// 
-  IaSdkApi? get _iaSdk {
-    return IaSdk.of(context);
+  /// Getter method for retrieving of the nearest ancestor object of [IaSdk] type.
+  ///
+  IaSdk? get _iaSdk {
+    return IaSdkWidget.of(context);
   }
 
   /// Allocate the ia.de runtime resources.
-  /// 
+  ///
   Future<void> _initIaSdk() async {
     await _iaSdk?.init();
   }
 }
 ```
 
-Using the specified method, the client implementation is enabled with access to any of the [IaSdkApi] properties,
+Using the specified method, the client implementation is enabled with access to any of the [IaSdk] properties,
 and may access them from any point in the widget tree.
 
 ---

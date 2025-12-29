@@ -280,11 +280,20 @@ internal class IaClientMethods(
             }
 
             FlutterCall.launchRoute.name -> {
-                val viewId = call.arguments
-                if (viewId !is String) {
+                val args = call.arguments
+                if (args !is Map<*, *>) {
                     result.error(
                         "ARG_ERROR",
-                        "View identifier must be provided as a String type argument.",
+                        "Arguments for launchRoute must be of Map type.",
+                        null,
+                    )
+                    return
+                }
+                val viewId = args["viewId"] as? String
+                if (viewId == null) {
+                    result.error(
+                        "ARG_ERROR",
+                        "Missing or invalid viewId. Expected String value for viewId.",
                         null,
                     )
                     return
