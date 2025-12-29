@@ -92,10 +92,11 @@ public static func transferPrescriptions(
 @TODO Kotlin
 Example: SDK has cart screen, we want to enable flutter host app to show it.
 
-1. Locate features/ia_sdk/ia_sdk_platform_view_launcher.dart and add const to IaSdkPlatformView (example: IaSdkPlatformView.startRoute).
-2. Add function to launch the screen to IaSdkPlatformViewLauncher, (example: IaSdkPlatformViewLauncher.launchStartRoute)
-3. Once this is done, IaSdkPlatformViewLauncher._launchRoute will send launchRoute event on method channel when launchStartRoute function is called.
-4. Now in native, define view identifier and create the view: for iOS add case to Features/IASDK/IASDKViewIdentifier.swift and handle it in IASDKViewIdentifier.iaScreen function.
+1. Locate features/ia_sdk/ia_sdk_platform_view_launcher.dart and add const to IaSdkPlatformView (example: IaSdkPlatformView.cartScreen).
+2. Add function to launch the screen to IaSdkPlatformViewLauncher (example: IaSdkPlatformViewLauncher.launchCartScreen).
+3. Expose launch function in appropriate module class in features/{module}/ (example: IaOrdering.launchCartScreen calls IaSdkPlatformViewLauncher.launchCartScreen).
+4. In native iOS: add case to Features/IASDK/IASDKViewIdentifier.swift and handle it in IASDKViewIdentifier.iaScreen function.
+5. Add button in example app (main.dart) that launches this view. 
 
 ## How to proxy callback (native → Dart → host app)
 ### How it works?

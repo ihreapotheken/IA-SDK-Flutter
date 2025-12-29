@@ -10,23 +10,29 @@ import IACore
 import IAIntegrations
 import IAOverTheCounter
 import IAOrdering
+import IAPharmacy
 
 enum IASDKViewIdentifier: String, CaseIterable {
     /**
      * Start screen displaying main app content.
      */
     case startScreen
-    
-    /**
-     * Cart screen displaying order overview.
-     */
-    case cartScreen
-    
+        
     /**
      * Product search screen.
      */
     case productSearchScreen
-            
+
+    /**
+     * Cart screen from IAOrdering module.
+     */
+    case cartScreen
+
+    /**
+     * Pharmacy details screen from IAPharmacy module.
+     */
+    case pharmacyDetails
+
     /**
      * Visual interface representation.
      */
@@ -34,12 +40,15 @@ enum IASDKViewIdentifier: String, CaseIterable {
         switch self {
         case IASDKViewIdentifier.startScreen:
             IAStartScreen()
-            
-        case IASDKViewIdentifier.cartScreen:
-            IACartScreen()
-            
+
         case IASDKViewIdentifier.productSearchScreen:
             IAProductSearchScreen()
+
+        case IASDKViewIdentifier.cartScreen:
+            IACartScreen()
+
+        case IASDKViewIdentifier.pharmacyDetails:
+            IAPharmacyScreen()
         }
     }
 }

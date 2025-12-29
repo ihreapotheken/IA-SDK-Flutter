@@ -12,6 +12,7 @@ import 'package:appsdk_v2_flutter_plugin/common/utilities/ia_sdk_channel.dart';
 import 'package:appsdk_v2_flutter_plugin/features/ia_sdk/ia_sdk_platform_view_launcher.dart';
 import 'package:appsdk_v2_flutter_plugin/features/ia_ordering/ia_ordering.dart';
 import 'package:appsdk_v2_flutter_plugin/features/ia_over_the_counter/ia_over_the_counter.dart';
+import 'package:appsdk_v2_flutter_plugin/features/ia_pharmacy/ia_pharmacy.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -97,6 +98,17 @@ class IaSdk extends State<IaSdkWidget> {
   /// await iaSdk?.overTheCounter.launchProductSearchRoute();
   /// ```
   late final overTheCounter = const IaOverTheCounter();
+
+  /// Pharmacy module providing pharmacy details functionality.
+  ///
+  /// This mirrors the IAPharmacy module from the native SDKs.
+  ///
+  /// Example:
+  /// ```dart
+  /// final iaSdk = IaSdk.of(context);
+  /// await iaSdk?.pharmacy.launchPharmacyDetails();
+  /// ```
+  late final pharmacy = const IaPharmacy();
 
   @override
   void initState() {

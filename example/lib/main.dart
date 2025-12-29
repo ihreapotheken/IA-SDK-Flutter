@@ -128,6 +128,20 @@ class _ExampleAppState extends State<ExampleApp> {
                         await _iaSdk?.overTheCounter.launchProductSearchRoute();
                       },
                     ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      child: Text('Launch Cart Screen'),
+                      onPressed: () async {
+                        await _iaSdk?.ordering.launchCartScreen();
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      child: Text('Launch Pharmacy Details'),
+                      onPressed: () async {
+                        await _iaSdk?.pharmacy.launchPharmacyDetails();
+                      },
+                    ),
                   ],
                 ),
                 _ => throw UnimplementedError('Tab view not defined for index #$_selectedTabIndex.'),

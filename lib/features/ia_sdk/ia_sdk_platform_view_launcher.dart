@@ -25,6 +25,18 @@ class IaSdkPlatformViewLauncher {
     await _launchRoute('productSearchScreen');
   }
 
+  /// Launches the cart screen experience on top of the navigation stack.
+  ///
+  static Future<void> launchCartScreen() async {
+    await _launchRoute('cartScreen');
+  }
+
+  /// Launches the pharmacy details screen experience on top of the navigation stack.
+  ///
+  static Future<void> launchPharmacyDetails() async {
+    await _launchRoute('pharmacyDetails');
+  }
+
   /// Places a new route object into the navigation stack.
   ///
   static Future<void> _launchRoute(String viewId) async {
@@ -78,6 +90,18 @@ class IaSdkPlatformView extends StatefulWidget {
   const IaSdkPlatformView.productSearchScreen({
     super.key,
   }) : _viewId = 'productSearchScreen';
+
+  /// Cart screen displaying shopping cart from IAOrdering module.
+  ///
+  const IaSdkPlatformView.cartScreen({
+    super.key,
+  }) : _viewId = 'cartScreen';
+
+  /// Pharmacy details screen from IAPharmacy module.
+  ///
+  const IaSdkPlatformView.pharmacyDetails({
+    super.key,
+  }) : _viewId = 'pharmacyDetails';
 
   /// Identifier for the currently-specified platform view object.
   ///

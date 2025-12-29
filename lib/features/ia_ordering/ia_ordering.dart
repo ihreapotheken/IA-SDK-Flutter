@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:appsdk_v2_flutter_plugin/common/utilities/argument_validator.dart';
 import 'package:appsdk_v2_flutter_plugin/common/utilities/ia_sdk_channel.dart';
+import 'package:appsdk_v2_flutter_plugin/features/ia_sdk/ia_sdk_platform_view_launcher.dart';
 
 /// Ordering module for the IA SDK.
 ///
@@ -58,5 +59,11 @@ class IaOrdering {
       'transferPrescriptions',
       arguments,
     );
+  }
+
+  /// Launches the cart screen experience on top of the navigation stack.
+  ///
+  Future<void> launchCartScreen() async {
+    await IaSdkPlatformViewLauncher.launchCartScreen();
   }
 }
