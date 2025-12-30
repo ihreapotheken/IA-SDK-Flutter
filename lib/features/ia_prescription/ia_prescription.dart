@@ -9,16 +9,4 @@ class IaPrescription {
   /// Creates an instance of [IaPrescription].
   ///
   const IaPrescription();
-
-  /// Launches the prescription scanner screen experience on top of the navigation stack.
-  ///
-  Future<void> launchPrescriptionScanner() async {
-    await IaSdkPlatformViewLauncher.launchPrescriptionScanner();
-  }
-
-  /// Launches the E-Prescription scanner screen experience on top of the navigation stack.
-  ///
-  Future<void> launchEPrescriptionScanner() async {
-    await IaSdkPlatformViewLauncher.launchEPrescriptionScanner();
-  }
 }

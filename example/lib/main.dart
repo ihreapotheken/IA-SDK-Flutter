@@ -142,20 +142,6 @@ class _ExampleAppState extends State<ExampleApp> {
                         await _iaSdk?.pharmacy.launchPharmacyDetails();
                       },
                     ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      child: Text('Launch Prescription Scanner'),
-                      onPressed: () async {
-                        await _iaSdk?.prescription.launchPrescriptionScanner();
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      child: Text('Launch E-Prescription Scanner'),
-                      onPressed: () async {
-                        await _iaSdk?.prescription.launchEPrescriptionScanner();
-                      },
-                    ),
                   ],
                 ),
                 _ => throw UnimplementedError('Tab view not defined for index #$_selectedTabIndex.'),

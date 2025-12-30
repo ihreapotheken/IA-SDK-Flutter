@@ -118,7 +118,6 @@ class IaSdk extends State<IaSdkWidget> {
   /// Example:
   /// ```dart
   /// final iaSdk = IaSdk.of(context);
-  /// await iaSdk?.prescription.launchPrescriptionScanner();
   /// ```
   late final prescription = const IaPrescription();
 
