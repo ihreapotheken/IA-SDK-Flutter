@@ -78,6 +78,11 @@ internal class IaClientMethods(
          * Closes any overlaying ia.de screen contents.
          */
         finishAllActivities,
+
+        /**
+         * Register modules.
+         */
+        register,
     }
 
     /**
@@ -399,6 +404,11 @@ internal class IaClientMethods(
 
             FlutterCall.finishAllActivities.name -> {
                 IaSdkActivity.finishAllActivities()
+                result.success(null)
+            }
+
+            FlutterCall.register.name -> {
+                // @TODO This needs to be handled. Added as empty case for now just so example app works.
                 result.success(null)
             }
 
