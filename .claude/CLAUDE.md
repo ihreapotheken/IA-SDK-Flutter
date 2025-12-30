@@ -105,7 +105,7 @@ Native (android):
 @TODO Android
 Example: SDK has cart screen, we want to enable flutter host app to show it.
 
-1. Locate features/ia_sdk/ia_sdk_platform_view_launcher.dart and add const to IaSdkPlatformView (example: IaSdkPlatformView.cartScreen).
+1. Locate features/ia_sdk/ia_sdk_platform_view_launcher.dart and add const to IaSdkPlatformView and IaSdkPlatformViewLauncher (example: IaSdkPlatformView.cartScreen, IaSdkPlatformViewLauncher.cartScreen).
 2. Add function to launch the screen to IaSdkPlatformViewLauncher (example: IaSdkPlatformViewLauncher.launchCartScreen).
 3. Expose launch function in appropriate module class in features/{module}/ (example: IaOrdering.launchCartScreen calls IaSdkPlatformViewLauncher.launchCartScreen).
 4. 

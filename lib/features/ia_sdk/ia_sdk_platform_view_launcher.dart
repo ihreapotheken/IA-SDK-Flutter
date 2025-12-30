@@ -37,18 +37,6 @@ class IaSdkPlatformViewLauncher {
     await _launchRoute('pharmacyScreen');
   }
 
-  /// Launches the prescription scanner screen experience on top of the navigation stack.
-  ///
-  static Future<void> launchPrescriptionScanner() async {
-    await _launchRoute('prescriptionScanner');
-  }
-
-  /// Launches the E-Prescription scanner screen experience on top of the navigation stack.
-  ///
-  static Future<void> launchEPrescriptionScanner() async {
-    await _launchRoute('ePrescriptionScanner');
-  }
-
   /// Places a new route object into the navigation stack.
   ///
   static Future<void> _launchRoute(String viewId) async {
@@ -101,7 +89,7 @@ class IaSdkPlatformView extends StatefulWidget {
   ///
   const IaSdkPlatformView.productSearchScreen({
     super.key,
-  }) : _viewId = 'productSearchScreen';
+  }) : _viewId = 'searchScreen';
 
   /// Cart screen displaying shopping cart from IAOrdering module.
   ///
@@ -113,19 +101,7 @@ class IaSdkPlatformView extends StatefulWidget {
   ///
   const IaSdkPlatformView.pharmacyDetails({
     super.key,
-  }) : _viewId = 'pharmacyDetails';
-
-  /// Prescription scanner screen from IAPrescription module.
-  ///
-  const IaSdkPlatformView.prescriptionScanner({
-    super.key,
-  }) : _viewId = 'prescriptionScanner';
-
-  /// E-Prescription scanner screen from IAPrescription module.
-  ///
-  const IaSdkPlatformView.ePrescriptionScanner({
-    super.key,
-  }) : _viewId = 'ePrescriptionScanner';
+  }) : _viewId = 'pharmacyScreen';
 
   /// Identifier for the currently-specified platform view object.
   ///
