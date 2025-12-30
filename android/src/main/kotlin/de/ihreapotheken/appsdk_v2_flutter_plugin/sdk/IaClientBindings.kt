@@ -9,11 +9,6 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformViewRegistry
 
-// @TODO send callbacks (sdkWillNavigateToTarget, orderingDidFinishOrder, orderingDidUpdateCart) to dart. See IaClientDelegate.swift.
-// @TODO handle configuration in FlutterCall.initIaSdk (See IaClientMethods in Swift)
-// @TODO handle register method (See IaClientMethods.swift)
-// @TODO FlutterCall.launchRoute.name now sends route for product search screen (productSearchScreen). There is button added in example app under "Screens" tab that lauches product search screen.
-
 class IaClientBindings(
     val applicationContext: Context,
     val activityContext: () -> Context?,
