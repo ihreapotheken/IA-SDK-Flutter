@@ -61,6 +61,12 @@ class IaOrdering {
     );
   }
 
+  /// Resets the state of user cart, clearing any added products or prescriptions.
+  ///
+  Future<void> clearCart() async {
+    await IaSdkChannel.instance.channel.invokeMethod('clearCart', null);
+  }
+
   /// Launches the cart screen experience on top of the navigation stack.
   ///
   Future<void> launchCartScreen() async {

@@ -55,7 +55,7 @@ class _ExampleAppState extends State<ExampleApp> {
                     ElevatedButton(
                       child: Text('Clear Cart'),
                       onPressed: () async {
-                        await _iaSdk?.clearCart();
+                        await _iaSdk?.ordering.clearCart();
                       },
                     ),
                     const SizedBox(height: 16),

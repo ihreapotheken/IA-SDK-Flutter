@@ -237,12 +237,6 @@ class IaSdk extends State<IaSdkWidget> {
     await _channel.invokeMethod('setPharmacyId', arguments);
   }
 
-  /// Resets the state of user cart, clearing any added products or prescriptions.
-  ///
-  Future<void> clearCart() async {
-    await _channel.invokeMethod('clearCart', null);
-  }
-
   /// Forwards the client personal information to the ia.de library for checkout purposes.
   ///
   Future<void> setGuestUserData({
