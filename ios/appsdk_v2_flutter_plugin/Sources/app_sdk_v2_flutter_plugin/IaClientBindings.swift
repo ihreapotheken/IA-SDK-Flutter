@@ -20,7 +20,7 @@ class IaClientBindings {
             name: "de.ihreapotheken/sdk",
             binaryMessenger: viewController.binaryMessenger
         )
-        let plugin = IaSdkPlugin(bindings: self)
+        let plugin = IASDKPlugin(bindings: self)
         self.channel.setMethodCallHandler(plugin.callHandler)
         guard let registrar = pluginRegistrar else { return nil }
         let viewFactory = IASDKViewFactory(messenger: registrar.messenger())

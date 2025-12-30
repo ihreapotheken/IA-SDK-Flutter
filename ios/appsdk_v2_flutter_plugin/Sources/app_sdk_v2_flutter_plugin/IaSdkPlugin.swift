@@ -7,7 +7,7 @@ import IAOverTheCounter
 import IAPharmacy
 
 @MainActor
-final class IaSdkPlugin {
+final class IASDKPlugin {
     private let bindings: IaClientBindings
     private let iaSdkWrapper = IASDKWrapper()
     private let pharmacyWrapper = IAPharmacyWrapper()
