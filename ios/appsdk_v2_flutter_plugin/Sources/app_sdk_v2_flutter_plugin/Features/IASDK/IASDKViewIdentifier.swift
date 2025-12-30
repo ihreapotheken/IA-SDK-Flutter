@@ -17,32 +17,32 @@ enum IASDKViewIdentifier: String, CaseIterable {
     /**
      * Start screen displaying main app content.
      */
-    case startScreen
+    case startScreen = "startScreen"
         
     /**
      * Product search screen.
      */
-    case productSearchScreen
+    case productSearchScreen  = "searchScreen"  // Different ID so it works on android
 
     /**
      * Cart screen from IAOrdering module.
      */
-    case cartScreen
+    case cartScreen = "cartScreen"
 
     /**
      * Pharmacy details screen from IAPharmacy module.
      */
-    case pharmacyDetails
+    case pharmacyDetails = "pharmacyScreen"
 
     /**
      * Prescription scanner screen from IAPrescription module.
      */
-    case prescriptionScanner
+    case prescriptionScanner = "prescriptionScanner"
 
     /**
      * E-Prescription scanner screen from IAPrescription module.
      */
-    case ePrescriptionScanner
+    case ePrescriptionScanner = "ePrescriptionScanner"
 
     /**
      * Visual interface representation.

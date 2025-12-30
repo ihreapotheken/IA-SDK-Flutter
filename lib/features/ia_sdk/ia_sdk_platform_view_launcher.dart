@@ -22,7 +22,7 @@ class IaSdkPlatformViewLauncher {
   /// Launches the product search screen experience on top of the navigation stack.
   ///
   static Future<void> launchProductSearchRoute() async {
-    await _launchRoute('productSearchScreen');
+    await _launchRoute('searchScreen');
   }
 
   /// Launches the cart screen experience on top of the navigation stack.
@@ -34,7 +34,7 @@ class IaSdkPlatformViewLauncher {
   /// Launches the pharmacy details screen experience on top of the navigation stack.
   ///
   static Future<void> launchPharmacyDetails() async {
-    await _launchRoute('pharmacyDetails');
+    await _launchRoute('pharmacyScreen');
   }
 
   /// Launches the prescription scanner screen experience on top of the navigation stack.
