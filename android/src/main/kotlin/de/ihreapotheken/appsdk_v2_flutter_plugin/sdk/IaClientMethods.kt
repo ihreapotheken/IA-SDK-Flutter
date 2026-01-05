@@ -1,7 +1,6 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
 import android.app.Activity
-import android.content.Intent
 import androidx.lifecycle.MutableLiveData
 import de.ihreapotheken.sdk.apofinder.ApofinderModule
 import de.ihreapotheken.sdk.core.api.PresentationMode
@@ -21,6 +20,7 @@ import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
 import de.ihreapotheken.sdk.integrations.api.TransferPrescriptionRequest
 import de.ihreapotheken.sdk.integrations.api.view.IaSdkActivity
+import de.ihreapotheken.sdk.integrations.api.view.IaScreen
 import de.ihreapotheken.sdk.ordering.OrderingModule
 import de.ihreapotheken.sdk.otc.OtcModule
 import de.ihreapotheken.sdk.pharmacy.PharmacyModule
@@ -155,17 +155,9 @@ internal class IaClientMethods(
                         override fun onSdkEvent(event: SdkEvent) {
                             if (event is SdkEvent.InitStatus && event !is SdkEvent.InitStatus.Initializing) {
                                 if (event is SdkEvent.InitStatus.InitializationCompleted) {
-                                    bindings.sdkModule.ordering.setCartListener(
-                                        object : CartListener {
-                                            override fun onCartChanged(
-                                                totalProducts: Int,
-                                                totalPrescription: Int,
-                                                totalItems: Int
-                                            ) {
-                                                cartItemCountListener.value = totalItems
-                                            }
-                                        }
-                                    )
+                                    // Set up centralized callbacks handler
+                                    bindings.sdkModule.ordering.setCartListener(bindings.callbacks)
+                                    bindings.sdkModule.ordering.setCheckoutListener(bindings.callbacks)
                                 }
                                 result.success(null)
                             } else if (event is SdkEvent.InitError) {
@@ -289,16 +281,36 @@ internal class IaClientMethods(
                     )
                     return
                 }
-                val activityContext = bindings.activityContext()
-                val intent = Intent(
-                    activityContext ?: bindings.applicationContext,
-                    IaSdkActivity::class.java,
-                )
-                if (activityContext == null) {
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                
+                // Convert viewId string to SdkEntryPoint
+                val entryPoint = when (viewId) {
+                    IaScreen.StartScreen::class.simpleName -> IaScreen.StartScreen
+                    IaScreen.CartScreen::class.simpleName -> IaScreen.CartScreen
+                    IaScreen.TransferPrescriptionsScreen::class.simpleName -> IaScreen.TransferPrescriptionsScreen
+                    IaScreen.SearchScreen::class.simpleName -> IaScreen.SearchScreen
+                    IaScreen.PharmacyScreen::class.simpleName -> IaScreen.PharmacyScreen
+                    IaScreen.PrerequisiteFlow::class.simpleName -> IaScreen.PrerequisiteFlow
+                    else -> {
+                        result.error(
+                            "ARG_ERROR",
+                            "Unknown view identifier: $viewId",
+                            null,
+                        )
+                        return
+                    }
                 }
-                intent.putExtra("viewId", viewId)
-                (activityContext ?: bindings.applicationContext).startActivity(intent)
+                
+                // Use the helper function with navigation callback
+                // NOTE: Assumes SDK supports: onNavigateToTarget: (suspend (SdkNavigationTarget) -> Boolean)?
+                // The lambda automatically becomes suspend because it calls a suspend function
+                val activityContext = bindings.activityContext()
+                IaSdkActivity.start(
+                    context = activityContext ?: bindings.applicationContext,
+                    view = entryPoint,
+                    onNavigateToTarget = { target ->
+                        bindings.callbacks.handleNavigationTarget(target)
+                    }
+                )
                 result.success(null)
             }
 
@@ -343,23 +355,9 @@ internal class IaClientMethods(
                     )
                 }
                 val orderId = data["orderId"] as? String
-                IaSdk.ordering.setCheckoutListener(
-                    object : CheckoutListener {
-                        override fun onCheckoutCompleted(hostOrderId: String, sdkOrderId: String) {
-                            bindings.channel.invokeMethod(
-                                "didFinishOrder",
-                                mapOf(
-                                    "iaOrderCode" to sdkOrderId,
-                                    "hostOrderCode" to hostOrderId,
-                                ),
-                            )
-                            bindings.orderSignatures.value = IaClientBindings.SignatureCodes(
-                                iaOrderCode = sdkOrderId,
-                                hostOrderCode = hostOrderId,
-                            )
-                        }
-                    }
-                )
+                // Note: CheckoutListener is already set globally in init, but we still need to
+                // update orderSignatures for prescription-specific flows
+                // The global listener will handle the Flutter callback
                 @Suppress("UNCHECKED_CAST")
                 bindings.sdkModule.ordering.transferPrescriptions(
                     context = (bindings.activityContext() ?: bindings.applicationContext) as Activity,
