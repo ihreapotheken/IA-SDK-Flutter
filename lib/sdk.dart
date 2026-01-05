@@ -6,6 +6,7 @@ import 'package:appsdk_v2_flutter_plugin/common/callbacks/handlers/ordering_did_
 import 'package:appsdk_v2_flutter_plugin/common/callbacks/handlers/sdk_will_navigate_to_target_callback_handler.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_callbacks.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_configuration.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_module.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -107,7 +108,22 @@ class IaSdkApi extends State<IaSdk> {
     await _IaSdkPlatformMethods.initIaSdk.invoke<void>(
       {
         ...widget._config.toJson(),
-        if (Platform.isIOS) 'emptyPrerequisites': true,
+      },
+      this,
+    );
+  }
+
+  /// Registers the specified SDK [modules] for use in the application.
+  ///
+  /// This method determines which SDK modules will be available for use.
+  /// Must be called before accessing module-specific functionality.
+  ///
+  Future<void> register(
+    List<IaSdkModule> modules,
+  ) async {
+    await _IaSdkPlatformMethods.register.invoke<void>(
+      {
+        'modules': modules.map((module) => module.name).toList(),
       },
       this,
     );
@@ -119,19 +135,11 @@ class IaSdkApi extends State<IaSdk> {
     String pharmacyId,
   ) async {
     final result = await _IaSdkPlatformMethods.setPharmacyId.invoke<void>(
-      pharmacyId,
+      {
+        'pharmacyId': pharmacyId,
+      },
       this,
     );
-    if (Platform.isIOS) {
-      await _IaSdkPlatformMethods.initIaSdk.invoke<void>(
-        {
-          ...widget._config.toJson(),
-          'shouldRunLegal': true,
-          'shouldRunOnboarding': false,
-        },
-        this,
-      );
-    }
     return result;
   }
 
@@ -195,17 +203,6 @@ class IaSdkApi extends State<IaSdk> {
     Iterable<String>? codes,
     String? orderId,
   }) async {
-    if (Platform.isIOS) {
-      await _IaSdkPlatformMethods.initIaSdk.invoke<void>(
-        {
-          ...widget._config.toJson(),
-          'shouldRunLegal': true,
-          'shouldRunOnboarding': false,
-          'shouldRunApofinder': true,
-        },
-        this,
-      );
-    }
     await _IaSdkPlatformMethods.transferPrescriptions.invoke<void>(
       {
         'images': images,
@@ -261,23 +258,6 @@ class IaSdkApi extends State<IaSdk> {
   Future<void> finishAllActivities() async {
     return await _IaSdkPlatformMethods.finishAllActivities.invoke<void>(
       null,
-      this,
-    );
-  }
-
-  /// Configures footer visibility settings.
-  /// IMPORTANT: Currently this works only for iOS.
-  Future<void> configureFooter({
-    required bool shouldShowDataProcessing,
-    required bool shouldShowAppSettings,
-    required bool shouldShowImprint,
-  }) async {
-    return await _IaSdkPlatformMethods.configureFooter.invoke<void>(
-      {
-        'shouldShowDataProcessing': shouldShowDataProcessing,
-        'shouldShowAppSettings': shouldShowAppSettings,
-        'shouldShowImprint': shouldShowImprint,
-      },
       this,
     );
   }

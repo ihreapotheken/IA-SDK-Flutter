@@ -40,6 +40,11 @@ This is IA SDK flutter plugin workspace that consists of:
 - plugin code location: /android/src/main/kotlin/de/ihreapotheken/appsdk_v2_flutter_plugin/sdk/
 
 # Coding tasks
+## General notes
+- when sending something with method channel from dart to native, always use map type for arguments, even if there is only one argument. This is because 
+we want to be able to convert arguments to json and then convert that json to swift/kotlin objects.
+
+
 ## How to add dart function that calls native function
 1. Define function in sdk.dart, this is what host app will call.
 2. Add enum case and implementation to methods.dart. If you need to create dart entities, put it in config.dart.

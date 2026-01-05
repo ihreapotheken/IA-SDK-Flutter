@@ -9,6 +9,10 @@ enum _IaSdkPlatformMethods {
   ///
   initIaSdk,
 
+  /// Registers SDK modules for use in the application.
+  ///
+  register,
+
   /// Selects a pharmacy by providing an identifier.
   ///
   setPharmacyId,
@@ -37,11 +41,7 @@ enum _IaSdkPlatformMethods {
 
   /// Closes any overlaying ia.de screen contents.
   ///
-  finishAllActivities,
-
-  /// Configures footer visibility settings.
-  ///
-  configureFooter;
+  finishAllActivities;
 
   /// Verifies [_platformChannel] argument input.
   ///
@@ -125,10 +125,30 @@ enum _IaSdkPlatformMethods {
             ],
           );
           break;
+        case _IaSdkPlatformMethods.register:
+          _verifyArgumentInput(
+            arguments,
+            argumentType: Map,
+            requiredMapFields: [
+              (
+                name: 'modules',
+                type: List<String>,
+                nullable: false,
+              ),
+            ],
+          );
+          break;
         case _IaSdkPlatformMethods.setPharmacyId:
           _verifyArgumentInput(
             arguments,
-            argumentType: String,
+            argumentType: Map,
+            requiredMapFields: [
+              (
+                name: 'pharmacyId',
+                type: String,
+                nullable: false,
+              ),
+            ],
           );
           break;
         case _IaSdkPlatformMethods.clearCart:
@@ -203,29 +223,6 @@ enum _IaSdkPlatformMethods {
           );
           break;
         case _IaSdkPlatformMethods.finishAllActivities:
-          break;
-        case _IaSdkPlatformMethods.configureFooter:
-          _verifyArgumentInput(
-            arguments,
-            argumentType: Map,
-            requiredMapFields: [
-              (
-                name: 'shouldShowDataProcessing',
-                type: bool,
-                nullable: false,
-              ),
-              (
-                name: 'shouldShowAppSettings',
-                type: bool,
-                nullable: false,
-              ),
-              (
-                name: 'shouldShowImprint',
-                type: bool,
-                nullable: false,
-              ),
-            ],
-          );
           break;
       }
       return await publicApi._channel.invokeMethod(

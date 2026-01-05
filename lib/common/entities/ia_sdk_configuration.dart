@@ -9,7 +9,11 @@ class IaSdkConfiguration {
     required this.accessKey,
     required this.clientId,
     required this.serverEnvironment,
-  });
+    this.shouldFetchThemeFromRemote = false,
+    IaFooterConfiguration? footer,
+    IaInitializationConfiguration? initialization,
+  }) : footer = footer ?? IaFooterConfiguration(),
+       initialization = initialization ?? IaInitializationConfiguration();
 
   /// Key used to authenticate the client setup with the backend service.
   ///
@@ -31,13 +35,28 @@ class IaSdkConfiguration {
   ///
   final IaSdkConfigServerEnvironment serverEnvironment;
 
+  /// Whether to fetch theme configuration from remote server.
+  ///
+  final bool shouldFetchThemeFromRemote;
+
+  /// Footer configuration options.
+  ///
+  final IaFooterConfiguration footer;
+
+  /// Initialization configuration options.
+  ///
+  final IaInitializationConfiguration initialization;
+
   /// Serialises the class data to a JSON-compatible format.
   ///
-  Map<String, String> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'accessKey': accessKey,
       'clientId': clientId,
       'serverEnvironment': serverEnvironment.name,
+      'shouldFetchThemeFromRemote': shouldFetchThemeFromRemote,
+      'footer': footer.toJson(),
+      'initialization': initialization.toJson(),
     };
   }
 }
@@ -70,4 +89,112 @@ enum IaSdkConfigServerEnvironment {
   /// DEV server environment, requires VPN for access.
   ///
   development,
+}
+
+/// Configuration options for SDK initialization behavior.
+///
+class IaInitializationConfiguration {
+  /// Generates an instance of initialization configuration.
+  ///
+  IaInitializationConfiguration({
+    this.shouldShowIndicator = true,
+    IaPrerequisitesConfiguration? prerequisites,
+  }) : prerequisites = prerequisites ?? IaPrerequisitesConfiguration();
+
+  /// Whether to show a loading indicator during initialization.
+  ///
+  final bool shouldShowIndicator;
+
+  /// Prerequisites configuration options.
+  ///
+  final IaPrerequisitesConfiguration prerequisites;
+
+  /// Serialises the class data to a JSON-compatible format.
+  ///
+  Map<String, dynamic> toJson() {
+    return {
+      'shouldShowIndicator': shouldShowIndicator,
+      'prerequisites': prerequisites.toJson(),
+    };
+  }
+}
+
+/// Configuration options for SDK prerequisites.
+///
+class IaPrerequisitesConfiguration {
+  /// Generates an instance of prerequisites configuration.
+  ///
+  IaPrerequisitesConfiguration({
+    this.isCancellable = false,
+    this.isAnimated = true,
+    this.runLegalIfNeeded = true,
+    this.runOnboardingIfNeeded = true,
+    this.runApofinderIfNeeded = true,
+  });
+
+  /// Whether the prerequisites flow can be cancelled.
+  ///
+  final bool isCancellable;
+
+  /// Whether to show animations during prerequisites flow.
+  ///
+  final bool isAnimated;
+
+  /// Whether to run legal documents flow if needed.
+  ///
+  final bool runLegalIfNeeded;
+
+  /// Whether to run onboarding flow if needed.
+  ///
+  final bool runOnboardingIfNeeded;
+
+  /// Whether to run pharmacy finder (Apofinder) flow if needed.
+  ///
+  final bool runApofinderIfNeeded;
+
+  /// Serialises the class data to a JSON-compatible format.
+  ///
+  Map<String, dynamic> toJson() {
+    return {
+      'isCancellable': isCancellable,
+      'isAnimated': isAnimated,
+      'runLegalIfNeeded': runLegalIfNeeded,
+      'runOnboardingIfNeeded': runOnboardingIfNeeded,
+      'runApofinderIfNeeded': runApofinderIfNeeded,
+    };
+  }
+}
+
+/// Configuration options for SDK footer buttons.
+///
+class IaFooterConfiguration {
+  /// Generates an instance of footer configuration.
+  ///
+  IaFooterConfiguration({
+    this.shouldShowDataProcessing = true,
+    this.shouldShowAppSettings = true,
+    this.shouldShowImprint = true,
+  });
+
+  /// Whether to show the data processing button in the footer.
+  ///
+  final bool shouldShowDataProcessing;
+
+  /// Whether to show the app settings button in the footer.
+  ///
+  final bool shouldShowAppSettings;
+
+  /// Whether to show the imprint button in the footer.
+  ///
+  final bool shouldShowImprint;
+
+  /// Serialises the class data to a JSON-compatible format.
+  ///
+  Map<String, dynamic> toJson() {
+    return {
+      'shouldShowDataProcessing': shouldShowDataProcessing,
+      'shouldShowAppSettings': shouldShowAppSettings,
+      'shouldShowImprint': shouldShowImprint,
+    };
+  }
 }
