@@ -78,11 +78,6 @@ internal class IaClientMethods(
          * Closes any overlaying ia.de screen contents.
          */
         finishAllActivities,
-
-        /**
-         * Configures footer visibility settings.
-         */
-        configureFooter,
     }
 
     /**
@@ -137,6 +132,13 @@ internal class IaClientMethods(
                     RxModule,
                     ApofinderModule,
                 )
+                // TODO: Parse configuration options from args (similar to iOS implementation)
+                // The following configuration options should be extracted from args:
+                // - shouldFetchThemeFromRemote (args["shouldFetchThemeFromRemote"])
+                // - footer configuration (args["footer"])
+                // - initialization configuration (args["initialization"])
+                // - prerequisites configuration (args["initialization"]["prerequisites"])
+                // See iOS implementation in IaClientMethods.swift for reference
                 bindings.sdkModule.init(
                     context = bindings.applicationContext,
                     apiKey = accessKey,
@@ -179,16 +181,25 @@ internal class IaClientMethods(
             }
 
             FlutterCall.setPharmacyId.name -> {
-                val pharmacyId = call.arguments
-                if (pharmacyId !is String) {
+                val args = call.arguments
+                if (args !is Map<*, *>) {
                     result.error(
                         "ARG_ERROR",
-                        "Pharmacy identifier must be provided as a String type argument.",
+                        "Arguments for setPharmacyId must be of Map type.",
                         null,
                     )
                     return
                 }
-                
+                val pharmacyId = args["pharmacyId"] as? String
+                if (pharmacyId == null) {
+                    result.error(
+                        "ARG_ERROR",
+                        "Missing or invalid pharmacyId. Expected String value for pharmacyId.",
+                        null,
+                    )
+                    return
+                }
+
                 bindings.sdkModule.pharmacy.setPharmacyId(
                     pharmacyId,
                     object : PharmacyConfigListener {
@@ -379,31 +390,6 @@ internal class IaClientMethods(
 
             FlutterCall.finishAllActivities.name -> {
                 IaSdkActivity.finishAllActivities()
-                result.success(null)
-            }
-
-            FlutterCall.configureFooter.name -> {
-                val args = call.arguments
-                if (args !is Map<*, *>) {
-                    result.error(
-                        "ARG_ERROR",
-                        "Arguments for configureFooter must be of Map type.",
-                        null,
-                    )
-                    return
-                }
-                val shouldShowDataProcessing = args["shouldShowDataProcessing"] as? Boolean
-                val shouldShowAppSettings = args["shouldShowAppSettings"] as? Boolean
-                val shouldShowImprint = args["shouldShowImprint"] as? Boolean
-                if (shouldShowDataProcessing == null || shouldShowAppSettings == null || shouldShowImprint == null) {
-                    result.error(
-                        "ARG_ERROR",
-                        "Missing or invalid argument types. Expected Boolean values for shouldShowDataProcessing, shouldShowAppSettings, and shouldShowImprint.",
-                        null,
-                    )
-                    return
-                }
-                // TODO: Implement footer configuration logic
                 result.success(null)
             }
 

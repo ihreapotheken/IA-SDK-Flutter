@@ -13,17 +13,16 @@ import Flutter
 class IaClientDelegate: SDKDelegate {
     let channel: FlutterMethodChannel
     
-    
     init(
         channel: FlutterMethodChannel,
     ) {
         self.channel = channel
     }
     
-    func sdkShouldOverrideRoute(_ routeOverride: IARouteOverride, decisionHandler: @escaping (HandlingDecision) -> Void) {
+    func sdkWillNavigateToTarget(_ navigationTarget: IANavigationTarget, decisionHandler: @escaping (HandlingDecision) -> Void) {
         // Convert navigation target to string
         let navigationTargetString: String
-        switch routeOverride {
+        switch navigationTarget {
         case .cart:
             navigationTargetString = "cart"
         case .pharmacyDetails:
@@ -37,7 +36,7 @@ class IaClientDelegate: SDKDelegate {
         case .apofinder:
             navigationTargetString = "apofinder"
         }
-
+        
         // Call Flutter callback and wait for response
         channel.invokeMethod(
             "sdkWillNavigateToTarget",
@@ -49,7 +48,7 @@ class IaClientDelegate: SDKDelegate {
                 decisionHandler(.performDefault)
                 return
             }
-
+            
             // Convert string to HandlingDecision
             let decision: HandlingDecision
             switch decisionString {
@@ -60,7 +59,7 @@ class IaClientDelegate: SDKDelegate {
             default:
                 decision = .performDefault
             }
-
+            
             decisionHandler(decision)
         }
     }
@@ -77,16 +76,16 @@ class IaClientDelegate: SDKDelegate {
             ],
         )
     }
-        
+    
     func orderingDidUpdateCart(cartState: IACartState) {
         // Extract totalAmountInCart from cartDetails, default to 0 if nil
         let totalAmountInCart = cartState.cartDetails?.totalAmountInCart ?? 0
-
+        
         let arguments: [String: Any] = [
             "totalAmountInCart": totalAmountInCart,
             "clientOrderIDs": cartState.clientOrderIDs
         ]
-
+        
         // Send to Flutter
         channel.invokeMethod(
             "orderingDidUpdateCart",

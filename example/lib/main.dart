@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
+import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_module.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_navigation_target.dart';
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
@@ -185,14 +186,11 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
     widget._iaSdk?.callbacks.onSdkWillNavigateToTarget = (navigationTarget) async {
       debugPrint('Host app: SDK wants to navigate to: $navigationTarget');
 
-      // For demonstration purposes, let's handle the cart route
-      // and let the SDK handle all other routes
       switch (navigationTarget) {
+        // Just as an example.
         case IaSdkNavigationTarget.pharmacyDetails:
-          debugPrint('Host app: Letting SDK handle route: $navigationTarget');
           return IaHandlingDecision.performDefault;
         default:
-          debugPrint('Host app: Letting SDK handle route: $navigationTarget');
           return IaHandlingDecision.performDefault;
       }
     };
@@ -207,8 +205,19 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
       debugPrint('Host app: Cart updated - $itemCount items, $orderCount orders');
     };
 
-    widget._iaSdk?.configureFooter(shouldShowDataProcessing: false, shouldShowAppSettings: true, shouldShowImprint: true);
-    _initIaSdk = widget._iaSdk?.init();
+    _initIaSdk = _initializeSdk();
+  }
+
+  Future<void> _initializeSdk() async {
+    await widget._iaSdk?.register([
+      IaSdkModule.integrations,
+      IaSdkModule.overTheCounter,
+      IaSdkModule.ordering,
+      IaSdkModule.apofinder,
+      IaSdkModule.pharmacyDetails,
+      IaSdkModule.prescription,
+    ]);
+    await widget._iaSdk?.init();
   }
 
   @override

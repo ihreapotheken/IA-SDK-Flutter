@@ -9,447 +9,183 @@ import IAPharmacy
 /// Flutter client service call handler.
 @MainActor
 internal class IaClientMethods {
-  /**
-   * Collection of available method invocation identifiers.
-   */
-  enum FlutterCall: CaseIterable {
     /**
-     * Allocates the SDK runtime resources.
+     * Collection of available method invocation identifiers.
      */
-    case initIaSdk
+    enum FlutterCall: CaseIterable {
+        /**
+         * Allocates the SDK runtime resources.
+         */
+        case initIaSdk
 
-    /**
-     * Selects a pharmacy by providing an identifier.
-     */
-    case setPharmacyId
+        /**
+         * Registers SDK modules for use in the application.
+         */
+        case register
 
-    /**
-     * Resets the state of user cart, clearing any added products or prescriptions.
-     */
-    case clearCart
+        /**
+         * Selects a pharmacy by providing an identifier.
+         */
+        case setPharmacyId
+        
+        /**
+         * Resets the state of user cart, clearing any added products or prescriptions.
+         */
+        case clearCart
+        
+        /**
+         * Forwards the client personal information to the ia.de library for checkout purposes.
+         */
+        case setGuestUserData
+        
+        /**
+         * Resets the user data and onboarding status (pharmacy selection, user consents statuses).
+         */
+        case logout
+        
+        /**
+         * Places a new [UIViewController] object into the navigation stack.
+         */
+        case launchRoute
+        
+        /**
+         * Forwards a collection of prescription objects with the ia.de checkout services.
+         */
+        case transferPrescriptions
+        
+        /**
+         * Closes any overlaying ia.de screen contents.
+         */
+        case finishAllActivities
 
-    /**
-     * Forwards the client personal information to the ia.de library for checkout purposes.
-     */
-    case setGuestUserData
-
-    /**
-     * Resets the user data and onboarding status (pharmacy selection, user consents statuses).
-     */
-    case logout
-
-    /**
-     * Places a new [UIViewController] object into the navigation stack.
-     */
-    case launchRoute
-
-    /**
-     * Forwards a collection of prescription objects with the ia.de checkout services.
-     */
-    case transferPrescriptions
-
-    /**
-     * Closes any overlaying ia.de screen contents.
-     */
-    case finishAllActivities
-
-    /**
-     * Configures footer visibility settings.
-     */
-    case configureFooter
-
-    /**
-     * String identifier getter definition.
-     */
-    var name: String {
-      return String(describing: self)
+        /**
+         * String identifier getter definition.
+         */
+        var name: String {
+            return String(describing: self)
+        }
     }
-  }
+    
+    /**
+     * Flutter SDK host app bindings definitions.
+     */
+    private let bindings: IaClientBindings!
+    private let argumentDecoder = IaArgumentDecoder()
 
-  /**
-   * Flutter SDK host app bindings definitions.
-   */
-  private let bindings: IaClientBindings!
-  private var isRegistered: Bool = false
-
-  init(bindings: IaClientBindings!) {
-    self.bindings = bindings
-  }
-
-
-  /**
-   * Registers a handler for method calls from the Flutter side.
-   */
-  func callHandler(call: FlutterMethodCall, result: @escaping FlutterResult) {
-    switch call.method {
-    case FlutterCall.initIaSdk.name:
-      let args = call.arguments
-      guard
-        let args = args as? [String: Any]
-      else {
-        return result(
-          FlutterError(
-            code: "ARG_ERROR",
-            message: "Arguments for initIaSdk must be of Dictionary type.",
-            details: nil
-          )
-        )
-      }
-      guard
-        let accessKey = args["accessKey"] as? String,
-        let clientId = args["clientId"] as? String,
-        let serverEnvString = args["serverEnvironment"] as? String
-      else {
-        return result(
-          FlutterError(
-            code: "ARG_ERROR",
-            message:
-              "Missing or invalid argument types. Expected String values for accessKey, clientId, and serverEnvironment.",
-            details: nil
-          )
-        )
-      }
-      let serverEnv: EnvironmentID
-      switch serverEnvString {
-      case "development":
-        serverEnv = EnvironmentID.dev
-        break
-      case "staging":
-        serverEnv = EnvironmentID.staging
-        break
-      case "production":
-        serverEnv = EnvironmentID.prod
-        break
-      default:
-        return result(
-          FlutterError(
-            code: "ARG_ERROR",
-            message: "Invalid environment ID: \(serverEnvString)",
-            details: nil
-          )
-        )
-      }
-      if !isRegistered {
-        isRegistered = true
-        IASDK.configuration.apiKey = accessKey
-        IASDK.configuration.clientID = clientId
-        IASDK.setEnvironment(serverEnv)
-        // @TODO: remove, just for testing
-        IASDK.QA.setQAFeatures([.showTestPharmaciesOnApofinder])
-        IASDK.register([
-          .integrations,
-          .overTheCounter,
-          .ordering,
-          .apofinder,
-          .pharmacyDetails,
-          .prescription,
-        ])
-      }
-      let masterDelegate = IaClientDelegate(
-        channel: bindings.channel,
-      )
-      IASDK.setDelegate(masterDelegate)
-      
-      Task.init {
-        do {
-          let prerequisitesOptions = IASDKPrerequisitesOptions(
-            shouldShowIndicator: true,
-            isCancellable: false,
-            isAnimated: false,
-            shouldRunLegal: (args["shouldRunLegal"] as? Bool) == true,
-            shouldRunOnboarding: (args["shouldRunOnboarding"] as? Bool) == true,
-            shouldRunApofinder: (args["shouldRunApofinder"] as? Bool) == true,
-          )
-          let _ = try await IASDK.initialize(
-            options: .init(
-              shouldShowIndicator: false,
-              prerequisitesOptions: (args["emptyPrerequisites"] as? Bool) == true
-                ? nil : prerequisitesOptions,
-            ),
-          )
-          result(nil)
-        } catch {
-          result(
-            FlutterError(
-              code: "INIT_ERROR",
-              message: "\(String(describing: error)) \(error.localizedDescription)",
-              details: nil,
-            )
-          )
-        }
-      }
-      break
-    case FlutterCall.setPharmacyId.name:
-      let args = call.arguments
-      guard
-        let pharmacyIdStr = args as? String
-      else {
-        return result(
-          FlutterError(
-            code: "ARG_ERROR",
-            message: "Pharmacy identifier must be provided as a String type argument.",
-            details: nil,
-          )
-        )
-      }
-      guard
-        let pharmacyId = Int(pharmacyIdStr)
-      else {
-        return result(
-          FlutterError(
-            code: "ARG_ERROR",
-            message: "Pharmacy identifier string must be provided in Int format: \(pharmacyIdStr).",
-            details: nil,
-          )
-        )
-      }
-      Task.init {
-        do {
-          try await IASDK.Pharmacy.setPharmacyID(pharmacyId)
-          result(true)
-        } catch {
-          result(
-            FlutterError(
-              code: "SET_PHARMACY_ERROR",
-              message: "\(String(describing: error)) \(error.localizedDescription)",
-              details: nil,
-            )
-          )
-        }
-      }
-      break
-    case FlutterCall.clearCart.name:
-      Task.init {
-        do {
-          try await IAOrderingSDK.deleteCart()
-          result(true)
-        } catch {
-          result(
-            FlutterError(
-              code: "CLEAR_CART_ERROR",
-              message: "\(String(describing: error)) \(error.localizedDescription)",
-              details: nil,
-            )
-          )
-        }
-      }
-      break
-    case FlutterCall.setGuestUserData.name:
-      let args = call.arguments
-      guard
-        let args = args as? [String: Any]
-      else {
-        return result(
-          FlutterError(
-            code: "ARG_ERROR",
-            message: "Arguments for initIaSdk must be of Dictionary type.",
-            details: nil
-          )
-        )
-      }
-      guard
-        let salutation = args["salutation"] as? String,
-        let firstName = args["firstName"] as? String,
-        let lastName = args["lastName"] as? String,
-        let email = args["email"] as? String,
-        let phoneNumberCountryCode = args["phoneNumberCountryCode"] as? String,
-        let phoneNumberWithoutCountryCode = args["phoneNumberWithoutCountryCode"] as? String
-      else {
-        return result(
-          FlutterError(
-            code: "ARG_ERROR",
-            message: "Missing or invalid argument types.",
-            details: nil
-          )
-        )
-      }
-      let iaSalutation: IAUserSalutation
-      switch salutation.lowercased() {
-      case "herr":
-        iaSalutation = IAUserSalutation.male
-      case "frau":
-        iaSalutation = IAUserSalutation.female
-      case "keine angabe":
-        iaSalutation = IAUserSalutation.notSpecified
-      default:
-        iaSalutation = IAUserSalutation.diverse
-      }
-      Task.init {
-        do {
-          let userData = IAUserData(
-            salutation: iaSalutation,
-            firstName: firstName,
-            lastName: lastName,
-            countryCode: phoneNumberCountryCode,
-            phoneNumber: phoneNumberWithoutCountryCode,
-            email: email,
-          )
-          try await IASDK.setUserData(userData)
-          result(nil)
-        } catch {
-          result(
-            FlutterError(
-              code: "SET_GUEST_USER_DATA_ERROR",
-              message: "\(String(describing: error)) \(error.localizedDescription)",
-              details: nil,
-            )
-          )
-        }
-      }
-      break
-    case FlutterCall.logout.name:
-      Task.init {
-        do {
-          try await IASDK.deleteAllUserRelatedData()
-          result(nil)
-        } catch {
-          result(
-            FlutterError(
-              code: "LOGOUT_ERROR",
-              message: "\(String(describing: error)) \(error.localizedDescription)",
-              details: nil,
-            )
-          )
-        }
-      }
-      break
-    case FlutterCall.launchRoute.name:
-      let args = call.arguments
-      guard
-        let args = args as? String
-      else {
-        return result(
-          FlutterError(
-            code: "ARG_ERROR",
-            message: "View identifier must be provided as a String type argument.",
-            details: nil,
-          )
-        )
-      }
-      IaClientViews.startScreen.iaScreen().present()
-      result(nil)
-      break
-    case FlutterCall.transferPrescriptions.name:
-      guard let data = call.arguments as? [String: Any] else {
-        result(
-          FlutterError(
-            code: "ARG_ERROR",
-            message:
-              "Prescription data must be provided as a Dictionary<String, Any> type argument.",
-            details: nil
-          ))
-        break
-      }
-      let prescriptionImages = data["images"]
-      if let prescriptionImages = prescriptionImages {
-        guard
-          let array = prescriptionImages as? [FlutterStandardTypedData]
-        else {
-          result(
-            FlutterError(
-              code: "ARG_ERROR",
-              message:
-                "Prescription image data must be provided as an Array<ByteData> type argument \"images\".",
-              details: nil
-            )
-          )
-          break
-        }
-      }
-      let prescriptionPdfs = data["pdfs"]
-      if let prescriptionPdfs = prescriptionPdfs {
-        guard
-          let array = prescriptionPdfs as? [FlutterStandardTypedData]
-        else {
-          result(
-            FlutterError(
-              code: "ARG_ERROR",
-              message:
-                "Prescription PDF data must be provided as an Array<ByteData> type argument \"pdfs\".",
-              details: nil
-            ))
-          break
-        }
-      }
-      let prescriptionCodes = data["codes"]
-      if let prescriptionCodes = prescriptionCodes {
-        guard
-          let outer = prescriptionCodes as? [String]
-        else {
-          result(
-            FlutterError(
-              code: "ARG_ERROR",
-              message:
-                "Prescription code data must be provided as an Array<String> type argument \"codes\".",
-              details: nil
-            ))
-          break
-        }
-      }
-      let images: [Data] = (data["images"] as? [FlutterStandardTypedData])?.map { $0.data } ?? []
-      let pdfs: [Data] = (data["pdfs"] as? [FlutterStandardTypedData])?.map { $0.data } ?? []
-      let codes: [String] = data["codes"] as? [String] ?? []
-      let orderId: String? = data["orderId"] as? String
-      Task.init {
-        do {
-          try await IAOrderingSDK.transferPrescriptions(
-            images: images,
-            pdfs: pdfs.map { pdfBytes in PDFPrescription(data: pdfBytes) },
-            codes: codes,
-            orderID: orderId,
-            showActivityIndicator: true,
-            finishAction: .openCart,
-          )
-          result(nil)
-        } catch {
-          result(
-            FlutterError(
-              code: "PRESCRIPTION_TRANSFER_ERROR",
-              message: "\(String(describing: error)) \(error.localizedDescription)",
-              details: nil,
-            )
-          )
-        }
-      }
-      break
-    case FlutterCall.finishAllActivities.name:
-      // @TODO: This will work for now but we will have to discuss how to best implement this.
-      UIApplication.shared.rootViewController?.dismiss(animated: true)
-      result(nil)
-      break
-    case FlutterCall.configureFooter.name:
-      let args = call.arguments
-      guard
-        let args = args as? [String: Any]
-      else {
-        return result(
-          FlutterError(
-            code: "ARG_ERROR",
-            message: "Arguments for configureFooter must be of Dictionary type.",
-            details: nil
-          )
-        )
-      }
-      guard
-        let shouldShowDataProcessing = args["shouldShowDataProcessing"] as? Bool,
-        let shouldShowAppSettings = args["shouldShowAppSettings"] as? Bool,
-        let shouldShowImprint = args["shouldShowImprint"] as? Bool
-      else {
-        return result(
-          FlutterError(
-            code: "ARG_ERROR",
-            message: "Missing or invalid argument types. Expected Bool values for shouldShowDataProcessing, shouldShowAppSettings, and shouldShowImprint.",
-            details: nil
-          )
-        )
-      }
-      IASDK.configuration.footer.shouldShowDataProcessing = shouldShowDataProcessing
-      IASDK.configuration.footer.shouldShowAppSettings = shouldShowAppSettings
-      IASDK.configuration.footer.shouldShowImprint = shouldShowImprint
-      result(nil)
-      break
-    default:
-      return result(FlutterMethodNotImplemented)
+    init(bindings: IaClientBindings!) {
+        self.bindings = bindings
     }
-  }
+    
+    /**
+     * Registers a handler for method calls from the Flutter side.
+     */
+    func callHandler(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        Task {
+            do {
+                let returnValue = try await callHandlerInternal(call: call)
+                result(returnValue)
+            } catch {
+                print(">>> callHandler error: \(error)")    // @TODO remove
+                result(error.flutterError(methodName: call.method))
+            }
+        }
+    }
+
+    func callHandlerInternal(call: FlutterMethodCall) async throws -> Any? {
+        switch call.method {
+        case FlutterCall.register.name:
+            let arguments = try argumentDecoder.decode(IaRegisterModulesArguments.self, from: call.arguments)
+            let modules = arguments.modules
+            
+            // Map Flutter modules to SDK modules, doing it here and not in decoder because it requires all imports.
+            var sdkModules = [IASDKModule]()
+            for module in modules {
+                switch module {
+                case .integrations: sdkModules.append(.integrations)
+                case .overTheCounter: sdkModules.append(.overTheCounter)
+                case .ordering: sdkModules.append(.ordering)
+                case .apofinder: sdkModules.append(.apofinder)
+                case .pharmacyDetails: sdkModules.append(.pharmacyDetails)
+                case .prescription: sdkModules.append(.prescription)
+                case .cardLink: sdkModules.append(.cardLink)
+                }
+            }
+            
+            IASDK.register(sdkModules)
+            return nil
+
+        case FlutterCall.initIaSdk.name:
+            let arguments = try argumentDecoder.decode(IaInitSdkArguments.self, from: call.arguments)
+            let initializationOptions = arguments.initialization.mappedToSDK()
+            
+            // Set delegate
+            IASDK.setDelegate(IaClientDelegate(channel: bindings.channel))
+            
+            // Configuration
+            IASDK.setEnvironment(arguments.serverEnvironment.mappedToSDK())
+            IASDK.configuration.apiKey = arguments.accessKey
+            IASDK.configuration.clientID = arguments.clientId
+            IASDK.configuration.shouldLoadRemoteStyleConfiguration = arguments.shouldFetchThemeFromRemote
+            IASDK.configuration.footer.shouldShowAppSettings = arguments.footer.shouldShowAppSettings
+            IASDK.configuration.footer.shouldShowDataProcessing = arguments.footer.shouldShowDataProcessing
+            IASDK.configuration.footer.shouldShowImprint = arguments.footer.shouldShowImprint
+
+            // @TODO: remove, just for testing
+            IASDK.QA.setQAFeatures([.showTestPharmaciesOnApofinder])
+            
+            // Auto initialization is enabled to match Android behavior in terms of prerequisites.
+            IASDK.configuration.isAutoInitializationEnabled = true
+            IASDK.configuration.defaultInitializationOptions = initializationOptions
+
+            // Initialization (we don't pass prerequisites options here to match android), isAutoInitializationEnabled is true which means it will run
+            // prerequisites when some screen is shown.
+            try await IASDK.initialize(shouldShowIndicator: initializationOptions.shouldShowIndicator, prerequisitesOptions: nil)
+            return nil
+
+        case FlutterCall.setPharmacyId.name:
+            let arguments = try argumentDecoder.decode(IaSetPharmacyIdArguments.self, from: call.arguments)
+            try await IASDK.Pharmacy.setPharmacyID(try arguments.pharmacyIdInt)
+            return true
+
+        case FlutterCall.clearCart.name:
+            try await IAOrderingSDK.deleteCart()
+            return nil
+
+        case FlutterCall.setGuestUserData.name:
+            let arguments = try argumentDecoder.decode(IaSetGuestUserDataArguments.self, from: call.arguments)
+            try await IASDK.setUserData(arguments.mappedToSDK())
+            return nil
+
+        case FlutterCall.logout.name:
+            try await IASDK.deleteAllUserRelatedData()
+            return nil
+
+        case FlutterCall.launchRoute.name:
+            // @TODO read which view to launch from arguments
+            IaClientViews.startScreen.iaScreen().present()
+            return nil
+
+        case FlutterCall.transferPrescriptions.name:
+            let arguments = try IaTransferPrescriptionsArguments(from: call.arguments)
+            let mapped = arguments.mappedToSDK()
+
+            try await IAOrderingSDK.transferPrescriptions(
+                images: mapped.images,
+                pdfs: mapped.pdfs,
+                codes: mapped.codes,
+                orderID: mapped.orderId,
+                showActivityIndicator: true,
+                finishAction: .openCart
+            )
+            return nil
+
+        case FlutterCall.finishAllActivities.name:
+            // @TODO: This will work for now but we will have to discuss how to best implement this.
+            UIApplication.shared.rootViewController?.dismiss(animated: true)
+            return nil
+
+        default:
+            return FlutterMethodNotImplemented
+        }
+    }
 }

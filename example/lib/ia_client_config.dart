@@ -66,6 +66,22 @@ class ExampleAppConfig {
       accessKey: accessKey,
       clientId: clientId,
       serverEnvironment: serverEnvironment,
+      shouldFetchThemeFromRemote: false,
+      footer: IaFooterConfiguration(
+        shouldShowDataProcessing: false,
+        shouldShowAppSettings: true,
+        shouldShowImprint: true,
+      ),
+      initialization: IaInitializationConfiguration(
+        shouldShowIndicator: false,
+        prerequisites: IaPrerequisitesConfiguration(
+          isCancellable: false,
+          isAnimated: true,
+          runLegalIfNeeded: true,
+          runOnboardingIfNeeded: true,
+          runApofinderIfNeeded: true,
+        ),
+      ),
     );
   }
 
