@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_module.dart';
 import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_navigation_target.dart';
-import 'package:appsdk_v2_flutter_plugin/sdk.dart';
+import 'package:appsdk_v2_flutter_plugin/features/ia_sdk/ia_sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -13,7 +13,7 @@ import 'package:latlong2/latlong.dart';
 
 void main() {
   runApp(
-    IaSdk(
+    IaSdkWidget(
       child: ExampleApp(),
       configuration: ExampleAppConfig.instance.pluginConfig,
     ),
@@ -28,8 +28,8 @@ class ExampleApp extends StatefulWidget {
 }
 
 class _ExampleAppState extends State<ExampleApp> {
-  IaSdkApi? get _iaSdk {
-    return IaSdk.of(context);
+  IaSdk? get _iaSdk {
+    return IaSdkWidget.of(context);
   }
 
   int _selectedTabIndex = 0;
@@ -55,7 +55,7 @@ class _ExampleAppState extends State<ExampleApp> {
                     ElevatedButton(
                       child: Text('Clear Cart'),
                       onPressed: () async {
-                        await _iaSdk?.clearCart();
+                        await _iaSdk?.ordering.clearCart();
                       },
                     ),
                     const SizedBox(height: 16),
@@ -84,7 +84,7 @@ class _ExampleAppState extends State<ExampleApp> {
                       child: Text('Transfer prescriptions'),
                       onPressed: () async {
                         try {
-                          await _iaSdk?.transferPrescriptions(
+                          await _iaSdk?.ordering.transferPrescriptions(
                             images: [
                               base64Decode(ExampleAppConfig.instance.mockPngPrescription),
                               base64Decode(ExampleAppConfig.instance.mockJpgPrescription),
@@ -107,6 +107,43 @@ class _ExampleAppState extends State<ExampleApp> {
                     ),
                   ],
                 ),
+                2 => ListView(
+                  padding: EdgeInsets.fromLTRB(
+                    20,
+                    24 + MediaQuery.of(context).padding.top,
+                    20,
+                    24,
+                  ),
+                  children: [
+                    ElevatedButton(
+                      child: Text('Launch Start screen'),
+                      onPressed: () async {
+                        await _iaSdk?.launchStartRoute();
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      child: Text('Launch Product Search'),
+                      onPressed: () async {
+                        await _iaSdk?.overTheCounter.launchProductSearchRoute();
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      child: Text('Launch Cart Screen'),
+                      onPressed: () async {
+                        await _iaSdk?.ordering.launchCartScreen();
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      child: Text('Launch Pharmacy Details'),
+                      onPressed: () async {
+                        await _iaSdk?.pharmacy.launchPharmacyDetails();
+                      },
+                    ),
+                  ],
+                ),
                 _ => throw UnimplementedError('Tab view not defined for index #$_selectedTabIndex.'),
               },
             ),
@@ -124,6 +161,10 @@ class _ExampleAppState extends State<ExampleApp> {
                       (
                         label: 'AppSDK Services',
                         icon: Icons.category,
+                      ),
+                      (
+                        label: 'Screens',
+                        icon: Icons.screenshot,
                       ),
                     }.indexed)
                       Expanded(
@@ -166,10 +207,10 @@ class _ExampleAppState extends State<ExampleApp> {
 
 class _ExampleMapView extends StatefulWidget {
   const _ExampleMapView({
-    required IaSdkApi? iaSdk,
+    required IaSdk? iaSdk,
   }) : _iaSdk = iaSdk;
 
-  final IaSdkApi? _iaSdk;
+  final IaSdk? _iaSdk;
 
   @override
   State<_ExampleMapView> createState() => _ExampleMapViewState();
@@ -318,7 +359,7 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
                                             if (Platform.isIOS) {
                                               await Future.delayed(const Duration(seconds: 1));
                                             }
-                                            await widget._iaSdk?.launchDashboardRoute();
+                                            await widget._iaSdk?.launchStartRoute();
                                             await FlutterWebBrowser.openWebPage(
                                               url: 'https://example.org/',
                                               customTabsOptions: const CustomTabsOptions(
