@@ -78,6 +78,11 @@ internal class IaClientMethods(
          * Closes any overlaying ia.de screen contents.
          */
         finishAllActivities,
+
+        /**
+         * Register modules.
+         */
+        register,
     }
 
     /**
@@ -272,11 +277,20 @@ internal class IaClientMethods(
             }
 
             FlutterCall.launchRoute.name -> {
-                val viewId = call.arguments
-                if (viewId !is String) {
+                val args = call.arguments
+                if (args !is Map<*, *>) {
                     result.error(
                         "ARG_ERROR",
-                        "View identifier must be provided as a String type argument.",
+                        "Arguments for launchRoute must be of Map type.",
+                        null,
+                    )
+                    return
+                }
+                val viewId = args["viewId"] as? String
+                if (viewId == null) {
+                    result.error(
+                        "ARG_ERROR",
+                        "Missing or invalid viewId. Expected String value for viewId.",
                         null,
                     )
                     return
@@ -388,6 +402,11 @@ internal class IaClientMethods(
 
             FlutterCall.finishAllActivities.name -> {
                 IaSdkActivity.finishAllActivities()
+                result.success(null)
+            }
+
+            FlutterCall.register.name -> {
+                // @TODO This needs to be handled. Added as empty case for now just so example app works.
                 result.success(null)
             }
 

@@ -20,7 +20,7 @@ extension Error {
         } else {
             // Try to find matching FlutterCall for specific error code
             let errorCode: String
-            if let flutterCall = IaClientMethods.FlutterCall.allCases.first(where: { $0.name == methodName }) {
+            if let flutterCall = FlutterCall.allCases.first(where: { $0.name == methodName }) {
                 errorCode = codeFromFlutterCall(flutterCall)
             } else {
                 errorCode = "METHOD_ERROR"
@@ -34,7 +34,7 @@ extension Error {
         }
     }
 
-    private func codeFromFlutterCall(_ flutterCall: IaClientMethods.FlutterCall) -> String {
+    private func codeFromFlutterCall(_ flutterCall: FlutterCall) -> String {
         switch flutterCall {
         case .initIaSdk: "INIT_ERROR"
         case .register: "REGISTER_ERROR"

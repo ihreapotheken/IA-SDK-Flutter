@@ -1,4 +1,4 @@
-part of '../../sdk.dart';
+part of '../../features/ia_sdk/ia_sdk.dart';
 
 enum IaSdkCallbackManager {
   orderingDidFinishOrder,
@@ -7,15 +7,15 @@ enum IaSdkCallbackManager {
 
   Future<T?> handle<T>(
     dynamic arguments,
-    IaSdkApi publicApi,
+    IaSdk iaSdk,
   ) async {
     switch (this) {
       case IaSdkCallbackManager.orderingDidFinishOrder:
-        return OrderingDidFinishOrderCallbackHandler().handle<T>(arguments, publicApi);
+        return OrderingDidFinishOrderCallbackHandler().handle<T>(arguments, iaSdk);
       case IaSdkCallbackManager.orderingDidUpdateCart:
-        return OrderingDidUpdateCartCallbackHandler().handle<T>(arguments, publicApi);
+        return OrderingDidUpdateCartCallbackHandler().handle<T>(arguments, iaSdk);
       case IaSdkCallbackManager.sdkWillNavigateToTarget:
-        return SdkWillNavigateToTargetCallbackHandler().handle<T>(arguments, publicApi);
+        return SdkWillNavigateToTargetCallbackHandler().handle<T>(arguments, iaSdk);
     }
   }
 }
