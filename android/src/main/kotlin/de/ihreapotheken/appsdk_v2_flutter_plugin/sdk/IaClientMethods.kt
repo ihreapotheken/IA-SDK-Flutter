@@ -4,8 +4,6 @@ import android.app.Activity
 import androidx.lifecycle.MutableLiveData
 import de.ihreapotheken.sdk.apofinder.ApofinderModule
 import de.ihreapotheken.sdk.core.api.PresentationMode
-import de.ihreapotheken.sdk.core.api.listener.CartListener
-import de.ihreapotheken.sdk.core.api.listener.CheckoutListener
 import de.ihreapotheken.sdk.core.api.listener.HandlingDecision
 import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigListener
 import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigResult
@@ -296,7 +294,7 @@ internal class IaClientMethods(
                     return
                 }
                 
-                // Convert viewId string to SdkEntryPoint
+                // Convert viewId string to IaScreen
                 val entryPoint = when (viewId) {
                     IaScreen.StartScreen::class.simpleName -> IaScreen.StartScreen
                     IaScreen.CartScreen::class.simpleName -> IaScreen.CartScreen

@@ -5,7 +5,6 @@ import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.view.IaScreen
-import de.ihreapotheken.sdk.integrations.api.view.SdkEntryPoint
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformViewRegistry
