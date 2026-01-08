@@ -1,22 +1,21 @@
-import 'package:appsdk_v2_flutter_plugin/features/ia_ordering/ordering/ia_order.dart';
-import 'package:appsdk_v2_flutter_plugin/features/ia_sdk/ia_sdk.dart';
-import 'package:flutter/foundation.dart';
+part of '../ia_sdk_callback_manager.dart';
 
-class OrderingDidFinishOrderCallbackHandler {
-  Future<T?> handle<T>(
+class _OrderingDidFinishOrderCallbackHandler implements _CallbackHandler {
+  @override
+  Future<void> handle(
     dynamic arguments,
     IaSdk iaSdk,
   ) async {
     // Check if callback is set first - no point processing if host app isn't listening
     final callback = iaSdk.callbacks.onOrderingDidFinishOrder;
     if (callback == null) {
-      return null;
+      return;
     }
 
     // Extract order info from arguments
     if (arguments is! Map) {
       debugPrint('orderingDidFinishOrder: Invalid arguments type');
-      return null;
+      return;
     }
 
     final orderCode = arguments['orderCode'] as String?;
@@ -26,10 +25,10 @@ class OrderingDidFinishOrderCallbackHandler {
 
     if (orderCode == null) {
       debugPrint('orderingDidFinishOrder: Missing orderCode');
-      return null;
+      return;
     }
 
-    final order = IaOrder(
+    final order = IaModelOrder(
       orderCode: orderCode,
       clientOrderIDs: clientOrderIDs,
     );
@@ -37,10 +36,8 @@ class OrderingDidFinishOrderCallbackHandler {
     // Call the callback (fire and forget)
     try {
       callback(order);
-      return null;
     } catch (e) {
       debugPrint('orderingDidFinishOrder: Error calling callback: $e');
-      return null;
     }
   }
 }

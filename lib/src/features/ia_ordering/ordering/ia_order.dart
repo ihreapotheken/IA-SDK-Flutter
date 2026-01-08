@@ -1,13 +1,13 @@
 /// Information about a completed order.
 ///
-class IaOrder {
+class IaModelOrder {
   /// Order code from backend.
   final String orderCode;
 
   /// Order ID provided by host app using transferPrescriptions (optional).
   final List<String>? clientOrderIDs;
 
-  const IaOrder({
+  const IaModelOrder({
     required this.orderCode,
     this.clientOrderIDs,
   });

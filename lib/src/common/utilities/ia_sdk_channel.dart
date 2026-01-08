@@ -8,11 +8,9 @@ import 'package:flutter/services.dart';
 class IaSdkChannel {
   IaSdkChannel._();
 
-  static final IaSdkChannel _instance = IaSdkChannel._();
-
   /// Returns the singleton instance of [IaSdkChannel].
   ///
-  static IaSdkChannel get instance => _instance;
+  static final IaSdkChannel instance = IaSdkChannel._();
 
   /// The method channel for communication with native platform code.
   ///

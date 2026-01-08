@@ -1,7 +1,7 @@
-import 'package:appsdk_v2_flutter_plugin/features/ia_ordering/ordering/ia_cart.dart';
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
-import 'package:appsdk_v2_flutter_plugin/features/ia_ordering/ordering/ia_order.dart';
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_navigation_target.dart';
+import 'package:appsdk_v2_flutter_plugin/src/features/ia_ordering/ordering/ia_cart.dart';
+import 'package:appsdk_v2_flutter_plugin/src/common/entities/ia_handling_decision.dart';
+import 'package:appsdk_v2_flutter_plugin/src/features/ia_ordering/ordering/ia_order.dart';
+import 'package:appsdk_v2_flutter_plugin/src/common/entities/ia_sdk_navigation_target.dart';
 
 /// Callbacks that allow the host app to observe and respond to SDK events.
 ///
@@ -41,7 +41,7 @@ class IaSdkCallbacks {
   ///   print('Order completed: ${order}');
   /// };
   /// ```
-  void Function(IaOrder order)? onOrderingDidFinishOrder;
+  void Function(IaModelOrder order)? onOrderingDidFinishOrder;
 
   /// Called when the shopping cart state changes.
   ///
@@ -55,5 +55,5 @@ class IaSdkCallbacks {
   ///   print('Cart updated: ${cart.totalAmountInCart} items');
   /// };
   /// ```
-  void Function(IaCart cart)? onOrderingDidUpdateCart;
+  void Function(IaModelCart cart)? onOrderingDidUpdateCart;
 }

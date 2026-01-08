@@ -10,10 +10,9 @@ class IaSdkConfiguration {
     required this.clientId,
     required this.serverEnvironment,
     this.shouldFetchThemeFromRemote = false,
-    IaFooterConfiguration? footer,
-    IaInitializationConfiguration? initialization,
-  }) : footer = footer ?? IaFooterConfiguration(),
-       initialization = initialization ?? IaInitializationConfiguration();
+    this.footer = const IaFooterConfiguration(),
+    this.initialization = const IaInitializationConfiguration(),
+  });
 
   /// Key used to authenticate the client setup with the backend service.
   ///
@@ -96,10 +95,10 @@ enum IaSdkConfigServerEnvironment {
 class IaInitializationConfiguration {
   /// Generates an instance of initialization configuration.
   ///
-  IaInitializationConfiguration({
+  const IaInitializationConfiguration({
     this.shouldShowIndicator = true,
-    IaPrerequisitesConfiguration? prerequisites,
-  }) : prerequisites = prerequisites ?? IaPrerequisitesConfiguration();
+    this.prerequisites = const IaPrerequisitesConfiguration(),
+  });
 
   /// Whether to show a loading indicator during initialization.
   ///
@@ -124,7 +123,7 @@ class IaInitializationConfiguration {
 class IaPrerequisitesConfiguration {
   /// Generates an instance of prerequisites configuration.
   ///
-  IaPrerequisitesConfiguration({
+  const IaPrerequisitesConfiguration({
     this.isCancellable = false,
     this.isAnimated = true,
     this.runLegalIfNeeded = true,
@@ -170,7 +169,7 @@ class IaPrerequisitesConfiguration {
 class IaFooterConfiguration {
   /// Generates an instance of footer configuration.
   ///
-  IaFooterConfiguration({
+  const IaFooterConfiguration({
     this.shouldShowDataProcessing = true,
     this.shouldShowAppSettings = true,
     this.shouldShowImprint = true,
