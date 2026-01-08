@@ -3,7 +3,8 @@ description: "Demonstrates how to use the appsdk_v2_flutter_plugin plugin."
 publish_to: 'none'
 
 environment:
-  sdk: ^3.9.2
+  sdk: '>=3.10.0'
+  flutter: '>=3.30.0'
 
 dependencies:
   flutter:
