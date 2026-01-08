@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:appsdk_v2_flutter_plugin/common/utilities/argument_validator.dart';
-import 'package:appsdk_v2_flutter_plugin/common/utilities/ia_sdk_channel.dart';
+import 'package:appsdk_v2_flutter_plugin/src/common/utilities/argument_validator.dart';
+import 'package:appsdk_v2_flutter_plugin/src/common/utilities/ia_sdk_channel.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

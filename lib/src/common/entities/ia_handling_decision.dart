@@ -7,18 +7,13 @@ enum IaHandlingDecision {
   /// The SDK should perform its default behavior.
   performDefault;
 
-  String get rawValue {
-    return switch (this) {
-      IaHandlingDecision.handled => 'handled',
-      IaHandlingDecision.performDefault => 'performDefault',
-    };
-  }
-
-  static IaHandlingDecision? fromRawValue(String value) {
+  factory IaHandlingDecision.fromRawValue(String value) {
     return switch (value) {
       'handled' => IaHandlingDecision.handled,
       'performDefault' => IaHandlingDecision.performDefault,
-      _ => null,
+      _ => throw UnimplementedError(
+        'IaHandlingDecision not defined for $value.',
+      ),
     };
   }
 }

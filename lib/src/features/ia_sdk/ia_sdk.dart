@@ -1,24 +1,18 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:appsdk_v2_flutter_plugin/common/callbacks/handlers/ordering_did_finish_order_callback_handler.dart';
-import 'package:appsdk_v2_flutter_plugin/common/callbacks/handlers/ordering_did_update_cart_callback_handler.dart';
-import 'package:appsdk_v2_flutter_plugin/common/callbacks/handlers/sdk_will_navigate_to_target_callback_handler.dart';
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_callbacks.dart';
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_configuration.dart';
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_module.dart';
-import 'package:appsdk_v2_flutter_plugin/common/utilities/argument_validator.dart';
-import 'package:appsdk_v2_flutter_plugin/common/utilities/ia_sdk_channel.dart';
-import 'package:appsdk_v2_flutter_plugin/features/ia_sdk/ia_sdk_platform_view_launcher.dart';
-import 'package:appsdk_v2_flutter_plugin/features/ia_ordering/ia_ordering.dart';
-import 'package:appsdk_v2_flutter_plugin/features/ia_over_the_counter/ia_over_the_counter.dart';
-import 'package:appsdk_v2_flutter_plugin/features/ia_pharmacy/ia_pharmacy.dart';
-import 'package:appsdk_v2_flutter_plugin/features/ia_prescription/ia_prescription.dart';
-import 'package:flutter/foundation.dart';
+import 'package:appsdk_v2_flutter_plugin/src/common/callbacks/ia_sdk_callback_manager.dart';
+import 'package:appsdk_v2_flutter_plugin/src/common/entities/ia_sdk_callbacks.dart';
+import 'package:appsdk_v2_flutter_plugin/src/common/entities/ia_sdk_configuration.dart';
+import 'package:appsdk_v2_flutter_plugin/src/common/entities/ia_sdk_module.dart';
+import 'package:appsdk_v2_flutter_plugin/src/common/utilities/argument_validator.dart';
+import 'package:appsdk_v2_flutter_plugin/src/common/utilities/ia_sdk_channel.dart';
+import 'package:appsdk_v2_flutter_plugin/src/features/ia_sdk/ia_sdk_platform_view_launcher.dart';
+import 'package:appsdk_v2_flutter_plugin/src/features/ia_ordering/ia_ordering.dart';
+import 'package:appsdk_v2_flutter_plugin/src/features/ia_over_the_counter/ia_over_the_counter.dart';
+import 'package:appsdk_v2_flutter_plugin/src/features/ia_pharmacy/ia_pharmacy.dart';
+import 'package:appsdk_v2_flutter_plugin/src/features/ia_prescription/ia_prescription.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-part '../../common/callbacks/ia_sdk_callback_manager.dart';
 
 /// Widget wrapper for the ia.de SDK service.
 ///

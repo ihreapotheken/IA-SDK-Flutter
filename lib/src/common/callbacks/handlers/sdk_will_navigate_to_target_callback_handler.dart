@@ -1,10 +1,8 @@
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_navigation_target.dart';
-import 'package:appsdk_v2_flutter_plugin/features/ia_sdk/ia_sdk.dart';
-import 'package:flutter/foundation.dart';
+part of '../ia_sdk_callback_manager.dart';
 
-class SdkWillNavigateToTargetCallbackHandler {
-  Future<T?> handle<T>(
+class _SdkWillNavigateToTargetCallbackHandler implements _CallbackHandler {
+  @override
+  Future<String> handle(
     dynamic arguments,
     IaSdk iaSdk,
   ) async {
@@ -12,34 +10,34 @@ class SdkWillNavigateToTargetCallbackHandler {
     final callback = iaSdk.callbacks.onSdkWillNavigateToTarget;
     if (callback == null) {
       // No callback set, always perform default
-      return IaHandlingDecision.performDefault.rawValue as T?;
+      return IaHandlingDecision.performDefault.name;
     }
 
     // Extract navigation target from arguments
     if (arguments is! Map) {
       debugPrint('sdkWillNavigateToTarget: Invalid arguments type');
-      return IaHandlingDecision.performDefault.rawValue as T?;
+      return IaHandlingDecision.performDefault.name;
     }
 
     final navigationTargetString = arguments['navigationTarget'] as String?;
     if (navigationTargetString == null) {
       debugPrint('sdkWillNavigateToTarget: Missing navigationTarget');
-      return IaHandlingDecision.performDefault.rawValue as T?;
+      return IaHandlingDecision.performDefault.name;
     }
 
     final navigationTarget = IaSdkNavigationTarget.fromRawValue(navigationTargetString);
     if (navigationTarget == null) {
       debugPrint('sdkWillNavigateToTarget: Unknown navigationTarget: $navigationTargetString');
-      return IaHandlingDecision.performDefault.rawValue as T?;
+      return IaHandlingDecision.performDefault.name;
     }
 
     // Call the callback
     try {
       final decision = await callback(navigationTarget);
-      return decision.rawValue as T?;
+      return decision.name;
     } catch (e) {
       debugPrint('sdkWillNavigateToTarget: Error calling callback: $e');
-      return IaHandlingDecision.performDefault.rawValue as T?;
+      return IaHandlingDecision.performDefault.name;
     }
   }
 }

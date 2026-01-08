@@ -1,10 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_handling_decision.dart';
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_module.dart';
-import 'package:appsdk_v2_flutter_plugin/common/entities/ia_sdk_navigation_target.dart';
-import 'package:appsdk_v2_flutter_plugin/features/ia_sdk/ia_sdk.dart';
+import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -21,7 +18,7 @@ void main() {
 }
 
 class ExampleApp extends StatefulWidget {
-  ExampleApp({super.key});
+  const ExampleApp({super.key});
 
   @override
   State<ExampleApp> createState() => _ExampleAppState();
