@@ -17,8 +17,8 @@ Public API Reference: https://ihreapotheken.github.io/docs/appsdk/flutter
 
 ---
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) 3.3 and up
-- [Dart SDK](https://dart.dev/get-dart) 3.9.2 and up
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) 3.30.0 and up
+- [Dart SDK](https://dart.dev/get-dart) 3.10.0 and up
 - [Swift Package Manager](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers) Flutter SDK Support
 - [Github Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) for native library access
 

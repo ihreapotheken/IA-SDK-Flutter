@@ -38,9 +38,14 @@ internal class IaClientMethods(
     @Suppress("EnumEntryName")
     enum class FlutterCall {
         /**
+         * Register modules.
+         */
+        register,
+
+        /**
          * Allocates the SDK runtime resources.
          */
-        initIaSdk,
+        initialize,
 
         /**
          * Selects a pharmacy by providing an identifier.
@@ -76,11 +81,6 @@ internal class IaClientMethods(
          * Closes any overlaying ia.de screen contents.
          */
         finishAllActivities,
-
-        /**
-         * Register modules.
-         */
-        register,
     }
 
     /**
@@ -93,7 +93,12 @@ internal class IaClientMethods(
         result: MethodChannel.Result,
     ) {
         when (call.method) {
-            FlutterCall.initIaSdk.name -> {
+            FlutterCall.register.name -> {
+                // @TODO This needs to be handled. Added as empty case for now just so example app works.
+                result.success(null)
+            }
+
+            FlutterCall.initialize.name -> {
                 val args = call.arguments
                 if (args !is Map<*, *>) {
                     result.error(
@@ -400,11 +405,6 @@ internal class IaClientMethods(
 
             FlutterCall.finishAllActivities.name -> {
                 IaSdkActivity.finishAllActivities()
-                result.success(null)
-            }
-
-            FlutterCall.register.name -> {
-                // @TODO This needs to be handled. Added as empty case for now just so example app works.
                 result.success(null)
             }
 

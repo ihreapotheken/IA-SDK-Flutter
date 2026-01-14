@@ -1,23 +1,16 @@
-//
-//  FlutterCall.swift
-//  appsdk_v2_flutter_plugin
-//
-//  Created by Danijel Huis on 29.12.2025..
-//
-
 /**
  * Collection of available method invocation identifiers.
  */
 enum FlutterCall: CaseIterable {
     /**
-     * Allocates the SDK runtime resources.
-     */
-    case initIaSdk
-    
-    /**
      * Registers SDK modules for use in the application.
      */
     case register
+
+    /**
+     * Allocates the SDK runtime resources.
+     */
+    case initialize
     
     /**
      * Selects a pharmacy by providing an identifier.

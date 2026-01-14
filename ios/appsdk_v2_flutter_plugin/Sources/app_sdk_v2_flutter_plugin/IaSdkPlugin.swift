@@ -44,7 +44,7 @@ final class IASDKPlugin {
         case FlutterCall.register.name:
             return try await iaSdkWrapper.register(arguments: call.arguments)
             
-        case FlutterCall.initIaSdk.name:
+        case FlutterCall.initialize.name:
             return try await iaSdkWrapper.initialize(arguments: call.arguments)
             
         case FlutterCall.setPharmacyId.name:

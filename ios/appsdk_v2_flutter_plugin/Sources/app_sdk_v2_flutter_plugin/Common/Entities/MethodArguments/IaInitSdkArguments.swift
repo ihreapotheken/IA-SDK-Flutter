@@ -1,10 +1,3 @@
-//
-//  IaInitSdkArguments.swift
-//  appsdk_v2_flutter_plugin
-//
-//  Created by Danijel Huis on 22.12.2025..
-//
-
 import Foundation
 import IACore
 
