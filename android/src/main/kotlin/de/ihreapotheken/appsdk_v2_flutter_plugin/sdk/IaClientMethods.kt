@@ -116,7 +116,6 @@ internal class IaClientMethods(
                     if (modules.contains("prescription")) RxModule else null,
                 ).toTypedArray<SdkModule>()
                 bindings.sdkModule = IaSdk.register(
-                    ApofinderModule,
                     *modulesCollection,
                 )
                 result.success(null)
