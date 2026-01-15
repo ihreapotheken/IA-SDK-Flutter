@@ -65,13 +65,14 @@ class ExampleAppConfig {
       accessKey: accessKey,
       clientId: clientId,
       serverEnvironment: serverEnvironment,
-      shouldFetchThemeFromRemote: false,
+      shouldFetchThemeFromRemote: true,
       footer: IaSdkConfigurationFooter(
         shouldShowDataProcessing: false,
         shouldShowAppSettings: true,
         shouldShowImprint: true,
       ),
       initialization: IaSdkConfigurationInitialization(
+        channelId: 2,
         shouldShowIndicator: false,
         prerequisites: IaPrerequisitesConfiguration(
           isCancellable: false,

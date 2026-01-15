@@ -361,11 +361,10 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
                                           onPressed: () async {
                                             Navigator.pop(context);
                                             await widget.iaSdk.pharmacy.setPharmacyId(marker.pharmacyId);
-
+                                            await widget.iaSdk.launchStartRoute();
                                             if (Platform.isIOS) {
                                               await Future.delayed(const Duration(seconds: 1));
                                             }
-                                            await widget.iaSdk.launchStartRoute();
                                             await FlutterWebBrowser.openWebPage(
                                               url: 'https://example.org/',
                                               customTabsOptions: const CustomTabsOptions(
