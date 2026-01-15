@@ -27,7 +27,7 @@ class IaModuleOrdering extends IaBaseOrdering {
       orderId: orderId,
     );
     return await _Methods.transferPrescriptions.invoke<void>(
-      arguments.toSupportedType(),
+      arguments,
     );
   }
 

@@ -16,12 +16,13 @@ final class IASDKWrapper {
         IASDK.setEnvironment(arguments.serverEnvironment.mappedToSDK())
         IASDK.configuration.apiKey = arguments.accessKey
         IASDK.configuration.clientID = arguments.clientId
+        if let channelId = arguments.initialization.channelId {
+            IASDK.configuration.channelID = channelId
+        }
         IASDK.configuration.shouldLoadRemoteStyleConfiguration = arguments.shouldFetchThemeFromRemote
         IASDK.configuration.footer.shouldShowAppSettings = arguments.footer.shouldShowAppSettings
         IASDK.configuration.footer.shouldShowDataProcessing = arguments.footer.shouldShowDataProcessing
         IASDK.configuration.footer.shouldShowImprint = arguments.footer.shouldShowImprint
-        // @TODO, this is hardcoded, should be removed once backend starts returning proper channel IDs (IASDK-1927).
-        IASDK.configuration.channelID = 2
         
         // @TODO: remove, just for testing
         IASDK.QA.setQAFeatures([.showTestPharmaciesOnApofinder])

@@ -1,8 +1,9 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
 import android.app.Activity
-import androidx.lifecycle.MutableLiveData
 import de.ihreapotheken.sdk.apofinder.ApofinderModule
+import de.ihreapotheken.sdk.cardlink.CardlinkModule
+import de.ihreapotheken.sdk.core.SdkModule
 import de.ihreapotheken.sdk.core.api.PresentationMode
 import de.ihreapotheken.sdk.core.api.listener.HandlingDecision
 import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigListener
@@ -83,18 +84,41 @@ internal class IaClientMethods(
         finishAllActivities,
     }
 
-    /**
-     * Listener for the total number of cart items.
-     */
-    private val cartItemCountListener: MutableLiveData<Int> = MutableLiveData(0)
-
     fun callHandler(
         call: MethodCall,
         result: MethodChannel.Result,
     ) {
         when (call.method) {
             FlutterCall.register.name -> {
-                // @TODO This needs to be handled. Added as empty case for now just so example app works.
+                val args = call.arguments
+                if (args !is Map<*, *>) {
+                    result.error(
+                        "ARG_ERROR",
+                        "Arguments for register modules must be of Map type.",
+                        null,
+                    )
+                    return
+                }
+                val modules = args["modules"] as? ArrayList<*>
+                if (modules == null || modules.any { it !is String }) {
+                    result.error(
+                        "ARG_ERROR",
+                        "Missing or invalid argument types. Expected ArrayList<String> value for modules.",
+                        null,
+                    )
+                    return
+                }
+                val modulesCollection = listOfNotNull(
+                    if (modules.contains("cardLink")) CardlinkModule else null,
+                    if (modules.contains("ordering")) OrderingModule else null,
+                    if (modules.contains("overTheCounter")) OtcModule else null,
+                    if (modules.contains("pharmacy")) PharmacyModule else null,
+                    if (modules.contains("prescription")) RxModule else null,
+                ).toTypedArray<SdkModule>()
+                bindings.sdkModule = IaSdk.register(
+                    ApofinderModule,
+                    *modulesCollection,
+                )
                 result.success(null)
             }
 
@@ -133,48 +157,41 @@ internal class IaClientMethods(
                         EnvironmentType.STAGING
                     }
                 }
-                bindings.sdkModule = IaSdk.register(
-                    OtcModule,
-                    OrderingModule,
-                    PharmacyModule,
-                    RxModule,
-                    ApofinderModule,
-                )
-                // TODO: Parse configuration options from args (similar to iOS implementation)
-                // The following configuration options should be extracted from args:
-                // - shouldFetchThemeFromRemote (args["shouldFetchThemeFromRemote"])
-                // - footer configuration (args["footer"])
-                // - initialization configuration (args["initialization"])
-                // - prerequisites configuration (args["initialization"]["prerequisites"])
-                // See iOS implementation in IaClientMethods.swift for reference
+                val shouldFetchThemeFromRemote = args["shouldFetchThemeFromRemote"] == true
+                val initializationOptions = args["initialization"] as? Map<*, *>
+                val channelId = args["channelId"] as? Int
+                val shouldShowIndicator = initializationOptions?.get("shouldShowIndicator") == true
+                val prerequisites = initializationOptions?.get("prerequisites") as? Map<*, *>
+                val shouldRunLegal = prerequisites?.get("runLegalIfNeeded") == true
+                val shouldRunOnboarding = prerequisites?.get("runOnboardingIfNeeded") == true
                 bindings.sdkModule.init(
                     context = bindings.applicationContext,
                     apiKey = accessKey,
                     clientId = clientId,
                     configuration = IaSdkConfiguration(
-                        shouldFetchThemeFromRemote = true,
+                        shouldFetchThemeFromRemote = shouldFetchThemeFromRemote,
                         prerequisiteFlowConfiguration = PrerequisiteFlowConfiguration(
-                            shouldRunLegal = true,
-                            shouldRunOnboarding = false,
+                            shouldRunLegal = shouldRunLegal,
+                            shouldRunOnboarding = shouldRunOnboarding,
                         ),
+                        channelId = channelId,
+                        shouldShowIndicator = shouldShowIndicator,
                     ),
                     environmentType = serverEnv,
-                    sdkEventListener = object : SdkEventListener {
-                        override fun onSdkEvent(event: SdkEvent) {
-                            if (event is SdkEvent.InitStatus && event !is SdkEvent.InitStatus.Initializing) {
-                                if (event is SdkEvent.InitStatus.InitializationCompleted) {
-                                    // Set up centralized callbacks handler
-                                    bindings.sdkModule.ordering.setCartListener(bindings.callbacks)
-                                    bindings.sdkModule.ordering.setCheckoutListener(bindings.callbacks)
-                                }
-                                result.success(null)
-                            } else if (event is SdkEvent.InitError) {
-                                result.error(
-                                    "INIT_ERROR",
-                                    event.message,
-                                    null,
-                                )
+                    sdkEventListener = SdkEventListener { event ->
+                        if (event is SdkEvent.InitStatus && event !is SdkEvent.InitStatus.Initializing) {
+                            if (event is SdkEvent.InitStatus.InitializationCompleted) {
+                                // Set up centralized callbacks handler
+                                bindings.sdkModule.ordering.setCartListener(bindings.callbacks)
+                                bindings.sdkModule.ordering.setCheckoutListener(bindings.callbacks)
                             }
+                            result.success(null)
+                        } else if (event is SdkEvent.InitError) {
+                            result.error(
+                                "INIT_ERROR",
+                                event.message,
+                                null,
+                            )
                         }
                     }
                 )

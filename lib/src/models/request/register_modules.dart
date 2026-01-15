@@ -5,16 +5,21 @@ class _RequestModelRegisterModules implements IaBaseRequest {
     required this.modules,
   });
 
-  final List<IaBase> modules;
+  final List<IaBaseModule> modules;
 
   @override
   Map<String, dynamic> toSupportedType() {
     return {
-      'modules': modules.map(
-        (module) {
-          return module.module.name;
-        },
-      ).toList(),
+      'modules':
+          [
+            IaBaseModule.integrations,
+            IaBaseModule.apofinder,
+            ...modules,
+          ].map(
+            (module) {
+              return module.name;
+            },
+          ).toList(),
     };
   }
 }

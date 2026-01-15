@@ -110,7 +110,13 @@ class IaSdk {
     required List<IaBase> modules,
   }) async {
     if (!_modulesRegistered) {
-      final arguments = _RequestModelRegisterModules(modules: modules);
+      final arguments = _RequestModelRegisterModules(
+        modules: modules.map(
+          (moduleEntry) {
+            return moduleEntry.module;
+          },
+        ).toList(),
+      );
       return await _Methods.register.invoke(arguments).then((value) {
         for (final module in modules) {
           for (final internalModule
@@ -200,7 +206,7 @@ class IaSdk {
   /// Launches the start screen experience on top of the navigation stack.
   ///
   Future<void> launchStartRoute() async {
-    await _Views.startScreen.launch();
+    return await _Views.startScreen.launch();
   }
 
   /// Closes any overlaying ia.de screen contents.
@@ -209,10 +215,10 @@ class IaSdk {
     return await _Methods.finishAllActivities.invoke();
   }
 
-  /// Internal state of the native navigation callback handler.
+  /// Property holding internal state of the native callback handlers.
   ///
   // ignore: unused_field
-  final _navigationCallbackHandler = IaBaseCallbacks(
+  final _callbackHandlers = IaBaseCallbacks(
     handlers: [
       const _NavigationHandler(),
     ],

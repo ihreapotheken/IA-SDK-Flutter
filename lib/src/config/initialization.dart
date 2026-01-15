@@ -52,9 +52,14 @@ class IaSdkConfigurationInitialization {
   /// Generates an instance of initialization configuration.
   ///
   const IaSdkConfigurationInitialization({
+    this.channelId,
     this.shouldShowIndicator = true,
     this.prerequisites = const IaPrerequisitesConfiguration(),
   });
+
+  /// Apofinder channel identifier implemented for pharmacy collection filtering.
+  ///
+  final int? channelId;
 
   /// Whether to show a loading indicator during initialization.
   ///
@@ -68,6 +73,7 @@ class IaSdkConfigurationInitialization {
   ///
   Map<String, dynamic> toJson() {
     return {
+      'channelId': channelId,
       'shouldShowIndicator': shouldShowIndicator,
       'prerequisites': prerequisites.toJson(),
     };

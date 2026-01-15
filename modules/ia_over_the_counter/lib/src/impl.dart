@@ -8,6 +8,6 @@ part 'views.dart';
 class IaModuleOverTheCounter extends IaBaseOverTheCounter {
   @override
   Future<void> launchProductSearchRoute() async {
-    return await _Views.productSearchScreen.launch();
+    return await _Views.searchScreen.launch();
   }
 }

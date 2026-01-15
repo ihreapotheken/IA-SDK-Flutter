@@ -1,7 +1,7 @@
 part of 'impl.dart';
 
 enum _Views with IaBaseViews implements IaBaseViews {
-  productSearchScreen,
+  searchScreen,
   ;
 
   @override

@@ -9,7 +9,7 @@ part 'models/request/set_pharmacy.dart';
 class IaModulePharmacy extends IaBasePharmacy {
   @override
   Future<void> launchPharmacyDetails() async {
-    return await _Views.pharmacyDetailsScreen.launch();
+    return await _Views.pharmacyScreen.launch();
   }
 
   @override

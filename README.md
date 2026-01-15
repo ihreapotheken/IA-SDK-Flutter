@@ -88,7 +88,7 @@ void main() {
   final iaSdkConfig = IaSdkConfiguration(
     accessKey: 'myAccessKey',
     clientId: 'myClientId',
-    serverEnvironment: 'myServerEnvironment',
+    serverEnvironment: myServerEnvironment,
   );
   runApp(
     IaSdk( // Alternatively, place the [IaSdk] wrapper somewhere else in the widget tree.
