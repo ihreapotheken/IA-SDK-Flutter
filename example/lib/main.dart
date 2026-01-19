@@ -6,14 +6,16 @@ import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
+import 'package:ia_cardlink/ia_cardlink.dart';
+import 'package:ia_ordering/ia_ordering.dart';
+import 'package:ia_over_the_counter/ia_over_the_counter.dart';
+import 'package:ia_pharmacy/ia_pharmacy.dart';
+import 'package:ia_prescription/ia_prescription.dart';
 import 'package:latlong2/latlong.dart';
 
 void main() {
   runApp(
-    IaSdkWidget(
-      child: ExampleApp(),
-      configuration: ExampleAppConfig.instance.pluginConfig,
-    ),
+    const ExampleApp(),
   );
 }
 
@@ -25,10 +27,6 @@ class ExampleApp extends StatefulWidget {
 }
 
 class _ExampleAppState extends State<ExampleApp> {
-  IaSdk? get _iaSdk {
-    return IaSdkWidget.of(context);
-  }
-
   int _selectedTabIndex = 0;
 
   @override
@@ -40,7 +38,7 @@ class _ExampleAppState extends State<ExampleApp> {
           children: [
             Expanded(
               child: switch (_selectedTabIndex) {
-                0 => _ExampleMapView(iaSdk: _iaSdk),
+                0 => _ExampleMapView(iaSdk: IaSdk.instance),
                 1 => ListView(
                   padding: EdgeInsets.fromLTRB(
                     20,
@@ -52,14 +50,14 @@ class _ExampleAppState extends State<ExampleApp> {
                     ElevatedButton(
                       child: Text('Clear Cart'),
                       onPressed: () async {
-                        await _iaSdk?.ordering.clearCart();
+                        await IaSdk.instance.ordering.clearCart();
                       },
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       child: Text('Set guest user data'),
                       onPressed: () async {
-                        await _iaSdk?.setGuestUserData(
+                        await IaSdk.instance.setGuestUserData(
                           salutation: 'Herr',
                           firstName: 'First',
                           lastName: 'Last',
@@ -73,7 +71,7 @@ class _ExampleAppState extends State<ExampleApp> {
                     ElevatedButton(
                       child: Text('Logout'),
                       onPressed: () async {
-                        await _iaSdk?.logout();
+                        await IaSdk.instance.logout();
                       },
                     ),
                     const SizedBox(height: 16),
@@ -81,7 +79,7 @@ class _ExampleAppState extends State<ExampleApp> {
                       child: Text('Transfer prescriptions'),
                       onPressed: () async {
                         try {
-                          await _iaSdk?.ordering.transferPrescriptions(
+                          await IaSdk.instance.ordering.transferPrescriptions(
                             images: [
                               base64Decode(ExampleAppConfig.instance.mockPngPrescription),
                               base64Decode(ExampleAppConfig.instance.mockJpgPrescription),
@@ -115,28 +113,28 @@ class _ExampleAppState extends State<ExampleApp> {
                     ElevatedButton(
                       child: Text('Launch Start screen'),
                       onPressed: () async {
-                        await _iaSdk?.launchStartRoute();
+                        await IaSdk.instance.launchStartRoute();
                       },
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       child: Text('Launch Product Search'),
                       onPressed: () async {
-                        await _iaSdk?.overTheCounter.launchProductSearchRoute();
+                        await IaSdk.instance.overTheCounter.launchProductSearchRoute();
                       },
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       child: Text('Launch Cart Screen'),
                       onPressed: () async {
-                        await _iaSdk?.ordering.launchCartScreen();
+                        await IaSdk.instance.ordering.launchCartScreen();
                       },
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       child: Text('Launch Pharmacy Details'),
                       onPressed: () async {
-                        await _iaSdk?.pharmacy.launchPharmacyDetails();
+                        await IaSdk.instance.pharmacy.launchPharmacyDetails();
                       },
                     ),
                   ],
@@ -204,10 +202,10 @@ class _ExampleAppState extends State<ExampleApp> {
 
 class _ExampleMapView extends StatefulWidget {
   const _ExampleMapView({
-    required IaSdk? iaSdk,
-  }) : _iaSdk = iaSdk;
+    required this.iaSdk,
+  });
 
-  final IaSdk? _iaSdk;
+  final IaSdk iaSdk;
 
   @override
   State<_ExampleMapView> createState() => _ExampleMapViewState();
@@ -221,41 +219,53 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
     super.initState();
 
     // Set up SDK callbacks
-    widget._iaSdk?.callbacks.onSdkWillNavigateToTarget = (navigationTarget) async {
+    widget.iaSdk.onSdkWillNavigateToTarget = (navigationTarget) async {
       debugPrint('Host app: SDK wants to navigate to: $navigationTarget');
 
       switch (navigationTarget) {
         // Just as an example.
         case IaSdkNavigationTarget.pharmacyDetails:
-          return IaHandlingDecision.performDefault;
+          return true;
         default:
-          return IaHandlingDecision.performDefault;
+          return true;
       }
-    };
-
-    widget._iaSdk?.callbacks.onOrderingDidFinishOrder = (order) {
-      debugPrint('Host app: Order completed! Order Code: ${order.orderCode}, client order ID: ${order.clientOrderIDs}');
-    };
-
-    widget._iaSdk?.callbacks.onOrderingDidUpdateCart = (cart) {
-      final itemCount = cart.totalAmountInCart;
-      final orderCount = cart.clientOrderIDs.length;
-      debugPrint('Host app: Cart updated - $itemCount items, $orderCount orders');
     };
 
     _initIaSdk = _initializeSdk();
   }
 
   Future<void> _initializeSdk() async {
-    await widget._iaSdk?.register([
-      IaSdkModule.integrations,
-      IaSdkModule.overTheCounter,
-      IaSdkModule.ordering,
-      IaSdkModule.apofinder,
-      IaSdkModule.pharmacyDetails,
-      IaSdkModule.prescription,
-    ]);
-    await widget._iaSdk?.init();
+    await widget.iaSdk.register(
+      modules: [
+        IaModuleCardLink(),
+        IaModuleOrdering(),
+        IaModuleOverTheCounter(),
+        IaModulePharmacy(),
+        IaModulePrescription(),
+      ],
+    );
+
+    await widget.iaSdk.initialize(
+      config: ExampleAppConfig.instance.pluginConfig,
+    );
+
+    widget.iaSdk.ordering.orderingDidFinishOrderListener.stream.listen(
+      (order) {
+        debugPrint(
+          'Host app: Order completed! Order Code: ${order.orderCode}, client order ID: ${order.clientOrderIDs}',
+        );
+      },
+    );
+
+    widget.iaSdk.ordering.orderingDidUpdateCartListener.stream.listen(
+      (cart) {
+        final itemCount = cart.totalAmountInCart;
+        final orderCount = cart.clientOrderIDs.length;
+        debugPrint(
+          'Host app: Cart updated - $itemCount items, $orderCount orders',
+        );
+      },
+    );
   }
 
   @override
@@ -270,7 +280,6 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
         }
 
         if (snapshot.hasError) {
-          print('AAAAA\n${snapshot.error}');
           return Center(
             child: Text(
               snapshot.error.toString(),
@@ -351,12 +360,11 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
                                           child: const Text('Online Shopping'),
                                           onPressed: () async {
                                             Navigator.pop(context);
-                                            await widget._iaSdk?.setPharmacyId(marker.pharmacyId);
-
+                                            await widget.iaSdk.pharmacy.setPharmacyId(marker.pharmacyId);
+                                            await widget.iaSdk.launchStartRoute();
                                             if (Platform.isIOS) {
                                               await Future.delayed(const Duration(seconds: 1));
                                             }
-                                            await widget._iaSdk?.launchStartRoute();
                                             await FlutterWebBrowser.openWebPage(
                                               url: 'https://example.org/',
                                               customTabsOptions: const CustomTabsOptions(

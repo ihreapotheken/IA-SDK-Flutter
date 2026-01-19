@@ -1,10 +1,3 @@
-//
-//  IaRegisterModulesArguments.swift
-//  appsdk_v2_flutter_plugin
-//
-//  Created by Danijel Huis on 23.12.2025..
-//
-
 import Foundation
 
 /// Arguments for registering SDK modules.

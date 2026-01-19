@@ -2,14 +2,25 @@ name: appsdk_v2_flutter_plugin
 description: "A new Flutter plugin project."
 version: 0.0.1
 homepage: https://ihreapotheken.de
+publish_to: none
 
 environment:
   sdk: '>=3.10.0'
   flutter: '>=3.30.0'
 
+workspace:
+  - interface
+  - modules/ia_cardlink
+  - modules/ia_ordering
+  - modules/ia_over_the_counter
+  - modules/ia_pharmacy
+  - modules/ia_prescription
+
 dependencies:
   flutter:
     sdk: flutter
+  ia_interface:
+    path: ./interface
 
 dev_dependencies:
   flutter_test:

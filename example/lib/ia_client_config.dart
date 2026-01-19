@@ -38,13 +38,13 @@ class ExampleAppConfig {
 
   /// Specified ia.de SDK server environment.
   ///
-  IaSdkConfigServerEnvironment get serverEnvironment {
+  IaSdkConfigurationServerEnvironment get serverEnvironment {
     try {
-      return IaSdkConfigServerEnvironment.values.firstWhere((serverEnv) {
+      return IaSdkConfigurationServerEnvironment.values.firstWhere((serverEnv) {
         return serverEnv.name == _serverEnvironment;
       });
     } catch (e) {
-      return IaSdkConfigServerEnvironment.staging;
+      return IaSdkConfigurationServerEnvironment.staging;
     }
   }
 
@@ -52,9 +52,9 @@ class ExampleAppConfig {
   ///
   String get clientId {
     return switch (serverEnvironment) {
-      IaSdkConfigServerEnvironment.production => '2004',
-      IaSdkConfigServerEnvironment.staging => '5004',
-      IaSdkConfigServerEnvironment.development => '103',
+      IaSdkConfigurationServerEnvironment.production => '2004',
+      IaSdkConfigurationServerEnvironment.staging => '5004',
+      IaSdkConfigurationServerEnvironment.development => '103',
     };
   }
 
@@ -65,13 +65,14 @@ class ExampleAppConfig {
       accessKey: accessKey,
       clientId: clientId,
       serverEnvironment: serverEnvironment,
-      shouldFetchThemeFromRemote: false,
-      footer: IaFooterConfiguration(
+      shouldFetchThemeFromRemote: true,
+      footer: IaSdkConfigurationFooter(
         shouldShowDataProcessing: false,
         shouldShowAppSettings: true,
         shouldShowImprint: true,
       ),
-      initialization: IaInitializationConfiguration(
+      initialization: IaSdkConfigurationInitialization(
+        channelId: 2,
         shouldShowIndicator: false,
         prerequisites: IaPrerequisitesConfiguration(
           isCancellable: false,

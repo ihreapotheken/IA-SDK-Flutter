@@ -1,10 +1,3 @@
-//
-//  IaInitSdkArguments.swift
-//  appsdk_v2_flutter_plugin
-//
-//  Created by Danijel Huis on 22.12.2025..
-//
-
 import Foundation
 import IACore
 
@@ -13,7 +6,7 @@ struct IaInitSdkArguments: Decodable {
     let accessKey: String
     let clientId: String    
     let serverEnvironment: IaEnvironmentArguments
-    let shouldFetchThemeFromRemote: Bool    
+    let shouldFetchThemeFromRemote: Bool
     let footer: IaFooterConfigurationArguments   
     let initialization: IaInitializationConfigurationArguments
 }
@@ -46,13 +39,14 @@ struct IaPrerequisitesConfigurationArguments: Decodable {
 
 /// Configuration options for SDK initialization behavior.
 struct IaInitializationConfigurationArguments: Decodable {
+    let channelId: Int?
     let shouldShowIndicator: Bool
     let prerequisites: IaPrerequisitesConfigurationArguments
     
     func mappedToSDK() -> IASDKInitializationOptions {
         .init(
             shouldShowIndicator: shouldShowIndicator,
-            prerequisitesOptions: prerequisites.mappedToSDK()
+            prerequisitesOptions: prerequisites.mappedToSDK(),
         )
     }
 }

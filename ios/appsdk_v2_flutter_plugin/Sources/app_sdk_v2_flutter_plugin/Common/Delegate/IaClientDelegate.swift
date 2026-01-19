@@ -1,10 +1,3 @@
-//
-//  IaClientDelegate.swift
-//  appsdk_v2_flutter_plugin
-//
-//  Created by Danijel Huis on 17.12.2025..
-//
-
 import Foundation
 import IACore
 import Combine

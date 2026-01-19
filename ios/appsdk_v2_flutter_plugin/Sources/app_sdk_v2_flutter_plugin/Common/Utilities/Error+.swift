@@ -1,10 +1,3 @@
-//
-//  Error+.swift
-//  appsdk_v2_flutter_plugin
-//
-//  Created by Danijel Huis on 22.12.2025..
-//
-
 import Flutter
 
 /// Extension to convert Swift errors to FlutterError.
@@ -36,7 +29,7 @@ extension Error {
 
     private func codeFromFlutterCall(_ flutterCall: FlutterCall) -> String {
         switch flutterCall {
-        case .initIaSdk: "INIT_ERROR"
+        case .initialize: "INIT_ERROR"
         case .register: "REGISTER_ERROR"
         case .setPharmacyId: "SET_PHARMACY_ERROR"
         case .clearCart: "CLEAR_CART_ERROR"
