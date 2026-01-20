@@ -1,5 +1,7 @@
 package de.ihreapotheken.appsdk.flutter.pharmacy
 
+import de.ihreapotheken.sdk.integrations.api.IaSdk
+import de.ihreapotheken.sdk.pharmacy.PharmacyModule
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -17,7 +19,10 @@ class IaSdkFlutterPharmacy :
     private lateinit var channel: MethodChannel
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ia_over_the_counter")
+        channel = MethodChannel(
+            flutterPluginBinding.binaryMessenger,
+            "de.ihreapotheken/sdk/pharmacyDetails",
+        )
         channel.setMethodCallHandler(this)
     }
 
@@ -25,8 +30,9 @@ class IaSdkFlutterPharmacy :
         call: MethodCall,
         result: Result
     ) {
-        if (call.method == "getPlatformVersion") {
-            result.success("Android ${android.os.Build.VERSION.RELEASE}")
+        if (call.method == "register") {
+            IaSdk.register(PharmacyModule)
+            result.success(null)
         } else {
             result.notImplemented()
         }

@@ -6,10 +6,26 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        gradlePluginPortal()
+        maven {
+            url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
+        }
+        mavenLocal()
+        maven {
+            url = uri("https://nexus.link4.health/repository/link4health-anonymous/")
+        }
+        maven {
+            name = "IA SDK repo"
+            url = uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
+            credentials {
+                username = System.getenv("GITHUB_USERNAME") ?: "appsdk-service@4ofthem.eu"
+                password = System.getenv("GITHUB_TOKEN") ?: "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"
+            }
+        }
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.11.1")
+        classpath("com.android.tools.build:gradle:8.12.3")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }
@@ -44,18 +60,34 @@ android {
     }
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 30
     }
 
     dependencies {
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
+        def envFile = file(buildFile.parentFile.path + "/../../../.env")
+        def env = [:]
+        if (envFile.exists()) {
+            envFile.eachLine { line ->
+                line = line.trim()
+                if (!line || line.startsWith("#")) return
+                def parts = line.split("=", 2)
+                env[parts[0]] = parts.length > 1 ? parts[1] : ""
+            }
+        }
+        def iaDeSdkVersion = env["ANDROID_APPSDK_VERSION"]
+        if (iaDeSdkVersion == null) {
+            throw new GradleException("No ANDROID_APPSDK_VERSION provided from .env file.")
+        }
+        iaDeSdkVersion = iaDeSdkVersion.replaceAll("\"", "")
+        implementation("de.ihreapotheken.sdk:integrations:${iaDeSdkVersion}")
+        implementation("de.ihreapotheken.sdk:cardlink:${iaDeSdkVersion}")
     }
 
     testOptions {
         unitTests.all {
             useJUnitPlatform()
-
             testLogging {
                events "passed", "skipped", "failed", "standardOut", "standardError"
                outputs.upToDateWhen {false}

@@ -26,6 +26,13 @@ abstract class IaBase {
   ///
   IaBase() {
     IaBaseCallbacks._instance;
+    final moduleChannelId = IaBaseMethods._channelId + '/${module.name}';
+    final moduleMethodChannel = MethodChannel(moduleChannelId);
+    moduleMethodChannel.invokeMethod('register').catchError(
+      (e) {
+        debugPrint('Error registering ${module.name} module: $e');
+      },
+    );
   }
 
   /// Relevant [IaBaseModule] with functionality extended by this base class.

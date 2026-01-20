@@ -38,9 +38,11 @@ class IaBaseCallbacks {
       (call) async {
         for (final subscriber in _subscribers) {
           try {
-            final matchingCallback = subscriber.handlers.firstWhere((handler) {
-              return handler.methodId == call.method;
-            });
+            final matchingCallback = subscriber.handlers.firstWhere(
+              (handler) {
+                return handler.methodId == call.method;
+              },
+            );
             return await matchingCallback.handler(call.arguments);
           } catch (e) {
             continue;

@@ -38,7 +38,7 @@ class _ExampleAppState extends State<ExampleApp> {
           children: [
             Expanded(
               child: switch (_selectedTabIndex) {
-                0 => _ExampleMapView(iaSdk: IaSdk.instance),
+                0 => _ExampleMapView(),
                 1 => ListView(
                   padding: EdgeInsets.fromLTRB(
                     20,
@@ -201,11 +201,7 @@ class _ExampleAppState extends State<ExampleApp> {
 }
 
 class _ExampleMapView extends StatefulWidget {
-  const _ExampleMapView({
-    required this.iaSdk,
-  });
-
-  final IaSdk iaSdk;
+  const _ExampleMapView();
 
   @override
   State<_ExampleMapView> createState() => _ExampleMapViewState();
@@ -219,7 +215,7 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
     super.initState();
 
     // Set up SDK callbacks
-    widget.iaSdk.onSdkWillNavigateToTarget = (navigationTarget) async {
+    IaSdk.instance.onSdkWillNavigateToTarget = (navigationTarget) async {
       debugPrint('Host app: SDK wants to navigate to: $navigationTarget');
 
       switch (navigationTarget) {
@@ -235,7 +231,7 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
   }
 
   Future<void> _initializeSdk() async {
-    await widget.iaSdk.register(
+    await IaSdk.instance.register(
       modules: [
         IaModuleCardLink(),
         IaModuleOrdering(),
@@ -245,11 +241,11 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
       ],
     );
 
-    await widget.iaSdk.initialize(
+    await IaSdk.instance.initialize(
       config: ExampleAppConfig.instance.pluginConfig,
     );
 
-    widget.iaSdk.ordering.orderingDidFinishOrderListener.stream.listen(
+    IaSdk.instance.ordering.orderingDidFinishOrderListener.stream.listen(
       (order) {
         debugPrint(
           'Host app: Order completed! Order Code: ${order.orderCode}, client order ID: ${order.clientOrderIDs}',
@@ -257,7 +253,7 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
       },
     );
 
-    widget.iaSdk.ordering.orderingDidUpdateCartListener.stream.listen(
+    IaSdk.instance.ordering.orderingDidUpdateCartListener.stream.listen(
       (cart) {
         final itemCount = cart.totalAmountInCart;
         final orderCount = cart.clientOrderIDs.length;
@@ -360,8 +356,8 @@ class _ExampleMapViewState extends State<_ExampleMapView> {
                                           child: const Text('Online Shopping'),
                                           onPressed: () async {
                                             Navigator.pop(context);
-                                            await widget.iaSdk.pharmacy.setPharmacyId(marker.pharmacyId);
-                                            await widget.iaSdk.launchStartRoute();
+                                            await IaSdk.instance.pharmacy.setPharmacyId(marker.pharmacyId);
+                                            await IaSdk.instance.launchStartRoute();
                                             if (Platform.isIOS) {
                                               await Future.delayed(const Duration(seconds: 1));
                                             }

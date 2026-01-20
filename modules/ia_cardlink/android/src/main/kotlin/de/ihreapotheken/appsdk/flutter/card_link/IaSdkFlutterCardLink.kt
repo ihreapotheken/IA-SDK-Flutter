@@ -1,5 +1,7 @@
 package de.ihreapotheken.appsdk.flutter.card_link
 
+import de.ihreapotheken.sdk.cardlink.CardlinkModule
+import de.ihreapotheken.sdk.integrations.api.IaSdk
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -17,7 +19,10 @@ class IaSdkFlutterCardLink :
     private lateinit var channel: MethodChannel
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ia_over_the_counter")
+        channel = MethodChannel(
+            flutterPluginBinding.binaryMessenger,
+            "de.ihreapotheken/sdk/cardLink",
+        )
         channel.setMethodCallHandler(this)
     }
 
@@ -25,8 +30,9 @@ class IaSdkFlutterCardLink :
         call: MethodCall,
         result: Result
     ) {
-        if (call.method == "getPlatformVersion") {
-            result.success("Android ${android.os.Build.VERSION.RELEASE}")
+        if (call.method == "register") {
+            IaSdk.register(CardlinkModule)
+            result.success(null)
         } else {
             result.notImplemented()
         }

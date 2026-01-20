@@ -1,6 +1,6 @@
 part of '../../common/_interface.dart';
 
-/// Base definitions for the ia.de AppSDK Ordering service.
+/// Method and property definitions for the ia.de AppSDK Ordering service.
 ///
 abstract class IaBaseOrdering extends IaBase {
   @override

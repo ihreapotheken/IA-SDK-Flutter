@@ -1,5 +1,7 @@
 package de.ihreapotheken.appsdk.flutter.over_the_counter
 
+import de.ihreapotheken.sdk.integrations.api.IaSdk
+import de.ihreapotheken.sdk.otc.OtcModule
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -17,7 +19,10 @@ class IaSdkFlutterOverTheCounter :
     private lateinit var channel: MethodChannel
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ia_over_the_counter")
+        channel = MethodChannel(
+            flutterPluginBinding.binaryMessenger,
+            "de.ihreapotheken/sdk/overTheCounter",
+        )
         channel.setMethodCallHandler(this)
     }
 
@@ -25,8 +30,9 @@ class IaSdkFlutterOverTheCounter :
         call: MethodCall,
         result: Result
     ) {
-        if (call.method == "getPlatformVersion") {
-            result.success("Android ${android.os.Build.VERSION.RELEASE}")
+        if (call.method == "register") {
+            IaSdk.register(OtcModule)
+            result.success(null)
         } else {
             result.notImplemented()
         }
