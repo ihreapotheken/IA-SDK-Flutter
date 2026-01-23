@@ -1,5 +1,7 @@
 part of '../../common/_interface.dart';
 
+/// Method and property definitions for the ia.de AppSDK Over-the-Counter service.
+///
 abstract class IaBaseOverTheCounter extends IaBase {
   @override
   IaBaseModule get module {

@@ -1,6 +1,6 @@
 import Foundation
 import Flutter
-import IAOrdering
+import IACore
 
 /// Arguments for transferring prescriptions.
 struct IaTransferPrescriptionsArguments {

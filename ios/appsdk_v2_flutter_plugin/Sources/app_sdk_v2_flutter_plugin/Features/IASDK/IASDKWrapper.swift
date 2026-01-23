@@ -40,21 +40,13 @@ final class IASDKWrapper {
     func register(arguments: Any) async throws -> Any? {
         let arguments = try argumentDecoder.decode(IaRegisterModulesArguments.self, from: arguments)
         let modules = arguments.modules
-        
-        // Map Flutter modules to SDK modules, doing it here and not in decoder because it requires all imports.
         var sdkModules = [IASDKModule]()
-        for module in modules {
-            switch module {
-            case .integrations: sdkModules.append(.integrations)
-            case .overTheCounter: sdkModules.append(.overTheCounter)
-            case .ordering: sdkModules.append(.ordering)
-            case .apofinder: sdkModules.append(.apofinder)
-            case .pharmacyDetails: sdkModules.append(.pharmacyDetails)
-            case .prescription: sdkModules.append(.prescription)
-            case .cardLink: sdkModules.append(.cardLink)
-            }
+        if modules.contains(.integrations) {
+            sdkModules.append(.integrations)
         }
-        
+        if modules.contains(.apofinder) {
+            sdkModules.append(.apofinder)
+        }
         IASDK.register(sdkModules)
         return nil
     }
@@ -72,7 +64,7 @@ final class IASDKWrapper {
     }
     
     func deleteAllUserRelatedData(arguments: Any) async throws -> Any? {
-        try await IASDK.deleteAllUserRelatedData()
+        try await IASDK.clearAllData()
         return nil
 
     }

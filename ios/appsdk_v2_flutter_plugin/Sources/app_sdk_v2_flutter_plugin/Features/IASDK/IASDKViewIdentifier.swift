@@ -1,10 +1,6 @@
 import Foundation
 import IACore
 import IAIntegrations
-import IAOverTheCounter
-import IAOrdering
-import IAPharmacy
-import IAPrescription
 
 enum IASDKViewIdentifier: String, CaseIterable {
     /**

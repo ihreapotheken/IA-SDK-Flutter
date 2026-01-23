@@ -25,11 +25,8 @@ abstract mixin class IaBaseMethods {
   ///
   Type? get argumentType;
 
-  /// Native method invocation definition.
+  /// Native method invocation definition and handling.
   ///
-  /// `super` invocation must be performed before executing the rest of the method logic.
-  ///
-  @mustCallSuper
   Future<T?> invoke<T>([dynamic args]) async {
     if (argumentType != null && args.runtimeType != argumentType!) {
       throw Exception('Argument type not properly defined for $this. Expected $argumentType, got ${args.runtimeType}.');

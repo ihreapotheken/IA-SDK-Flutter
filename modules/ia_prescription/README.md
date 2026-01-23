@@ -1,18 +1,49 @@
 # ia_prescription
 
-A new Flutter plugin project.
+AppSDK Prescription service.
 
-## Getting Started
+## Implementation
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/to/develop-plugins),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+For AppSDK usage, see the main [README.md](https://ihreapotheken.github.io/docs/appsdk/flutter) file.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+API reference: https://ihreapotheken.github.io/docs/appsdk/flutter/sdk/IaBasePrescription-class.html
 
-The plugin project was generated without specifying the `--platforms` flag, no platforms are currently supported.
-To add platforms, run `flutter create -t plugin --platforms <platforms> .` in this directory.
-You can also find a detailed instruction on how to add platforms in the `pubspec.yaml` at https://flutter.dev/to/pubspec-plugin-platforms.
+Usage: 
+
+```yaml
+# pubspec.yaml
+
+environment:
+  sdk: '>=3.10.0'
+  flutter: '>=3.30.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  appsdk_v2_flutter_plugin:
+    git:
+      url: https://github.com/ihreapotheken/IA-SDK-Flutter
+      ref: main
+  ia_prescription:
+    git:
+      url: https://github.com/ihreapotheken/IA-SDK-Flutter
+      ref: main
+      path: modules/ia_prescription
+```
+
+The module should be instantiated, after which it must be forwarded to the `IaSdk.register` method for runtime configuration:
+
+```dart
+final iaPrescriptionModule = IaModulePrescription();
+
+Future<void> registerIaModules() async {
+  await IaSdk.instance.register(
+    modules: [
+      iaPrescriptionModule,
+
+      // Other modules.
+
+    ],
+  );
+}
+```

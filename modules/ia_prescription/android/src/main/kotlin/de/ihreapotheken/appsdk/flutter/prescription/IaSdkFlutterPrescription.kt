@@ -1,5 +1,7 @@
 package de.ihreapotheken.appsdk.flutter.prescription
 
+import de.ihreapotheken.sdk.integrations.api.IaSdk
+import de.ihreapotheken.sdk.rx.RxModule
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -17,7 +19,10 @@ class IaSdkFlutterPrescription :
     private lateinit var channel: MethodChannel
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ia_prescription")
+        channel = MethodChannel(
+            flutterPluginBinding.binaryMessenger,
+            "de.ihreapotheken/sdk/prescription",
+        )
         channel.setMethodCallHandler(this)
     }
 
@@ -25,8 +30,9 @@ class IaSdkFlutterPrescription :
         call: MethodCall,
         result: Result
     ) {
-        if (call.method == "getPlatformVersion") {
-            result.success("Android ${android.os.Build.VERSION.RELEASE}")
+        if (call.method == "register") {
+            IaSdk.register(RxModule)
+            result.success(null)
         } else {
             result.notImplemented()
         }

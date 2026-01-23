@@ -2,7 +2,7 @@ group = "com.example.appsdk_v2_flutter_plugin"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = "2.1.0"
+    ext.kotlin_version = "2.2.20"
     repositories {
         google()
         mavenCentral()
@@ -97,13 +97,8 @@ dependencies {
     iaDeSdkVersion = iaDeSdkVersion.replaceAll("\"", "")
     def iaDeSdkDeps = [
             "integrations",
-            "otc",
-            "ordering",
-            "pharmacy",
-            "rx",
             "apofinder",
             "appointments",
-            "cardlink",
     ]
     iaDeSdkDeps.each { dep ->
         def fullDep = "de.ihreapotheken.sdk:${dep}:${iaDeSdkVersion}"

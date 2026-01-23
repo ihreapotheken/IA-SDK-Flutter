@@ -1,5 +1,7 @@
 part of '../../common/_interface.dart';
 
+/// Method and property definitions for the ia.de AppSDK Pharmacy service.
+///
 abstract class IaBasePharmacy extends IaBase {
   @override
   IaBaseModule get module {

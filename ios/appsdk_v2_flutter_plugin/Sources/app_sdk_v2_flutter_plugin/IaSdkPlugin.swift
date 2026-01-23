@@ -2,9 +2,6 @@ import Combine
 import Flutter
 import IACore
 import IAIntegrations
-import IAOrdering
-import IAOverTheCounter
-import IAPharmacy
 
 @MainActor
 final class IASDKPlugin {

@@ -2,7 +2,6 @@ package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
 import android.app.Activity
 import de.ihreapotheken.sdk.apofinder.ApofinderModule
-import de.ihreapotheken.sdk.cardlink.CardlinkModule
 import de.ihreapotheken.sdk.core.SdkModule
 import de.ihreapotheken.sdk.core.api.PresentationMode
 import de.ihreapotheken.sdk.core.api.listener.HandlingDecision
@@ -20,10 +19,6 @@ import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
 import de.ihreapotheken.sdk.integrations.api.TransferPrescriptionRequest
 import de.ihreapotheken.sdk.integrations.api.view.IaSdkActivity
 import de.ihreapotheken.sdk.integrations.api.view.IaScreen
-import de.ihreapotheken.sdk.ordering.OrderingModule
-import de.ihreapotheken.sdk.otc.OtcModule
-import de.ihreapotheken.sdk.pharmacy.PharmacyModule
-import de.ihreapotheken.sdk.rx.RxModule
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
@@ -109,11 +104,7 @@ internal class IaClientMethods(
                     return
                 }
                 val modulesCollection = listOfNotNull(
-                    if (modules.contains("cardLink")) CardlinkModule else null,
-                    if (modules.contains("ordering")) OrderingModule else null,
-                    if (modules.contains("overTheCounter")) OtcModule else null,
-                    if (modules.contains("pharmacy")) PharmacyModule else null,
-                    if (modules.contains("prescription")) RxModule else null,
+                    if (modules.contains("apofinder")) ApofinderModule else null,
                 ).toTypedArray<SdkModule>()
                 bindings.sdkModule = IaSdk.register(
                     *modulesCollection,
