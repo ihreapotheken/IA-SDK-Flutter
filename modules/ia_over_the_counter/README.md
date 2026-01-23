@@ -37,7 +37,7 @@ The module should be instantiated, after which it must be forwarded to the `IaSd
 final iaOverTheCounterModule = IaModuleOverTheCounter();
 
 Future<void> registerIaModules() async {
-  await IaSdk.register(
+  await IaSdk.instance.register(
     modules: [
       iaOverTheCounterModule,
 
