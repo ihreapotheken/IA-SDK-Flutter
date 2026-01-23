@@ -22,9 +22,12 @@ class IaSdk {
 
   /// Client-facing error message displayed for scenarios where any of the modules have not been registered.
   ///
-  final _moduleNotInitializedError = Exception(
-    'Module not initalized. Ensure the object is instantiated and forwarded to the "register" method with the "modules" field.',
-  );
+  Exception _moduleNotInitializedError(IaBaseModule module) {
+    return Exception(
+      'Module ${module.name} not initalized. '
+      'Ensure the object is instantiated and forwarded to the "register" method with the "modules" field.',
+    );
+  }
 
   /// Property defining the internal state of the CardLink native module.
   ///
@@ -34,7 +37,7 @@ class IaSdk {
   ///
   IaBaseCardLink get cardLink {
     if (_cardLink == null) {
-      throw _moduleNotInitializedError;
+      throw _moduleNotInitializedError(IaBaseModule.cardLink);
     }
     return _cardLink!;
   }
@@ -47,7 +50,7 @@ class IaSdk {
   ///
   IaBaseOrdering get ordering {
     if (_ordering == null) {
-      throw _moduleNotInitializedError;
+      throw _moduleNotInitializedError(IaBaseModule.ordering);
     }
     return _ordering!;
   }
@@ -60,7 +63,7 @@ class IaSdk {
   ///
   IaBaseOverTheCounter get overTheCounter {
     if (_overTheCounter == null) {
-      throw _moduleNotInitializedError;
+      throw _moduleNotInitializedError(IaBaseModule.overTheCounter);
     }
     return _overTheCounter!;
   }
@@ -73,7 +76,7 @@ class IaSdk {
   ///
   IaBasePharmacy get pharmacy {
     if (_pharmacy == null) {
-      throw _moduleNotInitializedError;
+      throw _moduleNotInitializedError(IaBaseModule.pharmacyDetails);
     }
     return _pharmacy!;
   }
@@ -86,7 +89,7 @@ class IaSdk {
   ///
   IaBasePrescription get prescription {
     if (_prescription == null) {
-      throw _moduleNotInitializedError;
+      throw _moduleNotInitializedError(IaBaseModule.prescription);
     }
     return _prescription!;
   }
