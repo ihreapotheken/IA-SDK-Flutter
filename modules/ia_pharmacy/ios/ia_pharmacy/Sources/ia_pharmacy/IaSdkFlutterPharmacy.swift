@@ -17,7 +17,7 @@ public class IaSdkFlutterPharmacy: NSObject, FlutterPlugin {
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "register":
-        IASDK.register([IASDKModule.pharmacyDetails])
+        IASDK.register([IASDKModule.pharmacy])
         result(nil)
     default:
         result(FlutterMethodNotImplemented)
