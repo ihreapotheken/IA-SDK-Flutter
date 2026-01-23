@@ -30,3 +30,20 @@ dependencies:
       ref: main
       path: modules/ia_pharmacy
 ```
+
+The module should be instantiated, after which it must be forwarded to the `IaSdk.register` method for runtime configuration:
+
+```dart
+final iaPharmacyModule = IaModulePharmacy();
+
+Future<void> registerIaModules() async {
+  await IaSdk.register(
+    modules: [
+      iaPharmacyModule,
+
+      // Other modules.
+
+    ],
+  );
+}
+```

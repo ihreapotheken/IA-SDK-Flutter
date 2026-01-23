@@ -30,3 +30,20 @@ dependencies:
       ref: main
       path: modules/ia_over_the_counter
 ```
+
+The module should be instantiated, after which it must be forwarded to the `IaSdk.register` method for runtime configuration:
+
+```dart
+final iaOverTheCounterModule = IaModuleOverTheCounter();
+
+Future<void> registerIaModules() async {
+  await IaSdk.register(
+    modules: [
+      iaOverTheCounterModule,
+
+      // Other modules.
+
+    ],
+  );
+}
+```

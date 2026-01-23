@@ -30,3 +30,20 @@ dependencies:
       ref: main
       path: modules/ia_ordering
 ```
+
+The module should be instantiated, after which it must be forwarded to the `IaSdk.register` method for runtime configuration:
+
+```dart
+final iaOrderingModule = IaModuleOrdering();
+
+Future<void> registerIaModules() async {
+  await IaSdk.register(
+    modules: [
+      iaOrderingModule,
+
+      // Other modules.
+
+    ],
+  );
+}
+```

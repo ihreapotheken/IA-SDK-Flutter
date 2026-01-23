@@ -30,3 +30,20 @@ dependencies:
       ref: main
       path: modules/ia_cardlink
 ```
+
+The module should be instantiated, after which it must be forwarded to the `IaSdk.register` method for runtime configuration:
+
+```dart
+final iaCardLinkModule = IaModuleCardLink();
+
+Future<void> registerIaModules() async {
+  await IaSdk.register(
+    modules: [
+      iaCardLinkModule,
+
+      // Other modules.
+
+    ],
+  );
+}
+```

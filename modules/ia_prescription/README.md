@@ -30,3 +30,20 @@ dependencies:
       ref: main
       path: modules/ia_prescription
 ```
+
+The module should be instantiated, after which it must be forwarded to the `IaSdk.register` method for runtime configuration:
+
+```dart
+final iaPrescriptionModule = IaModulePrescription();
+
+Future<void> registerIaModules() async {
+  await IaSdk.register(
+    modules: [
+      iaPrescriptionModule,
+
+      // Other modules.
+
+    ],
+  );
+}
+```
