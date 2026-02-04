@@ -5,7 +5,7 @@ part of '_interface.dart';
 abstract mixin class IaBaseViews {
   /// Native identifiers required for the "launch route" method integration.
   ///
-  static const _launchMethodId = 'launchRoute', _launchMethodArgId = 'viewId';
+  static const launchMethodId = 'launchRoute', launchMethodArgId = 'viewId';
 
   /// Identifier used with native code in order to specify the view integration.
   ///
@@ -15,9 +15,9 @@ abstract mixin class IaBaseViews {
   ///
   Future<void> launch() async {
     return await IaBaseMethods._channel.invokeMethod(
-      _launchMethodId,
+      launchMethodId,
       {
-        _launchMethodArgId: Platform.isAndroid ? viewId.substring(0, 1).toUpperCase() + viewId.substring(1) : viewId,
+        launchMethodArgId: Platform.isAndroid ? viewId.substring(0, 1).toUpperCase() + viewId.substring(1) : viewId,
       },
     );
   }

@@ -1,4 +1,5 @@
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Example client app ia.de SDK configuration.
 ///
@@ -22,10 +23,14 @@ class ExampleAppConfig {
   /// Access key used to authenticate with the ia.de backend services.
   ///
   String get accessKey {
-    if (_accessKey.isEmpty) {
-      return 'fa0e9523f1a8b20c2038dc65241af81a3882f6f6a73d987fa2ae92e48e740d36';
+    if (_accessKey.isNotEmpty) {
+      return _accessKey;
     }
-    return _accessKey;
+    final envKey = dotenv.env['APPSDK_ACCESS_KEY'];
+    if (envKey?.isNotEmpty != true) {
+      throw Exception('Missing .secrets file with APPSDK_ACCESS_KEY entry.');
+    }
+    return envKey!;
   }
 
   /// Server environment data provided with the CLI commands:
@@ -52,9 +57,9 @@ class ExampleAppConfig {
   ///
   String get clientId {
     return switch (serverEnvironment) {
-      IaSdkConfigurationServerEnvironment.production => '2004',
-      IaSdkConfigurationServerEnvironment.staging => '5004',
-      IaSdkConfigurationServerEnvironment.development => '103',
+      IaSdkConfigurationServerEnvironment.production => '6001',
+      IaSdkConfigurationServerEnvironment.staging => '6001',
+      IaSdkConfigurationServerEnvironment.development => '6001',
     };
   }
 

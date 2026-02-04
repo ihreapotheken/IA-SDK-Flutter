@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(dart analyze:*)",
+      "Bash(find:*)",
+      "Bash(chmod:*)",
+      "Bash(ruby scripts/sync_podspec_versions.rb:*)",
+      "Bash(nm:*)",
+      "Bash(ls:*)",
+      "Bash(flutter clean:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(pod install:*)",
+      "Bash(python3:*)",
+      "Bash(flutter build:*)",
+      "Bash(xcodebuild:*)"
+    ]
+  }
+}

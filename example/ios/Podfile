@@ -1,3 +1,7 @@
+# CocoaPods sources
+source 'https://cdn.cocoapods.org/'
+source 'https://github.com/ihreapotheken/IA-SDK-iOS/'
+
 platform :ios, '15.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
