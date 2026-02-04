@@ -74,7 +74,26 @@ You may reference specific branch, tag, or commit hash by specifying the `ref` f
 Version reference numbers can be found by reviewing 
 [the package Github repository tags](https://github.com/ihreapotheken/IA-SDK-Flutter/tags).
 
-### 4.2. Plugin usage
+### 4.2. iOS Permissions
+
+Add the following keys to your `Info.plist` file:
+
+```xml
+<!-- Location permission - required for pharmacy finder and directions -->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Used to show pharmacies nearby.</string>
+
+<!-- Camera permission - required for prescription upload -->
+<key>NSCameraUsageDescription</key>
+<string>Camera access is needed for prescription upload.</string>
+```
+
+| Permission | Key | Purpose |
+|------------|-----|---------|
+| Location (When In Use) | `NSLocationWhenInUseUsageDescription` | Find nearby pharmacies |
+| Camera | `NSCameraUsageDescription` | Upload prescriptions via camera |
+
+### 4.3. Plugin usage
 
 Methods and properties made available as public APIs implemented with the `IaSdk.instance` object. 
 
@@ -102,7 +121,7 @@ Future<void> initIaSdk() {
 
 Each of the two methods are expected to only be invoked once during the application runtime.
 
-### 4.3. Module registration
+### 4.4. Module registration
 
 Each of the individual native modules are available for installation from the 
 [modules](https://github.com/ihreapotheken/IA-SDK-Flutter) directory:
