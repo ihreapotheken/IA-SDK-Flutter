@@ -6,10 +6,10 @@ Future<void> _consentEventHandler(dynamic args) async {
       'cardLinkConsentEvent: Invalid arguments type.',
     );
   }
-  final eventType = args['event'];
+  final eventType = args['status'];
   if (eventType is! String) {
     throw Exception(
-      'cardLinkConsentEvent: Missing or incorrect type event: ${eventType.runtimeType} $eventType.',
+      'cardLinkConsentEvent: Missing or incorrect type status: ${eventType.runtimeType} $eventType.',
     );
   }
   final consentEvent = IaCardLinkConsentEvent.fromRawValue(eventType);

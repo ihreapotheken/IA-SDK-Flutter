@@ -34,6 +34,7 @@ class IaModuleCardLink extends IaBaseCardLink {
     int? textLinkColor,
     int? bottomNavigationColor,
     IaCardLinkEnvironment? environment,
+    bool? saveCardEnabled,
   }) async {
     final arguments = _RequestModelLaunch(
       sdkApiKey: sdkApiKey,
@@ -49,6 +50,7 @@ class IaModuleCardLink extends IaBaseCardLink {
       textLinkColor: textLinkColor,
       bottomNavigationColor: bottomNavigationColor,
       environment: environment,
+      saveCardEnabled: saveCardEnabled,
     );
     return await _Methods.launch.invoke<void>(arguments);
   }
@@ -85,6 +87,16 @@ class IaModuleCardLink extends IaBaseCardLink {
       cardName: cardName,
     );
     return await _Methods.deleteCard.invoke<void>(arguments);
+  }
+
+  @override
+  Future<String?> deleteAllCards() async {
+    return await _Methods.deleteAllCards.invoke<String?>(null);
+  }
+
+  @override
+  Future<void> deleteAllUserRelatedData() async {
+    return await _Methods.deleteAllUserRelatedData.invoke<void>(null);
   }
 
   static final _consentEventListener = StreamController<IaCardLinkConsentEvent>.broadcast();

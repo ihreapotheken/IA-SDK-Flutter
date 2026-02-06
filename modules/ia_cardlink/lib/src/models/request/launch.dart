@@ -15,6 +15,7 @@ class _RequestModelLaunch implements IaBaseRequest {
     this.textLinkColor,
     this.bottomNavigationColor,
     this.environment,
+    this.saveCardEnabled,
   });
 
   final String sdkApiKey;
@@ -30,6 +31,7 @@ class _RequestModelLaunch implements IaBaseRequest {
   final int? textLinkColor;
   final int? bottomNavigationColor;
   final IaCardLinkEnvironment? environment;
+  final bool? saveCardEnabled;
 
   @override
   Map<String, dynamic> toSupportedType() {
@@ -47,6 +49,7 @@ class _RequestModelLaunch implements IaBaseRequest {
       'textLinkColor': textLinkColor,
       'bottomNavigationColor': bottomNavigationColor,
       'environment': environment?.rawValue,
+      'saveCardEnabled': saveCardEnabled,
     };
   }
 }

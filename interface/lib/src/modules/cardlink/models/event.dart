@@ -38,13 +38,13 @@ enum IaCardLinkEvent {
       case IaCardLinkEvent.willStartScanning:
         return 'willStartScanning';
       case IaCardLinkEvent.failedToInitialize:
-        return 'cardlinkFailedToInitialize';
+        return 'failedToInitialize';
       case IaCardLinkEvent.goToCart:
         return 'goToCart';
       case IaCardLinkEvent.openTermsAndConditions:
         return 'openTermsAndConditions';
       case IaCardLinkEvent.cardSaved:
-        return 'saveCard';
+        return 'cardSaved';
     }
   }
 
@@ -56,13 +56,13 @@ enum IaCardLinkEvent {
         return IaCardLinkEvent.willExit;
       case 'willStartScanning':
         return IaCardLinkEvent.willStartScanning;
-      case 'cardlinkFailedToInitialize':
+      case 'failedToInitialize':
         return IaCardLinkEvent.failedToInitialize;
       case 'goToCart':
         return IaCardLinkEvent.goToCart;
       case 'openTermsAndConditions':
         return IaCardLinkEvent.openTermsAndConditions;
-      case 'saveCard':
+      case 'cardSaved':
         return IaCardLinkEvent.cardSaved;
       default:
         throw ArgumentError('Unknown CardLink event: $rawValue');

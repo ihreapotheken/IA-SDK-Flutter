@@ -6,19 +6,15 @@ import IAIntegrations
 @MainActor
 class IaClientBindings {
     var channel: FlutterMethodChannel
-    
-    init?(
-        viewController: FlutterViewController,
-        pluginRegistrar: FlutterPluginRegistrar?,
-    ) {
+    init(registrar: FlutterPluginRegistrar) {
+        let messenger = registrar.messenger()
         self.channel = FlutterMethodChannel(
             name: "de.ihreapotheken/sdk",
-            binaryMessenger: viewController.binaryMessenger
+            binaryMessenger: messenger
         )
         let plugin = IASDKPlugin(bindings: self)
         self.channel.setMethodCallHandler(plugin.callHandler)
-        guard let registrar = pluginRegistrar else { return nil }
-        let viewFactory = IASDKViewFactory(messenger: registrar.messenger())
+        let viewFactory = IASDKViewFactory(messenger: messenger)
         for view in IASDKViewIdentifier.allCases {
             registrar.register(
                 viewFactory,

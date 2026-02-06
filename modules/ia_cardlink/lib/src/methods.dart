@@ -7,6 +7,8 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
   getLogFilePath,
   getSavedCards,
   deleteCard,
+  deleteAllCards,
+  deleteAllUserRelatedData,
   ;
 
   /// Custom channel identifier for the CardLink plugin.
