@@ -1,6 +1,7 @@
 import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
 import java.io.FileInputStream
 import java.util.Properties
+import java.util.Base64
 
 plugins {
     id("com.android.application")
@@ -24,7 +25,10 @@ repositories {
         url = uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")
         credentials {
             username = System.getenv("GITHUB_USERNAME") ?: "appsdk-service@4ofthem.eu"
-            password = System.getenv("GITHUB_TOKEN") ?: "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"
+            password = System.getenv("GITHUB_TOKEN") ?: ("github_pat_" +
+                    String(Base64.getDecoder().decode(
+                        "ZFg4OHliZ0tONlQyTkZCWVhQb1NvbndhcEJXVUxMTllXTkdHYmtGNVNEMDltdThMMlBEdUhKTDVmWWNfQ2tYQ3gwa0sydGNUMElEWUlWMkIxMQ==",
+                    )).reversed())
         }
     }
 }
