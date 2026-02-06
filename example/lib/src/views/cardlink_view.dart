@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:flutter/material.dart';
 
@@ -9,20 +12,79 @@ class CardLinkView extends StatefulWidget {
 }
 
 class _CardLinkViewState extends State<CardLinkView> {
-  // Platform-specific API keys for CardLink SDK
-  static const _sdkApiKey = 'fa0e9523f1a8b20c2038dc65241af81a3882f6f6a73d987fa2ae92e48e740d36';
+  static const _sdkApiKey =
+      'fa0e9523f1a8b20c2038dc65241af81a3882f6f6a73d987fa2ae92e48e740d36';
 
   final _userIdController = TextEditingController(text: 'test_user_123');
   final _cardNameController = TextEditingController(text: 'My Card');
   final _phoneNumberController = TextEditingController(text: '+491234567890');
+  final _canCodeController = TextEditingController();
+
+  IaCardLinkConsentStatus _consentStatus =
+      IaCardLinkConsentStatus.showConsent;
+  bool _saveCardEnabled = false;
   String _resultText = '';
+  final List<String> _eventLog = [];
+
+  final List<StreamSubscription> _subscriptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _setupStreamListeners();
+  }
 
   @override
   void dispose() {
+    for (final sub in _subscriptions) {
+      sub.cancel();
+    }
     _userIdController.dispose();
     _cardNameController.dispose();
     _phoneNumberController.dispose();
+    _canCodeController.dispose();
     super.dispose();
+  }
+
+  void _setupStreamListeners() {
+    final cardLink = IaSdk.instance.cardLink;
+
+    _subscriptions.add(
+      cardLink.consentEventListener.stream.listen((event) {
+        _addEventLog('Consent: ${event.name}');
+      }),
+    );
+
+    _subscriptions.add(
+      cardLink.sessionCreatedListener.stream.listen((session) {
+        _addEventLog('Session created: ${session.data}');
+      }),
+    );
+
+    _subscriptions.add(
+      cardLink.prescriptionsRedeemedListener.stream.listen((prescriptions) {
+        _addEventLog('Prescriptions redeemed: $prescriptions');
+      }),
+    );
+
+    _subscriptions.add(
+      cardLink.eventListener.stream.listen((event) {
+        _addEventLog('Event: ${event.name}');
+      }),
+    );
+
+    _subscriptions.add(
+      cardLink.analyticsEventListener.stream.listen((event) {
+        _addEventLog('Analytics: $event');
+      }),
+    );
+  }
+
+  void _addEventLog(String entry) {
+    setState(() {
+      final timestamp = TimeOfDay.now().format(context);
+      _eventLog.insert(0, '[$timestamp] $entry');
+    });
   }
 
   void _showResult(String result) {
@@ -46,7 +108,9 @@ class _CardLinkViewState extends State<CardLinkView> {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 16),
-        _buildInputFields(),
+        _buildPresetDataSection(context),
+        const SizedBox(height: 24),
+        _buildConsentStatusSelector(context),
         const SizedBox(height: 24),
         _buildLaunchSection(context),
         const SizedBox(height: 24),
@@ -55,34 +119,126 @@ class _CardLinkViewState extends State<CardLinkView> {
         _buildCardManagementSection(context),
         const SizedBox(height: 24),
         _buildResultSection(context),
+        const SizedBox(height: 24),
+        _buildEventLogSection(context),
       ],
     );
   }
 
-  Widget _buildInputFields() {
+  Widget _buildPresetDataSection(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextField(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Preset Data',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            TextButton(
+              onPressed: _onResetPresetDataPressed,
+              child: Text('Reset All'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        _buildClearableTextField(
           controller: _userIdController,
-          decoration: InputDecoration(
-            labelText: 'User ID',
-            border: OutlineInputBorder(),
-          ),
+          label: 'User ID',
         ),
         const SizedBox(height: 12),
-        TextField(
+        _buildClearableTextField(
           controller: _cardNameController,
-          decoration: InputDecoration(
-            labelText: 'Card Name',
-            border: OutlineInputBorder(),
-          ),
+          label: 'Card Name',
         ),
         const SizedBox(height: 12),
-        TextField(
+        _buildClearableTextField(
           controller: _phoneNumberController,
-          decoration: InputDecoration(
-            labelText: 'Phone Number',
-            border: OutlineInputBorder(),
+          label: 'Phone Number',
+          keyboardType: TextInputType.phone,
+        ),
+        const SizedBox(height: 12),
+        _buildClearableTextField(
+          controller: _canCodeController,
+          label: 'CAN Code (optional)',
+          hint: '6-digit code from health card',
+          keyboardType: TextInputType.number,
+          maxLength: 6,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildClearableTextField({
+    required TextEditingController controller,
+    required String label,
+    String? hint,
+    TextInputType? keyboardType,
+    int? maxLength,
+  }) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        border: OutlineInputBorder(),
+        suffixIcon: IconButton(
+          icon: Icon(Icons.clear, size: 18),
+          onPressed: () {
+            controller.clear();
+            setState(() {});
+          },
+        ),
+      ),
+      keyboardType: keyboardType,
+      maxLength: maxLength,
+    );
+  }
+
+  void _onResetPresetDataPressed() {
+    setState(() {
+      _userIdController.clear();
+      _cardNameController.clear();
+      _phoneNumberController.clear();
+      _canCodeController.clear();
+    });
+  }
+
+  Widget _buildConsentStatusSelector(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Consent Status',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        RadioGroup<IaCardLinkConsentStatus>(
+          groupValue: _consentStatus,
+          onChanged: (value) {
+            if (value != null) setState(() => _consentStatus = value);
+          },
+          child: Column(
+            children: [
+              RadioListTile<IaCardLinkConsentStatus>(
+                title: Text('Show Consent'),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                value: IaCardLinkConsentStatus.showConsent,
+              ),
+              RadioListTile<IaCardLinkConsentStatus>(
+                title: Text('Consent Accepted'),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                value: IaCardLinkConsentStatus.consentAccepted,
+              ),
+              RadioListTile<IaCardLinkConsentStatus>(
+                title: Text('Consent Declined'),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                value: IaCardLinkConsentStatus.consentDeclined,
+              ),
+            ],
           ),
         ),
       ],
@@ -97,10 +253,17 @@ class _CardLinkViewState extends State<CardLinkView> {
           'Launch',
           style: Theme.of(context).textTheme.titleMedium,
         ),
+        SwitchListTile(
+          title: Text('Save Card Enabled'),
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          value: _saveCardEnabled,
+          onChanged: (value) => setState(() => _saveCardEnabled = value),
+        ),
         const SizedBox(height: 8),
         ElevatedButton.icon(
           icon: Icon(Icons.nfc),
-          label: Text('Launch CardLink SDK'),
+          label: Text('Launch CardLink'),
           onPressed: _onLaunchCardLinkPressed,
         ),
         const SizedBox(height: 8),
@@ -155,8 +318,26 @@ class _CardLinkViewState extends State<CardLinkView> {
         ),
         const SizedBox(height: 8),
         ElevatedButton(
-          child: Text('Delete Cards'),
+          child: Text('Delete Card'),
           onPressed: _onDeleteCardPressed,
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red.shade50,
+            foregroundColor: Colors.red.shade700,
+          ),
+          child: Text('Delete All Cards'),
+          onPressed: _onDeleteAllCardsPressed,
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red.shade50,
+            foregroundColor: Colors.red.shade700,
+          ),
+          child: Text('Delete All User Related Data'),
+          onPressed: _onDeleteAllUserRelatedDataPressed,
         ),
       ],
     );
@@ -168,9 +349,22 @@ class _CardLinkViewState extends State<CardLinkView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Result',
-          style: Theme.of(context).textTheme.titleMedium,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Result',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _resultText = '';
+                });
+              },
+              child: Text('Clear'),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         Container(
@@ -188,19 +382,87 @@ class _CardLinkViewState extends State<CardLinkView> {
     );
   }
 
+  Widget _buildEventLogSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Event Log',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            if (_eventLog.isNotEmpty)
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _eventLog.clear();
+                  });
+                },
+                child: Text('Clear'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          height: 200,
+          padding: EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade900,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: _eventLog.isEmpty
+              ? Center(
+                  child: Text(
+                    'No events yet.\nLaunch CardLink to see live events.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: _eventLog.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: SelectableText(
+                        _eventLog[index],
+                        style: TextStyle(
+                          color: Colors.green.shade300,
+                          fontFamily: 'monospace',
+                          fontSize: 12,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  // -- Actions --
+
   Future<void> _onLaunchCardLinkPressed() async {
     try {
+      final canCode = _canCodeController.text.trim();
       await IaSdk.instance.cardLink.launch(
         sdkApiKey: _sdkApiKey,
         flowType: IaCardLinkFlowType.cardLink,
         pharmacyId: '2163',
-        consentStatus: IaCardLinkConsentStatus.showConsent,
+        consentStatus: _consentStatus,
         phoneNumber: _phoneNumberController.text,
         userId: _userIdController.text,
         cardName: _cardNameController.text,
+        canCode: canCode.isNotEmpty ? canCode : null,
+        saveCardEnabled: _saveCardEnabled,
         environment: IaCardLinkEnvironment.debug,
       );
-      _showResult('CardLink SDK launched');
+      _showResult('CardLink launched');
     } catch (e) {
       _showResult('Error: $e');
     }
@@ -208,13 +470,17 @@ class _CardLinkViewState extends State<CardLinkView> {
 
   Future<void> _onLaunchSavedCardsPressed() async {
     try {
+      final canCode = _canCodeController.text.trim();
       await IaSdk.instance.cardLink.launch(
         sdkApiKey: _sdkApiKey,
         flowType: IaCardLinkFlowType.savedCards,
         pharmacyId: '2163',
-        consentStatus: IaCardLinkConsentStatus.consentAccepted,
+        consentStatus: _consentStatus,
         phoneNumber: _phoneNumberController.text,
         userId: _userIdController.text,
+        cardName: _cardNameController.text,
+        canCode: canCode.isNotEmpty ? canCode : null,
+        saveCardEnabled: _saveCardEnabled,
         environment: IaCardLinkEnvironment.debug,
       );
       _showResult('Saved Cards launched');
@@ -252,10 +518,17 @@ class _CardLinkViewState extends State<CardLinkView> {
 
   Future<void> _onGetSavedCardsPressed() async {
     try {
-      final cards = await IaSdk.instance.cardLink.getSavedCards(
+      final cardsJson = await IaSdk.instance.cardLink.getSavedCards(
         _userIdController.text,
       );
-      _showResult('Saved cards: $cards');
+      if (cardsJson == null || cardsJson.isEmpty) {
+        _showResult('No saved cards found.');
+        return;
+      }
+      final formatted = const JsonEncoder.withIndent('  ').convert(
+        jsonDecode(cardsJson),
+      );
+      _showResult('Saved cards:\n$formatted');
     } catch (e) {
       _showResult('Error: $e');
     }
@@ -267,7 +540,25 @@ class _CardLinkViewState extends State<CardLinkView> {
         userId: _userIdController.text,
         cardName: _cardNameController.text,
       );
-      _showResult('Card deleted successfully');
+      _showResult('Card "${_cardNameController.text}" deleted.');
+    } catch (e) {
+      _showResult('Error: $e');
+    }
+  }
+
+  Future<void> _onDeleteAllCardsPressed() async {
+    try {
+      final status = await IaSdk.instance.cardLink.deleteAllCards();
+      _showResult('Delete all cards: $status');
+    } catch (e) {
+      _showResult('Error: $e');
+    }
+  }
+
+  Future<void> _onDeleteAllUserRelatedDataPressed() async {
+    try {
+      await IaSdk.instance.cardLink.deleteAllUserRelatedData();
+      _showResult('All user related data deleted.');
     } catch (e) {
       _showResult('Error: $e');
     }

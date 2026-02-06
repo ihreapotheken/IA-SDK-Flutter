@@ -15,8 +15,6 @@ final class IASDKPlugin {
 
     init(bindings: IaClientBindings) {
         self.bindings = bindings
-        
-        // Set delegate
         IASDK.setDelegate(IaClientDelegate(channel: bindings.channel))
     }
     
@@ -27,7 +25,7 @@ final class IASDKPlugin {
                 let returnValue = try await callHandlerInternal(call: call)
                 result(returnValue)
             } catch {
-                print(">>> callHandler error: \(error)")    // @TODO remove
+                print(">>> callHandler error: \(error)")
                 result(error.flutterError(methodName: call.method))
             }
         }
@@ -35,40 +33,36 @@ final class IASDKPlugin {
     
     func callHandlerInternal(call: FlutterMethodCall) async throws -> Any? {
         switch call.method {
-            
-        // MARK: - IA SDK -
-        
-        case FlutterCall.register.name:
-            return try await iaSdkWrapper.register(arguments: call.arguments)
-            
-        case FlutterCall.initialize.name:
-            return try await iaSdkWrapper.initialize(arguments: call.arguments)
-            
-        case FlutterCall.setPharmacyId.name:
-            return try await iaSdkWrapper.setPharmacyId(arguments: call.arguments)
-            
-        case FlutterCall.setGuestUserData.name:
-            return try await iaSdkWrapper.setGuestUserData(arguments: call.arguments)
-            
-        case FlutterCall.logout.name:
-            return try await iaSdkWrapper.deleteAllUserRelatedData(arguments: call.arguments)
-                        
-        case FlutterCall.launchRoute.name:
-            return try await iaSdkWrapper.launchRoute(arguments: call.arguments)
-            
-        case FlutterCall.finishAllActivities.name:
-            return try await iaSdkWrapper.finishAllActivities(arguments: call.arguments)
-            
-        // MARK: - Ordering -
-        
-        case FlutterCall.clearCart.name:
-            return try await orderingWrapper.clearCart(arguments: call.arguments)
-            
-        case FlutterCall.transferPrescriptions.name:
-            return try await orderingWrapper.transferPrescriptions(arguments: call.arguments)
-            
-        default:
-            return FlutterMethodNotImplemented
+                
+            case FlutterCall.register.name:
+                return try await iaSdkWrapper.register(arguments: call.arguments)
+                
+            case FlutterCall.initialize.name:
+                return try await iaSdkWrapper.initialize(arguments: call.arguments)
+                
+            case FlutterCall.setPharmacyId.name:
+                return try await iaSdkWrapper.setPharmacyId(arguments: call.arguments)
+                
+            case FlutterCall.setGuestUserData.name:
+                return try await iaSdkWrapper.setGuestUserData(arguments: call.arguments)
+                
+            case FlutterCall.logout.name:
+                return try await iaSdkWrapper.deleteAllUserRelatedData(arguments: call.arguments)
+                            
+            case FlutterCall.launchRoute.name:
+                return try await iaSdkWrapper.launchRoute(arguments: call.arguments)
+                
+            case FlutterCall.finishAllActivities.name:
+                return try await iaSdkWrapper.finishAllActivities(arguments: call.arguments)
+                
+            case FlutterCall.clearCart.name:
+                return try await orderingWrapper.clearCart(arguments: call.arguments)
+                
+            case FlutterCall.transferPrescriptions.name:
+                return try await orderingWrapper.transferPrescriptions(arguments: call.arguments)
+                
+            default:
+                return FlutterMethodNotImplemented
         }
     }
 }

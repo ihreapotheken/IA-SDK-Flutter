@@ -19,9 +19,9 @@ enum IaCardLinkConsentEvent {
   String get rawValue {
     switch (this) {
       case IaCardLinkConsentEvent.accepted:
-        return 'consentAccepted';
+        return 'accepted';
       case IaCardLinkConsentEvent.declined:
-        return 'consentDeclined';
+        return 'declined';
     }
   }
 
@@ -29,9 +29,9 @@ enum IaCardLinkConsentEvent {
   ///
   static IaCardLinkConsentEvent fromRawValue(String rawValue) {
     switch (rawValue) {
-      case 'consentAccepted':
+      case 'accepted':
         return IaCardLinkConsentEvent.accepted;
-      case 'consentDeclined':
+      case 'declined':
         return IaCardLinkConsentEvent.declined;
       default:
         throw ArgumentError('Unknown consent event: $rawValue');

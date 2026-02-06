@@ -128,6 +128,14 @@ class IaSdkFlutterCardLink :
                 deleteCardHandler.handle(call, result)
             }
 
+            "deleteAllCards" -> {
+                result.notImplemented()
+            }
+
+            "deleteAllUserRelatedData" -> {
+                result.notImplemented()
+            }
+
             else -> {
                 result.notImplemented()
             }

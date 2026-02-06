@@ -26,6 +26,7 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [textLinkColor]: Optional text link UI color (as integer ARGB value).
   /// - [bottomNavigationColor]: Optional bottom navigation UI color (as integer ARGB value).
   /// - [environment]: Optional SDK environment (defaults to production).
+  /// - [saveCardEnabled]: Optional flag to enable card saving (defaults to false).
   ///
   Future<void> launch({
     required String sdkApiKey,
@@ -41,6 +42,7 @@ abstract class IaBaseCardLink extends IaBase {
     int? textLinkColor,
     int? bottomNavigationColor,
     IaCardLinkEnvironment? environment,
+    bool? saveCardEnabled,
   });
 
   /// Returns the CardLink SDK version string.
@@ -71,6 +73,24 @@ abstract class IaBaseCardLink extends IaBase {
     required String userId,
     required String cardName,
   });
+
+  /// Deletes all saved cards.
+  ///
+  /// Returns a status string indicating the result:
+  /// - "successDeleteAll": All cards were deleted.
+  /// - "emptyStorage": No cards to delete.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<String?> deleteAllCards();
+
+  /// Deletes all user-related data from the CardLink SDK.
+  ///
+  /// This includes saved cards and any other user-specific data.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<void> deleteAllUserRelatedData();
 
   /// Notifier for consent events (accepted or declined).
   ///

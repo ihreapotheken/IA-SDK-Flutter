@@ -32,6 +32,27 @@
 	<string>Kamerazugriff wird für den Rezeptupload benötigt.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Wird genutzt um Apotheken in Ihrer Nähe und Wegbeschreibungen anzuzeigen.</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>FlutterSceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -50,6 +71,21 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>NFCReaderUsageDescription</key>
+	<string>Auslesen von Rezeptdaten von Ihrer Krankenversicherungskarte.</string>
+	<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
+	<array>
+		<string>D2760001448000</string>
+		<string>D27600014601</string>
+		<string>D27600014606</string>
+		<string>D27600000102</string>
+		<string>A000000167455349474E</string>
+		<string>D27600006601</string>
+		<string>D27600014602</string>
+		<string>E828BD080FA000000167455349474E</string>
+		<string>E828BD080FD27600006601</string>
+		<string>D27600014603</string>
 	</array>
 </dict>
 </plist>

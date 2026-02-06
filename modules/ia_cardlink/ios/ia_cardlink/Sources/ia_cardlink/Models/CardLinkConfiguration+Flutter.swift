@@ -10,6 +10,7 @@ extension IACore.CardLinkConfiguration {
         let userId = args["userId"] as? String
         let canCode = args["canCode"] as? String
         let cardName = args["cardName"] as? String
+        let isSaveCardEnabled = args["saveCardEnabled"] as? Bool ?? true
 
         let consentStatus: CardLinkConsentStatus
         switch consentStatusString {
@@ -29,7 +30,8 @@ extension IACore.CardLinkConfiguration {
             canCode: canCode,
             phoneNumber: phoneNumber,
             userId: userId ?? "guest_user_id",
-            cardName: cardName
+            cardName: cardName,
+            isSaveCardEnabled: isSaveCardEnabled
         )
     }
 }

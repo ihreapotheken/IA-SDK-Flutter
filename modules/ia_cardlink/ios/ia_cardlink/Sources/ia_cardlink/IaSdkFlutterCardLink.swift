@@ -59,6 +59,24 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
             }
             deleteCardHandler.handle(args: args, result: result)
 
+        case "deleteAllCards":
+            do {
+                let status = try CardLink.deleteAllCards()
+                result("\(status)")
+            } catch {
+                result(FlutterError(code: "DELETE_ALL_CARDS_ERROR", message: "\(error)", details: nil))
+            }
+
+        case "deleteAllUserRelatedData":
+            Task {
+                do {
+                    try await CardLink.deleteAllUserRelatedData()
+                    result(nil)
+                } catch {
+                    result(FlutterError(code: "DELETE_ALL_USER_DATA_ERROR", message: "\(error)", details: nil))
+                }
+            }
+
         default:
             result(FlutterMethodNotImplemented)
         }
