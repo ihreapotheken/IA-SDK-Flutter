@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: develop
+          ref: feature/IASDK-2173/cardlink
 
       - uses: subosito/flutter-action@v2
         with:
