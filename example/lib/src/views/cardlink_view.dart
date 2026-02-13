@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
+import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
 import 'package:flutter/material.dart';
 
 class CardLinkView extends StatefulWidget {
@@ -12,16 +13,12 @@ class CardLinkView extends StatefulWidget {
 }
 
 class _CardLinkViewState extends State<CardLinkView> {
-  static const _sdkApiKey =
-      'fa0e9523f1a8b20c2038dc65241af81a3882f6f6a73d987fa2ae92e48e740d36';
-
   final _userIdController = TextEditingController(text: 'test_user_123');
   final _cardNameController = TextEditingController(text: 'My Card');
   final _phoneNumberController = TextEditingController(text: '+491234567890');
   final _canCodeController = TextEditingController();
 
-  IaCardLinkConsentStatus _consentStatus =
-      IaCardLinkConsentStatus.showConsent;
+  IaCardLinkConsentStatus _consentStatus = IaCardLinkConsentStatus.showConsent;
   bool _saveCardEnabled = false;
   String _resultText = '';
   final List<String> _eventLog = [];
@@ -451,7 +448,7 @@ class _CardLinkViewState extends State<CardLinkView> {
     try {
       final canCode = _canCodeController.text.trim();
       await IaSdk.instance.cardLink.launch(
-        sdkApiKey: _sdkApiKey,
+        sdkApiKey: ExampleAppConfig.instance.accessKey,
         flowType: IaCardLinkFlowType.cardLink,
         pharmacyId: '2163',
         consentStatus: _consentStatus,
@@ -472,7 +469,7 @@ class _CardLinkViewState extends State<CardLinkView> {
     try {
       final canCode = _canCodeController.text.trim();
       await IaSdk.instance.cardLink.launch(
-        sdkApiKey: _sdkApiKey,
+        sdkApiKey: ExampleAppConfig.instance.accessKey,
         flowType: IaCardLinkFlowType.savedCards,
         pharmacyId: '2163',
         consentStatus: _consentStatus,

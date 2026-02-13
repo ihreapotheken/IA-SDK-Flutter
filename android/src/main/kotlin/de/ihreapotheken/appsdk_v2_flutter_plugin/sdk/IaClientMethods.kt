@@ -13,6 +13,8 @@ import de.ihreapotheken.sdk.core.data.EnvironmentType
 import de.ihreapotheken.sdk.core.data.PrerequisiteFlowConfiguration
 import de.ihreapotheken.sdk.core.data.model.sdk.SdkEvent
 import de.ihreapotheken.sdk.core.data.model.sdk.SdkEventListener
+import de.ihreapotheken.sdk.core.data.model.prescription.ImagePrescription
+import de.ihreapotheken.sdk.core.data.model.prescription.PdfPrescription
 import de.ihreapotheken.sdk.core.domain.model.GuestUser
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
@@ -383,12 +385,15 @@ internal class IaClientMethods(
                 // update orderSignatures for prescription-specific flows
                 // The global listener will handle the Flutter callback
                 @Suppress("UNCHECKED_CAST")
+                val images = (prescriptionImages as? ArrayList<ByteArray>)?.map { ImagePrescription(it) } ?: emptyList()
+                val pdfs = (prescriptionPdfs as? ArrayList<ByteArray>)?.map { PdfPrescription(data = it) } ?: emptyList()
+                val codes = (prescriptionCodes as? ArrayList<String>) ?: arrayListOf()
                 bindings.sdkModule.ordering.transferPrescriptions(
                     context = (bindings.activityContext() ?: bindings.applicationContext) as Activity,
                     transferPrescriptionRequest = TransferPrescriptionRequest(
-                        images = prescriptionImages as ArrayList<ByteArray>,
-                        pdfs = prescriptionPdfs as ArrayList<ByteArray>,
-                        codes = prescriptionCodes as ArrayList<String>,
+                        images = images,
+                        pdfs = pdfs,
+                        codes = codes,
                         orderId = orderId,
                     ),
                     transferPrescriptionListener = object : TransferPrescriptionListener {
