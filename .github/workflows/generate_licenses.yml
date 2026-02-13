@@ -32,4 +32,4 @@ jobs:
           git add -f licenses/licenses.html
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "Update licenses.html for ${GITHUB_REF_NAME}"
-          git push origin HEAD:main
+          git push origin HEAD:develop
