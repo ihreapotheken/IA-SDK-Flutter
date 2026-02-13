@@ -6,7 +6,7 @@ import IACardLink
 class GetSavedCardsHandler {
     func handle(args: [String: Any], result: @escaping FlutterResult) {
         let userId = args["userId"] as? String ?? ""
-        let cards = CardLink.loadCards(userId: userId)
+        let cards = CardLink.getSavedCards(userId: userId)
 
         do {
             let jsonData = try JSONEncoder().encode(cards)
