@@ -36,6 +36,7 @@ class IaModuleCardLink extends IaBaseCardLink {
     int? bottomNavigationColor,
     IaCardLinkEnvironment? environment,
     bool? saveCardEnabled,
+    String? appId,
   }) async {
     final arguments = _RequestModelLaunch(
       sdkApiKey: sdkApiKey,
@@ -53,6 +54,7 @@ class IaModuleCardLink extends IaBaseCardLink {
       bottomNavigationColor: bottomNavigationColor,
       environment: environment,
       saveCardEnabled: saveCardEnabled,
+      appId: appId,
     );
     return await _Methods.launch.invoke<void>(arguments);
   }
