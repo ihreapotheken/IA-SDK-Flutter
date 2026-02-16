@@ -35,7 +35,7 @@ class LaunchHandler {
                 return
             }
 
-            CardLink.authenticationKey = .init(value: sdkApiKey)
+            CardLink.legacyAuthenticationKey = .init(value: sdkApiKey)
             CardLink.start(
                 type: flowType,
                 forcePresent: false,
@@ -56,7 +56,7 @@ class LaunchHandler {
             return
         }
 
-        CardLink.authenticationKey = .init(value: apiKey)
+        CardLink.legacyAuthenticationKey = .init(value: apiKey)
         CardLink.finish { [weak self] in
             CardLink.start(
                 type: .startCardlink,

@@ -11,6 +11,7 @@ extension IACore.CardLinkConfiguration {
         let canCode = args["canCode"] as? String
         let cardName = args["cardName"] as? String
         let isSaveCardEnabled = args["saveCardEnabled"] as? Bool ?? true
+        let finishActionString = args["finishAction"] as? String ?? "uploadPrescriptions"
 
         let consentStatus: CardLinkConsentStatus
         switch consentStatusString {
@@ -22,6 +23,14 @@ extension IACore.CardLinkConfiguration {
             consentStatus = .undetermined
         }
 
+        let finishAction: CardLinkFinishAction
+        switch finishActionString {
+        case "sendRawPrescriptions":
+            finishAction = .sendRawPrescriptions
+        default:
+            finishAction = .uploadPrescriptions
+        }
+
         CardLink.environment = CLEnvironment(pluginStringValue: environmentString)
 
         self.init(
@@ -31,7 +40,8 @@ extension IACore.CardLinkConfiguration {
             phoneNumber: phoneNumber,
             userId: userId ?? "guest_user_id",
             cardName: cardName,
-            isSaveCardEnabled: isSaveCardEnabled
+            isSaveCardEnabled: isSaveCardEnabled,
+            finishAction: finishAction
         )
     }
 }

@@ -18,6 +18,9 @@
       "Bash(unzip:*)",
       "Bash(./gradlew :app:dependencies:*)",
       "Bash(jar tf:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/matanljubas/Library/Caches/org.swift.swiftpm/artifacts"
     ]
   }
 }

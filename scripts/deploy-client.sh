@@ -17,7 +17,7 @@ source $SCRIPT_DIR/dev-env-setup.sh
 cd "$PROJECT_DIR" 
 
 # Add latest updates to source control.
-git add android/ ios/ example/ lib/ README.md pubspec.yaml .env
+git add android/ ios/ example/ lib/ interface/ modules/ README.md pubspec.yaml .env
 git commit -m "Flutter library deploy version $APP_SDK_VERSION"
 git push
 

@@ -52,6 +52,11 @@ class LaunchHandler(
 
         val listener = CardLinkListenerImpl(phoneNumber, eventSender)
 
+        println(consentStatus)
+        println(saveCardEnabled)
+        println(canCode)
+        println(phoneNumber)
+
         val config = CardLinkConfig(
             sdkApiKey = sdkApiKey,
             pharmacyId = pharmacyId,
