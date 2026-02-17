@@ -14,6 +14,8 @@ import de.ihreapotheken.sdk.core.data.PrerequisiteFlowConfiguration
 import de.ihreapotheken.sdk.core.data.model.sdk.SdkEvent
 import de.ihreapotheken.sdk.core.data.model.sdk.SdkEventListener
 import de.ihreapotheken.sdk.core.domain.model.GuestUser
+import de.ihreapotheken.sdk.core.data.model.prescription.ImagePrescription
+import de.ihreapotheken.sdk.core.data.model.prescription.PdfPrescription
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
 import de.ihreapotheken.sdk.integrations.api.TransferPrescriptionRequest
@@ -159,7 +161,7 @@ internal class IaClientMethods(
                     apiKey = accessKey,
                     clientId = clientId,
                     configuration = IaSdkConfiguration(
-                        shouldFetchThemeFromRemote = shouldFetchThemeFromRemote,
+                        shouldFetchThemeFromRemote = true,
                         prerequisiteFlowConfiguration = PrerequisiteFlowConfiguration(
                             shouldRunLegal = shouldRunLegal,
                             shouldRunOnboarding = shouldRunOnboarding,
@@ -382,9 +384,11 @@ internal class IaClientMethods(
                 // Note: CheckoutListener is already set globally in init, but we still need to
                 // update orderSignatures for prescription-specific flows
                 // The global listener will handle the Flutter callback
-                val images = (prescriptionImages as? ArrayList<ByteArray>) ?: emptyList()
-                val pdfs = (prescriptionPdfs as? ArrayList<ByteArray>) ?: emptyList()
+                val imageBytes = (prescriptionImages as? ArrayList<ByteArray>) ?: emptyList()
+                val pdfBytes = (prescriptionPdfs as? ArrayList<ByteArray>) ?: emptyList()
                 val codes = (prescriptionCodes as? ArrayList<String>) ?: arrayListOf()
+                val images = imageBytes.map { ImagePrescription(data = it) }
+                val pdfs = pdfBytes.map { PdfPrescription(data = it) }
                 bindings.sdkModule.ordering.transferPrescriptions(
                     context = (bindings.activityContext() ?: bindings.applicationContext) as Activity,
                     transferPrescriptionRequest = TransferPrescriptionRequest(
