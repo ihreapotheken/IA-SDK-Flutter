@@ -1,107 +1,21 @@
 PODS:
-  - appsdk_v2_flutter_plugin (0.0.1):
-    - Flutter
-    - IAIntegrations (= 2.0.0-beta.4)
   - Flutter (1.0.0)
   - flutter_web_browser (0.17.3):
     - Flutter
-  - GematikOpenSSL (4.3.1)
-  - ia_cardlink (0.0.1):
-    - Flutter
-    - IACardLink (= 2.0.0-beta.4)
-    - IACore (= 2.0.0-beta.4)
-    - IAIntegrations (= 2.0.0-beta.4)
-  - ia_ordering (0.0.1):
-    - Flutter
-    - IAIntegrations (= 2.0.0-beta.4)
-    - IAOrdering (= 2.0.0-beta.4)
-  - ia_over_the_counter (0.0.1):
-    - Flutter
-    - IAIntegrations (= 2.0.0-beta.4)
-    - IAOverTheCounter (= 2.0.0-beta.4)
-  - ia_pharmacy (0.0.1):
-    - Flutter
-    - IAIntegrations (= 2.0.0-beta.4)
-    - IAPharmacy (= 2.0.0-beta.4)
-  - ia_prescription (0.0.1):
-    - Flutter
-    - IAIntegrations (= 2.0.0-beta.4)
-    - IAPrescription (= 2.0.0-beta.4)
-  - IACardLink (2.0.0-beta.4):
-    - GematikOpenSSL (= 4.3.1)
-    - IACore (= 2.0.0-beta.4)
-  - IACore (2.0.0-beta.4):
-    - IOSKit (= 2.0.0-beta.4)
-  - IAIntegrations (2.0.0-beta.4):
-    - IACore (= 2.0.0-beta.4)
-  - IAOrdering (2.0.0-beta.4):
-    - IACore (= 2.0.0-beta.4)
-  - IAOverTheCounter (2.0.0-beta.4):
-    - IACore (= 2.0.0-beta.4)
-  - IAPharmacy (2.0.0-beta.4):
-    - IACore (= 2.0.0-beta.4)
-  - IAPrescription (2.0.0-beta.4):
-    - IACore (= 2.0.0-beta.4)
-  - IOSKit (2.0.0-beta.4)
 
 DEPENDENCIES:
-  - appsdk_v2_flutter_plugin (from `.symlinks/plugins/appsdk_v2_flutter_plugin/ios`)
   - Flutter (from `Flutter`)
   - flutter_web_browser (from `.symlinks/plugins/flutter_web_browser/ios`)
-  - ia_cardlink (from `.symlinks/plugins/ia_cardlink/ios`)
-  - ia_ordering (from `.symlinks/plugins/ia_ordering/ios`)
-  - ia_over_the_counter (from `.symlinks/plugins/ia_over_the_counter/ios`)
-  - ia_pharmacy (from `.symlinks/plugins/ia_pharmacy/ios`)
-  - ia_prescription (from `.symlinks/plugins/ia_prescription/ios`)
-
-SPEC REPOS:
-  https://github.com/ihreapotheken/IA-SDK-iOS:
-    - GematikOpenSSL
-    - IACardLink
-    - IACore
-    - IAIntegrations
-    - IAOrdering
-    - IAOverTheCounter
-    - IAPharmacy
-    - IAPrescription
-    - IOSKit
 
 EXTERNAL SOURCES:
-  appsdk_v2_flutter_plugin:
-    :path: ".symlinks/plugins/appsdk_v2_flutter_plugin/ios"
   Flutter:
     :path: Flutter
   flutter_web_browser:
     :path: ".symlinks/plugins/flutter_web_browser/ios"
-  ia_cardlink:
-    :path: ".symlinks/plugins/ia_cardlink/ios"
-  ia_ordering:
-    :path: ".symlinks/plugins/ia_ordering/ios"
-  ia_over_the_counter:
-    :path: ".symlinks/plugins/ia_over_the_counter/ios"
-  ia_pharmacy:
-    :path: ".symlinks/plugins/ia_pharmacy/ios"
-  ia_prescription:
-    :path: ".symlinks/plugins/ia_prescription/ios"
 
 SPEC CHECKSUMS:
-  appsdk_v2_flutter_plugin: 098746670ef2160dadf28f0c33d159e2a6a7014a
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_web_browser: 68b27d2c4773b059cef19e12c890cb204518d3c3
-  GematikOpenSSL: e0c7ed81c689ef7747104e8c22ab8846a1910ba1
-  ia_cardlink: 651e78cfbfffa07b886401c4f18ef30445031cb9
-  ia_ordering: 8d11213d8afeee483ed2e49dd3d461ac25e4c912
-  ia_over_the_counter: a0a5e862984a0db4c3e196297369837b7046b8e4
-  ia_pharmacy: 08fdc6ab5cf852c2f46f218643fe525e13549318
-  ia_prescription: be948206f946a4f1c9663b9225f24cdb7101266b
-  IACardLink: 86d98f91cd873746e9199c9e115fa0b27ac144f1
-  IACore: 89426f0d4d488218ceccd2a795c3b6669fffd9e3
-  IAIntegrations: a66efe1104535cea3771f8a715f0ec0af2376410
-  IAOrdering: ceef5e2f88586a6b4b39a78c6fe07f95a926e666
-  IAOverTheCounter: b9adfc0a704ed98ad51b8566ae834ecd9322e779
-  IAPharmacy: 899d71bf95bf5558943b10491dfef7953efd0bfb
-  IAPrescription: 0ca410fac27ec9636d1fdd9ffd11d3702de2bc43
-  IOSKit: e69d5b9e3fd78a81d5e4abf4560273ad0874f235
 
 PODFILE CHECKSUM: 618f270f51d011697ecf56e219df6a90b2bdd2d7
 

@@ -14,8 +14,6 @@ import de.ihreapotheken.sdk.core.data.PrerequisiteFlowConfiguration
 import de.ihreapotheken.sdk.core.data.model.sdk.SdkEvent
 import de.ihreapotheken.sdk.core.data.model.sdk.SdkEventListener
 import de.ihreapotheken.sdk.core.domain.model.GuestUser
-import de.ihreapotheken.sdk.core.data.model.prescription.ImagePrescription
-import de.ihreapotheken.sdk.core.data.model.prescription.PdfPrescription
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
 import de.ihreapotheken.sdk.integrations.api.TransferPrescriptionRequest
@@ -387,8 +385,8 @@ internal class IaClientMethods(
                 val imageBytes = (prescriptionImages as? ArrayList<ByteArray>) ?: emptyList()
                 val pdfBytes = (prescriptionPdfs as? ArrayList<ByteArray>) ?: emptyList()
                 val codes = (prescriptionCodes as? ArrayList<String>) ?: arrayListOf()
-                val images = imageBytes.map { ImagePrescription(data = it) }
-                val pdfs = pdfBytes.map { PdfPrescription(data = it) }
+                val images = imageBytes.toList()
+                val pdfs = pdfBytes.toList()
                 bindings.sdkModule.ordering.transferPrescriptions(
                     context = (bindings.activityContext() ?: bindings.applicationContext) as Activity,
                     transferPrescriptionRequest = TransferPrescriptionRequest(
