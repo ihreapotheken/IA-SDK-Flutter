@@ -10,7 +10,7 @@ class _RequestModelTransferPrescriptions implements IaBaseRequest {
 
   final Iterable<Uint8List>? images;
 
-  final Iterable<Uint8List>? pdfs;
+  final Iterable<({Uint8List data, IaPrescriptionInsuranceType insuranceType})>? pdfs;
 
   final Iterable<String>? codes;
 
@@ -20,7 +20,10 @@ class _RequestModelTransferPrescriptions implements IaBaseRequest {
   Map<String, dynamic> toSupportedType() {
     return {
       'images': images,
-      'pdfs': pdfs,
+      'pdfs': pdfs?.map((pdf) => {
+        'data': pdf.data,
+        'insuranceType': pdf.insuranceType.rawValue,
+      }).toList(),
       'codes': codes,
       'orderId': orderId,
     };
