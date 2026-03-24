@@ -10,9 +10,11 @@ abstract class IaBaseOrdering extends IaBase {
 
   /// Forwards the specified [images], [pdfs], or eRezept [codes] prescription collection to the ia.de backend.
   ///
+  /// Each PDF entry is a record containing the binary data and its [IaPrescriptionInsuranceType].
+  ///
   Future<void> transferPrescriptions({
     Iterable<Uint8List>? images,
-    Iterable<Uint8List>? pdfs,
+    Iterable<({Uint8List data, IaPrescriptionInsuranceType insuranceType})>? pdfs,
     Iterable<String>? codes,
     String? orderId,
   });
