@@ -38,6 +38,7 @@ extension Error {
         case .launchRoute: "LAUNCH_ROUTE_ERROR"
         case .transferPrescriptions: "PRESCRIPTION_TRANSFER_ERROR"
         case .finishAllActivities: "FINISH_ALL_ACTIVITIES_ERROR"
+        case .transferSDKv1UserData: "TRANSFER_SDK_V1_USER_DATA_ERROR"
         }
     }
 }

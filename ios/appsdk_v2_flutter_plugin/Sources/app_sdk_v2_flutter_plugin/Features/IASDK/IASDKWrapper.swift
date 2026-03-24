@@ -81,5 +81,10 @@ final class IASDKWrapper {
         UIApplication.shared.rootViewController?.dismiss(animated: true)
         return nil
     }
-    
+
+    func transferSDKv1UserData() async throws -> Any? {
+        await IASDK.transferSDKv1UserData()
+        return nil
+    }
+
 }

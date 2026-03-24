@@ -218,6 +218,14 @@ class IaSdk {
     return await _Methods.finishAllActivities.invoke();
   }
 
+  /// Transfers user data from SDK v1 to the current SDK.
+  ///
+  /// The method is intended to be invoked before the [initialize] method.
+  ///
+  Future<void> transferSDKv1UserData() async {
+    return await _Methods.transferSDKv1UserData.invoke();
+  }
+
   /// Property holding internal state of the native callback handlers.
   ///
   // ignore: unused_field

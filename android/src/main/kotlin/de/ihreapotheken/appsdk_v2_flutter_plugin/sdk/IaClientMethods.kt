@@ -13,6 +13,9 @@ import de.ihreapotheken.sdk.core.data.EnvironmentType
 import de.ihreapotheken.sdk.core.data.PrerequisiteFlowConfiguration
 import de.ihreapotheken.sdk.core.data.model.sdk.SdkEvent
 import de.ihreapotheken.sdk.core.data.model.sdk.SdkEventListener
+import de.ihreapotheken.sdk.core.data.model.prescription.ImagePrescription
+import de.ihreapotheken.sdk.core.data.model.prescription.PdfPrescription
+import de.ihreapotheken.sdk.core.data.model.prescription.PrescriptionInsuranceType
 import de.ihreapotheken.sdk.core.domain.model.GuestUser
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
@@ -77,6 +80,11 @@ internal class IaClientMethods(
          * Closes any overlaying ia.de screen contents.
          */
         finishAllActivities,
+
+        /**
+         * Transfers user data from SDK v1 to the current SDK.
+         */
+        transferSDKv1UserData,
     }
 
     fun callHandler(
@@ -359,12 +367,10 @@ internal class IaClientMethods(
                     )
                 }
                 val prescriptionPdfs = data["pdfs"]
-                if (prescriptionPdfs != null && (prescriptionPdfs !is ArrayList<*> ||
-                            prescriptionPdfs.any { it !is ByteArray })
-                ) {
+                if (prescriptionPdfs != null && prescriptionPdfs !is ArrayList<*>) {
                     result.error(
                         "ARG_ERROR",
-                        "Prescription PDF data must be provided as a ArrayList<ByteData> type argument \"pdfs\".",
+                        "Prescription PDF data must be provided as a ArrayList<Map> type argument \"pdfs\".",
                         null,
                     )
                 }
@@ -379,16 +385,30 @@ internal class IaClientMethods(
                     )
                 }
                 val orderId = data["orderId"] as? String
+                // Map PDF entries with insurance type
+                @Suppress("UNCHECKED_CAST")
+                val pdfPrescriptions = (prescriptionPdfs as? ArrayList<Map<String, Any>>)?.map { pdfMap ->
+                    val pdfData = pdfMap["data"] as ByteArray
+                    val insuranceTypeStr = pdfMap["insuranceType"] as? String
+                    val insuranceType = when (insuranceTypeStr) {
+                        "privateInsurance" -> PrescriptionInsuranceType.PRIVATE
+                        "publicHealthcare" -> PrescriptionInsuranceType.PUBLIC
+                        else -> PrescriptionInsuranceType.PUBLIC
+                    }
+                    PdfPrescription(insuranceType, pdfData)
+                }
+                val imagePrescriptions = (prescriptionImages as? ArrayList<ByteArray>)?.map {
+                    ImagePrescription(it)
+                }
                 // Note: CheckoutListener is already set globally in init, but we still need to
                 // update orderSignatures for prescription-specific flows
                 // The global listener will handle the Flutter callback
-                @Suppress("UNCHECKED_CAST")
                 bindings.sdkModule.ordering.transferPrescriptions(
                     context = (bindings.activityContext() ?: bindings.applicationContext) as Activity,
                     transferPrescriptionRequest = TransferPrescriptionRequest(
-                        images = prescriptionImages as ArrayList<ByteArray>,
-                        pdfs = prescriptionPdfs as ArrayList<ByteArray>,
-                        codes = prescriptionCodes as ArrayList<String>,
+                        images = imagePrescriptions,
+                        pdfs = pdfPrescriptions,
+                        codes = prescriptionCodes as? ArrayList<String>,
                         orderId = orderId,
                     ),
                     transferPrescriptionListener = object : TransferPrescriptionListener {
@@ -412,6 +432,11 @@ internal class IaClientMethods(
 
             FlutterCall.finishAllActivities.name -> {
                 IaSdkActivity.finishAllActivities()
+                result.success(null)
+            }
+
+            FlutterCall.transferSDKv1UserData.name -> {
+                IaSdk.transferSDKv1UserData(bindings.applicationContext)
                 result.success(null)
             }
 
