@@ -16,7 +16,7 @@ class IaModuleOrdering extends IaBaseOrdering {
   @override
   Future<void> transferPrescriptions({
     Iterable<Uint8List>? images,
-    Iterable<Uint8List>? pdfs,
+    Iterable<({Uint8List data, IaPrescriptionInsuranceType insuranceType})>? pdfs,
     Iterable<String>? codes,
     String? orderId,
   }) async {

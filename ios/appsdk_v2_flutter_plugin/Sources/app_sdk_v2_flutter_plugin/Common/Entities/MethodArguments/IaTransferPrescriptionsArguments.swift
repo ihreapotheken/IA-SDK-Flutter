@@ -5,7 +5,7 @@ import IACore
 /// Arguments for transferring prescriptions.
 struct IaTransferPrescriptionsArguments {
     let images: [Data]
-    let pdfs: [Data]
+    let pdfs: [(data: Data, insuranceType: PrescriptionInsuranceType)]
     let codes: [String]
     let orderId: String?
 
@@ -17,7 +17,19 @@ struct IaTransferPrescriptionsArguments {
             throw IaArgumentError.invalidInputArguments
         }
         self.images = (dictionary["images"] as? [FlutterStandardTypedData])?.map { $0.data } ?? []
-        self.pdfs = (dictionary["pdfs"] as? [FlutterStandardTypedData])?.map { $0.data } ?? []
+        self.pdfs = (dictionary["pdfs"] as? [[String: Any]])?.compactMap { pdfDict in
+            guard let typedData = pdfDict["data"] as? FlutterStandardTypedData else { return nil }
+            let insuranceType: PrescriptionInsuranceType
+            switch pdfDict["insuranceType"] as? String {
+            case "privateInsurance":
+                insuranceType = .privateInsurance
+            case "publicHealthcare":
+                insuranceType = .publicHealthcare
+            default:
+                insuranceType = .publicHealthcare
+            }
+            return (data: typedData.data, insuranceType: insuranceType)
+        } ?? []
         self.codes = dictionary["codes"] as? [String] ?? []
         self.orderId = dictionary["orderId"] as? String
     }
@@ -26,7 +38,7 @@ struct IaTransferPrescriptionsArguments {
     func mappedToSDK() -> (images: [Data], pdfs: [PDFPrescription], codes: [String], orderId: String?) {
         return (
             images: images,
-            pdfs: pdfs.map { PDFPrescription(data: $0) },
+            pdfs: pdfs.map { PDFPrescription(data: $0.data, insuranceType: $0.insuranceType) },
             codes: codes,
             orderId: orderId
         )

@@ -46,6 +46,11 @@ enum FlutterCall: CaseIterable {
      * Closes any overlaying ia.de screen contents.
      */
     case finishAllActivities
+
+    /**
+     * Transfers user data from SDK v1 to the current SDK.
+     */
+    case transferSDKv1UserData
     
     /**
      * String identifier getter definition.

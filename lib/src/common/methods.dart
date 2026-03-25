@@ -10,6 +10,8 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
   logout,
 
   finishAllActivities,
+
+  transferSDKv1UserData,
   ;
 
   @override

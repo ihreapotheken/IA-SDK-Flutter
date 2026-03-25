@@ -60,7 +60,10 @@ final class IASDKPlugin {
                 
             case FlutterCall.transferPrescriptions.name:
                 return try await orderingWrapper.transferPrescriptions(arguments: call.arguments)
-                
+
+            case FlutterCall.transferSDKv1UserData.name:
+                return try await iaSdkWrapper.transferSDKv1UserData()
+
             default:
                 return FlutterMethodNotImplemented
         }
