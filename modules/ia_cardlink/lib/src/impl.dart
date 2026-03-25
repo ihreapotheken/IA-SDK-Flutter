@@ -103,6 +103,11 @@ class IaModuleCardLink extends IaBaseCardLink {
     return await _Methods.deleteAllUserRelatedData.invoke<void>(null);
   }
 
+  @override
+  Future<void> finish() async {
+    return await _Methods.finish.invoke<void>(null);
+  }
+
   static final _consentEventListener = StreamController<IaCardLinkConsentEvent>.broadcast();
 
   @override

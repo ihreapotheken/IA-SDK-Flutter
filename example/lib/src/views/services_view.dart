@@ -17,28 +17,79 @@ class ServicesView extends StatelessWidget {
         24,
       ),
       children: [
+        _SectionHeader(title: 'SDK State'),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Is Initialized'),
+          onPressed: () async {
+            final result = await IaSdk.instance.isInitialized();
+            if (context.mounted) _showResult(context, 'isInitialized: $result');
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Get Environment (iOS)'),
+          onPressed: () async {
+            try {
+              final env = await IaSdk.instance.getEnvironment();
+              if (context.mounted) _showResult(context, 'Environment: ${env?.name ?? 'N/A'}');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 24),
+        _SectionHeader(title: 'Pharmacy'),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Get Pharmacy ID'),
+          onPressed: () async {
+            try {
+              final id = await IaSdk.instance.pharmacy.getPharmacyId();
+              if (context.mounted) _showResult(context, 'Pharmacy ID: ${id ?? 'none'}');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 24),
+        _SectionHeader(title: 'Ordering'),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Get Cart Details (iOS)'),
+          onPressed: () async {
+            try {
+              final details = await IaSdk.instance.ordering.getCartDetails();
+              if (context.mounted) {
+                if (details == null) {
+                  _showResult(context, 'Cart is empty');
+                } else {
+                  _showResult(context, 'Cart: ${const JsonEncoder.withIndent('  ').convert(details)}');
+                }
+              }
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
         ElevatedButton(
           child: Text('Clear Cart'),
           onPressed: () => IaSdk.instance.ordering.clearCart(),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         ElevatedButton(
-          child: Text('Set guest user data'),
-          onPressed: () => IaSdk.instance.setGuestUserData(
-            salutation: 'Herr',
-            firstName: 'First',
-            lastName: 'Last',
-            email: 'email@example.org',
-            phoneNumberCountryCode: 49,
-            phoneNumberWithoutCountryCode: 432432243,
-          ),
+          child: Text('Delete Order History (iOS)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.ordering.deleteOrderHistory();
+              if (context.mounted) _showResult(context, 'Order history deleted');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
         ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          child: Text('Logout'),
-          onPressed: () => IaSdk.instance.logout(),
-        ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         ElevatedButton(
           child: Text('Transfer prescriptions'),
           onPressed: () async {
@@ -68,7 +119,38 @@ class ServicesView extends StatelessWidget {
             }
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
+        _SectionHeader(title: 'User'),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Set guest user data'),
+          onPressed: () => IaSdk.instance.setGuestUserData(
+            salutation: 'Herr',
+            firstName: 'First',
+            lastName: 'Last',
+            email: 'email@example.org',
+            phoneNumberCountryCode: 49,
+            phoneNumberWithoutCountryCode: 432432243,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Delete User (iOS)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.deleteUser();
+              if (context.mounted) _showResult(context, 'User deleted');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Logout'),
+          onPressed: () => IaSdk.instance.logout(),
+        ),
+        const SizedBox(height: 8),
         ElevatedButton(
           child: Text('Transfer SDK v1 user data'),
           onPressed: () async {
@@ -80,7 +162,50 @@ class ServicesView extends StatelessWidget {
             }
           },
         ),
+        const SizedBox(height: 24),
+        _SectionHeader(title: 'Cache'),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Clean Cache (iOS)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.cleanCache(
+                initialization: true,
+                prerequisites: true,
+              );
+              if (context.mounted) _showResult(context, 'Cache cleaned');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
       ],
+    );
+  }
+
+  void _showResult(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
     );
   }
 }

@@ -12,6 +12,14 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
   finishAllActivities,
 
   transferSDKv1UserData,
+
+  isInitialized,
+
+  deleteUser,
+
+  getEnvironment,
+
+  cleanCache,
   ;
 
   @override
@@ -26,6 +34,8 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
         return _RequestModelRegisterModules;
       case _Methods.setGuestUserData:
         return _RequestModelSetGuestUserData;
+      case _Methods.cleanCache:
+        return _RequestModelCleanCache;
       default:
         return null;
     }

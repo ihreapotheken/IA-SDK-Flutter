@@ -451,6 +451,18 @@ class _InfoMethodsSection extends StatelessWidget {
             }
           },
         ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Finish CardLink (iOS)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.cardLink.finish();
+              onShowResult('CardLink finished');
+            } catch (e) {
+              onShowResult('Error: $e');
+            }
+          },
+        ),
       ],
     );
   }

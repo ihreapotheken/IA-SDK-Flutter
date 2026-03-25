@@ -15,4 +15,8 @@ abstract class IaBasePharmacy extends IaBase {
   /// Specifies a pharmacy identifier to be loaded into the AppSDK module for user interaction.
   ///
   Future<void> setPharmacyId(String pharmacyId);
+
+  /// Returns the currently selected pharmacy identifier, or `null` if no pharmacy is selected.
+  ///
+  Future<String?> getPharmacyId();
 }

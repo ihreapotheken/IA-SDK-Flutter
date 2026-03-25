@@ -24,16 +24,6 @@ enum IASDKViewIdentifier: String, CaseIterable {
     case pharmacyDetails = "pharmacyScreen"
 
     /**
-     * Prescription scanner screen from IAPrescription module.
-     */
-    case prescriptionScanner = "prescriptionScanner"
-
-    /**
-     * E-Prescription scanner screen from IAPrescription module.
-     */
-    case ePrescriptionScanner = "ePrescriptionScanner"
-
-    /**
      * Visual interface representation.
      */
     func iaScreen() -> any IAScreen {
@@ -49,12 +39,6 @@ enum IASDKViewIdentifier: String, CaseIterable {
 
         case IASDKViewIdentifier.pharmacyDetails:
             IAPharmacyScreen()
-
-        case IASDKViewIdentifier.prescriptionScanner:
-            IAScannerScreen(type: .prescription)
-
-        case IASDKViewIdentifier.ePrescriptionScanner:
-            IAScannerScreen(type: .ePrescription)
         }
     }
 }

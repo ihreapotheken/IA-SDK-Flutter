@@ -76,6 +76,29 @@ enum IaSdkNavigationTarget {
   }
 }
 
+class _ApofinderPharmacyChangedHandler implements IaBaseCallbackHandler {
+  const _ApofinderPharmacyChangedHandler();
+
+  @override
+  String get methodId => 'apofinderDidChangePharmacy';
+
+  @override
+  Future<dynamic> Function(dynamic args) get handler {
+    return (args) async {
+      if (args is! Map) return null;
+      final pharmacyId = args['pharmacyId'] as String?;
+      final isFromPrerequisites = args['isFromPrerequisites'] as bool? ?? false;
+      if (pharmacyId != null && IaSdk.instance.onApofinderDidChangePharmacy != null) {
+        IaSdk.instance.onApofinderDidChangePharmacy!(
+          pharmacyId: pharmacyId,
+          isFromPrerequisites: isFromPrerequisites,
+        );
+      }
+      return null;
+    };
+  }
+}
+
 /// Decision for how the SDK should handle a particular action.
 ///
 enum _NavigationHandlingDecision {
