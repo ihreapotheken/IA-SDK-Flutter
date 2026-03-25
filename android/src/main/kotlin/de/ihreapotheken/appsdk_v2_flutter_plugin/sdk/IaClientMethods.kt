@@ -167,7 +167,7 @@ internal class IaClientMethods(
                     apiKey = accessKey,
                     clientId = clientId,
                     configuration = IaSdkConfiguration(
-                        shouldFetchThemeFromRemote = shouldFetchThemeFromRemote,
+                        shouldFetchThemeFromRemote = true,
                         prerequisiteFlowConfiguration = PrerequisiteFlowConfiguration(
                             shouldRunLegal = shouldRunLegal,
                             shouldRunOnboarding = shouldRunOnboarding,

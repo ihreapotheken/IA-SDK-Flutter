@@ -47,6 +47,7 @@ class LaunchHandler(
         val textLinkColor = call.argument<Long>("textLinkColor")?.toInt()
         val bottomNavigationColor = call.argument<Long>("bottomNavigationColor")?.toInt()
         val cardLinkSdkEnvironment = EnvironmentMapper.fromString(call.argument<String>("environment"))
+        val applicationId = call.argument<String>("appId")
 
         val flowType = call.argument<String>("flowType") ?: "launchCardLinkSdk"
 
@@ -66,7 +67,8 @@ class LaunchHandler(
             textLinkColor = textLinkColor,
             bottomNavigationColor = bottomNavigationColor,
             cardLinkSdkEnvironment = cardLinkSdkEnvironment,
-            listener = listener
+            listener = listener,
+            applicationId = applicationId
         )
 
         activityProvider()?.let { activity ->

@@ -27,6 +27,7 @@ class IaModuleCardLink extends IaBaseCardLink {
     required IaCardLinkConsentStatus consentStatus,
     required String phoneNumber,
     required String userId,
+    required IaCardLinkFinishAction finishAction,
     String? canCode,
     String? cardName,
     int? primaryColor,
@@ -35,6 +36,7 @@ class IaModuleCardLink extends IaBaseCardLink {
     int? bottomNavigationColor,
     IaCardLinkEnvironment? environment,
     bool? saveCardEnabled,
+    String? appId,
   }) async {
     final arguments = _RequestModelLaunch(
       sdkApiKey: sdkApiKey,
@@ -43,6 +45,7 @@ class IaModuleCardLink extends IaBaseCardLink {
       consentStatus: consentStatus,
       phoneNumber: phoneNumber,
       userId: userId,
+      finishAction: finishAction,
       canCode: canCode,
       cardName: cardName,
       primaryColor: primaryColor,
@@ -51,6 +54,7 @@ class IaModuleCardLink extends IaBaseCardLink {
       bottomNavigationColor: bottomNavigationColor,
       environment: environment,
       saveCardEnabled: saveCardEnabled,
+      appId: appId,
     );
     return await _Methods.launch.invoke<void>(arguments);
   }

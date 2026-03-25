@@ -8,6 +8,7 @@ class _RequestModelLaunch implements IaBaseRequest {
     required this.consentStatus,
     required this.phoneNumber,
     required this.userId,
+    required this.finishAction,
     this.canCode,
     this.cardName,
     this.primaryColor,
@@ -16,6 +17,7 @@ class _RequestModelLaunch implements IaBaseRequest {
     this.bottomNavigationColor,
     this.environment,
     this.saveCardEnabled,
+    this.appId,
   });
 
   final String sdkApiKey;
@@ -24,6 +26,7 @@ class _RequestModelLaunch implements IaBaseRequest {
   final IaCardLinkConsentStatus consentStatus;
   final String phoneNumber;
   final String userId;
+  final IaCardLinkFinishAction finishAction;
   final String? canCode;
   final String? cardName;
   final int? primaryColor;
@@ -32,6 +35,7 @@ class _RequestModelLaunch implements IaBaseRequest {
   final int? bottomNavigationColor;
   final IaCardLinkEnvironment? environment;
   final bool? saveCardEnabled;
+  final String? appId;
 
   @override
   Map<String, dynamic> toSupportedType() {
@@ -42,6 +46,7 @@ class _RequestModelLaunch implements IaBaseRequest {
       'consentStatus': consentStatus.rawValue,
       'phoneNumber': phoneNumber,
       'userId': userId,
+      'finishAction': finishAction.rawValue,
       'canCode': canCode,
       'cardName': cardName,
       'primaryColor': primaryColor,
@@ -50,6 +55,7 @@ class _RequestModelLaunch implements IaBaseRequest {
       'bottomNavigationColor': bottomNavigationColor,
       'environment': environment?.rawValue,
       'saveCardEnabled': saveCardEnabled,
+      'appId': appId,
     };
   }
 }

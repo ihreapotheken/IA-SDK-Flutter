@@ -13,7 +13,14 @@
       "Bash(pod install:*)",
       "Bash(python3:*)",
       "Bash(flutter build:*)",
-      "Bash(xcodebuild:*)"
+      "Bash(xcodebuild:*)",
+      "Bash(javap:*)",
+      "Bash(unzip:*)",
+      "Bash(./gradlew :app:dependencies:*)",
+      "Bash(jar tf:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/matanljubas/Library/Caches/org.swift.swiftpm/artifacts"
     ]
   }
 }
