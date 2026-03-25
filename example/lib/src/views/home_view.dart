@@ -1,53 +1,21 @@
 import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/services/sdk_initializer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:latlong2/latlong.dart';
 
-class HomeView extends StatefulWidget {
+class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
-  @override
-  State<HomeView> createState() => _HomeViewState();
-}
-
-class _HomeViewState extends State<HomeView> {
-  late Future<void>? _initFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _initFuture = SdkInitializer.instance.initialize();
-  }
+  static const _pharmacyMarkers = <({LatLng point, String pharmacyId})>[
+    (point: LatLng(52.52, 13.4050), pharmacyId: '2163'),
+    (point: LatLng(52.545095, 13.447899), pharmacyId: '117988'),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _initFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              snapshot.error.toString(),
-            ),
-          );
-        }
-
-        return _buildMap(context);
-      },
-    );
-  }
-
-  Widget _buildMap(BuildContext context) {
     return FlutterMap(
       options: MapOptions(
         initialCenter: LatLng(52.52, 13.4050),
@@ -74,11 +42,6 @@ class _HomeViewState extends State<HomeView> {
       ],
     );
   }
-
-  static const _pharmacyMarkers = <({LatLng point, String pharmacyId})>[
-    (point: LatLng(52.52, 13.4050), pharmacyId: '2163'),
-    (point: LatLng(52.545095, 13.447899), pharmacyId: '117988'),
-  ];
 }
 
 class _PharmacyMarker extends StatelessWidget {
