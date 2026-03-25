@@ -10,6 +10,7 @@ part 'config/server_environment.dart';
 part 'models/request/guest_user_data.dart';
 part 'models/request/init_config.dart';
 part 'models/request/register_modules.dart';
+part 'models/request/clean_cache.dart';
 
 /// Main entrypoint for the ia.de AppSDK services and features.
 ///
@@ -226,12 +227,55 @@ class IaSdk {
     return await _Methods.transferSDKv1UserData.invoke();
   }
 
+  /// Returns `true` if the SDK has been successfully initialized.
+  ///
+  Future<bool> isInitialized() async {
+    final result = await _Methods.isInitialized.invoke<bool>();
+    return result ?? false;
+  }
+
+  /// Deletes the user account from the SDK.
+  ///
+  /// This is different from [logout] which clears local data — this deletes the user on the backend.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<void> deleteUser() async {
+    return await _Methods.deleteUser.invoke();
+  }
+
+  /// Returns the current server environment.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<IaSdkConfigurationServerEnvironment?> getEnvironment() async {
+    final result = await _Methods.getEnvironment.invoke<String?>();
+    if (result == null) return null;
+    return IaSdkConfigurationServerEnvironment.values.where((e) => e.name == result).firstOrNull;
+  }
+
+  /// Clears cached SDK data for initialization and/or prerequisites.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<void> cleanCache({
+    bool initialization = false,
+    bool prerequisites = false,
+  }) async {
+    final arguments = _RequestModelCleanCache(
+      initialization: initialization,
+      prerequisites: prerequisites,
+    );
+    return await _Methods.cleanCache.invoke(arguments);
+  }
+
   /// Property holding internal state of the native callback handlers.
   ///
   // ignore: unused_field
   final _callbackHandlers = IaBaseCallbacks(
     handlers: [
       const _NavigationHandler(),
+      const _ApofinderPharmacyChangedHandler(),
     ],
   );
 
@@ -258,4 +302,14 @@ class IaSdk {
     IaSdkNavigationTarget navigationTarget,
   )?
   onSdkWillNavigateToTarget;
+
+  /// Called when the user changes their pharmacy via the Apofinder flow.
+  ///
+  /// Provides the new [pharmacyId] and whether the change was triggered from the prerequisites flow.
+  ///
+  void Function({
+    required String pharmacyId,
+    required bool isFromPrerequisites,
+  })?
+  onApofinderDidChangePharmacy;
 }

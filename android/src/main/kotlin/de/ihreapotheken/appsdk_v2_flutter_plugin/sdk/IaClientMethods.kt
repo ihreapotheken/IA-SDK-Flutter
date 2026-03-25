@@ -85,6 +85,41 @@ internal class IaClientMethods(
          * Transfers user data from SDK v1 to the current SDK.
          */
         transferSDKv1UserData,
+
+        /**
+         * Returns whether the SDK has been successfully initialized.
+         */
+        isInitialized,
+
+        /**
+         * Deletes the user account from the SDK backend.
+         */
+        deleteUser,
+
+        /**
+         * Returns the current server environment.
+         */
+        getEnvironment,
+
+        /**
+         * Clears cached SDK data.
+         */
+        cleanCache,
+
+        /**
+         * Returns the currently selected pharmacy identifier.
+         */
+        getPharmacyId,
+
+        /**
+         * Returns the current cart details.
+         */
+        getCartDetails,
+
+        /**
+         * Deletes the order history.
+         */
+        deleteOrderHistory,
     }
 
     fun callHandler(
@@ -438,6 +473,35 @@ internal class IaClientMethods(
             FlutterCall.transferSDKv1UserData.name -> {
                 IaSdk.transferSDKv1UserData(bindings.applicationContext)
                 result.success(null)
+            }
+
+            FlutterCall.isInitialized.name -> {
+                result.success(bindings.sdkModule.isInitialized())
+            }
+
+            FlutterCall.getPharmacyId.name -> {
+                Thread {
+                    try {
+                        val pharmacyId = kotlinx.coroutines.runBlocking {
+                            bindings.sdkModule.pharmacy.getPharmacyId()
+                        }
+                        android.os.Handler(android.os.Looper.getMainLooper()).post {
+                            result.success(pharmacyId)
+                        }
+                    } catch (e: Exception) {
+                        android.os.Handler(android.os.Looper.getMainLooper()).post {
+                            result.success(null)
+                        }
+                    }
+                }.start()
+            }
+
+            FlutterCall.deleteUser.name,
+            FlutterCall.getEnvironment.name,
+            FlutterCall.cleanCache.name,
+            FlutterCall.getCartDetails.name,
+            FlutterCall.deleteOrderHistory.name -> {
+                result.notImplemented()
             }
 
             else -> {

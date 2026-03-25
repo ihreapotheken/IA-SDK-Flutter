@@ -12,6 +12,8 @@ extension IACore.CardLinkConfiguration {
         let cardName = args["cardName"] as? String
         let isSaveCardEnabled = args["saveCardEnabled"] as? Bool ?? true
         let appID = args["appID"] as? String
+        let finishActionString = args["finishAction"] as? String ?? "uploadPrescriptions"
+        let finishAction: CardLinkFinishAction = finishActionString == "sendRawPrescriptions" ? .sendRawPrescriptions : .uploadPrescriptions
 
         let consentStatus: CardLinkConsentStatus
         switch consentStatusString {
@@ -33,6 +35,7 @@ extension IACore.CardLinkConfiguration {
             userId: userId ?? "guest_user_id",
             cardName: cardName,
             isSaveCardEnabled: isSaveCardEnabled,
+            finishAction: finishAction,
             appID: appID
         )
     }

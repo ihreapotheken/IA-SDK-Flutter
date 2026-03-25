@@ -57,6 +57,16 @@ class IaClientDelegate: SDKDelegate {
         }
     }
     
+    func apofinderDidChangePharmacy(_ pharmacy: Pharmacy, isFromPrerequisites: Bool) {
+        channel.invokeMethod(
+            "apofinderDidChangePharmacy",
+            arguments: [
+                "pharmacyId": String(pharmacy.id),
+                "isFromPrerequisites": isFromPrerequisites,
+            ] as [String: Any]
+        )
+    }
+
     func orderingDidFinishOrders(orders: [IAOrder]) {
         guard let orderCode = orders.first?.orderCode else { return }
         let clientOrderIDs = orders.compactMap(\.clientOrderID)

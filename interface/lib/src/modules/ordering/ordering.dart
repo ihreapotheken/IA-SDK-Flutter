@@ -27,6 +27,18 @@ abstract class IaBaseOrdering extends IaBase {
   ///
   Future<void> launchCartScreen();
 
+  /// Returns the current cart details, or `null` if the cart is empty.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<Map<String, dynamic>?> getCartDetails();
+
+  /// Deletes the order history.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<void> deleteOrderHistory();
+
   /// Notifier object implemented for informing the client integration of order completion.
   ///
   /// Usage:

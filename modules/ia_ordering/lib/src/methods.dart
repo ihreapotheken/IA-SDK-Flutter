@@ -3,6 +3,8 @@ part of 'impl.dart';
 enum _Methods with IaBaseMethods implements IaBaseMethods {
   transferPrescriptions,
   clearCart,
+  getCartDetails,
+  deleteOrderHistory,
   ;
 
   @override

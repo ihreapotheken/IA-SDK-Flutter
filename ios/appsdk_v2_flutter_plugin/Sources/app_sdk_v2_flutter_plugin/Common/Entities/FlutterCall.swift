@@ -51,6 +51,41 @@ enum FlutterCall: CaseIterable {
      * Transfers user data from SDK v1 to the current SDK.
      */
     case transferSDKv1UserData
+
+    /**
+     * Returns whether the SDK has been successfully initialized.
+     */
+    case isInitialized
+
+    /**
+     * Deletes the user account from the SDK backend.
+     */
+    case deleteUser
+
+    /**
+     * Returns the current server environment.
+     */
+    case getEnvironment
+
+    /**
+     * Clears cached SDK data for initialization and/or prerequisites.
+     */
+    case cleanCache
+
+    /**
+     * Returns the currently selected pharmacy identifier.
+     */
+    case getPharmacyId
+
+    /**
+     * Returns the current cart details.
+     */
+    case getCartDetails
+
+    /**
+     * Deletes the order history.
+     */
+    case deleteOrderHistory
     
     /**
      * String identifier getter definition.

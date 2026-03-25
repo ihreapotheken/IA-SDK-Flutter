@@ -64,6 +64,27 @@ final class IASDKPlugin {
             case FlutterCall.transferSDKv1UserData.name:
                 return try await iaSdkWrapper.transferSDKv1UserData()
 
+            case FlutterCall.isInitialized.name:
+                return try await iaSdkWrapper.isInitialized()
+
+            case FlutterCall.deleteUser.name:
+                return try await iaSdkWrapper.deleteUser()
+
+            case FlutterCall.getEnvironment.name:
+                return try await iaSdkWrapper.getEnvironment()
+
+            case FlutterCall.cleanCache.name:
+                return try await iaSdkWrapper.cleanCache(arguments: call.arguments)
+
+            case FlutterCall.getPharmacyId.name:
+                return try await iaSdkWrapper.getPharmacyId()
+
+            case FlutterCall.getCartDetails.name:
+                return try await orderingWrapper.getCartDetails()
+
+            case FlutterCall.deleteOrderHistory.name:
+                return try await orderingWrapper.deleteOrderHistory()
+
             default:
                 return FlutterMethodNotImplemented
         }
