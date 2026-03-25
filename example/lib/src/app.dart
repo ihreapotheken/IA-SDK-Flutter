@@ -41,6 +41,15 @@ class _ExampleAppState extends State<ExampleApp> {
       return true;
     };
 
+    IaSdk.instance.onApofinderDidChangePharmacy = ({
+      required pharmacyId,
+      required isFromPrerequisites,
+    }) {
+      debugPrint(
+        'Host app: Apofinder changed pharmacy to $pharmacyId (fromPrerequisites: $isFromPrerequisites)',
+      );
+    };
+
     await IaSdk.instance.register(
       modules: [
         IaModuleCardLink(),

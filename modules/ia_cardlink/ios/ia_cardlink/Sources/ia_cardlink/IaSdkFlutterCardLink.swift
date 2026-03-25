@@ -77,6 +77,11 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
                 }
             }
 
+        case "finish":
+            CardLink.finish {
+                result(nil)
+            }
+
         default:
             result(FlutterMethodNotImplemented)
         }

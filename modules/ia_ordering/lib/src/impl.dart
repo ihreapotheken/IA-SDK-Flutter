@@ -37,6 +37,18 @@ class IaModuleOrdering extends IaBaseOrdering {
   }
 
   @override
+  Future<Map<String, dynamic>?> getCartDetails() async {
+    final result = await _Methods.getCartDetails.invoke<Map?>(null);
+    if (result == null) return null;
+    return Map<String, dynamic>.from(result);
+  }
+
+  @override
+  Future<void> deleteOrderHistory() async {
+    return await _Methods.deleteOrderHistory.invoke<void>(null);
+  }
+
+  @override
   Future<void> launchCartScreen() async {
     return await _Views.cartScreen.launch();
   }

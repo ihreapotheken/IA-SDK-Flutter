@@ -9,6 +9,7 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
   deleteCard,
   deleteAllCards,
   deleteAllUserRelatedData,
+  finish,
   ;
 
   /// Custom channel identifier for the CardLink plugin.

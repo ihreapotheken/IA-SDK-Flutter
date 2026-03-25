@@ -96,6 +96,12 @@ abstract class IaBaseCardLink extends IaBase {
   ///
   Future<void> deleteAllUserRelatedData();
 
+  /// Programmatically finishes the active CardLink session.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<void> finish();
+
   /// Notifier for consent events (accepted or declined).
   ///
   /// Consolidates consent accepted/declined into a single stream with status differentiation.

@@ -39,6 +39,13 @@ extension Error {
         case .transferPrescriptions: "PRESCRIPTION_TRANSFER_ERROR"
         case .finishAllActivities: "FINISH_ALL_ACTIVITIES_ERROR"
         case .transferSDKv1UserData: "TRANSFER_SDK_V1_USER_DATA_ERROR"
+        case .isInitialized: "IS_INITIALIZED_ERROR"
+        case .deleteUser: "DELETE_USER_ERROR"
+        case .getEnvironment: "GET_ENVIRONMENT_ERROR"
+        case .cleanCache: "CLEAN_CACHE_ERROR"
+        case .getPharmacyId: "GET_PHARMACY_ID_ERROR"
+        case .getCartDetails: "GET_CART_DETAILS_ERROR"
+        case .deleteOrderHistory: "DELETE_ORDER_HISTORY_ERROR"
         }
     }
 }

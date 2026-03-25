@@ -87,4 +87,41 @@ final class IASDKWrapper {
         return nil
     }
 
+    func isInitialized() async throws -> Any? {
+        let state = IASDK.initializationState
+        let summary = state.summary
+        return summary == .initializationFinished || summary == .initializationAndPrerequisitesFinished
+    }
+
+    func deleteUser() async throws -> Any? {
+        try await IASDK.deleteUser()
+        return nil
+    }
+
+    func getEnvironment() async throws -> Any? {
+        let env = IASDK.getEnvironment()
+        switch env {
+        case .dev:
+            return "development"
+        case .staging:
+            return "staging"
+        case .prod:
+            return "production"
+        }
+    }
+
+    func cleanCache(arguments: Any) async throws -> Any? {
+        let args = arguments as? [String: Any] ?? [:]
+        let initialization = args["initialization"] as? Bool ?? false
+        let prerequisites = args["prerequisites"] as? Bool ?? false
+        IASDK.cleanCache(initialization: initialization, prerequisites: prerequisites)
+        return nil
+    }
+
+    func getPharmacyId() async throws -> Any? {
+        guard let pharmacyId = IASDK.Pharmacy.getPharmacyID() else {
+            return nil
+        }
+        return String(pharmacyId)
+    }
 }
