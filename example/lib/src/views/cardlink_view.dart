@@ -125,7 +125,7 @@ class _CardLinkViewState extends State<CardLinkView> {
             try {
               final canCode = _canCodeController.text.trim();
               await IaSdk.instance.cardLink.launch(
-                sdkApiKey: _sdkApiKey,
+                sdkApiKey: ExampleAppConfig.instance.accessKey,
                 flowType: IaCardLinkFlowType.cardLink,
                 pharmacyId: '2163',
                 consentStatus: _consentStatus,
@@ -135,6 +135,7 @@ class _CardLinkViewState extends State<CardLinkView> {
                 canCode: canCode.isNotEmpty ? canCode : null,
                 saveCardEnabled: _saveCardEnabled,
                 environment: IaCardLinkEnvironment.debug,
+                finishAction: IaCardLinkFinishAction.uploadPrescriptions,
               );
               _showResult('CardLink launched');
             } catch (e) {
@@ -145,7 +146,7 @@ class _CardLinkViewState extends State<CardLinkView> {
             try {
               final canCode = _canCodeController.text.trim();
               await IaSdk.instance.cardLink.launch(
-                sdkApiKey: _sdkApiKey,
+                sdkApiKey: ExampleAppConfig.instance.accessKey,
                 flowType: IaCardLinkFlowType.savedCards,
                 pharmacyId: '2163',
                 consentStatus: _consentStatus,
@@ -155,6 +156,7 @@ class _CardLinkViewState extends State<CardLinkView> {
                 canCode: canCode.isNotEmpty ? canCode : null,
                 saveCardEnabled: _saveCardEnabled,
                 environment: IaCardLinkEnvironment.debug,
+                finishAction: IaCardLinkFinishAction.uploadPrescriptions,
               );
               _showResult('Saved Cards launched');
             } catch (e) {
