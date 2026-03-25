@@ -27,6 +27,8 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [bottomNavigationColor]: Optional bottom navigation UI color (as integer ARGB value).
   /// - [environment]: Optional SDK environment (defaults to production).
   /// - [saveCardEnabled]: Optional flag to enable card saving (defaults to false).
+  /// - [finishAction]: Determines what happens with prescriptions after NFC scanning.
+  /// - [appId]: Optional application ID (maps to `applicationId` on Android and `appID` on iOS).
   ///
   Future<void> launch({
     required String sdkApiKey,
@@ -35,6 +37,7 @@ abstract class IaBaseCardLink extends IaBase {
     required IaCardLinkConsentStatus consentStatus,
     required String phoneNumber,
     required String userId,
+    required IaCardLinkFinishAction finishAction,
     String? canCode,
     String? cardName,
     int? primaryColor,
@@ -43,6 +46,7 @@ abstract class IaBaseCardLink extends IaBase {
     int? bottomNavigationColor,
     IaCardLinkEnvironment? environment,
     bool? saveCardEnabled,
+    String? appId,
   });
 
   /// Returns the CardLink SDK version string.
