@@ -19,81 +19,68 @@ class ServicesView extends StatelessWidget {
       children: [
         ElevatedButton(
           child: Text('Clear Cart'),
-          onPressed: _onClearCartPressed,
+          onPressed: () => IaSdk.instance.ordering.clearCart(),
         ),
         const SizedBox(height: 16),
         ElevatedButton(
           child: Text('Set guest user data'),
-          onPressed: _onSetGuestUserDataPressed,
+          onPressed: () => IaSdk.instance.setGuestUserData(
+            salutation: 'Herr',
+            firstName: 'First',
+            lastName: 'Last',
+            email: 'email@example.org',
+            phoneNumberCountryCode: 49,
+            phoneNumberWithoutCountryCode: 432432243,
+          ),
         ),
         const SizedBox(height: 16),
         ElevatedButton(
           child: Text('Logout'),
-          onPressed: _onLogoutPressed,
+          onPressed: () => IaSdk.instance.logout(),
         ),
         const SizedBox(height: 16),
         ElevatedButton(
           child: Text('Transfer prescriptions'),
-          onPressed: _onTransferPrescriptionsPressed,
+          onPressed: () async {
+            try {
+              await IaSdk.instance.ordering.transferPrescriptions(
+                images: [
+                  base64Decode(ExampleAppConfig.instance.mockPngPrescription),
+                  base64Decode(ExampleAppConfig.instance.mockJpgPrescription),
+                ],
+                pdfs: [
+                  (
+                    data: base64Decode(
+                      ExampleAppConfig.instance.mockPdfPrescription,
+                    ),
+                    insuranceType:
+                        IaPrescriptionInsuranceType.privateInsurance,
+                  ),
+                ],
+                codes: [
+                  '{"urls":["Task/test9ba2fee0d07e4ef2b6205f8012e1445b/\$accept?ac=5e24cc059ff244bdbb01efcccf834a6329bdac67a4a64733938fe1b799ac19a9"]}',
+                ],
+                orderId: 'Some order id from host app',
+              );
+            } catch (e) {
+              debugPrint('ERROR TRANSFER');
+              debugPrint('$e', wrapWidth: 999999999999);
+            }
+          },
         ),
         const SizedBox(height: 16),
         ElevatedButton(
           child: Text('Transfer SDK v1 user data'),
-          onPressed: _onTransferSDKv1UserDataPressed,
+          onPressed: () async {
+            try {
+              await IaSdk.instance.transferSDKv1UserData();
+            } catch (e) {
+              debugPrint('ERROR TRANSFER SDK V1 USER DATA');
+              debugPrint('$e', wrapWidth: 999999999999);
+            }
+          },
         ),
       ],
     );
-  }
-
-  Future<void> _onClearCartPressed() async {
-    await IaSdk.instance.ordering.clearCart();
-  }
-
-  Future<void> _onSetGuestUserDataPressed() async {
-    await IaSdk.instance.setGuestUserData(
-      salutation: 'Herr',
-      firstName: 'First',
-      lastName: 'Last',
-      email: 'email@example.org',
-      phoneNumberCountryCode: 49,
-      phoneNumberWithoutCountryCode: 432432243,
-    );
-  }
-
-  Future<void> _onLogoutPressed() async {
-    await IaSdk.instance.logout();
-  }
-
-  Future<void> _onTransferPrescriptionsPressed() async {
-    try {
-      await IaSdk.instance.ordering.transferPrescriptions(
-        images: [
-          base64Decode(ExampleAppConfig.instance.mockPngPrescription),
-          base64Decode(ExampleAppConfig.instance.mockJpgPrescription),
-        ],
-        pdfs: [
-          (
-            data: base64Decode(ExampleAppConfig.instance.mockPdfPrescription),
-            insuranceType: IaPrescriptionInsuranceType.privateInsurance,
-          ),
-        ],
-        codes: [
-          '{"urls":["Task/test9ba2fee0d07e4ef2b6205f8012e1445b/\$accept?ac=5e24cc059ff244bdbb01efcccf834a6329bdac67a4a64733938fe1b799ac19a9"]}',
-        ],
-        orderId: 'Some order id from host app',
-      );
-    } catch (e) {
-      debugPrint('ERROR TRANSFER');
-      debugPrint('$e', wrapWidth: 999999999999);
-    }
-  }
-
-  Future<void> _onTransferSDKv1UserDataPressed() async {
-    try {
-      await IaSdk.instance.transferSDKv1UserData();
-    } catch (e) {
-      debugPrint('ERROR TRANSFER SDK V1 USER DATA');
-      debugPrint('$e', wrapWidth: 999999999999);
-    }
   }
 }

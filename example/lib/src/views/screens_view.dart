@@ -16,40 +16,24 @@ class ScreensView extends StatelessWidget {
       children: [
         ElevatedButton(
           child: Text('Launch Start screen'),
-          onPressed: _onLaunchStartScreenPressed,
+          onPressed: () => IaSdk.instance.launchStartRoute(),
         ),
         const SizedBox(height: 16),
         ElevatedButton(
           child: Text('Launch Product Search'),
-          onPressed: _onLaunchProductSearchPressed,
+          onPressed: () => IaSdk.instance.overTheCounter.launchProductSearchRoute(),
         ),
         const SizedBox(height: 16),
         ElevatedButton(
           child: Text('Launch Cart Screen'),
-          onPressed: _onLaunchCartScreenPressed,
+          onPressed: () => IaSdk.instance.ordering.launchCartScreen(),
         ),
         const SizedBox(height: 16),
         ElevatedButton(
           child: Text('Launch Pharmacy Details'),
-          onPressed: _onLaunchPharmacyDetailsPressed,
+          onPressed: () => IaSdk.instance.pharmacy.launchPharmacyDetails(),
         ),
       ],
     );
-  }
-
-  Future<void> _onLaunchStartScreenPressed() async {
-    await IaSdk.instance.launchStartRoute();
-  }
-
-  Future<void> _onLaunchProductSearchPressed() async {
-    await IaSdk.instance.overTheCounter.launchProductSearchRoute();
-  }
-
-  Future<void> _onLaunchCartScreenPressed() async {
-    await IaSdk.instance.ordering.launchCartScreen();
-  }
-
-  Future<void> _onLaunchPharmacyDetailsPressed() async {
-    await IaSdk.instance.pharmacy.launchPharmacyDetails();
   }
 }

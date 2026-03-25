@@ -4,7 +4,19 @@
 #
 # Usage:
 #
-# sh ./scripts/deploy-client.sh
+# sh ./scripts/deploy-client.sh --beta
+# sh ./scripts/deploy-client.sh --release
+
+# Parse the required --beta or --release argument.
+if [[ "$1" == "--beta" ]]; then
+  TAG_SUFFIX="-beta"
+elif [[ "$1" == "--release" ]]; then
+  TAG_SUFFIX=""
+else
+  echo "Error: Required argument missing."
+  echo "Usage: sh ./scripts/deploy-client.sh --beta | --release"
+  exit 1
+fi
 
 # Declare script and project paths.
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
@@ -14,7 +26,7 @@ PROJECT_DIR="$SCRIPT_DIR/.."
 source $SCRIPT_DIR/dev-env-setup.sh
 
 # Change current working directory.
-cd "$PROJECT_DIR" 
+cd "$PROJECT_DIR"
 
 # Add latest updates to source control.
 git add android/ ios/ example/ lib/ README.md pubspec.yaml .env interface modules
@@ -22,7 +34,7 @@ git commit -m "Flutter library deploy version $APP_SDK_VERSION"
 git push
 
 # Tag the current release.
-git tag "$APP_SDK_BUILD_VERSION-$APP_SDK_BUILD_NUMBER"
+git tag "$APP_SDK_BUILD_VERSION-$APP_SDK_BUILD_NUMBER$TAG_SUFFIX"
 
 # Push the tags, enabling clients to fetch the dependency using the pubspec `ref` field.
 git push --tags
