@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
+import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
 import 'package:flutter/material.dart';
 
 class CardLinkView extends StatefulWidget {
@@ -12,16 +13,12 @@ class CardLinkView extends StatefulWidget {
 }
 
 class _CardLinkViewState extends State<CardLinkView> {
-  static const _sdkApiKey =
-      'fa0e9523f1a8b20c2038dc65241af81a3882f6f6a73d987fa2ae92e48e740d36';
-
   final _userIdController = TextEditingController(text: 'test_user_123');
   final _cardNameController = TextEditingController(text: 'My Card');
   final _phoneNumberController = TextEditingController(text: '+491234567890');
   final _canCodeController = TextEditingController();
 
-  IaCardLinkConsentStatus _consentStatus =
-      IaCardLinkConsentStatus.showConsent;
+  IaCardLinkConsentStatus _consentStatus = IaCardLinkConsentStatus.showConsent;
   bool _saveCardEnabled = false;
   String _resultText = '';
   final List<String> _eventLog = [];
@@ -108,24 +105,109 @@ class _CardLinkViewState extends State<CardLinkView> {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 16),
-        _buildPresetDataSection(context),
+        _PresetDataSection(
+          userIdController: _userIdController,
+          cardNameController: _cardNameController,
+          phoneNumberController: _phoneNumberController,
+          canCodeController: _canCodeController,
+          onChanged: () => setState(() {}),
+        ),
         const SizedBox(height: 24),
-        _buildConsentStatusSelector(context),
+        _ConsentStatusSection(
+          value: _consentStatus,
+          onChanged: (value) => setState(() => _consentStatus = value),
+        ),
         const SizedBox(height: 24),
-        _buildLaunchSection(context),
+        _LaunchSection(
+          saveCardEnabled: _saveCardEnabled,
+          onSaveCardEnabledChanged: (value) => setState(() => _saveCardEnabled = value),
+          onLaunchCardLink: () async {
+            try {
+              final canCode = _canCodeController.text.trim();
+              await IaSdk.instance.cardLink.launch(
+                sdkApiKey: ExampleAppConfig.instance.accessKey,
+                flowType: IaCardLinkFlowType.cardLink,
+                pharmacyId: '2163',
+                consentStatus: _consentStatus,
+                phoneNumber: _phoneNumberController.text,
+                userId: _userIdController.text,
+                cardName: _cardNameController.text,
+                canCode: canCode.isNotEmpty ? canCode : null,
+                saveCardEnabled: _saveCardEnabled,
+                environment: IaCardLinkEnvironment.debug,
+                finishAction: IaCardLinkFinishAction.uploadPrescriptions,
+              );
+              _showResult('CardLink launched');
+            } catch (e) {
+              _showResult('Error: $e');
+            }
+          },
+          onLaunchSavedCards: () async {
+            try {
+              final canCode = _canCodeController.text.trim();
+              await IaSdk.instance.cardLink.launch(
+                sdkApiKey: ExampleAppConfig.instance.accessKey,
+                flowType: IaCardLinkFlowType.savedCards,
+                pharmacyId: '2163',
+                consentStatus: _consentStatus,
+                phoneNumber: _phoneNumberController.text,
+                userId: _userIdController.text,
+                cardName: _cardNameController.text,
+                canCode: canCode.isNotEmpty ? canCode : null,
+                saveCardEnabled: _saveCardEnabled,
+                environment: IaCardLinkEnvironment.debug,
+                finishAction: IaCardLinkFinishAction.uploadPrescriptions,
+              );
+              _showResult('Saved Cards launched');
+            } catch (e) {
+              _showResult('Error: $e');
+            }
+          },
+        ),
         const SizedBox(height: 24),
-        _buildInfoMethodsSection(context),
+        _InfoMethodsSection(
+          onShowResult: _showResult,
+        ),
         const SizedBox(height: 24),
-        _buildCardManagementSection(context),
+        _CardManagementSection(
+          userIdController: _userIdController,
+          cardNameController: _cardNameController,
+          onShowResult: _showResult,
+        ),
         const SizedBox(height: 24),
-        _buildResultSection(context),
-        const SizedBox(height: 24),
-        _buildEventLogSection(context),
+        if (_resultText.isNotEmpty) ...[
+          _ResultSection(
+            text: _resultText,
+            onClear: () => setState(() => _resultText = ''),
+          ),
+          const SizedBox(height: 24),
+        ],
+        _EventLogSection(
+          eventLog: _eventLog,
+          onClear: () => setState(() => _eventLog.clear()),
+        ),
       ],
     );
   }
+}
 
-  Widget _buildPresetDataSection(BuildContext context) {
+class _PresetDataSection extends StatelessWidget {
+  const _PresetDataSection({
+    required this.userIdController,
+    required this.cardNameController,
+    required this.phoneNumberController,
+    required this.canCodeController,
+    required this.onChanged,
+  });
+
+  final TextEditingController userIdController;
+  final TextEditingController cardNameController;
+  final TextEditingController phoneNumberController;
+  final TextEditingController canCodeController;
+  final VoidCallback onChanged;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -137,46 +219,69 @@ class _CardLinkViewState extends State<CardLinkView> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             TextButton(
-              onPressed: _onResetPresetDataPressed,
+              onPressed: () {
+                userIdController.clear();
+                cardNameController.clear();
+                phoneNumberController.clear();
+                canCodeController.clear();
+                onChanged();
+              },
               child: Text('Reset All'),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        _buildClearableTextField(
-          controller: _userIdController,
+        _ClearableTextField(
+          controller: userIdController,
           label: 'User ID',
+          onCleared: onChanged,
         ),
         const SizedBox(height: 12),
-        _buildClearableTextField(
-          controller: _cardNameController,
+        _ClearableTextField(
+          controller: cardNameController,
           label: 'Card Name',
+          onCleared: onChanged,
         ),
         const SizedBox(height: 12),
-        _buildClearableTextField(
-          controller: _phoneNumberController,
+        _ClearableTextField(
+          controller: phoneNumberController,
           label: 'Phone Number',
           keyboardType: TextInputType.phone,
+          onCleared: onChanged,
         ),
         const SizedBox(height: 12),
-        _buildClearableTextField(
-          controller: _canCodeController,
+        _ClearableTextField(
+          controller: canCodeController,
           label: 'CAN Code (optional)',
           hint: '6-digit code from health card',
           keyboardType: TextInputType.number,
           maxLength: 6,
+          onCleared: onChanged,
         ),
       ],
     );
   }
+}
 
-  Widget _buildClearableTextField({
-    required TextEditingController controller,
-    required String label,
-    String? hint,
-    TextInputType? keyboardType,
-    int? maxLength,
-  }) {
+class _ClearableTextField extends StatelessWidget {
+  const _ClearableTextField({
+    required this.controller,
+    required this.label,
+    required this.onCleared,
+    this.hint,
+    this.keyboardType,
+    this.maxLength,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final String? hint;
+  final TextInputType? keyboardType;
+  final int? maxLength;
+  final VoidCallback onCleared;
+
+  @override
+  Widget build(BuildContext context) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
@@ -187,7 +292,7 @@ class _CardLinkViewState extends State<CardLinkView> {
           icon: Icon(Icons.clear, size: 18),
           onPressed: () {
             controller.clear();
-            setState(() {});
+            onCleared();
           },
         ),
       ),
@@ -195,17 +300,19 @@ class _CardLinkViewState extends State<CardLinkView> {
       maxLength: maxLength,
     );
   }
+}
 
-  void _onResetPresetDataPressed() {
-    setState(() {
-      _userIdController.clear();
-      _cardNameController.clear();
-      _phoneNumberController.clear();
-      _canCodeController.clear();
-    });
-  }
+class _ConsentStatusSection extends StatelessWidget {
+  const _ConsentStatusSection({
+    required this.value,
+    required this.onChanged,
+  });
 
-  Widget _buildConsentStatusSelector(BuildContext context) {
+  final IaCardLinkConsentStatus value;
+  final ValueChanged<IaCardLinkConsentStatus> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -214,9 +321,9 @@ class _CardLinkViewState extends State<CardLinkView> {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         RadioGroup<IaCardLinkConsentStatus>(
-          groupValue: _consentStatus,
-          onChanged: (value) {
-            if (value != null) setState(() => _consentStatus = value);
+          groupValue: value,
+          onChanged: (newValue) {
+            if (newValue != null) onChanged(newValue);
           },
           child: Column(
             children: [
@@ -244,8 +351,23 @@ class _CardLinkViewState extends State<CardLinkView> {
       ],
     );
   }
+}
 
-  Widget _buildLaunchSection(BuildContext context) {
+class _LaunchSection extends StatelessWidget {
+  const _LaunchSection({
+    required this.saveCardEnabled,
+    required this.onSaveCardEnabledChanged,
+    required this.onLaunchCardLink,
+    required this.onLaunchSavedCards,
+  });
+
+  final bool saveCardEnabled;
+  final ValueChanged<bool> onSaveCardEnabledChanged;
+  final VoidCallback onLaunchCardLink;
+  final VoidCallback onLaunchSavedCards;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -257,26 +379,35 @@ class _CardLinkViewState extends State<CardLinkView> {
           title: Text('Save Card Enabled'),
           dense: true,
           contentPadding: EdgeInsets.zero,
-          value: _saveCardEnabled,
-          onChanged: (value) => setState(() => _saveCardEnabled = value),
+          value: saveCardEnabled,
+          onChanged: onSaveCardEnabledChanged,
         ),
         const SizedBox(height: 8),
         ElevatedButton.icon(
           icon: Icon(Icons.nfc),
           label: Text('Launch CardLink'),
-          onPressed: _onLaunchCardLinkPressed,
+          onPressed: onLaunchCardLink,
         ),
         const SizedBox(height: 8),
         ElevatedButton.icon(
           icon: Icon(Icons.credit_card),
           label: Text('Launch Saved Cards'),
-          onPressed: _onLaunchSavedCardsPressed,
+          onPressed: onLaunchSavedCards,
         ),
       ],
     );
   }
+}
 
-  Widget _buildInfoMethodsSection(BuildContext context) {
+class _InfoMethodsSection extends StatelessWidget {
+  const _InfoMethodsSection({
+    required this.onShowResult,
+  });
+
+  final ValueChanged<String> onShowResult;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -287,23 +418,57 @@ class _CardLinkViewState extends State<CardLinkView> {
         const SizedBox(height: 8),
         ElevatedButton(
           child: Text('Get Version'),
-          onPressed: _onGetVersionPressed,
+          onPressed: () async {
+            try {
+              final version = await IaSdk.instance.cardLink.getVersion();
+              onShowResult('Version: $version');
+            } catch (e) {
+              onShowResult('Error: $e');
+            }
+          },
         ),
         const SizedBox(height: 8),
         ElevatedButton(
           child: Text('Get Environment'),
-          onPressed: _onGetEnvironmentPressed,
+          onPressed: () async {
+            try {
+              final environment = await IaSdk.instance.cardLink.getEnvironment();
+              onShowResult('Environment: $environment');
+            } catch (e) {
+              onShowResult('Error: $e');
+            }
+          },
         ),
         const SizedBox(height: 8),
         ElevatedButton(
           child: Text('Get Log File Path'),
-          onPressed: _onGetLogFilePathPressed,
+          onPressed: () async {
+            try {
+              final logPath = await IaSdk.instance.cardLink.getLogFilePath();
+              onShowResult('Log path: $logPath');
+            } catch (e) {
+              onShowResult('Error: $e');
+            }
+          },
         ),
       ],
     );
   }
+}
 
-  Widget _buildCardManagementSection(BuildContext context) {
+class _CardManagementSection extends StatelessWidget {
+  const _CardManagementSection({
+    required this.userIdController,
+    required this.cardNameController,
+    required this.onShowResult,
+  });
+
+  final TextEditingController userIdController;
+  final TextEditingController cardNameController;
+  final ValueChanged<String> onShowResult;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -314,12 +479,38 @@ class _CardLinkViewState extends State<CardLinkView> {
         const SizedBox(height: 8),
         ElevatedButton(
           child: Text('Get Saved Cards'),
-          onPressed: _onGetSavedCardsPressed,
+          onPressed: () async {
+            try {
+              final cardsJson = await IaSdk.instance.cardLink.getSavedCards(
+                userIdController.text,
+              );
+              if (cardsJson == null || cardsJson.isEmpty) {
+                onShowResult('No saved cards found.');
+                return;
+              }
+              final formatted = const JsonEncoder.withIndent('  ').convert(
+                jsonDecode(cardsJson),
+              );
+              onShowResult('Saved cards:\n$formatted');
+            } catch (e) {
+              onShowResult('Error: $e');
+            }
+          },
         ),
         const SizedBox(height: 8),
         ElevatedButton(
           child: Text('Delete Card'),
-          onPressed: _onDeleteCardPressed,
+          onPressed: () async {
+            try {
+              await IaSdk.instance.cardLink.deleteCard(
+                userId: userIdController.text,
+                cardName: cardNameController.text,
+              );
+              onShowResult('Card "${cardNameController.text}" deleted.');
+            } catch (e) {
+              onShowResult('Error: $e');
+            }
+          },
         ),
         const SizedBox(height: 8),
         ElevatedButton(
@@ -328,7 +519,14 @@ class _CardLinkViewState extends State<CardLinkView> {
             foregroundColor: Colors.red.shade700,
           ),
           child: Text('Delete All Cards'),
-          onPressed: _onDeleteAllCardsPressed,
+          onPressed: () async {
+            try {
+              final status = await IaSdk.instance.cardLink.deleteAllCards();
+              onShowResult('Delete all cards: $status');
+            } catch (e) {
+              onShowResult('Error: $e');
+            }
+          },
         ),
         const SizedBox(height: 8),
         ElevatedButton(
@@ -337,15 +535,31 @@ class _CardLinkViewState extends State<CardLinkView> {
             foregroundColor: Colors.red.shade700,
           ),
           child: Text('Delete All User Related Data'),
-          onPressed: _onDeleteAllUserRelatedDataPressed,
+          onPressed: () async {
+            try {
+              await IaSdk.instance.cardLink.deleteAllUserRelatedData();
+              onShowResult('All user related data deleted.');
+            } catch (e) {
+              onShowResult('Error: $e');
+            }
+          },
         ),
       ],
     );
   }
+}
 
-  Widget _buildResultSection(BuildContext context) {
-    if (_resultText.isEmpty) return const SizedBox.shrink();
+class _ResultSection extends StatelessWidget {
+  const _ResultSection({
+    required this.text,
+    required this.onClear,
+  });
 
+  final String text;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -357,11 +571,7 @@ class _CardLinkViewState extends State<CardLinkView> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             TextButton(
-              onPressed: () {
-                setState(() {
-                  _resultText = '';
-                });
-              },
+              onPressed: onClear,
               child: Text('Clear'),
             ),
           ],
@@ -374,15 +584,26 @@ class _CardLinkViewState extends State<CardLinkView> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: SelectableText(
-            _resultText,
+            text,
             style: TextStyle(fontFamily: 'monospace'),
           ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildEventLogSection(BuildContext context) {
+class _EventLogSection extends StatelessWidget {
+  const _EventLogSection({
+    required this.eventLog,
+    required this.onClear,
+  });
+
+  final List<String> eventLog;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -393,13 +614,9 @@ class _CardLinkViewState extends State<CardLinkView> {
               'Event Log',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            if (_eventLog.isNotEmpty)
+            if (eventLog.isNotEmpty)
               TextButton(
-                onPressed: () {
-                  setState(() {
-                    _eventLog.clear();
-                  });
-                },
+                onPressed: onClear,
                 child: Text('Clear'),
               ),
           ],
@@ -412,7 +629,7 @@ class _CardLinkViewState extends State<CardLinkView> {
             color: Colors.grey.shade900,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: _eventLog.isEmpty
+          child: eventLog.isEmpty
               ? Center(
                   child: Text(
                     'No events yet.\nLaunch CardLink to see live events.',
@@ -425,12 +642,12 @@ class _CardLinkViewState extends State<CardLinkView> {
                   ),
                 )
               : ListView.builder(
-                  itemCount: _eventLog.length,
+                  itemCount: eventLog.length,
                   itemBuilder: (context, index) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 4),
                       child: SelectableText(
-                        _eventLog[index],
+                        eventLog[index],
                         style: TextStyle(
                           color: Colors.green.shade300,
                           fontFamily: 'monospace',
@@ -443,124 +660,5 @@ class _CardLinkViewState extends State<CardLinkView> {
         ),
       ],
     );
-  }
-
-  // -- Actions --
-
-  Future<void> _onLaunchCardLinkPressed() async {
-    try {
-      final canCode = _canCodeController.text.trim();
-      await IaSdk.instance.cardLink.launch(
-        sdkApiKey: _sdkApiKey,
-        flowType: IaCardLinkFlowType.cardLink,
-        pharmacyId: '2163',
-        consentStatus: _consentStatus,
-        phoneNumber: _phoneNumberController.text,
-        userId: _userIdController.text,
-        cardName: _cardNameController.text,
-        canCode: canCode.isNotEmpty ? canCode : null,
-        saveCardEnabled: _saveCardEnabled,
-        environment: IaCardLinkEnvironment.debug,
-      );
-      _showResult('CardLink launched');
-    } catch (e) {
-      _showResult('Error: $e');
-    }
-  }
-
-  Future<void> _onLaunchSavedCardsPressed() async {
-    try {
-      final canCode = _canCodeController.text.trim();
-      await IaSdk.instance.cardLink.launch(
-        sdkApiKey: _sdkApiKey,
-        flowType: IaCardLinkFlowType.savedCards,
-        pharmacyId: '2163',
-        consentStatus: _consentStatus,
-        phoneNumber: _phoneNumberController.text,
-        userId: _userIdController.text,
-        cardName: _cardNameController.text,
-        canCode: canCode.isNotEmpty ? canCode : null,
-        saveCardEnabled: _saveCardEnabled,
-        environment: IaCardLinkEnvironment.debug,
-      );
-      _showResult('Saved Cards launched');
-    } catch (e) {
-      _showResult('Error: $e');
-    }
-  }
-
-  Future<void> _onGetVersionPressed() async {
-    try {
-      final version = await IaSdk.instance.cardLink.getVersion();
-      _showResult('Version: $version');
-    } catch (e) {
-      _showResult('Error: $e');
-    }
-  }
-
-  Future<void> _onGetEnvironmentPressed() async {
-    try {
-      final environment = await IaSdk.instance.cardLink.getEnvironment();
-      _showResult('Environment: $environment');
-    } catch (e) {
-      _showResult('Error: $e');
-    }
-  }
-
-  Future<void> _onGetLogFilePathPressed() async {
-    try {
-      final logPath = await IaSdk.instance.cardLink.getLogFilePath();
-      _showResult('Log path: $logPath');
-    } catch (e) {
-      _showResult('Error: $e');
-    }
-  }
-
-  Future<void> _onGetSavedCardsPressed() async {
-    try {
-      final cardsJson = await IaSdk.instance.cardLink.getSavedCards(
-        _userIdController.text,
-      );
-      if (cardsJson == null || cardsJson.isEmpty) {
-        _showResult('No saved cards found.');
-        return;
-      }
-      final formatted = const JsonEncoder.withIndent('  ').convert(
-        jsonDecode(cardsJson),
-      );
-      _showResult('Saved cards:\n$formatted');
-    } catch (e) {
-      _showResult('Error: $e');
-    }
-  }
-
-  Future<void> _onDeleteCardPressed() async {
-    try {
-      await IaSdk.instance.cardLink.deleteCard(
-        userId: _userIdController.text,
-        cardName: _cardNameController.text,
-      );
-      _showResult('Card "${_cardNameController.text}" deleted.');
-    } catch (e) {
-      _showResult('Error: $e');
-    }
-  }
-
-  Future<void> _onDeleteAllCardsPressed() async {
-    try {
-      final status = await IaSdk.instance.cardLink.deleteAllCards();
-      _showResult('Delete all cards: $status');
-    } catch (e) {
-      _showResult('Error: $e');
-    }
-  }
-
-  Future<void> _onDeleteAllUserRelatedDataPressed() async {
-    try {
-      await IaSdk.instance.cardLink.deleteAllUserRelatedData();
-      _showResult('All user related data deleted.');
-    } catch (e) {
-      _showResult('Error: $e');
-    }
   }
 }
