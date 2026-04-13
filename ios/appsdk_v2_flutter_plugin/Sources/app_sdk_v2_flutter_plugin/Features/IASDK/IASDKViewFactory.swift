@@ -21,12 +21,12 @@ final class IASDKViewFactory: NSObject, FlutterPlatformViewFactory {
             assertionFailure("IASDKViewManager: Failed to convert args (viewId) to string.")
             return IASDKFlutterPlatformView.empty
         }
-        guard let viewId = IASDKViewIdentifier(rawValue: viewId) else {
+        guard let viewIdentifier = IASDKViewIdentifier(rawValue: viewId) else {
             assertionFailure("IASDKViewManager: Failed to find view for args: \(String(describing: args))")
             return IASDKFlutterPlatformView.empty
         }
-        
-        let view = viewId.iaScreen().viewControllerForPresenting(onDismiss: nil).view ?? UIView()
+
+        let view = viewIdentifier.iaScreen().viewControllerForPresenting(onDismiss: nil).view ?? UIView()
         return IASDKFlutterPlatformView(uiView: view)
     }
     

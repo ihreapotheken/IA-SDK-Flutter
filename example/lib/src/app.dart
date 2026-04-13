@@ -4,6 +4,7 @@ import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/views/cardlink_view.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/views/home_view.dart';
+import 'package:appsdk_v2_flutter_plugin_example/src/views/components_view.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/views/screens_view.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/views/services_view.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,7 @@ class _ExampleAppState extends State<ExampleApp> {
     (label: 'CardLink', icon: Icons.nfc),
     (label: 'Services', icon: Icons.category),
     (label: 'Screens', icon: Icons.screenshot),
+    (label: 'Components', icon: Icons.widgets),
   ];
 
   Future<void> _initializeSdk() async {
@@ -163,6 +165,7 @@ class _ExampleAppState extends State<ExampleApp> {
                     1 => const CardLinkView(),
                     2 => const ServicesView(),
                     3 => const ScreensView(),
+                    4 => const ComponentsView(),
                     _ => throw UnimplementedError(
                         'Tab view not defined for index #$_selectedTabIndex.',
                       ),
