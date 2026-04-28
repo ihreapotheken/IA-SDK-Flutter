@@ -41,7 +41,7 @@ class LaunchHandler(
         val savedCardName = call.argument<String>("cardName")
         val canCode = call.argument<String>("canCode")
         val consentStatus = ConsentStatusMapper.fromString(call.argument<String>("consentStatus") ?: "SHOW_CONSENT")
-        val saveCardEnabled = call.argument<Boolean>("saveCardEnabled") ?: false
+        val saveCardEnabled = call.argument<Boolean>("saveCardEnabled") ?: true
         val primaryColor = (call.argument<Any>("primaryColor") as? Number)?.toInt()
         val buttonsColor = (call.argument<Any>("buttonsColor") as? Number)?.toInt()
         val textLinkColor = (call.argument<Any>("textLinkColor") as? Number)?.toInt()
