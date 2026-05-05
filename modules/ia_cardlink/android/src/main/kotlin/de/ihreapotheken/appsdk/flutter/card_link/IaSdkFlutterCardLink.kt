@@ -129,11 +129,21 @@ class IaSdkFlutterCardLink :
             }
 
             "deleteAllCards" -> {
-                result.notImplemented()
+                activity?.let {
+                    CardLink.clearAllCardLinkData(it)
+                    result.success(null)
+                } ?: result.error("NO_ACTIVITY", "Activity not available", null)
             }
 
             "deleteAllUserRelatedData" -> {
-                result.notImplemented()
+                activity?.let {
+                    CardLink.clearAllCardLinkData(it)
+                    result.success(null)
+                } ?: result.error("NO_ACTIVITY", "Activity not available", null)
+            }
+
+            "finish" -> {
+                result.success(null)
             }
 
             else -> {
