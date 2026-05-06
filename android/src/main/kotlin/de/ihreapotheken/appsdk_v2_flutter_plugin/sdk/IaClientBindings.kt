@@ -33,7 +33,7 @@ class IaClientBindings(
     init {
         val methodHandler = IaClientMethods(this)
         channel.setMethodCallHandler(methodHandler::callHandler)
-        
+
         // Register all SDK entry point views
         val entryPoints = listOf(
             IaScreen.StartScreen,
@@ -43,11 +43,22 @@ class IaClientBindings(
             IaScreen.PrerequisiteFlow,
             IaScreen.TransferPrescriptionsScreen
         )
-        
+
+        val viewFactory = IaClientFlutterViewFactory()
         for (view in entryPoints) {
             platformViewRegistry.registerViewFactory(
                 view::class.simpleName!!,
-                IaClientFlutterViewFactory(),
+                viewFactory,
+            )
+        }
+
+        // Register inline component platform views. Component size updates are
+        // sent back over the main SDK channel (routed by Dart via IaBaseCallbacks).
+        val componentsFactory = IaClientComponentsViewFactory(channel)
+        for (component in IaComponentIdentifier.entries) {
+            platformViewRegistry.registerViewFactory(
+                component.viewTypeId,
+                componentsFactory,
             )
         }
     }
