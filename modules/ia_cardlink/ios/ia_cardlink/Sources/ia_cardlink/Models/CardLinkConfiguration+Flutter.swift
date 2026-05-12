@@ -2,16 +2,18 @@ import IACore
 import IACardLink
 
 extension IACore.CardLinkConfiguration {
+    
     init(args: [String: Any]) {
         let pharmacyId = args["pharmacyId"] as? String ?? ""
         let consentStatusString = args["consentStatus"] as? String ?? "SHOW_CONSENT"
         let phoneNumber = args["phoneNumber"] as? String ?? ""
-        let environmentString = args["environment"] as? String ?? "PRODUCTION"
         let userId = args["userId"] as? String
         let canCode = args["canCode"] as? String
         let cardName = args["cardName"] as? String
         let isSaveCardEnabled = args["saveCardEnabled"] as? Bool ?? true
+        // TODO: upcoming - appID will be passed to IASDK directly like the environment
         let appID = args["appID"] as? String
+        let coreAppLogFileURL = (args["coreAppLogFileURL"] as? String).flatMap { URL(fileURLWithPath: $0) }
         let finishActionString = args["finishAction"] as? String ?? "uploadPrescriptions"
         let finishAction: CardLinkFinishAction = finishActionString == "sendRawPrescriptions" ? .sendRawPrescriptions : .uploadPrescriptions
 
@@ -25,8 +27,6 @@ extension IACore.CardLinkConfiguration {
             consentStatus = .undetermined
         }
 
-        CardLink.environment = CLEnvironment(pluginStringValue: environmentString)
-
         self.init(
             pharmacyId: pharmacyId,
             consentStatus: consentStatus,
@@ -36,7 +36,8 @@ extension IACore.CardLinkConfiguration {
             cardName: cardName,
             isSaveCardEnabled: isSaveCardEnabled,
             finishAction: finishAction,
-            appID: appID
+            appID: appID,
+            coreAppLogFileURL: coreAppLogFileURL
         )
     }
 }

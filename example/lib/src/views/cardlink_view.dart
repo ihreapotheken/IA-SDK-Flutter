@@ -3,26 +3,46 @@ import 'dart:convert';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
+import 'package:appsdk_v2_flutter_plugin_example/src/file_utils.dart';
 import 'package:flutter/material.dart';
+
+class CardLinkViewStateData {
+  final userIdController = TextEditingController(text: 'test_user_123');
+  final cardNameController = TextEditingController(text: 'My Card');
+  final phoneNumberController = TextEditingController(text: '+491234567890');
+  final canCodeController = TextEditingController();
+
+  IaCardLinkConsentStatus consentStatus = IaCardLinkConsentStatus.showConsent;
+  bool saveCardEnabled = false;
+  bool includeCoreAppLogs = false;
+
+  String resultText = '';
+  final List<String> eventLog = [];
+
+  void resetControllers() {
+    userIdController.clear();
+    cardNameController.clear();
+    phoneNumberController.clear();
+    canCodeController.clear();
+  }
+
+  void dispose() {
+    userIdController.dispose();
+    cardNameController.dispose();
+    phoneNumberController.dispose();
+    canCodeController.dispose();
+  }
+}
 
 class CardLinkView extends StatefulWidget {
   const CardLinkView({super.key});
 
   @override
-  State<CardLinkView> createState() => _CardLinkViewState();
+  State<CardLinkView> createState() => _CardLinkViewStateData();
 }
 
-class _CardLinkViewState extends State<CardLinkView> {
-  final _userIdController = TextEditingController(text: 'test_user_123');
-  final _cardNameController = TextEditingController(text: 'My Card');
-  final _phoneNumberController = TextEditingController(text: '+491234567890');
-  final _canCodeController = TextEditingController();
-
-  IaCardLinkConsentStatus _consentStatus = IaCardLinkConsentStatus.showConsent;
-  bool _saveCardEnabled = false;
-  String _resultText = '';
-  final List<String> _eventLog = [];
-
+class _CardLinkViewStateData extends State<CardLinkView> {
+  final _data = CardLinkViewStateData();
   final List<StreamSubscription> _subscriptions = [];
 
   @override
@@ -36,10 +56,7 @@ class _CardLinkViewState extends State<CardLinkView> {
     for (final sub in _subscriptions) {
       sub.cancel();
     }
-    _userIdController.dispose();
-    _cardNameController.dispose();
-    _phoneNumberController.dispose();
-    _canCodeController.dispose();
+    _data.dispose();
     super.dispose();
   }
 
@@ -80,13 +97,18 @@ class _CardLinkViewState extends State<CardLinkView> {
   void _addEventLog(String entry) {
     setState(() {
       final timestamp = TimeOfDay.now().format(context);
-      _eventLog.insert(0, '[$timestamp] $entry');
+      _data.eventLog.insert(0, '[$timestamp] $entry');
     });
+  }
+
+  Future<String?> _createCoreAppLogFileIfNeeded() async {
+    if (!_data.includeCoreAppLogs) return null;
+    return await FileUtils.createDemoCoreAppLogFile();
   }
 
   void _showResult(String result) {
     setState(() {
-      _resultText = result;
+      _data.resultText = result;
     });
   }
 
@@ -101,41 +123,45 @@ class _CardLinkViewState extends State<CardLinkView> {
       ),
       children: [
         Text(
-          'CardLink Services',
+          'CardLink Services (${ExampleAppConfig.instance.serverEnvironment.name})',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 16),
         _PresetDataSection(
-          userIdController: _userIdController,
-          cardNameController: _cardNameController,
-          phoneNumberController: _phoneNumberController,
-          canCodeController: _canCodeController,
+          userIdController: _data.userIdController,
+          cardNameController: _data.cardNameController,
+          phoneNumberController: _data.phoneNumberController,
+          canCodeController: _data.canCodeController,
           onChanged: () => setState(() {}),
         ),
         const SizedBox(height: 24),
         _ConsentStatusSection(
-          value: _consentStatus,
-          onChanged: (value) => setState(() => _consentStatus = value),
+          value: _data.consentStatus,
+          onChanged: (value) => setState(() => _data.consentStatus = value),
         ),
+
         const SizedBox(height: 24),
         _LaunchSection(
-          saveCardEnabled: _saveCardEnabled,
-          onSaveCardEnabledChanged: (value) => setState(() => _saveCardEnabled = value),
+          saveCardEnabled: _data.saveCardEnabled,
+          onSaveCardEnabledChanged: (value) => setState(() => _data.saveCardEnabled = value),
+          includeCoreAppLogs: _data.includeCoreAppLogs,
+          onIncludeCoreAppLogsChanged: (value) => setState(() => _data.includeCoreAppLogs = value),
           onLaunchCardLink: () async {
             try {
-              final canCode = _canCodeController.text.trim();
+              final canCode = _data.canCodeController.text.trim();
+              final logFileURL = await _createCoreAppLogFileIfNeeded();
               await IaSdk.instance.cardLink.launch(
                 sdkApiKey: ExampleAppConfig.instance.accessKey,
                 flowType: IaCardLinkFlowType.cardLink,
                 pharmacyId: '2163',
-                consentStatus: _consentStatus,
-                phoneNumber: _phoneNumberController.text,
-                userId: _userIdController.text,
-                cardName: _cardNameController.text,
+                consentStatus: _data.consentStatus,
+                phoneNumber: _data.phoneNumberController.text,
+                userId: _data.userIdController.text,
+                cardName: _data.cardNameController.text,
                 canCode: canCode.isNotEmpty ? canCode : null,
-                saveCardEnabled: _saveCardEnabled,
-                environment: IaCardLinkEnvironment.debug,
+                saveCardEnabled: _data.saveCardEnabled,
                 finishAction: IaCardLinkFinishAction.uploadPrescriptions,
+                coreAppLogFileURL: logFileURL,
               );
               _showResult('CardLink launched');
             } catch (e) {
@@ -144,19 +170,20 @@ class _CardLinkViewState extends State<CardLinkView> {
           },
           onLaunchSavedCards: () async {
             try {
-              final canCode = _canCodeController.text.trim();
+              final canCode = _data.canCodeController.text.trim();
+              final logFileURL = await _createCoreAppLogFileIfNeeded();
               await IaSdk.instance.cardLink.launch(
                 sdkApiKey: ExampleAppConfig.instance.accessKey,
                 flowType: IaCardLinkFlowType.savedCards,
                 pharmacyId: '2163',
-                consentStatus: _consentStatus,
-                phoneNumber: _phoneNumberController.text,
-                userId: _userIdController.text,
-                cardName: _cardNameController.text,
+                consentStatus: _data.consentStatus,
+                phoneNumber: _data.phoneNumberController.text,
+                userId: _data.userIdController.text,
+                cardName: _data.cardNameController.text,
                 canCode: canCode.isNotEmpty ? canCode : null,
-                saveCardEnabled: _saveCardEnabled,
-                environment: IaCardLinkEnvironment.debug,
+                saveCardEnabled: _data.saveCardEnabled,
                 finishAction: IaCardLinkFinishAction.uploadPrescriptions,
+                coreAppLogFileURL: logFileURL,
               );
               _showResult('Saved Cards launched');
             } catch (e) {
@@ -170,21 +197,21 @@ class _CardLinkViewState extends State<CardLinkView> {
         ),
         const SizedBox(height: 24),
         _CardManagementSection(
-          userIdController: _userIdController,
-          cardNameController: _cardNameController,
+          userIdController: _data.userIdController,
+          cardNameController: _data.cardNameController,
           onShowResult: _showResult,
         ),
         const SizedBox(height: 24),
-        if (_resultText.isNotEmpty) ...[
+        if (_data.resultText.isNotEmpty) ...[
           _ResultSection(
-            text: _resultText,
-            onClear: () => setState(() => _resultText = ''),
+            text: _data.resultText,
+            onClear: () => setState(() => _data.resultText = ''),
           ),
           const SizedBox(height: 24),
         ],
         _EventLogSection(
-          eventLog: _eventLog,
-          onClear: () => setState(() => _eventLog.clear()),
+          eventLog: _data.eventLog,
+          onClear: () => setState(() => _data.eventLog.clear()),
         ),
       ],
     );
@@ -353,16 +380,21 @@ class _ConsentStatusSection extends StatelessWidget {
   }
 }
 
+
 class _LaunchSection extends StatelessWidget {
   const _LaunchSection({
     required this.saveCardEnabled,
     required this.onSaveCardEnabledChanged,
+    required this.includeCoreAppLogs,
+    required this.onIncludeCoreAppLogsChanged,
     required this.onLaunchCardLink,
     required this.onLaunchSavedCards,
   });
 
   final bool saveCardEnabled;
   final ValueChanged<bool> onSaveCardEnabledChanged;
+  final bool includeCoreAppLogs;
+  final ValueChanged<bool> onIncludeCoreAppLogsChanged;
   final VoidCallback onLaunchCardLink;
   final VoidCallback onLaunchSavedCards;
 
@@ -381,6 +413,13 @@ class _LaunchSection extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
           value: saveCardEnabled,
           onChanged: onSaveCardEnabledChanged,
+        ),
+        SwitchListTile(
+          title: Text('Include Core App Logs in Report Problem'),
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          value: includeCoreAppLogs,
+          onChanged: onIncludeCoreAppLogsChanged,
         ),
         const SizedBox(height: 8),
         ElevatedButton.icon(
