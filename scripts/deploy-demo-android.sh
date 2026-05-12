@@ -20,7 +20,9 @@ cd "$PROJECT_DIR/example"
 flutter clean
 
 # Build the release APK file.
-flutter build apk --release
+flutter build apk --release \
+  --build-name="$APP_SDK_BUILD_VERSION" \
+  --build-number="$APP_SDK_BUILD_NUMBER"
 
 # Deploy the file to the Firebase App Tester service.
 cd android

@@ -24,7 +24,9 @@ rm -rf ios/.symlinks ios/Pods ios/Podfile.lock
 flutter config --enable-swift-package-manager
 
 # Build the release archive file.
-flutter build ipa --release
+flutter build ipa --release \
+  --build-name="$APP_SDK_BUILD_VERSION" \
+  --build-number="$APP_SDK_BUILD_NUMBER"
 
 # Deploy the file to the TestFlight service.
 xcodebuild -exportArchive \
