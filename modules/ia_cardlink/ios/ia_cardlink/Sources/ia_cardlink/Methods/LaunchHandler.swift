@@ -14,7 +14,7 @@ class LaunchHandler {
     }
 
     func handle(args: [String: Any], result: @escaping FlutterResult) {
-        setupStyleAndConfiguration(args: args)
+        setupStyle(args: args)
 
         guard let configuration = savedConfiguration else {
             result(FlutterError(code: "CONFIGURATION_ERROR", message: "Failed to create configuration", details: nil))
@@ -70,7 +70,7 @@ class LaunchHandler {
         }
     }
 
-    private func setupStyleAndConfiguration(args: [String: Any]) {
+    private func setupStyle(args: [String: Any]) {
         let primaryColor = UIColor(argb: args["primaryColor"] as? Int)
         let buttonsColor = UIColor(argb: args["buttonsColor"] as? Int)
         let textLinkColor = UIColor(argb: args["textLinkColor"] as? Int)
@@ -86,7 +86,6 @@ class LaunchHandler {
             textLinkColor: textLinkColor,
             bottomNavigationColor: bottomNavigationColor
         )
-
         CardLink.legacyStyle = style
     }
 

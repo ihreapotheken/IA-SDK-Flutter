@@ -40,7 +40,6 @@ build/
 
 # Other
 IASDKSecrets.swift
-example/secrets
 
 temp/
 

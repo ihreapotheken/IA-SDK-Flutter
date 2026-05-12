@@ -18,7 +18,6 @@ class _RequestModelLaunch implements IaBaseRequest {
     this.environment,
     this.saveCardEnabled,
     this.appId,
-    this.coreAppLogFileURL,
   });
 
   final String sdkApiKey;
@@ -37,7 +36,6 @@ class _RequestModelLaunch implements IaBaseRequest {
   final IaCardLinkEnvironment? environment;
   final bool? saveCardEnabled;
   final String? appId;
-  final String? coreAppLogFileURL;
 
   @override
   Map<String, dynamic> toSupportedType() {
@@ -58,7 +56,6 @@ class _RequestModelLaunch implements IaBaseRequest {
       'environment': environment?.rawValue,
       'saveCardEnabled': saveCardEnabled,
       'appId': appId,
-      'coreAppLogFileURL': coreAppLogFileURL,
     };
   }
 }
