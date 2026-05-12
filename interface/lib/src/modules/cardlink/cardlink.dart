@@ -25,10 +25,11 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [buttonsColor]: Optional buttons UI color (as integer ARGB value).
   /// - [textLinkColor]: Optional text link UI color (as integer ARGB value).
   /// - [bottomNavigationColor]: Optional bottom navigation UI color (as integer ARGB value).
-  /// - [environment]: Optional SDK environment (defaults to production).
+  /// - [environment]: Optional SDK environment (defaults to production). Unused on iOS, which reads the environment from IASDK.
   /// - [saveCardEnabled]: Optional flag to enable card saving (defaults to false).
   /// - [finishAction]: Determines what happens with prescriptions after NFC scanning.
   /// - [appId]: Optional application ID (maps to `applicationId` on Android and `appID` on iOS).
+  /// - [coreAppLogFileURL]: Optional file path to the host app's log file. When provided, the log file is included in CardLink's "Report Problem" feature, allowing users to attach app-level logs alongside CardLink logs when reporting issues.
   ///
   Future<void> launch({
     required String sdkApiKey,
@@ -47,6 +48,7 @@ abstract class IaBaseCardLink extends IaBase {
     IaCardLinkEnvironment? environment,
     bool? saveCardEnabled,
     String? appId,
+    String? coreAppLogFileURL,
   });
 
   /// Returns the CardLink SDK version string.

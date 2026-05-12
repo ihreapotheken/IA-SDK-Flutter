@@ -37,6 +37,7 @@ class IaModuleCardLink extends IaBaseCardLink {
     IaCardLinkEnvironment? environment,
     bool? saveCardEnabled,
     String? appId,
+    String? coreAppLogFileURL,
   }) async {
     final arguments = _RequestModelLaunch(
       sdkApiKey: sdkApiKey,
@@ -55,6 +56,7 @@ class IaModuleCardLink extends IaBaseCardLink {
       environment: environment,
       saveCardEnabled: saveCardEnabled,
       appId: appId,
+      coreAppLogFileURL: coreAppLogFileURL,
     );
     return await _Methods.launch.invoke<void>(arguments);
   }

@@ -102,6 +102,7 @@ class IaSdkFlutterCardLink :
             }
 
             "launch" -> {
+                // TODO: Pass coreAppLogFileURL to CardLink when supported on Android
                 launchHandler.handle(call, result)
             }
 
