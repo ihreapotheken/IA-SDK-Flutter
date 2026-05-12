@@ -27,6 +27,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Write example/.secrets
+        run: echo "APPSDK_ACCESS_KEY=${{ secrets.APPSDK_ACCESS_KEY }}" > example/.secrets
       - name: Write Android signing files
         if: env.PLATFORM == 'all' || env.PLATFORM == 'android'
         run: |
