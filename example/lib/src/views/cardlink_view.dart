@@ -160,6 +160,7 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 cardName: _data.cardNameController.text,
                 canCode: canCode.isNotEmpty ? canCode : null,
                 saveCardEnabled: _data.saveCardEnabled,
+                environment: IaCardLinkEnvironment.debug,
                 finishAction: IaCardLinkFinishAction.uploadPrescriptions,
                 coreAppLogFileURL: logFileURL,
               );
@@ -182,6 +183,7 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 cardName: _data.cardNameController.text,
                 canCode: canCode.isNotEmpty ? canCode : null,
                 saveCardEnabled: _data.saveCardEnabled,
+                environment: IaCardLinkEnvironment.debug,
                 finishAction: IaCardLinkFinishAction.uploadPrescriptions,
                 coreAppLogFileURL: logFileURL,
               );

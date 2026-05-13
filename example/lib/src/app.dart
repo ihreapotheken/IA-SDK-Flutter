@@ -160,16 +160,16 @@ class _ExampleAppState extends State<ExampleApp> {
             return Column(
               children: [
                 Expanded(
-                  child: switch (_selectedTabIndex) {
-                    0 => const HomeView(),
-                    1 => const CardLinkView(),
-                    2 => const ServicesView(),
-                    3 => const ScreensView(),
-                    4 => const ComponentsView(),
-                    _ => throw UnimplementedError(
-                        'Tab view not defined for index #$_selectedTabIndex.',
-                      ),
-                  },
+                  child: IndexedStack(
+                    index: _selectedTabIndex,
+                    children: const [
+                      HomeView(),
+                      CardLinkView(),
+                      ServicesView(),
+                      ScreensView(),
+                      ComponentsView(),
+                    ],
+                  ),
                 ),
                 DecoratedBox(
                   decoration:
