@@ -48,6 +48,7 @@ class LaunchHandler(
         val bottomNavigationColor = (call.argument<Any>("bottomNavigationColor") as? Number)?.toInt()
         val cardLinkSdkEnvironment = EnvironmentMapper.fromString(call.argument<String>("environment"))
         val applicationId = call.argument<String>("appId")
+        val coreAppLogFileURL = call.argument<String>("coreAppLogFileURL")
 
         val flowType = call.argument<String>("flowType") ?: "launchCardLinkSdk"
 
@@ -68,7 +69,8 @@ class LaunchHandler(
             bottomNavigationColor = bottomNavigationColor,
             cardLinkSdkEnvironment = cardLinkSdkEnvironment,
             listener = listener,
-            applicationId = applicationId
+            applicationId = applicationId,
+            hostAppLogFilePath = coreAppLogFileURL,
         )
 
         activityProvider()?.let { activity ->
