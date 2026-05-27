@@ -13,8 +13,6 @@ extension IACore.CardLinkConfiguration {
         let canCode = args["canCode"] as? String
         let cardName = args["cardName"] as? String
         let isSaveCardEnabled = args["saveCardEnabled"] as? Bool ?? true
-        // TODO: upcoming - appID will be passed to IASDK directly like the environment
-        let appID = args["appID"] as? String
         let coreAppLogFileURL = (args["coreAppLogFileURL"] as? String).flatMap { URL(fileURLWithPath: $0) }
         let finishActionString = args["finishAction"] as? String ?? "uploadPrescriptions"
         let finishAction: CardLinkFinishAction = finishActionString == "sendRawPrescriptions" ? .sendRawPrescriptions : .uploadPrescriptions
@@ -40,7 +38,6 @@ extension IACore.CardLinkConfiguration {
             cardName: cardName,
             isSaveCardEnabled: isSaveCardEnabled,
             finishAction: finishAction,
-            appID: appID,
             coreAppLogFileURL: coreAppLogFileURL
         )
     }
