@@ -5,6 +5,8 @@ import de.ihreapotheken.appsdk.flutter.card_link.events.CardLinkEventSender
 import de.ihreapotheken.appsdk.flutter.card_link.methods.DeleteCardHandler
 import de.ihreapotheken.appsdk.flutter.card_link.methods.GetSavedCardsHandler
 import de.ihreapotheken.appsdk.flutter.card_link.methods.LaunchHandler
+import de.ihreapotheken.sdk.cardlink.BuildConfig
+import de.ihreapotheken.sdk.cardlink.CardLinkSdkEnvironment
 import de.ihreapotheken.sdk.cardlink.CardlinkModule
 import de.ihreapotheken.sdk.cardlink.api.CardLink
 import de.ihreapotheken.sdk.cardlink.api.REQUEST_CODE_CARD_LINK_ACTIVITY
@@ -106,11 +108,11 @@ class IaSdkFlutterCardLink :
             }
 
             "getVersion" -> {
-                result.success(null)
+                result.success(BuildConfig.SDK_VERSION)
             }
 
             "getEnvironment" -> {
-                result.success(null)
+                result.success(CardLinkSdkEnvironment.cardLinkSdkEnvironment.name)
             }
 
             "getLogFilePath" -> {
