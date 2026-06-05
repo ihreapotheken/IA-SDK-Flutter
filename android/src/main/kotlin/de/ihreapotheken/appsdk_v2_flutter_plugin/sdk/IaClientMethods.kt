@@ -19,6 +19,12 @@ import de.ihreapotheken.sdk.core.data.model.prescription.PrescriptionInsuranceTy
 import de.ihreapotheken.sdk.core.domain.model.GuestUser
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
+import de.ihreapotheken.sdk.core.ui.theme.IAUIConfiguration
+import de.ihreapotheken.sdk.core.ui.theme.IAHeaderConfiguration
+import de.ihreapotheken.sdk.core.ui.theme.IAHeaderStyle
+import de.ihreapotheken.sdk.core.ui.theme.IAPrimaryButtonConfiguration
+import de.ihreapotheken.sdk.core.ui.theme.IASecondaryButtonConfiguration
+import androidx.compose.ui.graphics.Color
 import de.ihreapotheken.sdk.integrations.api.TransferPrescriptionRequest
 import de.ihreapotheken.sdk.integrations.api.view.IaSdkActivity
 import de.ihreapotheken.sdk.integrations.api.view.IaScreen
@@ -197,18 +203,20 @@ internal class IaClientMethods(
                 val prerequisites = initializationOptions?.get("prerequisites") as? Map<*, *>
                 val shouldRunLegal = prerequisites?.get("runLegalIfNeeded") == true
                 val shouldRunOnboarding = prerequisites?.get("runOnboardingIfNeeded") == true
+                val uiConfiguration = parseUIConfiguration(args["uiConfiguration"] as? Map<*, *>)
                 bindings.sdkModule.init(
                     context = bindings.applicationContext,
                     apiKey = accessKey,
                     clientId = clientId,
                     configuration = IaSdkConfiguration(
-                        shouldFetchThemeFromRemote = true,
+                        shouldFetchThemeFromRemote = shouldFetchThemeFromRemote,
                         prerequisiteFlowConfiguration = PrerequisiteFlowConfiguration(
                             shouldRunLegal = shouldRunLegal,
                             shouldRunOnboarding = shouldRunOnboarding,
                         ),
                         channelId = channelId,
                         shouldShowIndicator = shouldShowIndicator,
+                        uiConfiguration = uiConfiguration,
                     ),
                     environmentType = serverEnv,
                     sdkEventListener = SdkEventListener { event ->
@@ -508,5 +516,56 @@ internal class IaClientMethods(
                 result.notImplemented()
             }
         }
+    }
+
+    private fun parseUIConfiguration(map: Map<*, *>?): IAUIConfiguration {
+        if (map == null) return IAUIConfiguration()
+
+        val headerMap = map["header"] as? Map<*, *>
+        val primaryMap = map["primaryButton"] as? Map<*, *>
+        val secondaryMap = map["secondaryButton"] as? Map<*, *>
+
+        return IAUIConfiguration(
+            header = parseHeaderConfiguration(headerMap),
+            primaryButton = parsePrimaryButtonConfiguration(primaryMap),
+            secondaryButton = parseSecondaryButtonConfiguration(secondaryMap),
+        )
+    }
+
+    private fun parseHeaderConfiguration(map: Map<*, *>?): IAHeaderConfiguration {
+        if (map == null) return IAHeaderConfiguration()
+        return IAHeaderConfiguration(
+            style = if (map["style"] == "monotone") IAHeaderStyle.MONOTONE else IAHeaderStyle.DUOTONE,
+            primaryColor = (map["primaryColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            secondaryColor = (map["secondaryColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+        )
+    }
+
+    private fun parsePrimaryButtonConfiguration(map: Map<*, *>?): IAPrimaryButtonConfiguration {
+        if (map == null) return IAPrimaryButtonConfiguration()
+        return IAPrimaryButtonConfiguration(
+            backgroundColor = (map["backgroundColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            backgroundDisabledColor = (map["backgroundDisabledColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            textColor = (map["textColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            textDisabledColor = (map["textDisabledColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            borderColor = (map["borderColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            borderDisabledColor = (map["borderDisabledColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            borderWidth = (map["borderWidth"] as? Number)?.toFloat(),
+            borderRadius = (map["borderRadius"] as? Number)?.toFloat(),
+        )
+    }
+
+    private fun parseSecondaryButtonConfiguration(map: Map<*, *>?): IASecondaryButtonConfiguration {
+        if (map == null) return IASecondaryButtonConfiguration()
+        return IASecondaryButtonConfiguration(
+            backgroundColor = (map["backgroundColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            backgroundDisabledColor = (map["backgroundDisabledColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            textColor = (map["textColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            textDisabledColor = (map["textDisabledColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            borderColor = (map["borderColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            borderDisabledColor = (map["borderDisabledColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            borderWidth = (map["borderWidth"] as? Number)?.toFloat(),
+            borderRadius = (map["borderRadius"] as? Number)?.toFloat(),
+        )
     }
 }
