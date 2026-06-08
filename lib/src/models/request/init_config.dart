@@ -8,6 +8,7 @@ class _RequestModelInitConfig extends IaSdkConfiguration implements IaBaseReques
     super.shouldFetchThemeFromRemote,
     super.footer,
     super.initialization,
+    super.uiConfiguration,
   });
 
   factory _RequestModelInitConfig.fromConfig(IaSdkConfiguration config) {
@@ -18,6 +19,7 @@ class _RequestModelInitConfig extends IaSdkConfiguration implements IaBaseReques
       shouldFetchThemeFromRemote: config.shouldFetchThemeFromRemote,
       footer: config.footer,
       initialization: config.initialization,
+      uiConfiguration: config.uiConfiguration,
     );
   }
 

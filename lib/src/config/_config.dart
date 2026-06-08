@@ -14,6 +14,7 @@ class IaSdkConfiguration {
     this.shouldFetchThemeFromRemote = true,
     this.footer = const IaSdkConfigurationFooter(),
     this.initialization = const IaSdkConfigurationInitialization(),
+    this.uiConfiguration = const IaUIConfiguration(),
   });
 
   /// Key used to authenticate the client setup with the backend service.
@@ -48,6 +49,10 @@ class IaSdkConfiguration {
   ///
   final IaSdkConfigurationInitialization initialization;
 
+  /// UI appearance configuration options.
+  ///
+  final IaUIConfiguration uiConfiguration;
+
   /// Serialises the class data to a JSON-compatible format.
   ///
   Map<String, dynamic> toJson() {
@@ -58,6 +63,7 @@ class IaSdkConfiguration {
       'shouldFetchThemeFromRemote': shouldFetchThemeFromRemote,
       'footer': footer.toJson(),
       'initialization': initialization.toJson(),
+      'uiConfiguration': uiConfiguration.toJson(),
     };
   }
 }

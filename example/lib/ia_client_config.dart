@@ -87,6 +87,9 @@ class ExampleAppConfig {
           runApofinderIfNeeded: true,
         ),
       ),
+      uiConfiguration: IaUIConfiguration(
+        supportsLiquidGlass: true,
+      ),
     );
   }
 

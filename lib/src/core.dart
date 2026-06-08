@@ -1,3 +1,5 @@
+import 'dart:ui' show Color;
+
 import 'package:ia_interface/ia_interface.dart';
 
 part 'common/methods.dart';
@@ -7,6 +9,7 @@ part 'config/_config.dart';
 part 'config/footer.dart';
 part 'config/initialization.dart';
 part 'config/server_environment.dart';
+part 'config/ui_configuration.dart';
 part 'models/request/guest_user_data.dart';
 part 'models/request/init_config.dart';
 part 'models/request/register_modules.dart';

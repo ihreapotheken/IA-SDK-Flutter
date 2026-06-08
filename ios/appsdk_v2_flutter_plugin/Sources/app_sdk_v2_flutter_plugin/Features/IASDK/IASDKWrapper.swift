@@ -23,7 +23,8 @@ final class IASDKWrapper {
         IASDK.configuration.footer.shouldShowAppSettings = arguments.footer.shouldShowAppSettings
         IASDK.configuration.footer.shouldShowDataProcessing = arguments.footer.shouldShowDataProcessing
         IASDK.configuration.footer.shouldShowImprint = arguments.footer.shouldShowImprint
-        
+        IASDK.configuration.uiConfiguration = arguments.uiConfiguration.mappedToSDK()
+
         // @TODO: remove, just for testing
         IASDK.QA.setQAFeatures([.showTestPharmaciesOnApofinder])
         
