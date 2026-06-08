@@ -19,6 +19,7 @@ class _RequestModelLaunch implements IaBaseRequest {
     this.saveCardEnabled,
     this.appId,
     this.coreAppLogFileURL,
+    required this.supportsLiquidGlass,
   });
 
   final String sdkApiKey;
@@ -38,6 +39,7 @@ class _RequestModelLaunch implements IaBaseRequest {
   final bool? saveCardEnabled;
   final String? appId;
   final String? coreAppLogFileURL;
+  final bool supportsLiquidGlass;
 
   @override
   Map<String, dynamic> toSupportedType() {
@@ -59,6 +61,7 @@ class _RequestModelLaunch implements IaBaseRequest {
       'saveCardEnabled': saveCardEnabled,
       'appId': appId,
       'coreAppLogFileURL': coreAppLogFileURL,
+      'supportsLiquidGlass': supportsLiquidGlass,
     };
   }
 }

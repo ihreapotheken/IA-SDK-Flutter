@@ -163,6 +163,7 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 environment: IaCardLinkEnvironment.debug,
                 finishAction: IaCardLinkFinishAction.uploadPrescriptions,
                 coreAppLogFileURL: logFileURL,
+                supportsLiquidGlass: true,
               );
               _showResult('CardLink launched');
             } catch (e) {
@@ -186,6 +187,7 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 environment: IaCardLinkEnvironment.debug,
                 finishAction: IaCardLinkFinishAction.uploadPrescriptions,
                 coreAppLogFileURL: logFileURL,
+                supportsLiquidGlass: true,
               );
               _showResult('Saved Cards launched');
             } catch (e) {

@@ -86,8 +86,9 @@ class LaunchHandler {
             textLinkColor: textLinkColor,
             bottomNavigationColor: bottomNavigationColor
         )
-
+        
         CardLink.legacyStyle = style
+        IASDK.configuration.uiConfiguration.supportsLiquidGlass = (args["supportsLiquidGlass"] as? Bool) ?? false
     }
 
     private func handleOutputAction(_ action: CardLinkOutputAction) {
