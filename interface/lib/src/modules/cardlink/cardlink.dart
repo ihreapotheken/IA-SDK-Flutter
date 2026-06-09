@@ -30,6 +30,7 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [finishAction]: Determines what happens with prescriptions after NFC scanning.
   /// - [appId]: Optional application ID (maps to `applicationId` on Android and `appID` on iOS).
   /// - [coreAppLogFileURL]: Optional file path to the host app's log file. When provided, the log file is included in CardLink's "Report Problem" feature, allowing users to attach app-level logs alongside CardLink logs when reporting issues.
+  /// - [supportsLiquidGlass]: Flag to enable Liquid Glass UI style.
   ///
   Future<void> launch({
     required String sdkApiKey,
@@ -49,6 +50,7 @@ abstract class IaBaseCardLink extends IaBase {
     bool? saveCardEnabled,
     String? appId,
     String? coreAppLogFileURL,
+    required bool supportsLiquidGlass,
   });
 
   /// Returns the CardLink SDK version string.

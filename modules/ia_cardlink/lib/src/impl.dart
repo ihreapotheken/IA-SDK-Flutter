@@ -38,6 +38,7 @@ class IaModuleCardLink extends IaBaseCardLink {
     bool? saveCardEnabled,
     String? appId,
     String? coreAppLogFileURL,
+    required bool supportsLiquidGlass,
   }) async {
     final arguments = _RequestModelLaunch(
       sdkApiKey: sdkApiKey,
@@ -57,6 +58,7 @@ class IaModuleCardLink extends IaBaseCardLink {
       saveCardEnabled: saveCardEnabled,
       appId: appId,
       coreAppLogFileURL: coreAppLogFileURL,
+      supportsLiquidGlass: supportsLiquidGlass,
     );
     return await _Methods.launch.invoke<void>(arguments);
   }
