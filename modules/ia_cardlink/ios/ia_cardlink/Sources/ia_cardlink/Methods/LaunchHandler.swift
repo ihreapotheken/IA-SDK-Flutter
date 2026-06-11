@@ -1,5 +1,7 @@
+import SwiftUI
+
 import Flutter
-import UIKit
+
 import IACore
 import IACardLink
 
@@ -14,7 +16,7 @@ class LaunchHandler {
     }
 
     func handle(args: [String: Any], result: @escaping FlutterResult) {
-        setupStyleAndConfiguration(args: args)
+        setupConfigurationAndStyle(args: args)
 
         guard let configuration = savedConfiguration else {
             result(FlutterError(code: "CONFIGURATION_ERROR", message: "Failed to create configuration", details: nil))
@@ -70,25 +72,24 @@ class LaunchHandler {
         }
     }
 
-    private func setupStyleAndConfiguration(args: [String: Any]) {
+    private func setupConfigurationAndStyle(args: [String: Any]) {
+        let configuration = CardLinkConfiguration(args: args)
+        self.savedConfiguration = configuration
+        self.savedSdkApiKey = args["sdkApiKey"] as? String
+
+        IASDK.configuration.uiConfiguration.supportsLiquidGlass = (args["supportsLiquidGlass"] as? Bool) ?? false
+
         let primaryColor = UIColor(argb: args["primaryColor"] as? Int)
         let buttonsColor = UIColor(argb: args["buttonsColor"] as? Int)
         let textLinkColor = UIColor(argb: args["textLinkColor"] as? Int)
         let bottomNavigationColor = UIColor(argb: args["bottomNavigationColor"] as? Int)
 
-        let configuration = CardLinkConfiguration(args: args)
-        self.savedConfiguration = configuration
-        self.savedSdkApiKey = args["sdkApiKey"] as? String
-
-        let style = CardLinkStyle(
-            primaryColor: primaryColor,
-            buttonsColor: buttonsColor,
-            textLinkColor: textLinkColor,
-            bottomNavigationColor: bottomNavigationColor
+        Color.ia = .init(
+            primary: primaryColor.map { .init($0) },
+            button: buttonsColor.map { .init($0) },
+            link: textLinkColor.map { .init($0) },
+            bottomNavigation: bottomNavigationColor.map { .init($0) }
         )
-        
-        CardLink.legacyStyle = style
-        IASDK.configuration.uiConfiguration.supportsLiquidGlass = (args["supportsLiquidGlass"] as? Bool) ?? false
     }
 
     private func handleOutputAction(_ action: CardLinkOutputAction) {

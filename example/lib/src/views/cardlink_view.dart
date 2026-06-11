@@ -164,6 +164,7 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 finishAction: IaCardLinkFinishAction.uploadPrescriptions,
                 coreAppLogFileURL: logFileURL,
                 supportsLiquidGlass: true,
+                primaryColor: 0xBAADF00D,
               );
               _showResult('CardLink launched');
             } catch (e) {
@@ -383,7 +384,6 @@ class _ConsentStatusSection extends StatelessWidget {
     );
   }
 }
-
 
 class _LaunchSection extends StatelessWidget {
   const _LaunchSection({
