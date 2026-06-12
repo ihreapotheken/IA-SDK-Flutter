@@ -37,6 +37,14 @@ class LaunchHandler {
                 return
             }
 
+            // @TODO high: This is just for core app, remove it after it starts using SDK initialization.
+            if let environmentString = args["environment"] as? String {
+                if environmentString == "PRODUCTION" {
+                    IASDK.setEnvironment(.prod)
+                } else if environmentString == "DEBUG" {
+                    IASDK.setEnvironment(.staging)
+                }
+            }
             CardLink.legacyAuthenticationKey = .init(value: sdkApiKey)
             CardLink.start(
                 type: flowType,
