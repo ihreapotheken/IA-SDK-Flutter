@@ -8,7 +8,6 @@ extension IACore.CardLinkConfiguration {
         let pharmacyId = args["pharmacyId"] as? String ?? ""
         let consentStatusString = args["consentStatus"] as? String ?? "SHOW_CONSENT"
         let phoneNumber = args["phoneNumber"] as? String ?? ""
-        let environmentString = args["environment"] as? String ?? "PRODUCTION"
         let userId = args["userId"] as? String
         let canCode = args["canCode"] as? String
         let cardName = args["cardName"] as? String
@@ -26,8 +25,6 @@ extension IACore.CardLinkConfiguration {
         default:
             consentStatus = .undetermined
         }
-
-        CardLink.environment = CLEnvironment(pluginStringValue: environmentString)
 
         self.init(
             pharmacyId: pharmacyId,

@@ -40,7 +40,12 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
             result(CardLink.version)
 
         case "getEnvironment":
-            result(CardLink.environment.pluginStringValue)
+            let environment = IASDK.getEnvironment()
+            let value: String = switch environment {
+            case .prod: "PRODUCTION"
+            case .dev, .staging: "DEBUG"
+            }
+            result(value)
 
         case "getLogFilePath":
             result(CardLink.logsPath)

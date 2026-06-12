@@ -384,7 +384,6 @@ class _ConsentStatusSection extends StatelessWidget {
   }
 }
 
-
 class _LaunchSection extends StatelessWidget {
   const _LaunchSection({
     required this.saveCardEnabled,
