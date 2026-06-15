@@ -22,7 +22,7 @@ internal class IaClientNativeView(
         }
         
         // Convert viewId string to SdkEntryPoint
-        val entryPoint: SdkEntryPoint = when (viewId) {
+        val entryPoint: SdkEntryPoint<*> = when (viewId) {
             IaScreen.StartScreen::class.simpleName -> IaScreen.StartScreen
             IaScreen.CartScreen::class.simpleName -> IaScreen.CartScreen
             IaScreen.SearchScreen::class.simpleName -> IaScreen.SearchScreen
