@@ -125,4 +125,16 @@ final class IASDKWrapper {
         }
         return String(pharmacyId)
     }
+
+    func setUserBillingAddress(arguments: Any) async throws -> Any? {
+        let arguments = try argumentDecoder.decode(IaSetUserAddressArguments.self, from: arguments)
+        try await IASDK.setUserBillingAddress(arguments.mappedToSDK())
+        return nil
+    }
+
+    func setUserDeliveryAddress(arguments: Any) async throws -> Any? {
+        let arguments = try argumentDecoder.decode(IaSetUserAddressArguments.self, from: arguments)
+        try await IASDK.setUserDeliveryAddress(arguments.mappedToSDK())
+        return nil
+    }
 }

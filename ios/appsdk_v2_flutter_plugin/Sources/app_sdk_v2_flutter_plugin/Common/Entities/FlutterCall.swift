@@ -86,7 +86,17 @@ enum FlutterCall: CaseIterable {
      * Deletes the order history.
      */
     case deleteOrderHistory
-    
+
+    /**
+     * Sets the user's billing address used to pre-fill checkout.
+     */
+    case setUserBillingAddress
+
+    /**
+     * Sets the user's delivery address used to pre-fill checkout.
+     */
+    case setUserDeliveryAddress
+
     /**
      * String identifier getter definition.
      */

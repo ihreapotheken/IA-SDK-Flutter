@@ -135,6 +135,48 @@ class ServicesView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         ElevatedButton(
+          child: Text('Set billing address (iOS)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.setUserBillingAddress(
+                salutation: 'Herr',
+                firstName: 'First',
+                lastName: 'Last',
+                street: 'Musterstraße',
+                houseNumber: '1',
+                zipCode: '10115',
+                city: 'Berlin',
+                phoneNumberCountryCode: 49,
+                phoneNumberWithoutCountryCode: '432432243',
+              );
+              if (context.mounted) _showResult(context, 'Billing address set');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Set delivery address (iOS)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.setUserDeliveryAddress(
+                salutation: 'Herr',
+                firstName: 'First',
+                lastName: 'Last',
+                street: 'Musterstraße',
+                houseNumber: '2',
+                zipCode: '10115',
+                city: 'Berlin',
+              );
+              if (context.mounted) _showResult(context, 'Delivery address set');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
           child: Text('Delete User (iOS)'),
           onPressed: () async {
             try {

@@ -20,6 +20,10 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
   getEnvironment,
 
   cleanCache,
+
+  setUserBillingAddress,
+
+  setUserDeliveryAddress,
   ;
 
   @override
@@ -36,6 +40,9 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
         return _RequestModelSetGuestUserData;
       case _Methods.cleanCache:
         return _RequestModelCleanCache;
+      case _Methods.setUserBillingAddress:
+      case _Methods.setUserDeliveryAddress:
+        return _RequestModelSetUserAddress;
       default:
         return null;
     }

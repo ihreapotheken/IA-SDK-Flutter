@@ -46,6 +46,8 @@ extension Error {
         case .getPharmacyId: "GET_PHARMACY_ID_ERROR"
         case .getCartDetails: "GET_CART_DETAILS_ERROR"
         case .deleteOrderHistory: "DELETE_ORDER_HISTORY_ERROR"
+        case .setUserBillingAddress: "SET_USER_BILLING_ADDRESS_ERROR"
+        case .setUserDeliveryAddress: "SET_USER_DELIVERY_ADDRESS_ERROR"
         }
     }
 }

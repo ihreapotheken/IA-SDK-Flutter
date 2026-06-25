@@ -24,6 +24,16 @@ enum IASDKViewIdentifier: String, CaseIterable {
     case pharmacyDetails = "pharmacyScreen"
 
     /**
+     * Apofinder (pharmacy finder) screen.
+     */
+    case apofinderScreen = "apofinderScreen"
+
+    /**
+     * Redeem prescription screen from IAPrescription module.
+     */
+    case redeemPrescription = "redeemPrescription"
+
+    /**
      * Visual interface representation.
      */
     func iaScreen() -> any IAScreen {
@@ -39,6 +49,12 @@ enum IASDKViewIdentifier: String, CaseIterable {
 
         case IASDKViewIdentifier.pharmacyDetails:
             IAPharmacyScreen()
+
+        case IASDKViewIdentifier.apofinderScreen:
+            IAApofinderScreen(isCancellable: true, onFinish: { _ in })
+
+        case IASDKViewIdentifier.redeemPrescription:
+            IARedeemPrescriptionScreen()
         }
     }
 }

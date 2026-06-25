@@ -33,6 +33,16 @@ class ScreensView extends StatelessWidget {
           child: Text('Launch Pharmacy Details'),
           onPressed: () => IaSdk.instance.pharmacy.launchPharmacyDetails(),
         ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          child: Text('Launch Apofinder'),
+          onPressed: () => IaSdk.instance.launchApofinder(),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          child: Text('Launch Redeem Prescription'),
+          onPressed: () => IaSdk.instance.prescription.launchRedeemPrescriptionScreen(),
+        ),
       ],
     );
   }

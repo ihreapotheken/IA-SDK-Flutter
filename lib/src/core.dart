@@ -14,6 +14,7 @@ part 'models/request/guest_user_data.dart';
 part 'models/request/init_config.dart';
 part 'models/request/register_modules.dart';
 part 'models/request/clean_cache.dart';
+part 'models/request/set_user_address.dart';
 
 /// Main entrypoint for the ia.de AppSDK services and features.
 ///
@@ -216,6 +217,14 @@ class IaSdk {
     return await _Views.startScreen.launch();
   }
 
+  /// Launches the Apofinder (pharmacy finder) screen on top of the navigation stack.
+  ///
+  /// The selected pharmacy is reported through [onApofinderDidChangePharmacy].
+  ///
+  Future<void> launchApofinder() async {
+    return await _Views.apofinderScreen.launch();
+  }
+
   /// Closes any overlaying ia.de screen contents.
   ///
   Future<void> finishAllActivities() async {
@@ -270,6 +279,74 @@ class IaSdk {
       prerequisites: prerequisites,
     );
     return await _Methods.cleanCache.invoke(arguments);
+  }
+
+  /// Sets the user's billing address, used to pre-fill the checkout flow.
+  ///
+  /// Pass a salutation matching the values accepted by [setGuestUserData]
+  /// (for example "Herr"/"Frau") or `null` to leave it unset.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<void> setUserBillingAddress({
+    required String firstName,
+    required String lastName,
+    String? additionalInfo,
+    required String street,
+    required String houseNumber,
+    required String zipCode,
+    required String city,
+    String? salutation,
+    int? phoneNumberCountryCode,
+    String? phoneNumberWithoutCountryCode,
+  }) async {
+    final arguments = _RequestModelSetUserAddress(
+      firstName: firstName,
+      lastName: lastName,
+      additionalInfo: additionalInfo,
+      street: street,
+      houseNumber: houseNumber,
+      zipCode: zipCode,
+      city: city,
+      salutation: salutation,
+      phoneNumberCountryCode: phoneNumberCountryCode,
+      phoneNumberWithoutCountryCode: phoneNumberWithoutCountryCode,
+    );
+    return await _Methods.setUserBillingAddress.invoke(arguments);
+  }
+
+  /// Sets the user's delivery address, used to pre-fill the checkout flow.
+  ///
+  /// Pass a salutation matching the values accepted by [setGuestUserData]
+  /// (for example "Herr"/"Frau") or `null` to leave it unset.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<void> setUserDeliveryAddress({
+    required String firstName,
+    required String lastName,
+    String? additionalInfo,
+    required String street,
+    required String houseNumber,
+    required String zipCode,
+    required String city,
+    String? salutation,
+    int? phoneNumberCountryCode,
+    String? phoneNumberWithoutCountryCode,
+  }) async {
+    final arguments = _RequestModelSetUserAddress(
+      firstName: firstName,
+      lastName: lastName,
+      additionalInfo: additionalInfo,
+      street: street,
+      houseNumber: houseNumber,
+      zipCode: zipCode,
+      city: city,
+      salutation: salutation,
+      phoneNumberCountryCode: phoneNumberCountryCode,
+      phoneNumberWithoutCountryCode: phoneNumberWithoutCountryCode,
+    );
+    return await _Methods.setUserDeliveryAddress.invoke(arguments);
   }
 
   /// Property holding internal state of the native callback handlers.
