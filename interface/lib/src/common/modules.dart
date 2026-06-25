@@ -32,4 +32,12 @@ enum IaBaseModule {
   /// CardLink (NFC) prescription transfer functionality.
   ///
   cardLink,
+
+  /// Appointment booking functionality.
+  ///
+  /// On Android this registers the native `AppointmentsModule`. On iOS
+  /// appointment booking is part of the Integrations module and is enabled
+  /// through the pharmacy configuration, so no separate registration occurs.
+  ///
+  appointments,
 }

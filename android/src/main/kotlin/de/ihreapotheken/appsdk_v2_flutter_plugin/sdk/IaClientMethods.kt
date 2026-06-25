@@ -2,6 +2,7 @@ package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
 import android.app.Activity
 import de.ihreapotheken.sdk.apofinder.ApofinderModule
+import de.ihreapotheken.sdk.appointments.AppointmentsModule
 import de.ihreapotheken.sdk.core.SdkModule
 import de.ihreapotheken.sdk.core.api.PresentationMode
 import de.ihreapotheken.sdk.core.api.listener.HandlingDecision
@@ -126,6 +127,16 @@ internal class IaClientMethods(
          * Deletes the order history.
          */
         deleteOrderHistory,
+
+        /**
+         * Sets the user's billing address used to pre-fill checkout. iOS only.
+         */
+        setUserBillingAddress,
+
+        /**
+         * Sets the user's delivery address used to pre-fill checkout. iOS only.
+         */
+        setUserDeliveryAddress,
     }
 
     fun callHandler(
@@ -154,6 +165,7 @@ internal class IaClientMethods(
                 }
                 val modulesCollection = listOfNotNull(
                     if (modules.contains("apofinder")) ApofinderModule else null,
+                    if (modules.contains("appointments")) AppointmentsModule else null,
                 ).toTypedArray<SdkModule>()
                 bindings.sdkModule = IaSdk.register(
                     *modulesCollection,
@@ -365,6 +377,8 @@ internal class IaClientMethods(
                     IaScreen.SearchScreen::class.simpleName -> IaScreen.SearchScreen
                     IaScreen.PharmacyScreen::class.simpleName -> IaScreen.PharmacyScreen
                     IaScreen.PrerequisiteFlow::class.simpleName -> IaScreen.PrerequisiteFlow
+                    IaScreen.ApofinderScreen::class.simpleName -> IaScreen.ApofinderScreen
+                    IaScreen.RedeemPrescription::class.simpleName -> IaScreen.RedeemPrescription
                     else -> {
                         result.error(
                             "ARG_ERROR",
@@ -508,7 +522,9 @@ internal class IaClientMethods(
             FlutterCall.getEnvironment.name,
             FlutterCall.cleanCache.name,
             FlutterCall.getCartDetails.name,
-            FlutterCall.deleteOrderHistory.name -> {
+            FlutterCall.deleteOrderHistory.name,
+            FlutterCall.setUserBillingAddress.name,
+            FlutterCall.setUserDeliveryAddress.name -> {
                 result.notImplemented()
             }
 

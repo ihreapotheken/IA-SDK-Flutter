@@ -5,4 +5,9 @@ part 'views.dart';
 
 /// Method and property definitions for the ia.de AppSDK Prescription service.
 ///
-class IaModulePrescription extends IaBasePrescription {}
+class IaModulePrescription extends IaBasePrescription {
+  @override
+  Future<void> launchRedeemPrescriptionScreen() async {
+    return await _Views.redeemPrescription.launch();
+  }
+}

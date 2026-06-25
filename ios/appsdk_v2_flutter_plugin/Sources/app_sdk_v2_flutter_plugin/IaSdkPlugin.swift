@@ -85,6 +85,12 @@ final class IASDKPlugin {
             case FlutterCall.deleteOrderHistory.name:
                 return try await orderingWrapper.deleteOrderHistory()
 
+            case FlutterCall.setUserBillingAddress.name:
+                return try await iaSdkWrapper.setUserBillingAddress(arguments: call.arguments)
+
+            case FlutterCall.setUserDeliveryAddress.name:
+                return try await iaSdkWrapper.setUserDeliveryAddress(arguments: call.arguments)
+
             default:
                 return FlutterMethodNotImplemented
         }

@@ -14,6 +14,7 @@ class _RequestModelRegisterModules implements IaBaseRequest {
           [
             IaBaseModule.integrations,
             IaBaseModule.apofinder,
+            IaBaseModule.appointments,
             ...modules,
           ].map(
             (module) {
