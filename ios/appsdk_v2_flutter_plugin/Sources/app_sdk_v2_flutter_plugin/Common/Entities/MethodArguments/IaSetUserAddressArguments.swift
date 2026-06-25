@@ -11,12 +11,12 @@ struct IaSetUserAddressArguments: Decodable {
     let zipCode: String
     let city: String
     let salutation: IaSalutation?
-    let phoneNumberCountryCode: String?
+    let phoneNumberCountryCode: Int?
     let phoneNumberWithoutCountryCode: String?
 
     func mappedToSDK() -> IAUserAddress {
         var phoneNumber: IAPhoneNumber?
-        if let countryCode = phoneNumberCountryCode.flatMap(Int.init),
+        if let countryCode = phoneNumberCountryCode,
            let number = phoneNumberWithoutCountryCode {
             phoneNumber = IAPhoneNumber(countryCode: countryCode, phoneNumber: number)
         }

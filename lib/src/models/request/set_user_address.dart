@@ -37,7 +37,7 @@ class _RequestModelSetUserAddress implements IaBaseRequest {
       'zipCode': zipCode,
       'city': city,
       'salutation': salutation,
-      'phoneNumberCountryCode': phoneNumberCountryCode?.toString(),
+      'phoneNumberCountryCode': phoneNumberCountryCode,
       'phoneNumberWithoutCountryCode': phoneNumberWithoutCountryCode,
     };
   }
