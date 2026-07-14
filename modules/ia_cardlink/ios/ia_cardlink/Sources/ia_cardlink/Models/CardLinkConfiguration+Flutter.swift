@@ -12,7 +12,6 @@ extension IACore.CardLinkConfiguration {
         let canCode = args["canCode"] as? String
         let cardName = args["cardName"] as? String
         let isSaveCardEnabled = args["saveCardEnabled"] as? Bool ?? true
-        let coreAppLogFileURL = (args["coreAppLogFileURL"] as? String).flatMap { URL(fileURLWithPath: $0) }
         let finishActionString = args["finishAction"] as? String ?? "uploadPrescriptions"
         let finishAction: CardLinkFinishAction = finishActionString == "sendRawPrescriptions" ? .sendRawPrescriptions : .uploadPrescriptions
 
@@ -25,7 +24,7 @@ extension IACore.CardLinkConfiguration {
         default:
             consentStatus = .undetermined
         }
-
+        
         self.init(
             pharmacyId: pharmacyId,
             consentStatus: consentStatus,
@@ -35,7 +34,6 @@ extension IACore.CardLinkConfiguration {
             cardName: cardName,
             isSaveCardEnabled: isSaveCardEnabled,
             finishAction: finishAction,
-            coreAppLogFileURL: coreAppLogFileURL
         )
     }
 }

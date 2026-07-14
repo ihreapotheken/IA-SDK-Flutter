@@ -86,6 +86,10 @@ class LaunchHandler {
         self.savedSdkApiKey = args["sdkApiKey"] as? String
 
         IASDK.configuration.uiConfiguration.supportsLiquidGlass = (args["supportsLiquidGlass"] as? Bool) ?? false
+        // @TODO: coreAppLogFileURL is used only by Core app. This should be refactored so IASDK.configuration can be setup separately from flutter, not when launching cardlink.
+        if let hostAppLogFileURL = (args["coreAppLogFileURL"] as? String).flatMap ({ URL(fileURLWithPath: $0) }) {
+            IASDK.configuration.hostAppLogFileURL = hostAppLogFileURL;
+        }
 
         let primaryColor = UIColor(argb: args["primaryColor"] as? Int)
         let buttonsColor = UIColor(argb: args["buttonsColor"] as? Int)
