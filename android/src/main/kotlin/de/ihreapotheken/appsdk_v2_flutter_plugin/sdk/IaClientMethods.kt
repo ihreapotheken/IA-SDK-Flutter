@@ -137,6 +137,11 @@ internal class IaClientMethods(
          * Sets the user's delivery address used to pre-fill checkout. iOS only.
          */
         setUserDeliveryAddress,
+
+        /**
+         * Legacy setup required when the host app is the Core app.
+         */
+        legacySetupAsCoreApp,
     }
 
     fun callHandler(
@@ -494,6 +499,10 @@ internal class IaClientMethods(
 
             FlutterCall.transferSDKv1UserData.name -> {
                 IaSdk.transferSDKv1UserData(bindings.applicationContext)
+                result.success(null)
+            }
+
+            FlutterCall.legacySetupAsCoreApp.name -> {
                 result.success(null)
             }
 

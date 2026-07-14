@@ -239,6 +239,12 @@ class IaSdk {
     return await _Methods.transferSDKv1UserData.invoke();
   }
 
+  /// Legacy setup required when the host app is the Core app.
+  ///
+  Future<void> legacySetupAsCoreApp() async {
+    return await _Methods.legacySetupAsCoreApp.invoke();
+  }
+
   /// Returns `true` if the SDK has been successfully initialized.
   ///
   Future<bool> isInitialized() async {

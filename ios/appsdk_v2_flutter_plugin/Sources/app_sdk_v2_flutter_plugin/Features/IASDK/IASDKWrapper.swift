@@ -88,6 +88,14 @@ final class IASDKWrapper {
         return nil
     }
 
+    func legacySetupAsCoreApp() async throws -> Any? {
+        // Needed because of report problem.
+        IASDK.register([.integrations])
+        // Needed to make requests work, they don't work because SDK config is not fetched and that is needed for ssl stuff.
+        IASDK.configuration.legacyIsCoreApp = true
+        return nil
+    }
+
     func isInitialized() async throws -> Any? {
         let state = IASDK.initializationState
         let summary = state.summary

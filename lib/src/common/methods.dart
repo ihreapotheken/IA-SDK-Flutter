@@ -24,6 +24,8 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
   setUserBillingAddress,
 
   setUserDeliveryAddress,
+
+  legacySetupAsCoreApp,
   ;
 
   @override

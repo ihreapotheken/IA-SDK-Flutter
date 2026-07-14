@@ -98,6 +98,11 @@ enum FlutterCall: CaseIterable {
     case setUserDeliveryAddress
 
     /**
+     * Legacy setup required when the host app is the Core app.
+     */
+    case legacySetupAsCoreApp
+
+    /**
      * String identifier getter definition.
      */
     var name: String {

@@ -91,10 +91,6 @@ class LaunchHandler {
             IASDK.configuration.hostAppLogFileURL = URL(fileURLWithPath: coreAppLogFileURL);
         }
 
-        if (args["isCoreApp"] as? Bool) == true {
-            IASDK.configuration.legacyIsCoreApp = true;
-        }
-
         let primaryColor = UIColor(argb: args["primaryColor"] as? Int)
         let buttonsColor = UIColor(argb: args["buttonsColor"] as? Int)
         let textLinkColor = UIColor(argb: args["textLinkColor"] as? Int)

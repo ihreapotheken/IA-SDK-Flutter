@@ -91,6 +91,9 @@ final class IASDKPlugin {
             case FlutterCall.setUserDeliveryAddress.name:
                 return try await iaSdkWrapper.setUserDeliveryAddress(arguments: call.arguments)
 
+            case FlutterCall.legacySetupAsCoreApp.name:
+                return try await iaSdkWrapper.legacySetupAsCoreApp()
+
             default:
                 return FlutterMethodNotImplemented
         }
