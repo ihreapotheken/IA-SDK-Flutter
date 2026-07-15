@@ -14,9 +14,9 @@ import de.ihreapotheken.sdk.core.data.EnvironmentType
 import de.ihreapotheken.sdk.core.data.PrerequisiteFlowConfiguration
 import de.ihreapotheken.sdk.core.data.model.sdk.SdkEvent
 import de.ihreapotheken.sdk.core.data.model.sdk.SdkEventListener
-import de.ihreapotheken.sdk.core.data.model.prescription.ImagePrescription
-import de.ihreapotheken.sdk.core.data.model.prescription.PdfPrescription
-import de.ihreapotheken.sdk.core.data.model.prescription.PrescriptionInsuranceType
+import de.ihreapotheken.sdk.core.domain.model.prescription.ImagePrescription
+import de.ihreapotheken.sdk.core.domain.model.prescription.PdfPrescription
+import de.ihreapotheken.sdk.core.domain.model.prescription.PrescriptionInsuranceType
 import de.ihreapotheken.sdk.core.domain.model.GuestUser
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
