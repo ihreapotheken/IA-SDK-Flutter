@@ -98,7 +98,7 @@ class LaunchHandler {
         }
 
         // @TODO: This should also be refactored, api key should not be passed in CardLink.launch. Same as above, refactor so IASDK.configuration.apiKey can be setup separately.
-        if let appID = args["appID"] as? String, !appID.isEmpty {
+        if let appID = args["appId"] as? String, !appID.isEmpty {
             IASDK.configuration.appStoreID = appID
         }
 
