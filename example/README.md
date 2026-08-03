@@ -28,6 +28,17 @@ Pass the access key as a compile-time variable:
 flutter run --dart-define iaAccessKey=your_access_key_here
 ```
 
+### Server environment
+
+The backend the app talks to is selected with the `iaServerEnv` dart-define, using the
+`IaSdkConfigurationServerEnvironment` value names. It defaults to `staging` (QA):
+
+```bash
+flutter run --dart-define iaServerEnv=development   # DEV
+flutter run --dart-define iaServerEnv=staging       # QA  (default)
+flutter run --dart-define iaServerEnv=production    # PROD
+```
+
 ## Running the Example
 
 ```bash
@@ -35,6 +46,37 @@ cd example
 flutter pub get
 flutter run
 ```
+
+## App Identity
+
+The demo app carries the same launcher branding as the native demo apps
+([IA-SDK-Dev-Android](https://github.com/ihreapotheken/IA-SDK-Android),
+[IA-SDK-Dev-iOS](https://github.com/ihreapotheken/IA-SDK-iOS)):
+
+- **Android** — the IA pin adaptive icon (`mipmap-anydpi-v26/ic_launcher.xml` over the
+  `ic_launcher_background` colour), copied from the native Android demo app.
+- **iOS** — the `IA SDK` wordmark app icon, generated from the native iOS demo app's
+  1024×1024 artwork.
+
+The launcher label is `AppSDK Flutter Demo` followed by the environment the build
+targets, so a distributed build is identifiable without opening it — for example
+`AppSDK Flutter Demo QA`. The same tag is shown in the app bar next to the native
+AppSDK version.
+
+The tag is derived from the `IA_SERVER_ENV` shell variable (`production` → `PROD`,
+`staging` → `QA`, `development` → `DEV`, default `staging`), which
+[dev-env-setup.sh](../scripts/dev-env-setup.sh) exports for the deploy scripts:
+
+```bash
+IA_SERVER_ENV=production sh ./scripts/deploy-demo.sh
+```
+
+The deploy scripts pass the same value on as `--dart-define=iaServerEnv`, so the label
+and the app's actual backend can never disagree. Android reads `IA_SERVER_ENV` in
+[app/build.gradle.kts](android/app/build.gradle.kts) to generate the `app_name`
+resource; iOS reads `IA_ENV_LABEL` from [ios/Flutter/IAEnv.xcconfig](ios/Flutter/IAEnv.xcconfig)
+in `CFBundleDisplayName`, which
+[deploy-demo-ios.sh](../scripts/deploy-demo-ios.sh) rewrites before archiving.
 
 ## App Structure
 
@@ -66,6 +108,36 @@ Demonstrates launching SDK screens directly:
 - Product search
 - Cart screen
 - Pharmacy details
+
+## E2E Harness
+
+The app can boot into a harness used by the shared e2e-tests suite instead of the
+demo UI:
+
+```bash
+flutter run --dart-define=iaE2E=true
+flutter build apk --debug --dart-define=iaE2E=true
+flutter build ios --simulator --debug --dart-define=iaE2E=true
+```
+
+The harness ([lib/src/e2e/](lib/src/e2e/)) mirrors the native demo apps: a host
+tab bar (Start / Search / Cart / Pharmacy / Settings) over full-screen embedded
+SDK screens. Because the SDK content is the same native UI in every host, the test
+flows and their selectors are shared across the native demo app and this one.
+
+Notes:
+
+- Prerequisites (onboarding → legal → Apofinder) are driven by the SDK when the
+  start screen is shown without them completed, so a fresh install reproduces the
+  same entry sequence the demo apps show.
+- Host controls carry `Semantics` identifiers (`tab_start`, `tab_cart`,
+  `host_use_test_pharmacy`, …), which reach the test runner as `resource-id` on
+  Android and `accessibilityIdentifier` on iOS. Renaming one means updating
+  `_elements.flutter.yaml` in the e2e-tests repo.
+- The Settings tab selects test pharmacy 2163 via `setPharmacyId`, standing in for
+  the demo app's QA-only "Apotheken-ID eingeben" sheet.
+- `--dart-define=iaE2EPharmacyId=2163` optionally pre-selects a pharmacy before
+  the harness appears, which skips the Apofinder prerequisite entirely.
 
 ## SDK Initialization
 

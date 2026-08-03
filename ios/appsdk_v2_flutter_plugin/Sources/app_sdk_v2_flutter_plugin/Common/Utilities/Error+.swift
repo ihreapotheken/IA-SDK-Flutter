@@ -49,6 +49,7 @@ extension Error {
         case .setUserBillingAddress: "SET_USER_BILLING_ADDRESS_ERROR"
         case .setUserDeliveryAddress: "SET_USER_DELIVERY_ADDRESS_ERROR"
         case .legacySetupAsCoreApp: "LEGACY_SETUP_AS_CORE_APP_ERROR"
+        case .setShouldShowMascotIllustrations: "SET_SHOULD_SHOW_MASCOT_ILLUSTRATIONS_ERROR"
         }
     }
 }

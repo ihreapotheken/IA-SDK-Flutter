@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
+import 'package:appsdk_v2_flutter_plugin_example/src/e2e/e2e_config.dart';
+import 'package:appsdk_v2_flutter_plugin_example/src/e2e/e2e_harness.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/views/cardlink_view.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/views/home_view.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/views/components_view.dart';
@@ -40,7 +42,9 @@ class _ExampleAppState extends State<ExampleApp> {
 
     IaSdk.instance.onSdkWillNavigateToTarget = (navigationTarget) async {
       debugPrint('Host app: SDK wants to navigate to: $navigationTarget');
-      return true;
+      // The E2E harness has no host destinations to navigate to — let the SDK
+      // handle every target internally so the flows match the native demos.
+      return !E2EConfig.enabled;
     };
 
     IaSdk.instance.onApofinderDidChangePharmacy = ({
@@ -106,20 +110,56 @@ class _ExampleAppState extends State<ExampleApp> {
       (event) => debugPrint('Host app: CardLink analytics event: $event'),
     );
 
+    if (E2EConfig.enabled && E2EConfig.pharmacyId.isNotEmpty) {
+      await IaSdk.instance.pharmacy.setPharmacyId(E2EConfig.pharmacyId);
+    }
+
     _isInitialized = true;
   }
 
   @override
   Widget build(BuildContext context) {
+    if (E2EConfig.enabled) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: FutureBuilder(
+          future: _initFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (snapshot.hasError) {
+              return Scaffold(
+                body: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Text(
+                      'SDK init failed: ${snapshot.error}',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              );
+            }
+            return const E2EHarness();
+          },
+        ),
+      );
+    }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           title: Text(
-            'IA SDK Flutter'
+            'AppSDK Flutter Demo'
             ' | '
             '${Platform.isIOS ? 'iOS' : 'Android'}'
-            ' ${dotenv.env['${Platform.isIOS ? 'IOS' : 'ANDROID'}_APPSDK_VERSION'] ?? 'N/A'}',
+            ' ${dotenv.env['${Platform.isIOS ? 'IOS' : 'ANDROID'}_APPSDK_VERSION'] ?? 'N/A'}'
+            ' | '
+            '${ExampleAppConfig.instance.serverEnvironmentLabel}',
             style: const TextStyle(fontSize: 14),
           ),
           centerTitle: true,

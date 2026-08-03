@@ -127,6 +127,14 @@ final class IASDKWrapper {
         return nil
     }
 
+    func setShouldShowMascotIllustrations(arguments: Any) async throws -> Any? {
+        let args = arguments as? [String: Any] ?? [:]
+        // Absent value keeps the SDK default rather than silently hiding the mascot.
+        let shouldShow = args["shouldShowMascotIllustrations"] as? Bool ?? true
+        IASDK.configuration.uiConfiguration.shouldShowMascotIllustrations = shouldShow
+        return nil
+    }
+
     func getPharmacyId() async throws -> Any? {
         guard let pharmacyId = IASDK.Pharmacy.getPharmacyID() else {
             return nil

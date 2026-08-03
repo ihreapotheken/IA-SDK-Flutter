@@ -16,6 +16,7 @@ struct IaInitSdkArguments: Decodable {
 /// Configuration options for SDK UI appearance.
 struct IaUIConfigurationArguments: Decodable {
     let supportsLiquidGlass: Bool
+    let shouldShowMascotIllustrations: Bool
     let header: IaHeaderConfigurationArguments
     let primaryButton: IaButtonConfigurationArguments
     let secondaryButton: IaButtonConfigurationArguments
@@ -23,6 +24,7 @@ struct IaUIConfigurationArguments: Decodable {
     func mappedToSDK() -> SDKConfiguration.UIConfiguration {
         var config = SDKConfiguration.UIConfiguration()
         config.supportsLiquidGlass = supportsLiquidGlass
+        config.shouldShowMascotIllustrations = shouldShowMascotIllustrations
         header.apply(to: &config.header)
         primaryButton.apply(to: &config.primaryButton)
         secondaryButton.apply(to: &config.secondaryButton)

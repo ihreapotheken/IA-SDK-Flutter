@@ -53,6 +53,19 @@ class ExampleAppConfig {
     }
   }
 
+  /// Short tag for the active [serverEnvironment].
+  ///
+  /// Matches the tag the deploy scripts append to the app launcher label, so an
+  /// installed build and its running UI always report the same environment.
+  ///
+  String get serverEnvironmentLabel {
+    return switch (serverEnvironment) {
+      IaSdkConfigurationServerEnvironment.production => 'PROD',
+      IaSdkConfigurationServerEnvironment.staging => 'QA',
+      IaSdkConfigurationServerEnvironment.development => 'DEV',
+    };
+  }
+
   /// Specified client identifier with the pharmacy specification service.
   ///
   String get clientId {
@@ -89,6 +102,8 @@ class ExampleAppConfig {
       ),
       uiConfiguration: IaUIConfiguration(
         supportsLiquidGlass: true,
+        // Set to false to drop the Pharmi mascot illustrations (Android only).
+        shouldShowMascotIllustrations: true,
       ),
     );
   }
