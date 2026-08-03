@@ -142,7 +142,30 @@ internal class IaClientMethods(
          * Legacy setup required when the host app is the Core app.
          */
         legacySetupAsCoreApp,
+
+        /**
+         * Toggles the Pharmi mascot illustrations on an already-initialized SDK.
+         *
+         * Mocked, see [mockShouldShowMascotIllustrations].
+         */
+        setShouldShowMascotIllustrations,
     }
+
+    /**
+     * Mocked state for the Pharmi mascot illustration toggle.
+     *
+     * The Android AppSDK has no equivalent of the iOS
+     * `IASDK.configuration.uiConfiguration.shouldShowMascotIllustrations` yet — the native
+     * work lives on the unmerged `feature/IASDK-2710/conditional-mascot-display` branch and
+     * `IAUIConfiguration` takes no such parameter as of 2.6.0. Until an Android build ships
+     * it, the value is accepted and recorded here so the Dart API and the demo app's toggle
+     * behave identically on both platforms, but nothing is forwarded to the SDK.
+     *
+     * To make this real: pass the value into [IAUIConfiguration] in [parseUIConfiguration],
+     * forward it to the SDK from the [FlutterCall.setShouldShowMascotIllustrations] branch,
+     * and delete this property.
+     */
+    private var mockShouldShowMascotIllustrations: Boolean = true
 
     fun callHandler(
         call: MethodCall,
@@ -506,6 +529,15 @@ internal class IaClientMethods(
                 result.success(null)
             }
 
+            FlutterCall.setShouldShowMascotIllustrations.name -> {
+                // Mocked: the value is recorded but not forwarded to the SDK.
+                // See [mockShouldShowMascotIllustrations].
+                val args = call.arguments as? Map<*, *>
+                mockShouldShowMascotIllustrations =
+                    args?.get("shouldShowMascotIllustrations") as? Boolean ?: true
+                result.success(null)
+            }
+
             FlutterCall.isInitialized.name -> {
                 result.success(bindings.sdkModule.isInitialized())
             }
@@ -549,6 +581,11 @@ internal class IaClientMethods(
         val headerMap = map["header"] as? Map<*, *>
         val primaryMap = map["primaryButton"] as? Map<*, *>
         val secondaryMap = map["secondaryButton"] as? Map<*, *>
+
+        // Mocked: recorded but not forwarded to IAUIConfiguration, which takes no such
+        // parameter as of 2.6.0. See [mockShouldShowMascotIllustrations].
+        mockShouldShowMascotIllustrations =
+            map["shouldShowMascotIllustrations"] as? Boolean ?: true
 
         return IAUIConfiguration(
             header = parseHeaderConfiguration(headerMap),

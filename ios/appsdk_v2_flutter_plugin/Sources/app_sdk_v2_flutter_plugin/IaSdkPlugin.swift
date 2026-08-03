@@ -94,6 +94,9 @@ final class IASDKPlugin {
             case FlutterCall.legacySetupAsCoreApp.name:
                 return try await iaSdkWrapper.legacySetupAsCoreApp()
 
+            case FlutterCall.setShouldShowMascotIllustrations.name:
+                return try await iaSdkWrapper.setShouldShowMascotIllustrations(arguments: call.arguments)
+
             default:
                 return FlutterMethodNotImplemented
         }

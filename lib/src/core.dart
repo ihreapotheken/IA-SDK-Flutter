@@ -15,6 +15,7 @@ part 'models/request/init_config.dart';
 part 'models/request/register_modules.dart';
 part 'models/request/clean_cache.dart';
 part 'models/request/set_user_address.dart';
+part 'models/request/mascot_illustrations.dart';
 
 /// Main entrypoint for the ia.de AppSDK services and features.
 ///
@@ -270,6 +271,25 @@ class IaSdk {
     final result = await _Methods.getEnvironment.invoke<String?>();
     if (result == null) return null;
     return IaSdkConfigurationServerEnvironment.values.where((e) => e.name == result).firstOrNull;
+  }
+
+  /// Toggles the Pharmi mascot illustrations at runtime.
+  ///
+  /// Updates the same value as [IaUIConfiguration.shouldShowMascotIllustrations],
+  /// which is only read while the SDK initializes. Use this to change the setting
+  /// on an already-initialized SDK — screens rendered after the call pick up the
+  /// new value.
+  ///
+  /// Note: Only supported on iOS. The Android AppSDK has no equivalent API yet,
+  /// so the call is accepted and ignored there.
+  ///
+  Future<void> setShouldShowMascotIllustrations({
+    required bool shouldShowMascotIllustrations,
+  }) async {
+    final arguments = _RequestModelSetShouldShowMascotIllustrations(
+      shouldShowMascotIllustrations: shouldShowMascotIllustrations,
+    );
+    return await _Methods.setShouldShowMascotIllustrations.invoke(arguments);
   }
 
   /// Clears cached SDK data for initialization and/or prerequisites.

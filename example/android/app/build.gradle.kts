@@ -39,6 +39,19 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+// ia.de server environment the build targets, matching the `iaServerEnv` dart-define
+// read by `ExampleAppConfig`. `staging` is the default on both sides, so an unset
+// value produces the same label the app actually behaves as.
+val iaServerEnv = System.getenv("IA_SERVER_ENV")?.takeIf { it.isNotBlank() } ?: "staging"
+
+// Short environment tag shown to testers in the launcher label, so a Firebase App
+// Distribution build is identifiable without opening the app.
+val iaEnvLabel = when (iaServerEnv) {
+    "production" -> "PROD"
+    "development" -> "DEV"
+    else -> "QA"
+}
+
 android {
     namespace = "com.example.appsdk_v2_flutter_plugin_example"
     compileSdk = 36
@@ -57,6 +70,7 @@ android {
         applicationId = "de.ihreapotheken.flutter"
         minSdk = 30
         targetSdk = 36
+        resValue("string", "app_name", "AppSDK Flutter Demo $iaEnvLabel")
         versionName = System.getenv("APP_SDK_BUILD_VERSION") ?: "1.0.0"
         versionCode = if (System.getenv("APP_SDK_BUILD_NUMBER") == null) {
             1

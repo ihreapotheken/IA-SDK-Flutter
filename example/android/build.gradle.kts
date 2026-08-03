@@ -9,6 +9,11 @@ allprojects {
         }
         mavenLocal()
         maven("https://nexus.link4.health/repository/link4health-anonymous/")
+        // The CardLink module's link4health-sdk releases (e.g. 3.4.1, pulled in by
+        // de.ihreapotheken.sdk:cardlink) are published to the releases repo, not the
+        // anonymous one — resolving them fails without this. Same repository the
+        // native SDK project uses (IA-SDK-Dev-Android settings.gradle.kts).
+        maven("https://nexus.link4.health/repository/link4health-releases/")
         maven {
             name = "IA SDK repo"
             url = uri("https://maven.pkg.github.com/ihreapotheken/IA-SDK-Android")

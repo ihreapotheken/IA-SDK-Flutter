@@ -103,6 +103,11 @@ enum FlutterCall: CaseIterable {
     case legacySetupAsCoreApp
 
     /**
+     * Toggles the Pharmi mascot illustrations on an already-initialized SDK.
+     */
+    case setShouldShowMascotIllustrations
+
+    /**
      * String identifier getter definition.
      */
     var name: String {

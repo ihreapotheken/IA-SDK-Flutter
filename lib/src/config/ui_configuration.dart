@@ -168,6 +168,7 @@ class IaUIConfiguration {
   ///
   const IaUIConfiguration({
     this.supportsLiquidGlass = false,
+    this.shouldShowMascotIllustrations = true,
     this.header = const IaHeaderConfiguration(),
     this.primaryButton = const IaPrimaryButtonConfiguration(),
     this.secondaryButton = const IaSecondaryButtonConfiguration(),
@@ -178,6 +179,22 @@ class IaUIConfiguration {
   /// Only supported on iOS. Ignored on Android.
   ///
   final bool supportsLiquidGlass;
+
+  /// Whether the Pharmi mascot illustrations are rendered.
+  ///
+  /// Set to `false` in white-label apps that should not carry Ihre Apotheken
+  /// character branding. When `false`, the mascot is omitted and the
+  /// surrounding layout collapses so no empty space is left behind.
+  ///
+  /// Read while the SDK initializes. Use [IaSdk.setShouldShowMascotIllustrations]
+  /// to change the setting afterwards.
+  ///
+  /// Only supported on iOS, from AppSDK 2.7.0 onwards. The Android AppSDK has no
+  /// equivalent API yet, so the value is accepted and ignored there.
+  ///
+  /// Defaults to `true`.
+  ///
+  final bool shouldShowMascotIllustrations;
 
   /// Header appearance configuration.
   ///
@@ -196,6 +213,7 @@ class IaUIConfiguration {
   Map<String, dynamic> toJson() {
     return {
       'supportsLiquidGlass': supportsLiquidGlass,
+      'shouldShowMascotIllustrations': shouldShowMascotIllustrations,
       'header': header.toJson(),
       'primaryButton': primaryButton.toJson(),
       'secondaryButton': secondaryButton.toJson(),

@@ -26,6 +26,8 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
   setUserDeliveryAddress,
 
   legacySetupAsCoreApp,
+
+  setShouldShowMascotIllustrations,
   ;
 
   @override
@@ -45,6 +47,8 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
       case _Methods.setUserBillingAddress:
       case _Methods.setUserDeliveryAddress:
         return _RequestModelSetUserAddress;
+      case _Methods.setShouldShowMascotIllustrations:
+        return _RequestModelSetShouldShowMascotIllustrations;
       default:
         return null;
     }

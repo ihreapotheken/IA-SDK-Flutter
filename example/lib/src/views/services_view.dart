@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
@@ -205,6 +206,10 @@ class ServicesView extends StatelessWidget {
           },
         ),
         const SizedBox(height: 24),
+        _SectionHeader(title: 'Appearance'),
+        const SizedBox(height: 8),
+        const _MascotIllustrationsToggle(),
+        const SizedBox(height: 24),
         _SectionHeader(title: 'Cache'),
         const SizedBox(height: 8),
         ElevatedButton(
@@ -222,6 +227,70 @@ class ServicesView extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+
+  void _showResult(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+}
+
+/// Runtime toggle for the Pharmi mascot illustrations.
+///
+/// The mascot renders on the CardLink FAQ screen, so flip this and then open
+/// CardLink → Launch CardLink → FAQ to see the change. Screens already on
+/// screen keep the value they were built with.
+class _MascotIllustrationsToggle extends StatefulWidget {
+  const _MascotIllustrationsToggle();
+
+  @override
+  State<_MascotIllustrationsToggle> createState() {
+    return _MascotIllustrationsToggleState();
+  }
+}
+
+class _MascotIllustrationsToggleState
+    extends State<_MascotIllustrationsToggle> {
+  /// Seeded from the value the SDK was initialized with, so the button label
+  /// starts out reflecting the SDK's actual state.
+  bool _shouldShow = ExampleAppConfig
+      .instance
+      .pluginConfig
+      .uiConfiguration
+      .shouldShowMascotIllustrations;
+
+  Future<void> _toggle() async {
+    final next = !_shouldShow;
+    try {
+      await IaSdk.instance.setShouldShowMascotIllustrations(
+        shouldShowMascotIllustrations: next,
+      );
+      setState(() => _shouldShow = next);
+      if (mounted) {
+        _showResult(
+          context,
+          'Mascot illustrations ${next ? 'enabled' : 'disabled'}'
+          '${Platform.isAndroid ? ' (mocked on Android)' : ''}',
+        );
+      }
+    } catch (e) {
+      if (mounted) _showResult(context, 'Error: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: _toggle,
+      child: Text(
+        _shouldShow ? 'Hide mascot illustrations' : 'Show mascot illustrations',
+      ),
     );
   }
 

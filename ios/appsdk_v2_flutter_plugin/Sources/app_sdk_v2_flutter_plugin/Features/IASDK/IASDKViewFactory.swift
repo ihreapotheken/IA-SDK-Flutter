@@ -17,8 +17,17 @@ final class IASDKViewFactory: NSObject, FlutterPlatformViewFactory {
         viewIdentifier viewId: Int64,
         arguments args: Any?
     ) -> FlutterPlatformView {
-        guard let viewId = args as? String else {
-            assertionFailure("IASDKViewManager: Failed to convert args (viewId) to string.")
+        // Dart's `IaSdkPlatformView` sends creation params as a map; earlier
+        // callers passed the view ID as a bare string. Accept both.
+        let viewId: String?
+        switch args {
+        case let params as [String: Any]: viewId = params["viewId"] as? String
+        case let rawViewId as String: viewId = rawViewId
+        default: viewId = nil
+        }
+
+        guard let viewId else {
+            assertionFailure("IASDKViewManager: Failed to resolve viewId from args: \(String(describing: args))")
             return IASDKFlutterPlatformView.empty
         }
         guard let viewIdentifier = IASDKViewIdentifier(rawValue: viewId) else {
