@@ -80,6 +80,7 @@ class LaunchHandler {
         }
     }
 
+
     private func setupConfigurationAndStyle(args: [String: Any]) {
         let configuration = CardLinkConfiguration(args: args)
         self.savedConfiguration = configuration
@@ -94,6 +95,11 @@ class LaunchHandler {
         // @TODO: This should also be refactored, api key should not be passed in CardLink.launch. Same as above, refactor so IASDK.configuration.apiKey can be setup separately.
         if let sdkApiKey = args["sdkApiKey"] as? String, !sdkApiKey.isEmpty, IASDK.configuration.apiKey.isEmpty {
             IASDK.configuration.apiKey = sdkApiKey
+        }
+
+        // @TODO: This should also be refactored, api key should not be passed in CardLink.launch. Same as above, refactor so IASDK.configuration.apiKey can be setup separately.
+        if let appID = args["appID"] as? String, !appID.isEmpty {
+            IASDK.configuration.appStoreID = appID
         }
 
         let primaryColor = UIColor(argb: args["primaryColor"] as? Int)
