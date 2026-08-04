@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
@@ -246,6 +245,10 @@ class ServicesView extends StatelessWidget {
 /// The mascot renders on the CardLink FAQ screen, so flip this and then open
 /// CardLink → Launch CardLink → FAQ to see the change. Screens already on
 /// screen keep the value they were built with.
+///
+/// iOS only: Android's native UI configuration is immutable after init, so the
+/// mascot is set there through [IaUIConfiguration.shouldShowMascotIllustrations]
+/// in [ExampleAppConfig.pluginConfig] instead.
 class _MascotIllustrationsToggle extends StatefulWidget {
   const _MascotIllustrationsToggle();
 
@@ -275,8 +278,8 @@ class _MascotIllustrationsToggleState
       if (mounted) {
         _showResult(
           context,
-          'Mascot illustrations ${next ? 'enabled' : 'disabled'}'
-          '${Platform.isAndroid ? ' (mocked on Android)' : ''}',
+          'Mascot illustrations ${next ? 'enabled' : 'disabled'}. '
+          'Open CardLink → FAQ to see the change.',
         );
       }
     } catch (e) {
@@ -289,7 +292,9 @@ class _MascotIllustrationsToggleState
     return ElevatedButton(
       onPressed: _toggle,
       child: Text(
-        _shouldShow ? 'Hide mascot illustrations' : 'Show mascot illustrations',
+        _shouldShow
+            ? 'Hide mascot illustrations (iOS)'
+            : 'Show mascot illustrations (iOS)',
       ),
     );
   }
