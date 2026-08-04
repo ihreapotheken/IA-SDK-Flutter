@@ -280,8 +280,11 @@ class IaSdk {
   /// on an already-initialized SDK — screens rendered after the call pick up the
   /// new value.
   ///
-  /// Note: Only supported on iOS. The Android AppSDK has no equivalent API yet,
-  /// so the call is accepted and ignored there.
+  /// Note: Only supported on iOS. The Android AppSDK's UI configuration is an
+  /// immutable value supplied at initialization, so there is nothing to update
+  /// at runtime — configure the mascot through
+  /// [IaUIConfiguration.shouldShowMascotIllustrations] instead, which both
+  /// platforms honour.
   ///
   Future<void> setShouldShowMascotIllustrations({
     required bool shouldShowMascotIllustrations,

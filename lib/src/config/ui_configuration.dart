@@ -186,11 +186,11 @@ class IaUIConfiguration {
   /// character branding. When `false`, the mascot is omitted and the
   /// surrounding layout collapses so no empty space is left behind.
   ///
-  /// Read while the SDK initializes. Use [IaSdk.setShouldShowMascotIllustrations]
-  /// to change the setting afterwards.
+  /// Read while the SDK initializes. On iOS the setting can also be changed
+  /// afterwards with [IaSdk.setShouldShowMascotIllustrations]; on Android the
+  /// native configuration is immutable, so this init option is the only way.
   ///
-  /// Only supported on iOS, from AppSDK 2.7.0 onwards. The Android AppSDK has no
-  /// equivalent API yet, so the value is accepted and ignored there.
+  /// Requires AppSDK 2.7.0 or newer on both platforms.
   ///
   /// Defaults to `true`.
   ///
