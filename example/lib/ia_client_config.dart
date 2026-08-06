@@ -53,6 +53,25 @@ class ExampleAppConfig {
     }
   }
 
+  /// Whether the Pharmi mascot illustrations are rendered, provided with the
+  /// CLI commands:
+  ///
+  /// ```dart
+  /// flutter run --dart-define iaShowMascot=false
+  /// ```
+  ///
+  /// Exposed as a build flag because Android reads the setting once, while the
+  /// SDK initializes, and offers no runtime equivalent of the iOS
+  /// `setShouldShowMascotIllustrations`. Without this a mascot-off Android build
+  /// would mean editing source.
+  ///
+  /// Defaults to `true`, matching the SDK default on both platforms.
+  ///
+  final shouldShowMascotIllustrations = const bool.fromEnvironment(
+    'iaShowMascot',
+    defaultValue: true,
+  );
+
   /// Short tag for the active [serverEnvironment].
   ///
   /// Matches the tag the deploy scripts append to the app launcher label, so an
@@ -102,8 +121,9 @@ class ExampleAppConfig {
       ),
       uiConfiguration: IaUIConfiguration(
         supportsLiquidGlass: true,
-        // Set to false to drop the Pharmi mascot illustrations (Android only).
-        shouldShowMascotIllustrations: true,
+        // Pass --dart-define iaShowMascot=false to drop the Pharmi mascot
+        // illustrations. Honoured on both platforms from AppSDK 2.7.0.
+        shouldShowMascotIllustrations: shouldShowMascotIllustrations,
       ),
     );
   }
