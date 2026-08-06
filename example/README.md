@@ -39,6 +39,28 @@ flutter run --dart-define iaServerEnv=staging       # QA  (default)
 flutter run --dart-define iaServerEnv=production    # PROD
 ```
 
+### Pharmi mascot illustrations
+
+`IaUIConfiguration.shouldShowMascotIllustrations` controls whether the Pharmi mascot
+is rendered. It defaults to `true` and is read while the SDK initializes:
+
+```bash
+flutter run --dart-define iaShowMascot=false
+```
+
+The two platforms differ in what can be changed afterwards:
+
+- **iOS** — also settable at runtime with `IaSdk.setShouldShowMascotIllustrations`.
+  The Services tab has a "Hide/Show mascot illustrations (iOS)" button for this.
+- **Android** — the native `IAUIConfiguration` is immutable once the SDK is
+  initialized, so `iaShowMascot` is the only way to change it, and the runtime
+  button reports `MissingPluginException` by design.
+
+Either way, CardLink → FAQ is the screen that renders the mascot, so that is where
+to check the result.
+
+Requires AppSDK 2.7.0 or newer on both platforms.
+
 ## Running the Example
 
 ```bash
