@@ -62,14 +62,14 @@ let package = Package(
         .library(name: "ia-cardlink", targets: ["ia_cardlink"])
     ],
     dependencies: [
-	    .package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", exact: appSdkVersion)
+	    .package(name: "IASDK", path: "/Users/danijelhuis/git/git_fourOfThem/IA-SDK-Dev-iOS")
     ],
     targets: [
         .target(
             name: "ia_cardlink",
             dependencies: [
-                .product(name: "IAIntegrations", package: "IA-SDK-iOS"),
-                .product(name: "IACardLink", package: "IA-SDK-iOS"),
+                .product(name: "IAIntegrations", package: "IASDK"),
+                .product(name: "IACardLink", package: "IASDK"),
             ],
             resources: [
                 // If your plugin requires a privacy manifest, for example if it uses any required

@@ -62,16 +62,17 @@ let package = Package(
         .library(name: "appsdk-v2-flutter-plugin", targets: ["appsdk_v2_flutter_plugin"])
     ],
     dependencies: [
-	    .package(url: "https://github.com/ihreapotheken/IA-SDK-iOS", exact: appSdkVersion),
+	    .package(name: "IASDK", path: "/Users/danijelhuis/git/git_fourOfThem/IA-SDK-Dev-iOS"),
         .package(name: "FlutterFramework", path: "../FlutterFramework"),
     ],
     targets: [
         .target(
             name: "appsdk_v2_flutter_plugin",
             dependencies: [
-                .product(name: "IAIntegrations", package: "IA-SDK-iOS"),
+                .product(name: "IAIntegrations", package: "IASDK"),
                 .product(name: "FlutterFramework", package: "FlutterFramework"),
             ],
+            path: "Sources/app_sdk_v2_flutter_plugin",
             resources: [
                 // TODO: If your plugin requires a privacy manifest
                 // (e.g. if it uses any required reason APIs), update the PrivacyInfo.xcprivacy file
