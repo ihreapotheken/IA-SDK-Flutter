@@ -18,9 +18,9 @@ Native SDK 2.9.0 on both platforms.
 - Pharmacy: `clearPharmacyId`, `savePharmacyId`, `getPharmacy`.
 - Ordering: `getCartState`, `getCartDetails` options, `transferPrescriptions` `finishAction` and
   `showActivityIndicator`, cart counts and products in `orderingDidUpdateCartListener`, `orderCodes` in
-  `orderingDidFinishOrderListener`.
-- Over the counter: `clearProductGridCache`, `launchProductSearchRoute(focusesOnAppear:)`, `IaProductGrid` custom type,
-  `IaCartButton(onTap:)`.
+  `orderingDidFinishOrderListener`, `IaCartButton(onTap:)`.
+- Over the counter: `clearProductGridCache`, `launchProductSearchRoute(focusesOnAppear:)`, `IaProductGrid` custom
+  type.
 - Prescription: scan interception (`onPrescriptionPhotoScanned`, `onEPrescriptionScanned`),
   `launchPrescriptionScanner`, `setScannerCameraState`, `scannerCameraErrorListener`.
 - CardLink: `getSavedCardList`, `updateCard`, `reorderSavedCards`, `setHostAppLogFilePath`, `setMocks`,
@@ -59,6 +59,14 @@ Native SDK 2.9.0 on both platforms.
   when the app was paused while CardLink was signing in.
 - Module callbacks no longer pile up when a module is created more than once.
 - `ia_cardlink` declares its `ia_interface` dependency.
+- iOS: `launchApofinder` didn't report the selected pharmacy through `onApofinderDidChangePharmacy` and didn't close.
+- iOS: `resetPrerequisites`, `resetLegalDisclaimer`, `setIsOnboardingShown` and `clearPharmacyId` only took effect
+  after an app restart.
+- Android: inline components crashed in apps using `FlutterActivity` instead of `FlutterFragmentActivity`.
+- Inline components failed to lay out without a width limit, for example in a `Row` or `AppBar.actions`. The
+  Android cart button now has its own width, as on iOS.
+- iOS: an empty product grid kept its loading height.
+- Android: the `IaCartButton` without `onTap` opened the cart without asking `onSdkWillNavigateToTarget`.
 
 ### Changed
 
@@ -79,12 +87,17 @@ Native SDK 2.9.0 on both platforms.
   modules throws a `StateError`; pass all modules in the first call.
 - **CardLink `launch` takes `supportsLiquidGlass` as an optional `bool?`**; without it the `initialize` setting is
   kept.
+- **`setAnalyticsConsent` takes `consent` as a named parameter**, like the other setters.
+- **`getEnvironment` returns a non-null `IaSdkConfigurationServerEnvironment`.**
+- **Android error codes name the failed method**, for example `CLEAR_CART_ERROR`, as on iOS, instead of
+  `METHOD_ERROR`.
 - **Android:**
   - `onSdkBackAction` is asked before any SDK screen closes, except through `finishAllActivities`.
   - `launchPrerequisiteFlow` opens the SDK's prerequisites activity.
   - Calls that need an initialized SDK fail before `initialize`: the address setters, `setGuestUserData`, `logout`,
-    `resetPrerequisites`, `isPrerequisiteFlowCompleted`, `setAnalyticsConsent`, and the pharmacy ID getter and
-    clearer. The SDK used to ignore them or answer with defaults.
+    `resetPrerequisites`, `isPrerequisiteFlowCompleted`, `setAnalyticsConsent`, `setHapticFeedbackEnabled`,
+    `clearCart`, `transferPrescriptions`, and the pharmacy ID getter and clearer. The SDK used to ignore them or
+    answer with defaults.
   - CardLink without an `environment` follows the SDK's environment.
 
 ## 0.0.1

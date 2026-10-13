@@ -141,8 +141,10 @@ final class SizeReportingHostingController<Content: View>: UIHostingController<C
         let width = view.bounds.width
         guard width > 0 else { return }
         let target = CGSize(width: width, height: .greatestFiniteMagnitude)
-        let size = sizeThatFits(in: target)
-        // A height of 0 is reported too, so an emptied component collapses in Flutter.
+        let fittingSize = sizeThatFits(in: target)
+        // A height of 0 is reported too, so an emptied component collapses in Flutter. Empty SwiftUI content
+        // measures 0×0, so it keeps the layout width.
+        let size = fittingSize.height == 0 ? CGSize(width: width, height: 0) : fittingSize
         guard size.width > 0, size.height >= 0 else { return }
         // Also reported again for a new layout width: Flutter widens the view when its available width changes,
         // and waits for the size measured against it.

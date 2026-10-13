@@ -2,6 +2,9 @@ part of '_models.dart';
 
 /// Determines what happens with prescriptions after CardLink NFC scanning.
 ///
+/// Only used on iOS. On Android, a CardLink flow launched by the host app always sends the raw prescriptions, as
+/// with [sendRawPrescriptions].
+///
 enum IaCardLinkFinishAction {
   /// Send raw prescription data back to the host app.
   ///

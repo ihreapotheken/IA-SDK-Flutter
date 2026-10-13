@@ -194,9 +194,19 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
         // on rotation) the component gets the whole width again until native reports its new size.
         final measuredSize = _measuredSize;
         final isMeasurementCurrent = measuredSize != null && _measuredAvailableWidth == constraints.maxWidth;
+        if (isMeasurementCurrent || constraints.hasBoundedWidth) {
+          return _MeasuredSizeBox(
+            width: isMeasurementCurrent ? measuredSize.width : null,
+            height: measuredSize?.height,
+            child: platformView,
+          );
+        }
+        // Without a width limit, for example in a Row, the component takes no width until native reports its size,
+        // which it measures within the screen width.
         return _MeasuredSizeBox(
-          width: isMeasurementCurrent ? measuredSize.width : null,
+          width: 0,
           height: measuredSize?.height,
+          layoutWidth: MediaQuery.sizeOf(context).width,
           child: platformView,
         );
       },
@@ -210,46 +220,51 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
 /// constraints to lay out against (otherwise unbounded parents like
 /// [ListView] would crash). A reported height of 0 collapses the box.
 ///
+/// The widgets around [child] are the same in every case, as a changed
+/// structure would recreate the native view.
+///
 class _MeasuredSizeBox extends StatelessWidget {
   const _MeasuredSizeBox({
     required this.width,
     required this.height,
+    this.layoutWidth,
     required this.child,
   });
 
-  /// Measured width, or `null` for the parent's width.
+  /// Width taken in the parent: the measured width, or `null` for the parent's width.
   final double? width;
 
   /// Measured height, or `null` before the first measurement.
   final double? height;
 
+  /// Width the platform view is laid out with when it differs from [width].
+  final double? layoutWidth;
+
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    if (height == 0) {
-      // An empty component takes no space, but the platform view keeps a 1px
-      // height so native can still lay it out and report when content appears.
-      return SizedBox(
-        width: width,
-        height: 0,
-        child: ClipRect(
-          child: OverflowBox(
-            alignment: Alignment.topCenter,
-            minHeight: 1,
-            maxHeight: 1,
-            child: child,
-          ),
-        ),
-      );
-    }
+    // An empty component takes no space, but the platform view keeps a 1px
+    // height so native can still lay it out and report when content appears.
+    final isEmpty = height == 0;
+    final layoutHeight = isEmpty ? 1.0 : null;
     return SizedBox(
       // Width: null lets the parent's constraint flow through. Height defaults
       // to 1px before native reports back, which still triggers a layout pass
       // and lets the native size reporter measure the intrinsic height.
       width: width,
       height: height ?? 1,
-      child: child,
+      child: ClipRect(
+        clipBehavior: isEmpty || layoutWidth != null ? Clip.hardEdge : Clip.none,
+        child: OverflowBox(
+          alignment: AlignmentDirectional.topStart,
+          minWidth: layoutWidth,
+          maxWidth: layoutWidth,
+          minHeight: layoutHeight,
+          maxHeight: layoutHeight,
+          child: child,
+        ),
+      ),
     );
   }
 }

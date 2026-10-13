@@ -83,7 +83,10 @@ class IaClientBindings(
 
         // Register inline component platform views. Component size updates are
         // sent back over the main SDK channel (routed by Dart via IaBaseCallbacks).
-        val componentsFactory = IaClientComponentsViewFactory(channel)
+        val componentsFactory = IaClientComponentsViewFactory(
+            componentsChannel = channel,
+            onCartButtonClick = methodHandler::openCartFromCartButton,
+        )
         for (component in IaComponentIdentifier.entries) {
             platformViewRegistry.registerViewFactory(
                 component.viewTypeId,

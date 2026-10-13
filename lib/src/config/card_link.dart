@@ -16,7 +16,8 @@ class IaSdkConfigurationCardLink {
     this.phoneNumber,
   });
 
-  /// Whether the user can save their health card. `null` keeps the SDK default.
+  /// Whether the user can save their health card. `null` keeps the SDK default, which allows it on iOS but not on
+  /// Android.
   ///
   final bool? isSaveCardEnabled;
 

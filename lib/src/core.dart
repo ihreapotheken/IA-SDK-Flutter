@@ -35,6 +35,11 @@ part 'models/response/prerequisites_result.dart';
 /// Methods documented as "Only supported on iOS" or "Only supported on Android" throw a
 /// [MissingPluginException] on the other platform. Callbacks and streams with such a note never fire there.
 ///
+/// Failed calls throw a [PlatformException]. Its code is `ARG_ERROR` for invalid arguments, and otherwise names the
+/// method, for example `CLEAR_CART_ERROR` for `clearCart`. On Android, calls that need an initialized SDK fail with
+/// `SDK_NOT_INITIALIZED` before [initialize], and calls that open a screen fail with `NO_ACTIVITY` without an
+/// attached activity.
+///
 class IaSdk {
   IaSdk._();
 
@@ -406,9 +411,11 @@ class IaSdk {
     return result ?? false;
   }
 
-  /// Deletes the user account from the SDK.
+  /// Deletes the user data the SDK stores on the device: the guest and registered user with their name, email,
+  /// phone number and addresses.
   ///
-  /// This is different from [logout] which clears local data — this deletes the user on the backend.
+  /// It makes no backend request. [logout] deletes this data too, and also resets the prerequisites, the cart and
+  /// the pharmacy.
   ///
   /// Note: Only supported on iOS.
   ///
@@ -418,10 +425,13 @@ class IaSdk {
 
   /// Returns the current server environment. Before [initialize] it's the SDK's default, production.
   ///
-  Future<IaSdkConfigurationServerEnvironment?> getEnvironment() async {
+  Future<IaSdkConfigurationServerEnvironment> getEnvironment() async {
     final result = await _Methods.getEnvironment.invoke<String?>();
-    if (result == null) return null;
-    return IaSdkConfigurationServerEnvironment.values.where((e) => e.name == result).firstOrNull;
+    final environment = IaSdkConfigurationServerEnvironment.values.where((e) => e.name == result).firstOrNull;
+    if (environment == null) {
+      throw StateError('getEnvironment: Unknown environment $result.');
+    }
+    return environment;
   }
 
   /// Toggles the Pharmi mascot illustrations at runtime.
@@ -463,7 +473,7 @@ class IaSdk {
 
   /// Sets the user's billing address, used to pre-fill the checkout flow.
   ///
-  /// Call it after [initialize]; before that the call fails.
+  /// On Android, call it after [initialize]; before that the call fails.
   ///
   /// Pass a salutation matching the values accepted by [setGuestUserData]
   /// (for example "Herr"/"Frau") or `null` to leave it unset.
@@ -499,7 +509,7 @@ class IaSdk {
 
   /// Sets the user's delivery address, used to pre-fill the checkout flow.
   ///
-  /// Call it after [initialize]; before that the call fails.
+  /// On Android, call it after [initialize]; before that the call fails.
   ///
   /// Pass a salutation matching the values accepted by [setGuestUserData]
   /// (for example "Herr"/"Frau") or `null` to leave it unset.
@@ -535,7 +545,7 @@ class IaSdk {
 
   /// Removes the billing address set with [setUserBillingAddress].
   ///
-  /// Like the address setters, it needs an initialized SDK; before [initialize] the call fails.
+  /// On Android, call it after [initialize]; before that the call fails.
   ///
   Future<void> clearUserBillingAddress() async {
     return await _Methods.clearUserBillingAddress.invoke();
@@ -543,7 +553,7 @@ class IaSdk {
 
   /// Removes the delivery address set with [setUserDeliveryAddress].
   ///
-  /// Like the address setters, it needs an initialized SDK; before [initialize] the call fails.
+  /// On Android, call it after [initialize]; before that the call fails.
   ///
   Future<void> clearUserDeliveryAddress() async {
     return await _Methods.clearUserDeliveryAddress.invoke();
@@ -555,7 +565,9 @@ class IaSdk {
   ///
   /// Note: Only supported on Android.
   ///
-  Future<void> setAnalyticsConsent(IaSdkAnalyticsConsent consent) async {
+  Future<void> setAnalyticsConsent({
+    required IaSdkAnalyticsConsent consent,
+  }) async {
     final arguments = _RequestModelSetAnalyticsConsent(
       consent: consent,
     );
@@ -563,6 +575,9 @@ class IaSdk {
   }
 
   /// Turns haptic feedback in SDK screens on or off.
+  ///
+  /// Call it after [initialize]; before that the call fails. [IaSdkConfiguration.isHapticFeedbackEnabled] sets the
+  /// initial value.
   ///
   /// Note: Only supported on Android.
   ///
@@ -597,9 +612,11 @@ class IaSdk {
     return await _Methods.getUserId.invoke<String?>();
   }
 
-  /// Removes all cached network responses of the SDK, for testing an integration with fresh data.
+  /// Removes the SDK's cached image responses, for testing an integration with fresh images.
   ///
-  /// Note: Only supported on iOS. See [cleanCache] for the initialization and prerequisites caches.
+  /// Cached API data isn't affected. See [cleanCache] for the initialization and prerequisites caches.
+  ///
+  /// Note: Only supported on iOS.
   ///
   Future<void> removeAllCachedResponses() async {
     return await _Methods.removeAllCachedResponses.invoke();
@@ -627,7 +644,8 @@ class IaSdk {
   /// answer within 5 seconds, the screen closes. [finishAllActivities] always closes the screens without asking.
   ///
   /// It isn't called for the prerequisites flow opened with [launchPrerequisiteFlow], whose SDK screen has no
-  /// back hook.
+  /// back hook, nor for the screens the SDK opens from `IaProductGrid` or for `transferPrescriptions`, which it
+  /// starts without one.
   ///
   /// Note: Only supported on Android.
   ///
@@ -691,7 +709,8 @@ class IaSdk {
   ///
   /// On Android the SDK waits at most 500 ms for the answer and otherwise proceeds with its
   /// built-in presentation. A later answer is ignored, so answer without awaiting slow work, or the
-  /// host's screen and the SDK's screen both open.
+  /// host's screen and the SDK's screen both open. The Android SDK also opens the screens of `IaProductGrid`
+  /// (product details) and of `transferPrescriptions` without asking, including the navigation within them.
   ///
   /// Usage:
   ///

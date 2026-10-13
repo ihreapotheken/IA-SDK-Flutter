@@ -44,7 +44,7 @@ class ServicesView extends StatelessWidget {
           onPressed: () async {
             try {
               final env = await IaSdk.instance.getEnvironment();
-              if (context.mounted) _showResult(context, 'Environment: ${env?.name ?? 'N/A'}');
+              if (context.mounted) _showResult(context, 'Environment: ${env.name}');
             } catch (e) {
               if (context.mounted) _showResult(context, 'Error: $e');
             }
@@ -386,7 +386,7 @@ class ServicesView extends StatelessWidget {
             child: Text('Analytics Consent: ${consent.name} (Android)'),
             onPressed: () async {
               try {
-                await IaSdk.instance.setAnalyticsConsent(consent);
+                await IaSdk.instance.setAnalyticsConsent(consent: consent);
                 if (context.mounted) _showResult(context, 'Analytics consent ${consent.name}');
               } catch (e) {
                 if (context.mounted) _showResult(context, 'Error: $e');

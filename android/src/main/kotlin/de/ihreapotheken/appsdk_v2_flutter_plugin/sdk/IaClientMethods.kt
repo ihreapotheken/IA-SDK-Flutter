@@ -1,5 +1,6 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
+import android.content.Context
 import android.app.Activity
 import de.ihreapotheken.sdk.core.api.SdkFeatureProvider
 import de.ihreapotheken.sdk.integrations.api.view.IaPrerequisiteActivity
@@ -50,6 +51,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Flutter client service call handler.
@@ -288,6 +290,46 @@ internal class IaClientMethods(
     }
 
     /**
+     * Opens the SDK cart for a cart button without a Dart tap handler. The SDK's own button opens it without asking
+     * onSdkWillNavigateToTarget, unlike on iOS, so the plugin asks first, with the SDK's 500 ms limit.
+     */
+    fun openCartFromCartButton(context: Context) {
+        scope.launch {
+            val isHandledByHost = withTimeoutOrNull(500) {
+                bindings.callbacks.handleNavigationTarget(IaScreen.CartScreen)
+            } ?: false
+            if (isHandledByHost) return@launch
+            IaSdkActivity.start(
+                context = bindings.activityContext() ?: context,
+                view = IaScreen.CartScreen,
+                onBackAction = { bindings.callbacks.handleBackAction() },
+                onNavigateToTarget = { target -> bindings.callbacks.handleNavigationTarget(target) },
+            )
+        }
+    }
+
+    /**
+     * Replies the generic METHOD_ERROR with an error code per method, like the iOS plugin, for example
+     * CLEAR_CART_ERROR.
+     */
+    private class PerMethodErrorResult(
+        private val method: String,
+        private val result: MethodChannel.Result,
+    ) : MethodChannel.Result by result {
+        override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+            result.error(if (errorCode == "METHOD_ERROR") methodErrorCode(method) else errorCode, errorMessage, errorDetails)
+        }
+
+        private fun methodErrorCode(method: String): String = when (method) {
+            FlutterCall.initialize.name -> "INIT_ERROR"
+            FlutterCall.setPharmacyId.name -> "SET_PHARMACY_ERROR"
+            FlutterCall.transferPrescriptions.name -> "PRESCRIPTION_TRANSFER_ERROR"
+            FlutterCall.transferSDKv1UserData.name -> "TRANSFER_SDK_V1_USER_DATA_ERROR"
+            else -> method.replace(Regex("([a-z0-9])([A-Z])"), "\$1_\$2").uppercase() + "_ERROR"
+        }
+    }
+
+    /**
      * Runs a suspending AppSDK call and reports its value, or its failure, to Flutter.
      */
     private fun respondSuspending(
@@ -305,8 +347,9 @@ internal class IaClientMethods(
 
     fun callHandler(
         call: MethodCall,
-        result: MethodChannel.Result,
+        channelResult: MethodChannel.Result,
     ) {
+        val result = PerMethodErrorResult(call.method, channelResult)
         when (call.method) {
             FlutterCall.register.name -> {
                 val args = call.arguments
@@ -510,6 +553,8 @@ internal class IaClientMethods(
             }
 
             FlutterCall.clearCart.name -> {
+                if (!requireInitialized(result)) return
+                // The SDK clears the cart in the background and returns once it has started.
                 val success = bindings.sdkModule.ordering.deleteCart()
                 if (success) {
                     result.success(null)
@@ -750,6 +795,8 @@ internal class IaClientMethods(
                 // Note: CheckoutListener is already set globally in init, but we still need to
                 // update orderSignatures for prescription-specific flows
                 // The global listener will handle the Flutter callback
+                // The ordering feature only becomes available during initialization.
+                if (!requireInitialized(result)) return
                 if (SdkFeatureProvider.orderingFeatureProvider == null) {
                     // The SDK would only show a "not included in your subscription" message and never report back.
                     result.error("METHOD_ERROR", "Ordering isn't available. Is the ordering module registered and entitled?", null)
@@ -895,6 +942,8 @@ internal class IaClientMethods(
                     )
                     return
                 }
+                // Initialization applies IaSdkConfiguration.isHapticFeedbackEnabled, replacing an earlier value.
+                if (!requireInitialized(result)) return
                 bindings.sdkModule.setHapticFeedbackEnabled(enabled)
                 result.success(null)
             }

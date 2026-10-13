@@ -18,6 +18,8 @@ abstract class IaBaseOrdering extends IaBase {
   /// [finishAction] decides what the SDK shows once the transfer is done. [showActivityIndicator] decides whether
   /// a loading indicator is shown during the transfer, and is only used on iOS.
   ///
+  /// On Android, call it after `IaSdk.initialize`; before that the call fails. iOS initializes the SDK itself.
+  ///
   Future<void> transferPrescriptions({
     Iterable<Uint8List>? images,
     Iterable<({Uint8List data, IaPrescriptionInsuranceType insuranceType})>? pdfs,
@@ -28,6 +30,9 @@ abstract class IaBaseOrdering extends IaBase {
   });
 
   /// Resets the state of user cart, clearing any added products or prescriptions.
+  ///
+  /// On Android, call it after `IaSdk.initialize`; before that the call fails. There it completes once clearing has
+  /// started, and a failure while clearing isn't reported.
   ///
   Future<void> clearCart();
 

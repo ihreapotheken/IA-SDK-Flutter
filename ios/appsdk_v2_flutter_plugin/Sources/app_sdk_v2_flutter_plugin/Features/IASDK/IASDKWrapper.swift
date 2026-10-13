@@ -84,7 +84,7 @@ final class IASDKWrapper {
 
     }
     
-    func launchRoute(arguments: Any) async throws -> Any? {
+    func launchRoute(arguments: Any, delegate: IaClientDelegate) async throws -> Any? {
         let arguments = try argumentDecoder.decode(IaLaunchRouteArguments.self, from: arguments)
         // Android-only screens, reported like the other platform-only calls.
         if arguments.viewId == "prerequisiteFlow" {
@@ -94,15 +94,30 @@ final class IASDKWrapper {
         if view == .prescriptionScanner || view == .ePrescriptionScanner {
             PrescriptionScannerCameraController.shared.reset()
         }
+        let presentedScreen = PresentedScreen()
         let screen = view.iaScreen(
             isCancellable: arguments.isCancellable ?? true,
             focusesOnAppear: arguments.focusesOnAppear,
-            controlsScannerCamera: true
+            controlsScannerCamera: true,
+            onApofinderFinish: { [weak delegate] pharmacy in
+                // Only the SDK's own Apofinder flow tells the SDK delegate, so the selection is reported here, like
+                // Android's Apofinder result.
+                presentedScreen.viewController?.presentingViewController?.dismiss(animated: true)
+                if let pharmacy {
+                    delegate?.apofinderDidChangePharmacy(pharmacy, isFromPrerequisites: false)
+                }
+            }
         )
-        if let presentedScreen = screen.present() {
-            Self.presentedScreens.add(presentedScreen)
+        if let viewController = screen.present() {
+            presentedScreen.viewController = viewController
+            Self.presentedScreens.add(viewController)
         }
         return nil
+    }
+
+    /// The view controller of a launched screen, which its callbacks only know after it's presented.
+    private final class PresentedScreen {
+        weak var viewController: UIViewController?
     }
     
     func finishAllActivities(arguments: Any) async throws -> Any? {
@@ -208,17 +223,26 @@ final class IASDKWrapper {
 
     func clearPharmacyId() async throws -> Any? {
         IASDK.Pharmacy.savePharmacyID(nil)
+        Self.cleanPrerequisitesCache()
         return nil
     }
 
     func resetPrerequisites() async throws -> Any? {
         try await IASDK.Prerequisites.resetAllPrerequisites()
+        Self.cleanPrerequisitesCache()
         return nil
     }
 
     func resetLegalDisclaimer() async throws -> Any? {
         try await IASDK.Prerequisites.resetLegalDisclaimer()
+        Self.cleanPrerequisitesCache()
         return nil
+    }
+
+    /// The SDK keeps the prerequisites result of the session, so without this the changed prerequisites only apply
+    /// after an app restart. Its own `clearAllData` does the same.
+    private static func cleanPrerequisitesCache() {
+        IASDK.cleanCache(initialization: false, prerequisites: true)
     }
 
     func setIsOnboardingShown(arguments: Any) async throws -> Any? {
@@ -227,6 +251,7 @@ final class IASDKWrapper {
             throw IaArgumentError.decodingArgumentFailed(description: "Missing or invalid Bool value for enabled.")
         }
         try await IASDK.Prerequisites.setIsOnboardingShown(isOnboardingShown)
+        Self.cleanPrerequisitesCache()
         return nil
     }
 

@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import de.ihreapotheken.appsdk.flutter.card_link.events.CardLinkEventSender
 import de.ihreapotheken.appsdk.flutter.card_link.methods.DeleteCardHandler
 import de.ihreapotheken.appsdk.flutter.card_link.methods.GetSavedCardsHandler
@@ -69,11 +70,25 @@ class IaSdkFlutterCardLink :
      */
     private var cardLinkActivityCount = 0
 
+    /**
+     * When the launched flow last ended on the saved cards screen. Continuing from there into the scan flow,
+     * the SDK closes that screen after a fixed delay, which can be before the scan flow has signed in and opened.
+     */
+    private var savedCardsExitTime = 0L
+
     private val mainHandler = Handler(Looper.getMainLooper())
 
     private val activityLifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-            if (isCardLinkSessionActive && activity.isCardLinkScreen()) {
+            if (!activity.isCardLinkScreen()) return
+            // A scan flow that opens soon after the saved cards screen closed belongs to the launched flow.
+            if (!isCardLinkSessionActive && savedCardsExitTime != 0L &&
+                SystemClock.elapsedRealtime() - savedCardsExitTime < SAVED_CARDS_CONTINUATION_MS
+            ) {
+                savedCardsExitTime = 0L
+                isCardLinkSessionActive = true
+            }
+            if (isCardLinkSessionActive) {
                 cardLinkActivityCount++
             }
         }
@@ -84,6 +99,7 @@ class IaSdkFlutterCardLink :
             if (cardLinkActivityCount <= 0 && activity.isFinishing) {
                 cardLinkActivityCount = 0
                 isCardLinkSessionActive = false
+                savedCardsExitTime = if (activity.javaClass.simpleName == "MyCardsActivity") SystemClock.elapsedRealtime() else 0L
                 eventSender.sendWillExitEvent()
             }
         }
@@ -136,6 +152,7 @@ class IaSdkFlutterCardLink :
             onLaunched = {
                 isCardLinkSessionActive = true
                 hasLaunchedCardLink = true
+                savedCardsExitTime = 0L
             },
             // Called on the SDK's background thread.
             onFailedToInitialize = { mainHandler.post { isCardLinkSessionActive = false } },
@@ -152,6 +169,12 @@ class IaSdkFlutterCardLink :
 
     companion object {
         private const val CHANNEL_ID = "de.ihreapotheken/sdk/cardLink"
+
+        /**
+         * How long after the saved cards screen closed a CardLink screen still counts as its continuation,
+         * which covers the scan flow's sign-in.
+         */
+        private const val SAVED_CARDS_CONTINUATION_MS = 15_000L
     }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {

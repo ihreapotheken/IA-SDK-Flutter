@@ -11,7 +11,8 @@ class IaCartButton extends StatelessWidget {
     this.onTap,
   });
 
-  /// Called when the button is tapped. When `null`, the SDK opens its cart screen.
+  /// Called when the button is tapped. When `null`, the SDK opens its cart screen, after asking
+  /// `IaSdk.onSdkWillNavigateToTarget` on both platforms.
   ///
   /// Switching between `null` and a callback recreates the native button.
   ///

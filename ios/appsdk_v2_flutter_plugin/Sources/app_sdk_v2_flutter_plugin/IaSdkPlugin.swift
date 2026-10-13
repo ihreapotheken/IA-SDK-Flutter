@@ -71,7 +71,7 @@ final class IASDKPlugin {
                 return try await iaSdkWrapper.deleteAllUserRelatedData(arguments: call.arguments)
                             
             case FlutterCall.launchRoute.name:
-                return try await iaSdkWrapper.launchRoute(arguments: call.arguments)
+                return try await iaSdkWrapper.launchRoute(arguments: call.arguments, delegate: delegate)
                 
             case FlutterCall.finishAllActivities.name:
                 return try await iaSdkWrapper.finishAllActivities(arguments: call.arguments)
