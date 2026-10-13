@@ -79,7 +79,12 @@ class IaModulePrescription extends IaBasePrescription {
   }
 
   @override
-  final callbacks = IaBaseCallbacks(
+  IaBaseCallbacks get callbacks {
+    return _callbacks;
+  }
+
+  // Shared by all instances, like the streams, so creating more instances doesn't add more subscribers.
+  static final _callbacks = IaBaseCallbacks(
     handlers: _Callbacks.values,
   );
 }

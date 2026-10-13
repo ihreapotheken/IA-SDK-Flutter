@@ -247,14 +247,21 @@ class ServicesView extends StatelessWidget {
         const SizedBox(height: 8),
         ElevatedButton(
           child: Text('Set guest user data'),
-          onPressed: () => IaSdk.instance.setGuestUserData(
-            salutation: 'Herr',
-            firstName: 'First',
-            lastName: 'Last',
-            email: 'email@example.org',
-            phoneNumberCountryCode: 49,
-            phoneNumberWithoutCountryCode: 432432243,
-          ),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.setGuestUserData(
+                salutation: 'Herr',
+                firstName: 'First',
+                lastName: 'Last',
+                email: 'email@example.org',
+                phoneNumberCountryCode: 49,
+                phoneNumberWithoutCountryCode: '432432243',
+              );
+              if (context.mounted) _showResult(context, 'Guest user data set');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
         ),
         const SizedBox(height: 8),
         ElevatedButton(
@@ -326,7 +333,14 @@ class ServicesView extends StatelessWidget {
         const SizedBox(height: 8),
         ElevatedButton(
           child: Text('Logout'),
-          onPressed: () => IaSdk.instance.logout(),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.logout();
+              if (context.mounted) _showResult(context, 'Logged out');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
         ),
         const SizedBox(height: 8),
         ElevatedButton(

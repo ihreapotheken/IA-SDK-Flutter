@@ -43,12 +43,20 @@ struct IaCardLinkConfigurationArguments: Decodable {
             )
         }
         if let phoneNumber {
-            updated.setRawPhoneNumber(phoneNumber)
+            updated.setRawPhoneNumber(Self.formatted(phoneNumber: phoneNumber))
         }
         if let isSaveCardEnabled {
             updated.isSaveCardEnabled = isSaveCardEnabled
         }
         return updated
+    }
+
+    /// Formats the number like the `CardLinkConfiguration` initializer does for launched CardLink flows: only digits
+    /// and a leading "+" are kept.
+    private static func formatted(phoneNumber: String) -> String {
+        let kept = phoneNumber.filter { $0.isNumber || $0 == "+" }
+        guard let first = kept.first else { return kept }
+        return String(first) + kept.dropFirst().filter { $0 != "+" }
     }
 }
 

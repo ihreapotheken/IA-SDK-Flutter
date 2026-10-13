@@ -6,8 +6,11 @@ import IACardLink
 class GetSavedCardsHandler {
     func handle(args: [String: Any], result: @escaping FlutterResult) {
         let userId = args["userId"] as? String ?? ""
-        // No saved cards is an empty list, not the JSON literal "null".
-        let cards = CardLink.getSavedCards(userId: userId) ?? []
+        // The SDK returns an empty list without saved cards and nil only when reading them failed.
+        guard let cards = CardLink.getSavedCards(userId: userId) else {
+            result(FlutterError(code: "STORAGE_ERROR", message: "Reading the saved cards failed", details: nil))
+            return
+        }
 
         do {
             let jsonData = try JSONEncoder().encode(cards)

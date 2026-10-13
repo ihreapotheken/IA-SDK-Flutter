@@ -80,7 +80,6 @@ class _ComponentsViewState extends State<ComponentsView> {
         ],
         if (!_needsPzn || _recommendationPznController.text.trim().isNotEmpty)
           IaProductGrid(
-            key: ValueKey('$_selectedGridType ${_recommendationPznController.text.trim()}'),
             type: _selectedGridType,
             pzn: _needsPzn ? _recommendationPznController.text.trim() : null,
           ),
@@ -100,7 +99,6 @@ class _ComponentsViewState extends State<ComponentsView> {
         const SizedBox(height: 12),
         if (_customPzns.isNotEmpty)
           IaProductGrid(
-            key: ValueKey(_customPzns.join(',')),
             type: IaProductDisplayType.custom,
             title: 'Selected for you',
             pzns: _customPzns,

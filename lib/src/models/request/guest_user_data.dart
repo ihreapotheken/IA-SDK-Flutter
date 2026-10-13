@@ -16,7 +16,9 @@ class _RequestModelSetGuestUserData implements IaBaseRequest {
 
   final String email;
 
-  final int phoneNumberCountryCode, phoneNumberWithoutCountryCode;
+  final int phoneNumberCountryCode;
+
+  final String phoneNumberWithoutCountryCode;
 
   @override
   Map<String, dynamic> toSupportedType() {
@@ -26,7 +28,7 @@ class _RequestModelSetGuestUserData implements IaBaseRequest {
       'lastName': lastName,
       'email': email,
       'phoneNumberCountryCode': phoneNumberCountryCode.toString(),
-      'phoneNumberWithoutCountryCode': phoneNumberWithoutCountryCode.toString(),
+      'phoneNumberWithoutCountryCode': phoneNumberWithoutCountryCode,
     };
   }
 }

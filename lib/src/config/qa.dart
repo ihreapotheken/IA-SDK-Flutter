@@ -13,7 +13,10 @@ class IaSdkConfigurationQa {
     this.mockSdkFeatures,
     this.mockBundlePermissions,
     this.mockForceUpdate,
-  });
+  }) : assert(
+         maxScrollSpeed == null || (maxScrollSpeed > -double.infinity && maxScrollSpeed < double.infinity),
+         'maxScrollSpeed must be a finite number.',
+       );
 
   /// Whether Apofinder also lists test pharmacies.
   ///
@@ -25,13 +28,14 @@ class IaSdkConfigurationQa {
   ///
   final Set<IaSdkQaFeature> features;
 
-  /// Pharmacy identifier Apofinder offers in addition to the found pharmacies.
+  /// Numeric pharmacy identifier, for example `"1234"`, that Apofinder offers in addition to the found pharmacies.
+  /// Other values make [IaSdk.initialize] fail.
   ///
   /// Note: Only used on Android.
   ///
   final String? apofinderCustomPharmacyId;
 
-  /// Upper limit for the scroll speed in SDK lists.
+  /// Upper limit for the scroll speed in SDK lists. Must be a finite number; leave it `null` for no limit.
   ///
   /// Note: Only used on Android.
   ///

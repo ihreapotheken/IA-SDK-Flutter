@@ -67,7 +67,9 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
             result(value)
 
         case "getLogFilePath":
-            result(CardLink.logsPath)
+            // The SDK returns a file URL of an exported log copy, or "" when exporting fails.
+            let logsPath = CardLink.logsPath
+            result(logsPath.isEmpty ? nil : (URL(string: logsPath)?.path ?? logsPath))
 
         case "getSavedCards":
             guard let args = call.arguments as? [String: Any] else {
@@ -118,9 +120,7 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
             result(nil)
 
         case "finish":
-            CardLink.finish {
-                result(nil)
-            }
+            launchHandler.finish(result: result)
 
         default:
             result(FlutterMethodNotImplemented)

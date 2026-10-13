@@ -15,6 +15,7 @@ class CardLinkViewStateData {
   IaCardLinkConsentStatus consentStatus = IaCardLinkConsentStatus.showConsent;
   bool saveCardEnabled = false;
   bool includeCoreAppLogs = false;
+  bool usesCustomColors = false;
   IaCardLinkIllustrationColor illustrationColor = IaCardLinkIllustrationColor.red;
 
   String resultText = '';
@@ -43,6 +44,9 @@ class CardLinkView extends StatefulWidget {
 }
 
 class _CardLinkViewStateData extends State<CardLinkView> {
+  /// ARGB green for the "Custom Colors" launch option.
+  static const _customColor = 0xFF2E7D32;
+
   final _data = CardLinkViewStateData();
   final List<StreamSubscription> _subscriptions = [];
 
@@ -185,6 +189,8 @@ class _CardLinkViewStateData extends State<CardLinkView> {
           onSaveCardEnabledChanged: (value) => setState(() => _data.saveCardEnabled = value),
           includeCoreAppLogs: _data.includeCoreAppLogs,
           onIncludeCoreAppLogsChanged: (value) => setState(() => _data.includeCoreAppLogs = value),
+          usesCustomColors: _data.usesCustomColors,
+          onUsesCustomColorsChanged: (value) => setState(() => _data.usesCustomColors = value),
           onLaunchCardLink: () async {
             try {
               final canCode = _data.canCodeController.text.trim();
@@ -205,6 +211,10 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 coreAppLogFileURL: logFileURL,
                 supportsLiquidGlass: true,
                 illustrationColor: _data.illustrationColor,
+                primaryColor: _data.usesCustomColors ? _customColor : null,
+                buttonsColor: _data.usesCustomColors ? _customColor : null,
+                textLinkColor: _data.usesCustomColors ? _customColor : null,
+                bottomNavigationColor: _data.usesCustomColors ? _customColor : null,
               );
               _showResult('CardLink launched');
             } catch (e) {
@@ -231,6 +241,10 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 coreAppLogFileURL: logFileURL,
                 supportsLiquidGlass: true,
                 illustrationColor: _data.illustrationColor,
+                primaryColor: _data.usesCustomColors ? _customColor : null,
+                buttonsColor: _data.usesCustomColors ? _customColor : null,
+                textLinkColor: _data.usesCustomColors ? _customColor : null,
+                bottomNavigationColor: _data.usesCustomColors ? _customColor : null,
               );
               _showResult('Saved Cards launched');
             } catch (e) {
@@ -433,6 +447,8 @@ class _LaunchSection extends StatelessWidget {
     required this.onSaveCardEnabledChanged,
     required this.includeCoreAppLogs,
     required this.onIncludeCoreAppLogsChanged,
+    required this.usesCustomColors,
+    required this.onUsesCustomColorsChanged,
     required this.onLaunchCardLink,
     required this.onLaunchSavedCards,
   });
@@ -441,6 +457,8 @@ class _LaunchSection extends StatelessWidget {
   final ValueChanged<bool> onSaveCardEnabledChanged;
   final bool includeCoreAppLogs;
   final ValueChanged<bool> onIncludeCoreAppLogsChanged;
+  final bool usesCustomColors;
+  final ValueChanged<bool> onUsesCustomColorsChanged;
   final VoidCallback onLaunchCardLink;
   final VoidCallback onLaunchSavedCards;
 
@@ -466,6 +484,15 @@ class _LaunchSection extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
           value: includeCoreAppLogs,
           onChanged: onIncludeCoreAppLogsChanged,
+        ),
+        SwitchListTile(
+          title: Text('Custom Colors'),
+          // On iOS they replace the SDK-wide palette until CardLink closes; SDK screens opened later keep theirs.
+          subtitle: Text('Green primary, button, link and navigation colors'),
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          value: usesCustomColors,
+          onChanged: onUsesCustomColorsChanged,
         ),
         const SizedBox(height: 8),
         ElevatedButton.icon(

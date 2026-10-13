@@ -120,6 +120,10 @@ class IaSdk {
   ///
   bool _modulesRegistered = false;
 
+  /// Modules passed to the successful [register] call.
+  ///
+  final _registeredModules = <IaBaseModule>{};
+
   /// Register a collection of specified [modules] for client integration.
   ///
   /// Modules provide specific functionality to client integrations,
@@ -131,9 +135,29 @@ class IaSdk {
   /// - [pharmacy]
   /// - [prescription]
   ///
+  /// Pass all modules in one call. Later calls have no effect, and throw a [StateError] when they pass a module the
+  /// first call didn't.
+  ///
+  /// Fails when a module's native part is missing, for example when the app wasn't rebuilt after adding the module.
+  ///
   Future<void> register({
     required List<IaBase> modules,
   }) async {
+    if (_modulesRegistered) {
+      final unregisteredModules = [
+        for (final moduleEntry in modules)
+          if (!_registeredModules.contains(moduleEntry.module)) moduleEntry.module.name,
+      ];
+      if (unregisteredModules.isNotEmpty) {
+        throw StateError(
+          'IaSdk.register was already called, so ${unregisteredModules.join(', ')} can\'t be added. '
+          'Pass all modules in the first call.',
+        );
+      }
+      return;
+    }
+    // Each module starts its native registration when it's created; a missing native part fails here.
+    await Future.wait(modules.map((moduleEntry) => moduleEntry.nativeRegistration));
     if (!_modulesRegistered) {
       final arguments = _RequestModelRegisterModules(
         modules: modules.map(
@@ -178,6 +202,7 @@ class IaSdk {
           }
         }
         _modulesRegistered = true;
+        _registeredModules.addAll(modules.map((moduleEntry) => moduleEntry.module));
         await _forwardHostAppLogFilePath();
         return value;
       });
@@ -189,6 +214,11 @@ class IaSdk {
   bool _initialized = false;
 
   /// Allocates the resources required for the AppSDK usage.
+  ///
+  /// Only the first successful call has an effect; later calls return without applying their [config].
+  ///
+  /// On Android a failed initialization can't be retried: the SDK keeps its error state, so later calls fail too
+  /// until the app restarts. On iOS a later call initializes the SDK again.
   ///
   Future<void> initialize({
     required IaSdkConfiguration config,
@@ -233,7 +263,7 @@ class IaSdk {
   /// [salutation] is one of "Herr", "Frau", "Divers" (or "Diverse") and "Keine Angabe", matched case-insensitively.
   /// Other values are stored as "Keine Angabe".
   ///
-  /// The phone number is passed as an `int`, so leading zeros of [phoneNumberWithoutCountryCode] are lost.
+  /// On Android, call it after [initialize]; before that the call fails.
   ///
   Future<void> setGuestUserData({
     required String salutation,
@@ -241,7 +271,7 @@ class IaSdk {
     required String lastName,
     required String email,
     required int phoneNumberCountryCode,
-    required int phoneNumberWithoutCountryCode,
+    required String phoneNumberWithoutCountryCode,
   }) async {
     final arguments = _RequestModelSetGuestUserData(
       salutation: salutation,
@@ -256,6 +286,8 @@ class IaSdk {
 
   /// Resets the user data and onboarding status (pharmacy selection, user consents statuses).
   ///
+  /// On Android, call it after [initialize]; before that the call fails.
+  ///
   Future<void> logout() async {
     return await _Methods.logout.invoke();
   }
@@ -264,6 +296,8 @@ class IaSdk {
   /// (legal documents, onboarding) again the next time it's required.
   ///
   /// Unlike [logout], user data is kept.
+  ///
+  /// On Android, call it after [initialize]; before that the call fails.
   ///
   Future<void> resetPrerequisites() async {
     return await _Methods.resetPrerequisites.invoke();
@@ -291,6 +325,8 @@ class IaSdk {
   }
 
   /// Returns `true` if the user has completed the prerequisites flow (legal documents, onboarding).
+  ///
+  /// Call it after [initialize]; before that the call fails.
   ///
   /// Note: Only supported on Android.
   ///
@@ -331,7 +367,9 @@ class IaSdk {
     );
   }
 
-  /// Closes any overlaying ia.de screen contents.
+  /// Closes the ia.de screens shown on top of the app, including screens the SDK opened from them.
+  ///
+  /// Screens the host app presented itself stay open, and so does a CardLink flow the host launched.
   ///
   Future<void> finishAllActivities() async {
     return await _Methods.finishAllActivities.invoke();
@@ -659,7 +697,7 @@ class IaSdk {
   ///
   /// ```dart
   /// IaSdk.instance.onSdkWillNavigateToTarget = (navigationTarget) async {
-  ///   if (navigationTarget == SdkNavigationTarget.cart) {
+  ///   if (navigationTarget == IaSdkNavigationTarget.cart) {
   ///     // Switch to your own cart tab.
   ///     switchToTab(TabType.cart);
   ///     return false;

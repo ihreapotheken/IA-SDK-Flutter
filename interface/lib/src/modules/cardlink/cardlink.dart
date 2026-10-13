@@ -28,6 +28,8 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [buttonsColor]: Optional buttons UI color (as integer ARGB value).
   /// - [textLinkColor]: Optional text link UI color (as integer ARGB value).
   /// - [bottomNavigationColor]: Optional bottom navigation UI color (as integer ARGB value).
+  ///   On iOS CardLink uses the SDK-wide color palette. Passing any of these colors replaces it until CardLink
+  ///   closes, with SDK defaults for the palette colors not passed. Without colors the palette stays unchanged.
   /// - [environment]: Optional CardLink environment. When `null`, the environment `IaSdk` was initialized with
   ///   is used. On iOS, passing it also switches the environment of the whole SDK.
   /// - [saveCardEnabled]: Optional flag to enable card saving (defaults to true).
@@ -35,9 +37,12 @@ abstract class IaBaseCardLink extends IaBase {
   ///   Android SDK always uploads them.
   /// - [appId]: Optional application ID (maps to `applicationId` on Android and to the SDK-wide
   ///   `IASDK.configuration.appStoreID` on iOS).
-  /// - [coreAppLogFileURL]: Optional file path to the host app's log file. When provided, the log file is included in CardLink's "Report Problem" feature, allowing users to attach app-level logs alongside CardLink logs when reporting issues.
-  /// - [supportsLiquidGlass]: Flag to enable Liquid Glass UI style. Only used on iOS, where it also changes the
-  ///   setting for all SDK screens.
+  /// - [coreAppLogFileURL]: Optional file path (not a URL) to the host app's log file, which users can attach to
+  ///   problem reports. It replaces the host log file set with `IaSdkConfiguration.hostAppLogFilePath` or
+  ///   [setHostAppLogFilePath], on iOS for the problem reports of all SDK screens, and stays set after CardLink
+  ///   closes.
+  /// - [supportsLiquidGlass]: Optional flag to enable Liquid Glass UI style. Only used on iOS, where it also changes
+  ///   the setting for all SDK screens. When `null`, the setting from `IaSdk.initialize` is kept.
   /// - [illustrationColor]: Optional color of the CardLink illustrations (defaults to red). Only used on Android.
   ///
   Future<void> launch({
@@ -58,7 +63,7 @@ abstract class IaBaseCardLink extends IaBase {
     bool? saveCardEnabled,
     String? appId,
     String? coreAppLogFileURL,
-    required bool supportsLiquidGlass,
+    bool? supportsLiquidGlass,
     IaCardLinkIllustrationColor? illustrationColor,
   });
 
@@ -68,15 +73,19 @@ abstract class IaBaseCardLink extends IaBase {
 
   /// Returns the current CardLink SDK environment.
   ///
+  /// Before the first [launch], this is the environment `IaSdk` was initialized with.
+  ///
   Future<IaCardLinkEnvironment> getEnvironment();
 
-  /// Returns the path to the CardLink SDK log file.
+  /// Returns the path to the CardLink SDK log file, or `null` when it isn't available.
+  ///
+  /// On iOS this is an exported copy of the logs, limited in size.
   ///
   Future<String?> getLogFilePath();
 
   /// Returns the list of saved cards for the specified user.
   ///
-  /// The returned string contains JSON-encoded card data.
+  /// The returned string contains JSON-encoded card data. Fails when the stored cards can't be read.
   ///
   Future<String?> getSavedCards(String userId);
 
@@ -145,8 +154,9 @@ abstract class IaBaseCardLink extends IaBase {
 
   /// Sets the host app's log file, which users can attach to CardLink problem reports.
   ///
-  /// `IaSdk.initialize` calls this with `IaSdkConfiguration.hostAppLogFilePath` when the CardLink module was
-  /// registered before.
+  /// `IaSdk.initialize` and `IaSdk.register` call this with `IaSdkConfiguration.hostAppLogFilePath`, whichever
+  /// of them runs second, so a file set here before then is replaced. [launch] with `coreAppLogFileURL` replaces
+  /// it too.
   ///
   /// On Android an empty [path] keeps the previously set file, the SDK can't detach it.
   ///
@@ -159,6 +169,8 @@ abstract class IaBaseCardLink extends IaBase {
   Future<void> setMocks(IaCardLinkMocks mocks);
 
   /// Programmatically finishes the active CardLink session.
+  ///
+  /// Completes right away when no CardLink screen is shown.
   ///
   /// Note: Only has an effect on iOS.
   ///
@@ -200,6 +212,9 @@ abstract class IaBaseCardLink extends IaBase {
   ///
   /// Emits prescription data when prescriptions are successfully redeemed.
   ///
+  /// On iOS, with [IaCardLinkFinishAction.uploadPrescriptions] the SDK adds the prescriptions to the cart itself.
+  /// They're reported here too, in the same JSON format but without each prescription's `token`.
+  ///
   /// Usage:
   ///
   /// ```dart
@@ -213,7 +228,8 @@ abstract class IaBaseCardLink extends IaBase {
   /// Notifier for CardLink lifecycle and interaction events.
   ///
   /// Consolidates various events into a single stream:
-  /// - [IaCardLinkEvent.willExit]: CardLink will close. On Android it's reported once CardLink has closed.
+  /// - [IaCardLinkEvent.willExit]: CardLink will close. It's reported once CardLink has closed on Android, and on
+  ///   iOS when CardLink added the prescriptions to the cart itself.
   /// - [IaCardLinkEvent.willStartScanning]: NFC scanning is about to start. Only reported on iOS.
   /// - [IaCardLinkEvent.failedToInitialize]: Initialization failed
   /// - [IaCardLinkEvent.goToCart]: User requested to go to cart
@@ -222,7 +238,8 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [IaCardLinkEvent.finished]: CardLink closed with a result (Android), see [resultListener]
   ///
   /// On iOS, CardLink flows the SDK starts itself (for example from the "redeem prescription" screen) report
-  /// consent, session, prescription, saved-card, error and analytics events too. Their navigation events
+  /// consent, session, prescription (see [prescriptionsRedeemedListener]), saved-card, error and analytics events
+  /// too. Their navigation events
   /// ([IaCardLinkEvent.willExit], [IaCardLinkEvent.goToCart], [IaCardLinkEvent.openTermsAndConditions]) aren't
   /// reported, because the SDK handles them.
   ///

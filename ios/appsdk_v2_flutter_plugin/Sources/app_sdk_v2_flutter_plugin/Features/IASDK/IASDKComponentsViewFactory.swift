@@ -113,6 +113,7 @@ final class SizeReportingHostingController<Content: View>: UIHostingController<C
     private let viewId: Int64
     private let channel: FlutterMethodChannel
     private var lastReported: CGSize = .zero
+    private var lastMeasuredWidth: CGFloat = 0
 
     init(viewId: Int64, channel: FlutterMethodChannel, rootView: Content) {
         self.viewId = viewId
@@ -141,9 +142,13 @@ final class SizeReportingHostingController<Content: View>: UIHostingController<C
         guard width > 0 else { return }
         let target = CGSize(width: width, height: .greatestFiniteMagnitude)
         let size = sizeThatFits(in: target)
-        guard size.width > 0, size.height > 0 else { return }
-        guard size != lastReported else { return }
+        // A height of 0 is reported too, so an emptied component collapses in Flutter.
+        guard size.width > 0, size.height >= 0 else { return }
+        // Also reported again for a new layout width: Flutter widens the view when its available width changes,
+        // and waits for the size measured against it.
+        guard size != lastReported || width != lastMeasuredWidth else { return }
         lastReported = size
+        lastMeasuredWidth = width
 
         channel.invokeMethod(
             "updateComponentSize",

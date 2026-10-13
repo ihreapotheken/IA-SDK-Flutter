@@ -3,7 +3,6 @@ package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 import android.app.Activity
 import de.ihreapotheken.sdk.core.api.SdkFeatureProvider
 import de.ihreapotheken.sdk.integrations.api.view.IaPrerequisiteActivity
-import android.util.Log
 import java.util.concurrent.atomic.AtomicBoolean
 import de.ihreapotheken.sdk.apofinder.ApofinderModule
 import de.ihreapotheken.sdk.appointments.AppointmentsModule
@@ -274,8 +273,6 @@ internal class IaClientMethods(
          * is reported to Flutter by the plugin's activity result listener.
          */
         const val REQUEST_CODE_PREREQUISITES = 7301
-
-        private const val LOG_TAG = "IaSdkFlutter"
     }
 
     /**
@@ -395,7 +392,13 @@ internal class IaClientMethods(
                 val playStoreId = args["playStoreId"] as? String
                 val qaConfiguration = args["qaConfiguration"] as? Map<*, *>
                 if (qaConfiguration != null) {
-                    IaSdk.setQaConfiguration(parseQaConfiguration(qaConfiguration))
+                    val parsedQaConfiguration = try {
+                        parseQaConfiguration(qaConfiguration)
+                    } catch (e: IllegalArgumentException) {
+                        result.error("ARG_ERROR", e.message, null)
+                        return
+                    }
+                    IaSdk.setQaConfiguration(parsedQaConfiguration)
                 }
                 val isCardLinkSaveCardEnabled = (args["cardLink"] as? Map<*, *>)?.get("isSaveCardEnabled") as? Boolean ?: false
                 // Footer "Datenverarbeitung" taps are reported like the iOS hostAppPrivacyPolicy navigation target.
@@ -547,6 +550,7 @@ internal class IaClientMethods(
                     },
                     phoneNumberWithoutCountryCode = phoneNumberWithoutCountryCode,
                 )
+                if (!requireInitialized(result)) return
                 bindings.sdkModule.setUserData(
                     userData
                 )
@@ -583,6 +587,7 @@ internal class IaClientMethods(
             }
 
             FlutterCall.logout.name -> {
+                if (!requireInitialized(result)) return
                 val success = bindings.sdkModule.clearAllData()
                 if (success) {
                     result.success(null)
@@ -812,15 +817,10 @@ internal class IaClientMethods(
             }
 
             FlutterCall.getPharmacyId.name -> {
-                scope.launch {
-                    val pharmacyId = try {
-                        bindings.sdkModule.pharmacy.getPharmacyId().ifEmpty { null }
-                    } catch (e: Exception) {
-                        // Reported as "no pharmacy selected", as before, but no longer silently.
-                        Log.w(LOG_TAG, "Reading the pharmacy ID failed.", e)
-                        null
-                    }
-                    result.success(pharmacyId)
+                // Before its initialization the SDK can't read the stored ID, so null would wrongly mean "none selected".
+                if (!requireInitialized(result)) return
+                respondSuspending(result) {
+                    bindings.sdkModule.pharmacy.getPharmacyId().ifEmpty { null }
                 }
             }
 
@@ -833,6 +833,7 @@ internal class IaClientMethods(
             }
 
             FlutterCall.resetPrerequisites.name -> {
+                if (!requireInitialized(result)) return
                 val success = bindings.sdkModule.resetPrerequisites()
                 if (success) {
                     result.success(null)
@@ -846,6 +847,8 @@ internal class IaClientMethods(
             }
 
             FlutterCall.isPrerequisiteFlowCompleted.name -> {
+                // The SDK answers false before its initialization, even for users who completed the flow.
+                if (!requireInitialized(result)) return
                 respondSuspending(result) {
                     bindings.sdkModule.isPrerequisiteFlowCompleted()
                 }
@@ -1000,8 +1003,19 @@ internal class IaClientMethods(
             },
             showTestPharmaciesInApofinder = map["showTestPharmaciesInApofinder"] == true,
             maxScrollSpeed = (map["maxScrollSpeed"] as? Number)?.toFloat(),
-            apofinderCustomPharmacyId = (map["apofinderCustomPharmacyId"] as? Number)?.toInt(),
+            apofinderCustomPharmacyId = parseApofinderCustomPharmacyId(map["apofinderCustomPharmacyId"]),
         )
+    }
+
+    /** Dart sends the pharmacy ID as a String, while the SDK takes an Int. */
+    private fun parseApofinderCustomPharmacyId(value: Any?): Int? {
+        return when (value) {
+            null -> null
+            is Number -> value.toInt()
+            is String -> value.trim().toIntOrNull()
+                ?: throw IllegalArgumentException("apofinderCustomPharmacyId must be a numeric pharmacy ID, got \"$value\".")
+            else -> throw IllegalArgumentException("apofinderCustomPharmacyId must be a String.")
+        }
     }
 
     private fun parseUserAddress(map: Map<*, *>): IaUserAddress? {
@@ -1044,12 +1058,12 @@ internal class IaClientMethods(
     }
 
     /**
-     * Replies an error and returns `false` when the SDK isn't initialized. The SDK silently ignores
-     * these calls before its initialization, so they'd otherwise report success without effect.
+     * Replies an error and returns `false` when the SDK isn't initialized. Before its initialization the
+     * SDK silently ignores these calls, or answers them with defaults, so they'd otherwise seem to succeed.
      */
     private fun requireInitialized(result: MethodChannel.Result): Boolean {
         if (bindings.sdkModule.isInitialized()) return true
-        result.error("SDK_NOT_INITIALIZED", "Call initialize first; the SDK ignores this call before it's initialized.", null)
+        result.error("SDK_NOT_INITIALIZED", "Call initialize first; the SDK can't handle this call before it's initialized.", null)
         return false
     }
 

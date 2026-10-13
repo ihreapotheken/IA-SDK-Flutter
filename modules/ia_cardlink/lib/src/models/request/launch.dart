@@ -19,7 +19,7 @@ class _RequestModelLaunch implements IaBaseRequest {
     this.saveCardEnabled,
     this.appId,
     this.coreAppLogFileURL,
-    required this.supportsLiquidGlass,
+    this.supportsLiquidGlass,
     this.illustrationColor,
   });
 
@@ -40,7 +40,7 @@ class _RequestModelLaunch implements IaBaseRequest {
   final bool? saveCardEnabled;
   final String? appId;
   final String? coreAppLogFileURL;
-  final bool supportsLiquidGlass;
+  final bool? supportsLiquidGlass;
   final IaCardLinkIllustrationColor? illustrationColor;
 
   @override

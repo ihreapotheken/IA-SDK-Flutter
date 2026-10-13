@@ -3,6 +3,8 @@ import 'package:ia_interface/ia_interface.dart';
 
 /// Inline native product grid component.
 ///
+/// Native reads the options once, when it creates the grid, so changing any of them recreates the native grid.
+///
 class IaProductGrid extends StatelessWidget {
   /// Default constructor for [IaProductGrid].
   ///
@@ -41,6 +43,8 @@ class IaProductGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IaSdkPlatformView(
+      // Native reads the creation params once, so changed options need a new native grid.
+      key: ValueKey((type, pzn, shouldShowLoading, title, pzns?.join('\n'))),
       viewId: 'productGrid',
       creationParams: {
         'type': type.name,

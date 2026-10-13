@@ -17,11 +17,15 @@ abstract class IaBasePharmacy extends IaBase {
 
   /// Specifies a pharmacy identifier to be loaded into the AppSDK module for user interaction.
   ///
-  /// [pharmacyId] is the numeric pharmacy identifier, for example `"1234"`. iOS rejects other values.
+  /// [pharmacyId] is the numeric pharmacy identifier, for example `"1234"`. Both platforms reject other values.
+  ///
+  /// On Android, call it after `IaSdk.initialize`; before that the call fails.
   ///
   Future<void> setPharmacyId(String pharmacyId);
 
-  /// Stores the pharmacy identifier without validating it or loading the pharmacy, unlike [setPharmacyId].
+  /// Stores the pharmacy identifier without checking that the pharmacy exists or loading it, unlike [setPharmacyId].
+  ///
+  /// [pharmacyId] is the numeric pharmacy identifier; other values are rejected.
   ///
   /// Note: Only supported on iOS.
   ///
@@ -29,9 +33,14 @@ abstract class IaBasePharmacy extends IaBase {
 
   /// Returns the currently selected pharmacy identifier, or `null` if no pharmacy is selected.
   ///
+  /// On Android, call it after `IaSdk.initialize`; before that the call fails, since the SDK can't read the stored
+  /// identifier yet.
+  ///
   Future<String?> getPharmacyId();
 
   /// Clears the selected pharmacy, so [getPharmacyId] returns `null` until a pharmacy is selected again.
+  ///
+  /// On Android, call it after `IaSdk.initialize`; before that the call fails.
   ///
   Future<void> clearPharmacyId();
 

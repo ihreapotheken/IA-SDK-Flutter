@@ -99,14 +99,47 @@ final class IASDKWrapper {
             focusesOnAppear: arguments.focusesOnAppear,
             controlsScannerCamera: true
         )
-        screen.present()
+        if let presentedScreen = screen.present() {
+            Self.presentedScreens.add(presentedScreen)
+        }
         return nil
     }
     
     func finishAllActivities(arguments: Any) async throws -> Any? {
-        // @TODO: This will work for now but we will have to discuss how to best implement this.
-        UIApplication.shared.rootViewController?.dismiss(animated: true)
+        // Dismissing the lowest SDK screen also closes everything presented above it, while the host's own
+        // screens below it stay open, like on Android.
+        Self.lowestPresentedSDKScreen()?.presentingViewController?.dismiss(animated: true)
         return nil
+    }
+
+    /// Screens presented through launchRoute.
+    private static let presentedScreens = NSHashTable<UIViewController>.weakObjects()
+
+    /// Modules whose screens finishAllActivities closes. On Android CardLink isn't one of the SDK's activities,
+    /// so a CardLink flow the host launched stays open there, and here too.
+    private static let sdkModuleNames = ["IACore", "IAIntegrations", "IAOverTheCounter", "IAOrdering", "IAPharmacy", "IAPrescription"]
+
+    private static func lowestPresentedSDKScreen() -> UIViewController? {
+        var viewController = UIApplication.shared.rootViewController?.presentedViewController
+        while let current = viewController {
+            if isSDKScreen(current) { return current }
+            viewController = current.presentedViewController
+        }
+        return nil
+    }
+
+    /// Screens the SDK presented itself are recognized by the module their controller or its root comes from.
+    private static func isSDKScreen(_ viewController: UIViewController) -> Bool {
+        if presentedScreens.contains(viewController) { return true }
+        var candidates = [viewController]
+        if let rootViewController = (viewController as? UINavigationController)?.viewControllers.first {
+            candidates.append(rootViewController)
+        }
+        let typeNames = candidates.map { String(reflecting: type(of: $0)) }
+        if typeNames.contains(where: { $0.contains("IACardLink.") }) { return false }
+        return typeNames.contains { typeName in
+            sdkModuleNames.contains { typeName.contains("\($0).") }
+        }
     }
 
     func transferSDKv1UserData() async throws -> Any? {

@@ -28,6 +28,20 @@ class ScreensView extends StatelessWidget {
     }
   }
 
+  /// Opens product search, then closes the SDK screens after a few seconds. Screens the app presented itself stay.
+  ///
+  static Future<void> _runFinishAllActivitiesTest() async {
+    final log = ExampleEventLog.instance;
+    await IaSdk.instance.overTheCounter.launchProductSearchRoute();
+    await Future<void>.delayed(const Duration(seconds: 4));
+    try {
+      await IaSdk.instance.finishAllActivities();
+      log.add('Finish all activities test', 'SDK screens closed');
+    } catch (e) {
+      log.add('Finish all activities test', 'Failed: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -101,6 +115,12 @@ class ScreensView extends StatelessWidget {
         ElevatedButton(
           child: Text('Launch Prerequisite Flow (Android)'),
           onPressed: () => IaSdk.instance.launchPrerequisiteFlow(),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          // The SDK screen covers the app, so finishAllActivities runs on a timer while it's open.
+          child: Text('Finish All Activities Test'),
+          onPressed: _runFinishAllActivitiesTest,
         ),
       ],
     );

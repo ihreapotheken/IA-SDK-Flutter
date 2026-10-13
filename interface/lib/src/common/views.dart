@@ -81,6 +81,10 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
   int? _platformViewId;
   Size? _measuredSize;
 
+  /// Width the parent offered in the latest layout, and when [_measuredSize] was reported.
+  double? _availableWidth;
+  double? _measuredAvailableWidth;
+
   @override
   void initState() {
     super.initState();
@@ -118,8 +122,11 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
 
   void _onSizeUpdate(Size size) {
     if (!mounted) return;
-    if (_measuredSize != size) {
-      setState(() => _measuredSize = size);
+    if (_measuredSize != size || _measuredAvailableWidth != _availableWidth) {
+      setState(() {
+        _measuredSize = size;
+        _measuredAvailableWidth = _availableWidth;
+      });
     }
   }
 
@@ -180,7 +187,20 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
     }
 
     if (!widget.selfSizing) return platformView;
-    return _MeasuredSizeBox(measuredSize: _measuredSize, child: platformView);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        _availableWidth = constraints.maxWidth;
+        // Native measures against the width it's laid out with, so after the offered width changed (for example
+        // on rotation) the component gets the whole width again until native reports its new size.
+        final measuredSize = _measuredSize;
+        final isMeasurementCurrent = measuredSize != null && _measuredAvailableWidth == constraints.maxWidth;
+        return _MeasuredSizeBox(
+          width: isMeasurementCurrent ? measuredSize.width : null,
+          height: measuredSize?.height,
+          child: platformView,
+        );
+      },
+    );
   }
 }
 
@@ -188,25 +208,47 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
 /// component's reported intrinsic size. Falls back to a 1px height while
 /// awaiting the first measurement so the platform view has bounded
 /// constraints to lay out against (otherwise unbounded parents like
-/// [ListView] would crash).
+/// [ListView] would crash). A reported height of 0 collapses the box.
 ///
 class _MeasuredSizeBox extends StatelessWidget {
   const _MeasuredSizeBox({
-    required this.measuredSize,
+    required this.width,
+    required this.height,
     required this.child,
   });
 
-  final Size? measuredSize;
+  /// Measured width, or `null` for the parent's width.
+  final double? width;
+
+  /// Measured height, or `null` before the first measurement.
+  final double? height;
+
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
+    if (height == 0) {
+      // An empty component takes no space, but the platform view keeps a 1px
+      // height so native can still lay it out and report when content appears.
+      return SizedBox(
+        width: width,
+        height: 0,
+        child: ClipRect(
+          child: OverflowBox(
+            alignment: Alignment.topCenter,
+            minHeight: 1,
+            maxHeight: 1,
+            child: child,
+          ),
+        ),
+      );
+    }
     return SizedBox(
       // Width: null lets the parent's constraint flow through. Height defaults
       // to 1px before native reports back, which still triggers a layout pass
       // and lets the native size reporter measure the intrinsic height.
-      width: measuredSize?.width,
-      height: measuredSize?.height ?? 1,
+      width: width,
+      height: height ?? 1,
       child: child,
     );
   }

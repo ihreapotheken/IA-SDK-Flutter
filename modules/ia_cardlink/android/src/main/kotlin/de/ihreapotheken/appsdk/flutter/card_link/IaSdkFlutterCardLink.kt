@@ -1,14 +1,16 @@
 package de.ihreapotheken.appsdk.flutter.card_link
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import de.ihreapotheken.appsdk.flutter.card_link.events.CardLinkEventSender
 import de.ihreapotheken.appsdk.flutter.card_link.methods.DeleteCardHandler
 import de.ihreapotheken.appsdk.flutter.card_link.methods.GetSavedCardsHandler
 import de.ihreapotheken.appsdk.flutter.card_link.methods.LaunchHandler
+import de.ihreapotheken.appsdk.flutter.card_link.models.EnvironmentMapper
 import de.ihreapotheken.sdk.cardlink.BuildConfig
 import de.ihreapotheken.sdk.cardlink.CardLinkSdkEnvironment
 import de.ihreapotheken.sdk.cardlink.HostAppLogProvider
@@ -43,7 +45,7 @@ class IaSdkFlutterCardLink :
     private var activity: Activity? = null
     private var applicationContext: Context? = null
     private var activityBinding: ActivityPluginBinding? = null
-    private var activityLifecycle: Lifecycle? = null
+    private var application: Application? = null
 
     /**
      * Scope for the SDK's storage calls, which block and therefore run on the IO dispatcher.
@@ -51,30 +53,50 @@ class IaSdkFlutterCardLink :
     private val scope = MainScope()
 
     /**
-     * Whether CardLink was launched and hasn't covered the host activity yet. The SDK signs in before
-     * it opens its screen, and doesn't open it when that fails.
+     * Whether a CardLink flow launched by this plugin is starting or shown. The SDK signs in before it
+     * opens its screen, and doesn't open it when that fails. Only changed on the main thread.
      */
-    private var isCardLinkLaunching = false
+    private var isCardLinkSessionActive = false
 
     /**
-     * Whether a CardLink screen launched by this plugin covers the host activity. The Android SDK has
-     * no exit callback, so its closing is detected when the host activity resumes.
+     * Whether this plugin launched CardLink, which sets the SDK's CardLink environment.
      */
-    private var isCardLinkShown = false
+    private var hasLaunchedCardLink = false
 
-    private val lifecycleObserver = LifecycleEventObserver { _, event ->
-        when (event) {
-            Lifecycle.Event.ON_PAUSE -> if (isCardLinkLaunching) {
-                isCardLinkLaunching = false
-                isCardLinkShown = true
+    /**
+     * CardLink screens of the launched flow. The Android SDK has no exit callback, so the flow has
+     * closed when the last of them finishes. Screens recreated after a configuration change count again.
+     */
+    private var cardLinkActivityCount = 0
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    private val activityLifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+            if (isCardLinkSessionActive && activity.isCardLinkScreen()) {
+                cardLinkActivityCount++
             }
-            Lifecycle.Event.ON_RESUME -> if (isCardLinkShown) {
-                isCardLinkShown = false
+        }
+
+        override fun onActivityDestroyed(activity: Activity) {
+            if (!isCardLinkSessionActive || !activity.isCardLinkScreen()) return
+            cardLinkActivityCount--
+            if (cardLinkActivityCount <= 0 && activity.isFinishing) {
+                cardLinkActivityCount = 0
+                isCardLinkSessionActive = false
                 eventSender.sendWillExitEvent()
             }
-            else -> Unit
         }
+
+        override fun onActivityStarted(activity: Activity) = Unit
+        override fun onActivityResumed(activity: Activity) = Unit
+        override fun onActivityPaused(activity: Activity) = Unit
+        override fun onActivityStopped(activity: Activity) = Unit
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
     }
+
+    private fun Activity.isCardLinkScreen(): Boolean =
+        javaClass.name.startsWith("de.ihreapotheken.sdk.cardlink.")
 
     /**
      * Serializes the SDK's storage calls: its card storage isn't safe to create from two threads at once.
@@ -111,8 +133,12 @@ class IaSdkFlutterCardLink :
         LaunchHandler(
             activityProvider = { activity },
             eventSender = eventSender,
-            onLaunched = { isCardLinkLaunching = true },
-            onFailedToInitialize = { isCardLinkLaunching = false },
+            onLaunched = {
+                isCardLinkSessionActive = true
+                hasLaunchedCardLink = true
+            },
+            // Called on the SDK's background thread.
+            onFailedToInitialize = { mainHandler.post { isCardLinkSessionActive = false } },
         )
     }
 
@@ -135,27 +161,26 @@ class IaSdkFlutterCardLink :
         )
         channel.setMethodCallHandler(this)
         applicationContext = flutterPluginBinding.applicationContext
+        application = (flutterPluginBinding.applicationContext as? Application)?.also {
+            it.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
+        }
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
+        application = null
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
         activityBinding = binding
         binding.addActivityResultListener(activityResultListener)
-        // FlutterActivity and FlutterFragmentActivity are lifecycle owners.
-        activityLifecycle = (binding.activity as? LifecycleOwner)?.lifecycle?.also {
-            it.addObserver(lifecycleObserver)
-        }
     }
 
     override fun onDetachedFromActivity() {
         activityBinding?.removeActivityResultListener(activityResultListener)
-        activityLifecycle?.removeObserver(lifecycleObserver)
         activityBinding = null
-        activityLifecycle = null
         activity = null
     }
 
@@ -183,7 +208,14 @@ class IaSdkFlutterCardLink :
             }
 
             "getEnvironment" -> {
-                result.success(CardLinkSdkEnvironment.cardLinkSdkEnvironment.name)
+                // Until a launch sets it, the SDK's CardLink environment is its production default, while a
+                // launch without an environment follows the IaSdk environment, as on iOS.
+                val environment = if (hasLaunchedCardLink) {
+                    CardLinkSdkEnvironment.cardLinkSdkEnvironment
+                } else {
+                    EnvironmentMapper.fromString(null)
+                }
+                result.success(environment.name)
             }
 
             "getLogFilePath" -> {

@@ -12,20 +12,19 @@ Future<void> _orderingDidFinishOrderHandler(dynamic args) async {
       'orderingDidFinishOrder: Missing or incorrect type orderCode: ${orderCode.runtimeType} $orderCode.',
     );
   }
-  final clientOrderIDs = args['clientOrderIDs'];
-  if (clientOrderIDs != null && clientOrderIDs is! Iterable?) {
+  final clientOrderIDs = args['clientOrderIDs'] ?? const [];
+  if (clientOrderIDs is! Iterable) {
     throw Exception(
-      'orderingDidFinishOrder: Missing or incorect type clientOrderIDs: ${clientOrderIDs.runtimeType} $clientOrderIDs.',
+      'orderingDidFinishOrder: Incorrect type clientOrderIDs: ${clientOrderIDs.runtimeType} $clientOrderIDs.',
     );
   }
-  if (clientOrderIDs != null &&
-      (clientOrderIDs as Iterable).any(
-        (orderId) {
-          return orderId is! String;
-        },
-      )) {
+  if (clientOrderIDs.any(
+    (orderId) {
+      return orderId is! String;
+    },
+  )) {
     throw Exception(
-      'orderingDidFinishOrder: Incorect type clientOrderIDs: $clientOrderIDs.',
+      'orderingDidFinishOrder: Incorrect type clientOrderIDs: $clientOrderIDs.',
     );
   }
   final orderCodes = args['orderCodes'];
@@ -33,11 +32,9 @@ Future<void> _orderingDidFinishOrderHandler(dynamic args) async {
     IaModelOrderingTransactionSignatures(
       orderCode: orderCode,
       orderCodes: orderCodes is Iterable ? orderCodes.whereType<String>().toList() : [orderCode],
-      clientOrderIDs: clientOrderIDs == null
-          ? null
-          : List<String>.from(
-              clientOrderIDs,
-            ),
+      clientOrderIDs: List<String>.from(
+        clientOrderIDs,
+      ),
     ),
   );
 }

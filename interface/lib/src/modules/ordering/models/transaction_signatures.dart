@@ -7,7 +7,7 @@ class IaModelOrderingTransactionSignatures {
   ///
   const IaModelOrderingTransactionSignatures({
     required this.orderCode,
-    this.clientOrderIDs,
+    this.clientOrderIDs = const [],
     this.orderCodes = const [],
   });
 
@@ -19,7 +19,7 @@ class IaModelOrderingTransactionSignatures {
   ///
   final List<String> orderCodes;
 
-  /// Order ID provided by host app using transferPrescriptions (optional).
+  /// Order IDs the host app passed to transferPrescriptions. Empty when it passed none.
   ///
-  final List<String>? clientOrderIDs;
+  final List<String> clientOrderIDs;
 }

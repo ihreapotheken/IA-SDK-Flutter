@@ -2,6 +2,7 @@ name: ia_cardlink
 description: "AppSDK CardLink Services."
 version: 0.0.1
 homepage:
+publish_to: none
 
 environment:
   sdk: ">=3.10.0"
@@ -12,6 +13,8 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
+  ia_interface:
+    path: ../../interface
 
 dev_dependencies:
   flutter_test:

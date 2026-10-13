@@ -137,7 +137,8 @@ private class IaComponentSizeReporter(
         )
         val width = view.measuredWidth
         val height = view.measuredHeight
-        if (width <= 0 || height <= 0) return
+        // A height of 0 is reported too, so an emptied component collapses in Flutter.
+        if (width <= 0 || height < 0) return
         if (width == lastReportedWidth && height == lastReportedHeight) return
         lastReportedWidth = width
         lastReportedHeight = height

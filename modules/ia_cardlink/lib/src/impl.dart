@@ -42,7 +42,7 @@ class IaModuleCardLink extends IaBaseCardLink {
     bool? saveCardEnabled,
     String? appId,
     String? coreAppLogFileURL,
-    required bool supportsLiquidGlass,
+    bool? supportsLiquidGlass,
     IaCardLinkIllustrationColor? illustrationColor,
   }) async {
     final arguments = _RequestModelLaunch(
@@ -243,7 +243,12 @@ class IaModuleCardLink extends IaBaseCardLink {
   }
 
   @override
-  final callbacks = IaBaseCallbacks(
+  IaBaseCallbacks get callbacks {
+    return _callbacks;
+  }
+
+  // Shared by all instances, like the streams, so creating more instances doesn't add more subscribers.
+  static final _callbacks = IaBaseCallbacks(
     channel: _Methods._channel,
     handlers: _Callbacks.values,
   );
