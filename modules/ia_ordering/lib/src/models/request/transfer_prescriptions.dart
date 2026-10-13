@@ -6,6 +6,8 @@ class _RequestModelTransferPrescriptions implements IaBaseRequest {
     this.pdfs,
     this.codes,
     this.orderId,
+    required this.finishAction,
+    required this.showActivityIndicator,
   });
 
   final Iterable<Uint8List>? images;
@@ -15,6 +17,10 @@ class _RequestModelTransferPrescriptions implements IaBaseRequest {
   final Iterable<String>? codes;
 
   final String? orderId;
+
+  final IaTransferPrescriptionsFinishAction finishAction;
+
+  final bool showActivityIndicator;
 
   @override
   Map<String, dynamic> toSupportedType() {
@@ -26,6 +32,8 @@ class _RequestModelTransferPrescriptions implements IaBaseRequest {
       }).toList(),
       'codes': codes,
       'orderId': orderId,
+      'finishAction': finishAction.name,
+      'showActivityIndicator': showActivityIndicator,
     };
   }
 }

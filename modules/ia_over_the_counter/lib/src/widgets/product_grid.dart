@@ -11,6 +11,8 @@ class IaProductGrid extends StatelessWidget {
     required this.type,
     this.pzn,
     this.shouldShowLoading = true,
+    this.title,
+    this.pzns,
   });
 
   /// Product collection to display.
@@ -21,9 +23,17 @@ class IaProductGrid extends StatelessWidget {
   ///
   final String? pzn;
 
-  /// Whether to show a loading indicator while products load (iOS only).
+  /// Whether to show a loading indicator while products load.
   ///
   final bool shouldShowLoading;
+
+  /// Title of the grid, for [IaProductDisplayType.custom].
+  ///
+  final String? title;
+
+  /// Product identifiers (pzns) to show, for [IaProductDisplayType.custom].
+  ///
+  final List<String>? pzns;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +43,8 @@ class IaProductGrid extends StatelessWidget {
         'type': type.name,
         if (pzn != null) 'pzn': pzn,
         'shouldShowLoading': shouldShowLoading,
+        if (title != null) 'title': title,
+        if (pzns != null) 'pzns': pzns,
       },
     );
   }

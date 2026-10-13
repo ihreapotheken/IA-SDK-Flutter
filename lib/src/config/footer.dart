@@ -9,6 +9,7 @@ class IaSdkConfigurationFooter {
     this.shouldShowDataProcessing = true,
     this.shouldShowAppSettings = true,
     this.shouldShowImprint = true,
+    this.isImprintHandledByHostApp = false,
   });
 
   /// Whether to show the data processing button in the footer.
@@ -23,6 +24,15 @@ class IaSdkConfigurationFooter {
   ///
   final bool shouldShowImprint;
 
+  /// Whether the host app shows the imprint itself, when the imprint button reports [IaSdkNavigationTarget.imprint].
+  ///
+  /// iOS always asks [IaSdk.onSdkWillNavigateToTarget] and opens its own imprint page unless the host handles it.
+  /// The Android SDK can't ask, so it either opens its own imprint page or, with this flag, only reports the tap.
+  ///
+  /// Note: Only used on Android.
+  ///
+  final bool isImprintHandledByHostApp;
+
   /// Serialises the class data to a JSON-compatible format.
   ///
   Map<String, dynamic> toJson() {
@@ -30,6 +40,7 @@ class IaSdkConfigurationFooter {
       'shouldShowDataProcessing': shouldShowDataProcessing,
       'shouldShowAppSettings': shouldShowAppSettings,
       'shouldShowImprint': shouldShowImprint,
+      'isImprintHandledByHostApp': isImprintHandledByHostApp,
     };
   }
 }

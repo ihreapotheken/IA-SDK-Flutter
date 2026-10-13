@@ -16,7 +16,27 @@ abstract class IaBasePharmacy extends IaBase {
   ///
   Future<void> setPharmacyId(String pharmacyId);
 
+  /// Stores the pharmacy identifier without validating it or loading the pharmacy, unlike [setPharmacyId].
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<void> savePharmacyId(String pharmacyId);
+
   /// Returns the currently selected pharmacy identifier, or `null` if no pharmacy is selected.
   ///
   Future<String?> getPharmacyId();
+
+  /// Clears the selected pharmacy, so [getPharmacyId] returns `null` until a pharmacy is selected again.
+  ///
+  Future<void> clearPharmacyId();
+
+  /// Returns the details of the selected pharmacy, or `null` if no pharmacy is selected.
+  ///
+  /// With [allowCached] the SDK may return previously loaded details instead of loading them again.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<IaModelPharmacy?> getPharmacy({
+    bool allowCached = true,
+  });
 }

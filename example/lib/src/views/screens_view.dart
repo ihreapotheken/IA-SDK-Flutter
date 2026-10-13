@@ -25,6 +25,11 @@ class ScreensView extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         ElevatedButton(
+          child: Text('Launch Product Search, focused (iOS)'),
+          onPressed: () => IaSdk.instance.overTheCounter.launchProductSearchRoute(focusesOnAppear: true),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
           child: Text('Launch Cart Screen'),
           onPressed: () => IaSdk.instance.ordering.launchCartScreen(),
         ),
@@ -40,8 +45,37 @@ class ScreensView extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         ElevatedButton(
+          child: Text('Launch Apofinder, not cancellable (iOS)'),
+          onPressed: () => IaSdk.instance.launchApofinder(isCancellable: false),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
           child: Text('Launch Redeem Prescription'),
           onPressed: () => IaSdk.instance.prescription.launchRedeemPrescriptionScreen(),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          child: Text('Launch Prescription Photo Scanner (iOS)'),
+          onPressed: () => IaSdk.instance.prescription.launchPrescriptionScanner(
+            IaPrescriptionScannerType.prescription,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          child: Text('Launch E-Prescription Scanner (iOS)'),
+          onPressed: () => IaSdk.instance.prescription.launchPrescriptionScanner(
+            IaPrescriptionScannerType.ePrescription,
+          ),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          child: Text('Turn On Scanner Flashlight (iOS)'),
+          onPressed: () => IaSdk.instance.prescription.setScannerCameraState(isFlashlightOn: true),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          child: Text('Launch Prerequisite Flow (Android)'),
+          onPressed: () => IaSdk.instance.launchPrerequisiteFlow(),
         ),
       ],
     );

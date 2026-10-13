@@ -31,7 +31,12 @@ final class IASDKComponentsViewFactory: NSObject, FlutterPlatformViewFactory {
 
         switch identifier {
         case .cartButton:
-            return IASDKComponentPlatformView(rootView: AnyView(IACartButton())) { rootView in
+            // With a Dart tap handler the tap is reported instead of the SDK opening the cart.
+            let channel = componentsChannel
+            let onTap: EmptyCallback? = params["hasTapHandler"] as? Bool == true
+                ? { channel.invokeMethod("componentTapped", arguments: ["viewId": viewId]) }
+                : nil
+            return IASDKComponentPlatformView(rootView: AnyView(IACartButton(onTap: onTap))) { rootView in
                 SizeReportingHostingController(viewId: viewId, channel: self.componentsChannel, rootView: rootView)
             }
 
@@ -63,6 +68,8 @@ final class IASDKComponentsViewFactory: NSObject, FlutterPlatformViewFactory {
             return .productRecommendations(pzn: pzn ?? "")
         case "customersAlsoBought":
             return .customersAlsoBought(pzn: pzn ?? "")
+        case "custom":
+            return .custom(title: params["title"] as? String ?? "", pzns: params["pzns"] as? [String] ?? [])
         default:
             return .currentOffers(pznToExclude: pzn)
         }

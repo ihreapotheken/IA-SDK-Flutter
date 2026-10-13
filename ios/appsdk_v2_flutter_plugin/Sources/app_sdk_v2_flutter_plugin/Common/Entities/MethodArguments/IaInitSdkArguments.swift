@@ -11,6 +11,68 @@ struct IaInitSdkArguments: Decodable {
     let footer: IaFooterConfigurationArguments
     let initialization: IaInitializationConfigurationArguments
     let uiConfiguration: IaUIConfigurationArguments
+    let isPickupLockerAndCourierShippingEnabled: Bool?
+    let appStoreId: String?
+    let qaConfiguration: IaQaConfigurationArguments?
+    let cardLink: IaCardLinkConfigurationArguments?
+    let hostAppLogFilePath: String?
+}
+
+/// Configuration for CardLink flows the SDK starts itself.
+struct IaCardLinkConfigurationArguments: Decodable {
+    let isSaveCardEnabled: Bool?
+    let userId: String?
+    let phoneNumber: String?
+
+    /// Applies the configured values to the configuration the SDK is about to start CardLink with.
+    func applied(to configuration: CardLinkConfiguration) -> CardLinkConfiguration {
+        guard isSaveCardEnabled != nil || userId != nil || phoneNumber != nil else {
+            return configuration
+        }
+        return CardLinkConfiguration(
+            pharmacyId: configuration.pharmacyId,
+            consentStatus: configuration.consentStatus,
+            canCode: configuration.canCode,
+            phoneNumber: phoneNumber ?? configuration.phoneNumber,
+            userId: userId ?? configuration.userId,
+            cardName: configuration.cardName,
+            isSaveCardEnabled: isSaveCardEnabled ?? configuration.isSaveCardEnabled,
+            source: configuration.source,
+            finishAction: configuration.finishAction
+        )
+    }
+}
+
+/// QA options for testing an integration.
+struct IaQaConfigurationArguments: Decodable {
+    let showTestPharmaciesInApofinder: Bool
+    let features: [String]?
+
+    func mappedToSDK() -> Set<QAFeature> {
+        var qaFeatures = Set((features ?? []).compactMap(Self.qaFeature(named:)))
+        if showTestPharmaciesInApofinder {
+            qaFeatures.insert(.showTestPharmaciesOnApofinder)
+        }
+        return qaFeatures
+    }
+
+    /// Maps the Dart `IaSdkQaFeature` names to the SDK's QA features.
+    private static func qaFeature(named name: String) -> QAFeature? {
+        switch name {
+        case "easyLogsAccessInProduction": .easyLogsAccessInProduction
+        case "forceRefreshCartScreenButton": .forceRefreshCartScreenButton
+        case "pharmacyPCasesInfoButton": .pharmacyPCasesInfoButton
+        case "longPressProductInfo": .longPressProductInfo
+        case "sdkInfoInNavigationBar": .sdkInfoInNavigationBar
+        case "showInteractionWithRealPharmacyWarning": .showInteractionWithRealPharmacyWarning
+        case "showPharmacyIdInputOnApofinder": .showPharmacyIDInputOnApofinder
+        case "imageViewerDebugDetails": .imageViewerDebugDetails
+        case "showFailedScannedCodeInErrorMessage": .showFailedScannedCodeInErrorMessage
+        case "enableFirstResponderLogging": .enableIAFirstResponderLogging
+        case "showLabTestActivationCodeDetails": .showLabTestActivationCodeDetails
+        default: nil
+        }
+    }
 }
 
 /// Configuration options for SDK UI appearance.

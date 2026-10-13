@@ -7,9 +7,11 @@ import de.ihreapotheken.appsdk.flutter.card_link.methods.GetSavedCardsHandler
 import de.ihreapotheken.appsdk.flutter.card_link.methods.LaunchHandler
 import de.ihreapotheken.sdk.cardlink.BuildConfig
 import de.ihreapotheken.sdk.cardlink.CardLinkSdkEnvironment
+import de.ihreapotheken.sdk.cardlink.HostAppLogProvider
 import de.ihreapotheken.sdk.cardlink.CardlinkModule
 import de.ihreapotheken.sdk.cardlink.api.CardLink
 import de.ihreapotheken.sdk.cardlink.api.REQUEST_CODE_CARD_LINK_ACTIVITY
+import de.ihreapotheken.sdk.core.api.featureproviders.SavedCardData
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -128,6 +130,58 @@ class IaSdkFlutterCardLink :
 
             "deleteCard" -> {
                 deleteCardHandler.handle(call, result)
+            }
+
+            "setHostAppLogFilePath" -> {
+                val path = call.argument<String>("path")
+                if (path == null) {
+                    result.error("INVALID_ARGUMENTS", "path is required", null)
+                    return
+                }
+                HostAppLogProvider.initialize(path.ifEmpty { null })
+                result.success(null)
+            }
+
+            "updateCard" -> {
+                val userId = call.argument<String>("userId")
+                val originalName = call.argument<String>("originalName")
+                val name = call.argument<String>("name")
+                val phoneNumber = call.argument<String>("phoneNumber")
+                val canCode = call.argument<String>("canCode")
+                if (userId == null || originalName == null || name == null || phoneNumber == null || canCode == null) {
+                    result.error(
+                        "INVALID_ARGUMENTS",
+                        "userId, originalName, name, phoneNumber and canCode are required",
+                        null,
+                    )
+                    return
+                }
+                activity?.let {
+                    CardLink.updateCard(
+                        it,
+                        originalName,
+                        SavedCardData(
+                            name = name,
+                            phoneNumber = phoneNumber,
+                            canCode = canCode,
+                            userId = userId,
+                        ),
+                    )
+                    result.success(null)
+                } ?: result.error("NO_ACTIVITY", "Activity not available", null)
+            }
+
+            "reorderSavedCards" -> {
+                val userId = call.argument<String>("userId")
+                val orderedCanCodes = call.argument<List<*>>("orderedCanCodes")?.filterIsInstance<String>()
+                if (userId == null || orderedCanCodes == null) {
+                    result.error("INVALID_ARGUMENTS", "userId and orderedCanCodes are required", null)
+                    return
+                }
+                activity?.let {
+                    CardLink.reorderSavedCards(it, orderedCanCodes, userId)
+                    result.success(null)
+                } ?: result.error("NO_ACTIVITY", "Activity not available", null)
             }
 
             "deleteAllCards" -> {

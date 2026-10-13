@@ -14,7 +14,7 @@ class CardLinkEventSender {
         let status = accepted ? "accepted" : "declined"
         methodChannel?.invokeMethod(
             "cardLinkConsentEvent",
-            arguments: ["status": status]
+            arguments: ["status": status, "phoneNumber": phoneNumber ?? NSNull()] as [String: Any]
         )
     }
 

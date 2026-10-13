@@ -5,6 +5,8 @@ import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.view.IaScreen
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformViewRegistry
@@ -34,6 +36,13 @@ class IaClientBindings(
         val methodHandler = IaClientMethods(this)
         channel.setMethodCallHandler(methodHandler::callHandler)
 
+        // Report initialization state changes, like the iOS initializationStatePublisher.
+        MainScope().launch {
+            IaSdk.initState.collect { state ->
+                callbacks.onInitStateChanged(state)
+            }
+        }
+
         // Register all SDK entry point views
         val entryPoints = listOf(
             IaScreen.StartScreen,
@@ -41,10 +50,12 @@ class IaClientBindings(
             IaScreen.SearchScreen,
             IaScreen.PharmacyScreen,
             IaScreen.PrerequisiteFlow,
-            IaScreen.TransferPrescriptionsScreen
+            IaScreen.TransferPrescriptionsScreen,
+            IaScreen.ApofinderScreen,
+            IaScreen.RedeemPrescription,
         )
 
-        val viewFactory = IaClientFlutterViewFactory()
+        val viewFactory = IaClientFlutterViewFactory(callbacks)
         for (view in entryPoints) {
             platformViewRegistry.registerViewFactory(
                 view::class.simpleName!!,

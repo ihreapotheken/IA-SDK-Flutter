@@ -13,10 +13,15 @@ abstract mixin class IaBaseViews {
 
   /// Places a view integration to the native integration stack.
   ///
-  Future<void> launch() async {
+  /// Screen options are forwarded as [arguments], next to the view identifier.
+  ///
+  Future<void> launch({
+    Map<String, dynamic> arguments = const {},
+  }) async {
     return await IaBaseMethods._channel.invokeMethod(
       launchMethodId,
       {
+        ...arguments,
         launchMethodArgId: Platform.isAndroid ? viewId.substring(0, 1).toUpperCase() + viewId.substring(1) : viewId,
       },
     );
@@ -36,6 +41,7 @@ class IaSdkPlatformView extends StatefulWidget {
     required this.viewId,
     this.creationParams = const {},
     this.selfSizing = true,
+    this.onTap,
   });
 
   /// Identifier for the currently-specified platform view object.
@@ -57,6 +63,12 @@ class IaSdkPlatformView extends StatefulWidget {
   /// constraints — typically via a [SizedBox] or [Expanded] wrapper.
   ///
   final bool selfSizing;
+
+  /// Called when the native component is tapped, instead of the component's own tap action.
+  ///
+  /// Only used by components that support it (e.g. `IaCartButton`).
+  ///
+  final VoidCallback? onTap;
 
   @override
   State<IaSdkPlatformView> createState() {
@@ -82,6 +94,7 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
 
   Map<String, dynamic> get _creationParams => {
     'viewId': _platformViewType,
+    'hasTapHandler': widget.onTap != null,
     ...widget.creationParams,
   };
 
@@ -90,6 +103,8 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
     if (widget.selfSizing) {
       _ComponentSizeDispatcher.instance.register(id, _onSizeUpdate);
     }
+    // Looked up on each tap, so a rebuilt widget's new callback is used.
+    _ComponentTapDispatcher.instance.register(id, () => widget.onTap?.call());
   }
 
   void _onSizeUpdate(Size size) {
@@ -103,6 +118,9 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
   void dispose() {
     if (_platformViewId != null && widget.selfSizing) {
       _ComponentSizeDispatcher.instance.unregister(_platformViewId!);
+    }
+    if (_platformViewId != null) {
+      _ComponentTapDispatcher.instance.unregister(_platformViewId!);
     }
     super.dispose();
   }
@@ -226,6 +244,42 @@ class _ComponentSizeDispatcher implements IaBaseCallbackHandler {
         (args['height'] as num).toDouble(),
       );
       _listeners[viewId]?.call(size);
+      return null;
+    };
+  }
+}
+
+/// Routes native component taps to the registered [IaSdkPlatformView.onTap].
+///
+/// Listens on the main SDK MethodChannel via the shared [IaBaseCallbacks]
+/// system, like [_ComponentSizeDispatcher].
+///
+class _ComponentTapDispatcher implements IaBaseCallbackHandler {
+  _ComponentTapDispatcher._() {
+    IaBaseCallbacks(handlers: [this]);
+  }
+
+  static final instance = _ComponentTapDispatcher._();
+
+  final _listeners = <int, VoidCallback>{};
+
+  void register(int viewId, VoidCallback callback) {
+    _listeners[viewId] = callback;
+  }
+
+  void unregister(int viewId) {
+    _listeners.remove(viewId);
+  }
+
+  @override
+  String get methodId => 'componentTapped';
+
+  @override
+  Future<dynamic> Function(dynamic args) get handler {
+    return (args) async {
+      if (args is! Map) return null;
+      final viewId = (args['viewId'] as num).toInt();
+      _listeners[viewId]?.call();
       return null;
     };
   }

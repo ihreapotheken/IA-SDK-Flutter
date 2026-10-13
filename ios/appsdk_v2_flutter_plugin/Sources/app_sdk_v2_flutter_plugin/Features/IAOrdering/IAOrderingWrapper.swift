@@ -10,9 +10,12 @@ final class IAOrderingWrapper {
         return nil
     }
     
-    func getCartDetails() async throws -> Any? {
+    func getCartDetails(arguments: Any?) async throws -> Any? {
+        let args = arguments as? [String: Any] ?? [:]
         let cartDetails = try await IASDK.ordering.getCartDetails(
-            allowCached: true, throwIfNil: false, shouldEmit: false
+            allowCached: args["allowCached"] as? Bool ?? true,
+            throwIfNil: false,
+            shouldEmit: args["shouldEmitCartUpdate"] as? Bool ?? false
         )
         guard let cartDetails else { return nil }
         let products = cartDetails.products.map { product in
@@ -38,8 +41,8 @@ final class IAOrderingWrapper {
             pdfs: mapped.pdfs,
             codes: mapped.codes,
             orderID: mapped.orderId,
-            showActivityIndicator: true,
-            finishAction: .openCart
+            showActivityIndicator: arguments.showActivityIndicator,
+            finishAction: arguments.finishAction
         )
         return nil
     }

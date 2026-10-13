@@ -1,0 +1,41 @@
+part of '../core.dart';
+
+/// Configuration for CardLink flows the SDK starts itself, for example from the "redeem prescription" screen.
+///
+/// CardLink flows launched with `IaSdk.instance.cardLink.launch` use the values passed there instead.
+///
+class IaSdkConfigurationCardLink {
+  /// Generates an instance of CardLink configuration.
+  ///
+  const IaSdkConfigurationCardLink({
+    this.isSaveCardEnabled,
+    this.userId,
+    this.phoneNumber,
+  });
+
+  /// Whether the user can save their health card. `null` keeps the SDK default.
+  ///
+  final bool? isSaveCardEnabled;
+
+  /// User identifier under which saved cards are stored. `null` keeps the SDK default.
+  ///
+  /// Note: Only used on iOS.
+  ///
+  final String? userId;
+
+  /// Phone number to pre-fill. `null` keeps the SDK default.
+  ///
+  /// Note: Only used on iOS.
+  ///
+  final String? phoneNumber;
+
+  /// Serialises the class data to a JSON-compatible format.
+  ///
+  Map<String, dynamic> toJson() {
+    return {
+      'isSaveCardEnabled': isSaveCardEnabled,
+      'userId': userId,
+      'phoneNumber': phoneNumber,
+    };
+  }
+}

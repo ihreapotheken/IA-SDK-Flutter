@@ -49,7 +49,15 @@ internal class IaClientComponentsViewFactory(
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             setContent {
                 when (identifier) {
-                    IaComponentIdentifier.CartButton -> IaCartButton(Modifier)
+                    IaComponentIdentifier.CartButton -> IaCartButton(
+                        Modifier,
+                        // With a Dart tap handler the tap is reported instead of the SDK opening the cart.
+                        onClick = if (creationParams?.get("hasTapHandler") == true) {
+                            { componentsChannel.invokeMethod("componentTapped", mapOf("viewId" to viewId)) }
+                        } else {
+                            null
+                        },
+                    )
                     IaComponentIdentifier.ProductGrid -> renderProductGrid(creationParams)
                 }
             }
@@ -64,6 +72,10 @@ internal class IaClientComponentsViewFactory(
             "productsOfTheMonth" -> ProductType.ProductOfTheMonths
             "productRecommendations" -> ProductType.ProductRecommendations(pzn ?: "")
             "customersAlsoBought" -> ProductType.CustomersAlsoBought(pzn ?: "")
+            "custom" -> ProductType.Custom(
+                title = creationParams["title"] as? String ?: "",
+                pzns = (creationParams["pzns"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
+            )
             else -> ProductType.CurrentOffers
         }
         val showLoading = creationParams?.get("shouldShowLoading") as? Boolean ?: true

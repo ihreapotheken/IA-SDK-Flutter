@@ -34,15 +34,30 @@ enum IASDKViewIdentifier: String, CaseIterable {
     case redeemPrescription = "redeemPrescription"
 
     /**
+     * Prescription photo scanner from IAPrescription module.
+     */
+    case prescriptionScanner = "prescriptionScanner"
+
+    /**
+     * E-prescription QR code scanner from IAPrescription module.
+     */
+    case ePrescriptionScanner = "ePrescriptionScanner"
+
+    /**
      * Visual interface representation.
      */
-    func iaScreen() -> any IAScreen {
+    @MainActor
+    func iaScreen(isCancellable: Bool = true, focusesOnAppear: Bool? = nil) -> any IAScreen {
         switch self {
         case IASDKViewIdentifier.startScreen:
             IAStartScreen()
 
         case IASDKViewIdentifier.productSearchScreen:
-            IAProductSearchScreen()
+            if let focusesOnAppear {
+                IAProductSearchScreen().focusesOnAppear(focusesOnAppear)
+            } else {
+                IAProductSearchScreen()
+            }
 
         case IASDKViewIdentifier.cartScreen:
             IACartScreen()
@@ -51,10 +66,16 @@ enum IASDKViewIdentifier: String, CaseIterable {
             IAPharmacyScreen()
 
         case IASDKViewIdentifier.apofinderScreen:
-            IAApofinderScreen(isCancellable: true, onFinish: { _ in })
+            IAApofinderScreen(isCancellable: isCancellable, onFinish: { _ in })
 
         case IASDKViewIdentifier.redeemPrescription:
             IARedeemPrescriptionScreen()
+
+        case IASDKViewIdentifier.prescriptionScanner:
+            CameraControlledPrescriptionScannerScreen(type: .prescription)
+
+        case IASDKViewIdentifier.ePrescriptionScanner:
+            CameraControlledPrescriptionScannerScreen(type: .ePrescription)
         }
     }
 }

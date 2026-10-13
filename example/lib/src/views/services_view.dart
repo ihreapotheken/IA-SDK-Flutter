@@ -38,6 +38,54 @@ class ServicesView extends StatelessWidget {
             }
           },
         ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Reset Prerequisites'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.resetPrerequisites();
+              if (context.mounted) _showResult(context, 'Prerequisites reset');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Reset Legal Disclaimer (iOS)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.resetLegalDisclaimer();
+              if (context.mounted) _showResult(context, 'Legal disclaimer reset');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Mark Onboarding Not Shown (iOS)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.setIsOnboardingShown(false);
+              if (context.mounted) _showResult(context, 'Onboarding marked as not shown');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Is Prerequisite Flow Completed (Android)'),
+          onPressed: () async {
+            try {
+              final result = await IaSdk.instance.isPrerequisiteFlowCompleted();
+              if (context.mounted) _showResult(context, 'isPrerequisiteFlowCompleted: $result');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
         const SizedBox(height: 24),
         _SectionHeader(title: 'Pharmacy'),
         const SizedBox(height: 8),
@@ -47,6 +95,35 @@ class ServicesView extends StatelessWidget {
             try {
               final id = await IaSdk.instance.pharmacy.getPharmacyId();
               if (context.mounted) _showResult(context, 'Pharmacy ID: ${id ?? 'none'}');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Get Pharmacy (iOS)'),
+          onPressed: () async {
+            try {
+              final pharmacy = await IaSdk.instance.pharmacy.getPharmacy();
+              if (context.mounted) {
+                _showResult(
+                  context,
+                  pharmacy == null ? 'No pharmacy selected' : '${pharmacy.name}, ${pharmacy.street}, ${pharmacy.city}',
+                );
+              }
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Clear Pharmacy ID'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.pharmacy.clearPharmacyId();
+              if (context.mounted) _showResult(context, 'Pharmacy ID cleared');
             } catch (e) {
               if (context.mounted) _showResult(context, 'Error: $e');
             }
@@ -135,7 +212,7 @@ class ServicesView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         ElevatedButton(
-          child: Text('Set billing address (iOS)'),
+          child: Text('Set billing address'),
           onPressed: () async {
             try {
               await IaSdk.instance.setUserBillingAddress(
@@ -157,7 +234,7 @@ class ServicesView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         ElevatedButton(
-          child: Text('Set delivery address (iOS)'),
+          child: Text('Set delivery address'),
           onPressed: () async {
             try {
               await IaSdk.instance.setUserDeliveryAddress(
@@ -170,6 +247,19 @@ class ServicesView extends StatelessWidget {
                 city: 'Berlin',
               );
               if (context.mounted) _showResult(context, 'Delivery address set');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Clear billing and delivery addresses'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.clearUserBillingAddress();
+              await IaSdk.instance.clearUserDeliveryAddress();
+              if (context.mounted) _showResult(context, 'Addresses cleared');
             } catch (e) {
               if (context.mounted) _showResult(context, 'Error: $e');
             }
@@ -208,6 +298,69 @@ class ServicesView extends StatelessWidget {
         _SectionHeader(title: 'Appearance'),
         const SizedBox(height: 8),
         const _MascotIllustrationsToggle(),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Disable Haptic Feedback (Android)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.setHapticFeedbackEnabled(false);
+              if (context.mounted) _showResult(context, 'Haptic feedback disabled');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 24),
+        _SectionHeader(title: 'Analytics'),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Grant Analytics Consent (Android)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.setAnalyticsConsent(IaSdkAnalyticsConsent.granted);
+              if (context.mounted) _showResult(context, 'Analytics consent granted');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 24),
+        _SectionHeader(title: 'Debugging'),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Present Logs (iOS)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.presentLogs();
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Export Logs (Android)'),
+          onPressed: () async {
+            try {
+              final path = await IaSdk.instance.exportLogs();
+              if (context.mounted) _showResult(context, 'Logs: ${path ?? 'none'}');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Get User ID (iOS)'),
+          onPressed: () async {
+            try {
+              final userId = await IaSdk.instance.getUserId();
+              if (context.mounted) _showResult(context, 'User ID: ${userId ?? 'none'}');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
         const SizedBox(height: 24),
         _SectionHeader(title: 'Cache'),
         const SizedBox(height: 8),
@@ -220,6 +373,30 @@ class ServicesView extends StatelessWidget {
                 prerequisites: true,
               );
               if (context.mounted) _showResult(context, 'Cache cleaned');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Remove All Cached Responses (iOS)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.removeAllCachedResponses();
+              if (context.mounted) _showResult(context, 'Cached responses removed');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Clear Product Grid Cache (iOS)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.overTheCounter.clearProductGridCache();
+              if (context.mounted) _showResult(context, 'Product grid cache cleared');
             } catch (e) {
               if (context.mounted) _showResult(context, 'Error: $e');
             }

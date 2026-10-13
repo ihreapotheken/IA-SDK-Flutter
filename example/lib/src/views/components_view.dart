@@ -13,6 +13,16 @@ class ComponentsView extends StatefulWidget {
 class _ComponentsViewState extends State<ComponentsView> {
   IaProductDisplayType _selectedGridType = IaProductDisplayType.currentOffers;
 
+  final _customPznsController = TextEditingController();
+
+  List<String> _customPzns = const [];
+
+  @override
+  void dispose() {
+    _customPznsController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -25,13 +35,24 @@ class _ComponentsViewState extends State<ComponentsView> {
       children: [
         const _SectionHeader('Cart Button'),
         const IaCartButton(),
+        const SizedBox(height: 12),
+        Text('With a host tap handler', style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: 4),
+        IaCartButton(
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Cart button tapped, the host app handles it.')),
+            );
+          },
+        ),
         const SizedBox(height: 24),
         const _SectionHeader('Product Grid'),
         Text('Display Type', style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 4),
         Wrap(
           spacing: 8,
-          children: IaProductDisplayType.values.map((type) {
+          // The custom type needs product identifiers, see the custom grid below.
+          children: IaProductDisplayType.values.where((type) => type != IaProductDisplayType.custom).map((type) {
             return ChoiceChip(
               label: Text(type.name),
               selected: _selectedGridType == type,
@@ -44,6 +65,27 @@ class _ComponentsViewState extends State<ComponentsView> {
           key: ValueKey(_selectedGridType),
           type: _selectedGridType,
         ),
+        const SizedBox(height: 24),
+        const _SectionHeader('Custom Product Grid'),
+        TextField(
+          controller: _customPznsController,
+          decoration: const InputDecoration(
+            labelText: 'PZNs, comma separated',
+          ),
+          onSubmitted: (value) {
+            setState(() {
+              _customPzns = value.split(',').map((pzn) => pzn.trim()).where((pzn) => pzn.isNotEmpty).toList();
+            });
+          },
+        ),
+        const SizedBox(height: 12),
+        if (_customPzns.isNotEmpty)
+          IaProductGrid(
+            key: ValueKey(_customPzns.join(',')),
+            type: IaProductDisplayType.custom,
+            title: 'Selected for you',
+            pzns: _customPzns,
+          ),
       ],
     );
   }

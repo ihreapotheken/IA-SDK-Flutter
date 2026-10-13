@@ -50,6 +50,20 @@ extension Error {
         case .setUserDeliveryAddress: "SET_USER_DELIVERY_ADDRESS_ERROR"
         case .legacySetupAsCoreApp: "LEGACY_SETUP_AS_CORE_APP_ERROR"
         case .setShouldShowMascotIllustrations: "SET_SHOULD_SHOW_MASCOT_ILLUSTRATIONS_ERROR"
+        case .clearPharmacyId: "CLEAR_PHARMACY_ID_ERROR"
+        case .resetPrerequisites: "RESET_PREREQUISITES_ERROR"
+        case .clearProductGridCache: "CLEAR_PRODUCT_GRID_CACHE_ERROR"
+        case .resetLegalDisclaimer: "RESET_LEGAL_DISCLAIMER_ERROR"
+        case .setIsOnboardingShown: "SET_IS_ONBOARDING_SHOWN_ERROR"
+        case .clearUserBillingAddress: "CLEAR_USER_BILLING_ADDRESS_ERROR"
+        case .clearUserDeliveryAddress: "CLEAR_USER_DELIVERY_ADDRESS_ERROR"
+        case .presentLogs: "PRESENT_LOGS_ERROR"
+        case .getUserId: "GET_USER_ID_ERROR"
+        case .setLogMessageForwardingEnabled: "SET_LOG_MESSAGE_FORWARDING_ENABLED_ERROR"
+        case .getPharmacy: "GET_PHARMACY_ERROR"
+        case .removeAllCachedResponses: "REMOVE_ALL_CACHED_RESPONSES_ERROR"
+        case .savePharmacyId: "SAVE_PHARMACY_ID_ERROR"
+        case .setPrescriptionScannerCameraState: "SET_PRESCRIPTION_SCANNER_CAMERA_STATE_ERROR"
         }
     }
 }

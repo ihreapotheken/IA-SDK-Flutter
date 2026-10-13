@@ -9,6 +9,10 @@ part 'views.dart';
 part 'models/request/launch.dart';
 part 'models/request/get_saved_cards.dart';
 part 'models/request/delete_card.dart';
+part 'models/request/update_card.dart';
+part 'models/request/reorder_saved_cards.dart';
+part 'models/request/set_mocks.dart';
+part 'models/request/set_host_app_log_file_path.dart';
 part 'callbacks/_callbacks.dart';
 part 'callbacks/consent_event.dart';
 part 'callbacks/session_created.dart';
@@ -39,6 +43,8 @@ class IaModuleCardLink extends IaBaseCardLink {
     String? appId,
     String? coreAppLogFileURL,
     required bool supportsLiquidGlass,
+    IaCardLinkIllustrationColor? illustrationColor,
+    bool? mockInvalidXmlData,
   }) async {
     final arguments = _RequestModelLaunch(
       sdkApiKey: sdkApiKey,
@@ -59,6 +65,8 @@ class IaModuleCardLink extends IaBaseCardLink {
       appId: appId,
       coreAppLogFileURL: coreAppLogFileURL,
       supportsLiquidGlass: supportsLiquidGlass,
+      illustrationColor: illustrationColor,
+      mockInvalidXmlData: mockInvalidXmlData,
     );
     return await _Methods.launch.invoke<void>(arguments);
   }
@@ -98,6 +106,36 @@ class IaModuleCardLink extends IaBaseCardLink {
   }
 
   @override
+  Future<void> updateCard({
+    required String userId,
+    required String originalName,
+    required String name,
+    required String phoneNumber,
+    required String canCode,
+  }) async {
+    final arguments = _RequestModelUpdateCard(
+      userId: userId,
+      originalName: originalName,
+      name: name,
+      phoneNumber: phoneNumber,
+      canCode: canCode,
+    );
+    return await _Methods.updateCard.invoke<void>(arguments);
+  }
+
+  @override
+  Future<void> reorderSavedCards({
+    required String userId,
+    required List<String> orderedCanCodes,
+  }) async {
+    final arguments = _RequestModelReorderSavedCards(
+      userId: userId,
+      orderedCanCodes: orderedCanCodes,
+    );
+    return await _Methods.reorderSavedCards.invoke<void>(arguments);
+  }
+
+  @override
   Future<String?> deleteAllCards() async {
     return await _Methods.deleteAllCards.invoke<String?>(null);
   }
@@ -105,6 +143,22 @@ class IaModuleCardLink extends IaBaseCardLink {
   @override
   Future<void> deleteAllUserRelatedData() async {
     return await _Methods.deleteAllUserRelatedData.invoke<void>(null);
+  }
+
+  @override
+  Future<void> setHostAppLogFilePath(String path) async {
+    final arguments = _RequestModelSetHostAppLogFilePath(
+      path: path,
+    );
+    return await _Methods.setHostAppLogFilePath.invoke<void>(arguments);
+  }
+
+  @override
+  Future<void> setMocks(IaCardLinkMocks mocks) async {
+    final arguments = _RequestModelSetMocks(
+      mocks: mocks,
+    );
+    return await _Methods.setMocks.invoke<void>(arguments);
   }
 
   @override
@@ -145,6 +199,34 @@ class IaModuleCardLink extends IaBaseCardLink {
   @override
   StreamController<String> get analyticsEventListener {
     return _analyticsEventListener;
+  }
+
+  static final _consentPhoneNumberListener = StreamController<String>.broadcast();
+
+  @override
+  StreamController<String> get consentPhoneNumberListener {
+    return _consentPhoneNumberListener;
+  }
+
+  static final _savedCardsListener = StreamController<List<IaCardLinkSavedCard>>.broadcast();
+
+  @override
+  StreamController<List<IaCardLinkSavedCard>> get savedCardsListener {
+    return _savedCardsListener;
+  }
+
+  static final _initializationErrorListener = StreamController<String?>.broadcast();
+
+  @override
+  StreamController<String?> get initializationErrorListener {
+    return _initializationErrorListener;
+  }
+
+  static final _resultListener = StreamController<String?>.broadcast();
+
+  @override
+  StreamController<String?> get resultListener {
+    return _resultListener;
   }
 
   @override

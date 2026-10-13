@@ -7,6 +7,7 @@ import de.ihreapotheken.appsdk.flutter.card_link.models.ConsentStatusMapper
 import de.ihreapotheken.appsdk.flutter.card_link.models.EnvironmentMapper
 import de.ihreapotheken.sdk.cardlink.api.CardLink
 import de.ihreapotheken.sdk.cardlink.api.CardLinkConfig
+import de.ihreapotheken.sdk.cardlink.api.CardLinkIllustrationColor
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel.Result
 
@@ -49,6 +50,11 @@ class LaunchHandler(
         val cardLinkSdkEnvironment = EnvironmentMapper.fromString(call.argument<String>("environment"))
         val applicationId = call.argument<String>("appId")
         val coreAppLogFileURL = call.argument<String>("coreAppLogFileURL")
+        // Absent or unknown values keep the SDK default.
+        val illustrationColor = CardLinkIllustrationColor.entries
+            .firstOrNull { it.name == call.argument<String>("illustrationColor") }
+            ?: CardLinkIllustrationColor.RED
+        val mockInvalidXmlDataEnabled = call.argument<Boolean>("mockInvalidXmlData") ?: false
 
         val flowType = call.argument<String>("flowType") ?: "launchCardLinkSdk"
 
@@ -71,6 +77,8 @@ class LaunchHandler(
             listener = listener,
             applicationId = applicationId,
             hostAppLogFilePath = coreAppLogFileURL,
+            illustrationColor = illustrationColor,
+            mockInvalidXmlDataEnabled = mockInvalidXmlDataEnabled,
         )
 
         activityProvider()?.let { activity ->

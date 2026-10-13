@@ -28,6 +28,32 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
   legacySetupAsCoreApp,
 
   setShouldShowMascotIllustrations,
+
+  resetPrerequisites,
+
+  resetLegalDisclaimer,
+
+  setIsOnboardingShown,
+
+  isPrerequisiteFlowCompleted,
+
+  clearUserBillingAddress,
+
+  clearUserDeliveryAddress,
+
+  setAnalyticsConsent,
+
+  setHapticFeedbackEnabled,
+
+  presentLogs,
+
+  exportLogs,
+
+  getUserId,
+
+  setLogMessageForwardingEnabled,
+
+  removeAllCachedResponses,
   ;
 
   @override
@@ -49,6 +75,12 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
         return _RequestModelSetUserAddress;
       case _Methods.setShouldShowMascotIllustrations:
         return _RequestModelSetShouldShowMascotIllustrations;
+      case _Methods.setAnalyticsConsent:
+        return _RequestModelSetAnalyticsConsent;
+      case _Methods.setIsOnboardingShown:
+      case _Methods.setHapticFeedbackEnabled:
+      case _Methods.setLogMessageForwardingEnabled:
+        return _RequestModelSetEnabled;
       default:
         return null;
     }

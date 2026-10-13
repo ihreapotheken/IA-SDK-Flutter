@@ -25,9 +25,15 @@ enum IaCardLinkEvent {
   ///
   openTermsAndConditions,
 
-  /// A card (CAN code) was saved.
+  /// A card (CAN code) was saved. The saved cards are reported through `savedCardsListener`.
   ///
-  cardSaved;
+  cardSaved,
+
+  /// CardLink closed with a result, reported through `resultListener`.
+  ///
+  /// Note: Only reported on Android.
+  ///
+  finished;
 
   /// Returns the raw string value for native communication.
   ///
@@ -45,6 +51,8 @@ enum IaCardLinkEvent {
         return 'openTermsAndConditions';
       case IaCardLinkEvent.cardSaved:
         return 'cardSaved';
+      case IaCardLinkEvent.finished:
+        return 'cardLinkResult';
     }
   }
 
@@ -64,6 +72,8 @@ enum IaCardLinkEvent {
         return IaCardLinkEvent.openTermsAndConditions;
       case 'cardSaved':
         return IaCardLinkEvent.cardSaved;
+      case 'cardLinkResult':
+        return IaCardLinkEvent.finished;
       default:
         throw ArgumentError('Unknown CardLink event: $rawValue');
     }

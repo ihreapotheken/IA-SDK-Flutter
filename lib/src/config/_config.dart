@@ -15,6 +15,14 @@ class IaSdkConfiguration {
     this.footer = const IaSdkConfigurationFooter(),
     this.initialization = const IaSdkConfigurationInitialization(),
     this.uiConfiguration = const IaUIConfiguration(),
+    this.isPickupLockerAndCourierShippingEnabled,
+    this.appStoreId,
+    this.playStoreId,
+    this.isAnalyticsEnabled,
+    this.isHapticFeedbackEnabled,
+    this.qaConfiguration,
+    this.cardLink,
+    this.hostAppLogFilePath,
   });
 
   /// Key used to authenticate the client setup with the backend service.
@@ -30,8 +38,6 @@ class IaSdkConfiguration {
   final String clientId;
 
   /// Selected server environment specification.
-  ///
-  /// Currently only available with the iOS platform.
   ///
   /// See [IaSdkConfigurationServerEnvironment] for further information.
   ///
@@ -53,6 +59,56 @@ class IaSdkConfiguration {
   ///
   final IaUIConfiguration uiConfiguration;
 
+  /// Whether checkout offers pickup locker and courier shipping as delivery options.
+  ///
+  /// `null` keeps the SDK default.
+  ///
+  final bool? isPickupLockerAndCourierShippingEnabled;
+
+  /// App Store identifier of the host app, used by the SDK to link to the store listing (for example for updates).
+  ///
+  /// Note: Only used on iOS. See [playStoreId] for Android.
+  ///
+  final String? appStoreId;
+
+  /// Google Play identifier of the host app, used by the SDK to link to the store listing (for example for updates).
+  ///
+  /// Note: Only used on Android. See [appStoreId] for iOS.
+  ///
+  final String? playStoreId;
+
+  /// Whether the SDK tracks analytics events, reported through [IaSdk.analyticsEventListener].
+  ///
+  /// `null` keeps the SDK default.
+  ///
+  /// Note: Only used on Android.
+  ///
+  final bool? isAnalyticsEnabled;
+
+  /// Whether SDK screens use haptic feedback. Can be changed later with [IaSdk.setHapticFeedbackEnabled].
+  ///
+  /// `null` keeps the SDK default.
+  ///
+  /// Note: Only used on Android.
+  ///
+  final bool? isHapticFeedbackEnabled;
+
+  /// QA options for testing an integration. Not meant for production builds.
+  ///
+  /// `null` keeps the previous behavior: on iOS Apofinder lists test pharmacies, on Android the SDK defaults apply.
+  ///
+  final IaSdkConfigurationQa? qaConfiguration;
+
+  /// Configuration for CardLink flows the SDK starts itself, for example from the "redeem prescription" screen.
+  ///
+  final IaSdkConfigurationCardLink? cardLink;
+
+  /// Path to the host app's log file, attached to problem reports sent from SDK screens.
+  ///
+  /// On Android it's attached to CardLink problem reports, when the CardLink module is registered.
+  ///
+  final String? hostAppLogFilePath;
+
   /// Serialises the class data to a JSON-compatible format.
   ///
   Map<String, dynamic> toJson() {
@@ -64,6 +120,14 @@ class IaSdkConfiguration {
       'footer': footer.toJson(),
       'initialization': initialization.toJson(),
       'uiConfiguration': uiConfiguration.toJson(),
+      'isPickupLockerAndCourierShippingEnabled': isPickupLockerAndCourierShippingEnabled,
+      'appStoreId': appStoreId,
+      'playStoreId': playStoreId,
+      'isAnalyticsEnabled': isAnalyticsEnabled,
+      'isHapticFeedbackEnabled': isHapticFeedbackEnabled,
+      'qaConfiguration': qaConfiguration?.toJson(),
+      'cardLink': cardLink?.toJson(),
+      'hostAppLogFilePath': hostAppLogFilePath,
     };
   }
 }

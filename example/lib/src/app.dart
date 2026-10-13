@@ -56,6 +56,25 @@ class _ExampleAppState extends State<ExampleApp> {
       );
     };
 
+    IaSdk.instance.onSdkBackAction = () async {
+      debugPrint('Host app: SDK screen closes with the back action');
+      return true;
+    };
+
+    IaSdk.instance.prerequisitesResultListener.stream.listen(
+      (result) {
+        debugPrint(
+          'Host app: Prerequisites finished, cancelled: ${result.isCancelled}, pharmacy: ${result.pharmacyId}',
+        );
+      },
+    );
+
+    IaSdk.instance.initializationStateListener.stream.listen(
+      (state) {
+        debugPrint('Host app: SDK initialization state: ${state.name}');
+      },
+    );
+
     await IaSdk.instance.register(
       modules: [
         IaModuleCardLink(),
@@ -85,6 +104,23 @@ class _ExampleAppState extends State<ExampleApp> {
         );
       },
     );
+
+    IaSdk.instance.analyticsEventListener.stream.listen(
+      (event) {
+        debugPrint('Host app: SDK analytics event: ${event.type} ${event.parameters}');
+      },
+    );
+
+    // Log scanned prescriptions and let the SDK add them to the cart as usual.
+    IaSdk.instance.prescription.onPrescriptionPhotoScanned = (imageData) async {
+      debugPrint('Host app: Prescription photo scanned (${imageData.length} bytes)');
+      return IaModelPrescriptionScanDecision.performDefault;
+    };
+
+    IaSdk.instance.prescription.onEPrescriptionScanned = (scan) async {
+      debugPrint('Host app: E-prescription scanned with ${scan.urls.length} prescription(s)');
+      return IaModelPrescriptionScanDecision.performDefault;
+    };
 
     IaSdk.instance.cardLink.consentEventListener.stream.listen(
       (event) => debugPrint('Host app: CardLink consent event: $event'),

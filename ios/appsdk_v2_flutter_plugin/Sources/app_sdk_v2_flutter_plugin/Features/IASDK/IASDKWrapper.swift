@@ -8,8 +8,9 @@ import UIKit
 final class IASDKWrapper {
     private let argumentDecoder = IaArgumentDecoder()
 
-    func initialize(arguments: Any) async throws -> Any? {
+    func initialize(arguments: Any, delegate: IaClientDelegate) async throws -> Any? {
         let arguments = try argumentDecoder.decode(IaInitSdkArguments.self, from: arguments)
+        delegate.cardLinkConfiguration = arguments.cardLink
         let initializationOptions = arguments.initialization.mappedToSDK()
         
         // Configuration
@@ -24,9 +25,23 @@ final class IASDKWrapper {
         IASDK.configuration.footer.shouldShowDataProcessing = arguments.footer.shouldShowDataProcessing
         IASDK.configuration.footer.shouldShowImprint = arguments.footer.shouldShowImprint
         IASDK.configuration.uiConfiguration = arguments.uiConfiguration.mappedToSDK()
+        if let isPickupLockerAndCourierShippingEnabled = arguments.isPickupLockerAndCourierShippingEnabled {
+            IASDK.configuration.isPickupLockerAndCourierShippingEnabled = isPickupLockerAndCourierShippingEnabled
+        }
 
-        // @TODO: remove, just for testing
-        IASDK.QA.setQAFeatures([.showTestPharmaciesOnApofinder])
+        if let appStoreId = arguments.appStoreId {
+            IASDK.configuration.appStoreID = appStoreId
+        }
+        if let hostAppLogFilePath = arguments.hostAppLogFilePath, !hostAppLogFilePath.isEmpty {
+            IASDK.configuration.hostAppLogFileURL = URL(fileURLWithPath: hostAppLogFilePath)
+        }
+
+        if let qaConfiguration = arguments.qaConfiguration {
+            IASDK.QA.setQAFeatures(qaConfiguration.mappedToSDK())
+        } else {
+            // @TODO: remove, just for testing
+            IASDK.QA.setQAFeatures([.showTestPharmaciesOnApofinder])
+        }
         
         // Auto initialization is enabled to match Android behavior in terms of prerequisites.
         IASDK.configuration.isAutoInitializationEnabled = true
@@ -72,7 +87,14 @@ final class IASDKWrapper {
     
     func launchRoute(arguments: Any) async throws -> Any? {
         let arguments = try argumentDecoder.decode(IaLaunchRouteArguments.self, from: arguments)
-        let screen = try arguments.view.iaScreen()
+        let view = try arguments.view
+        if view == .prescriptionScanner || view == .ePrescriptionScanner {
+            PrescriptionScannerCameraController.shared.reset()
+        }
+        let screen = view.iaScreen(
+            isCancellable: arguments.isCancellable ?? true,
+            focusesOnAppear: arguments.focusesOnAppear
+        )
         screen.present()
         return nil
     }
@@ -140,6 +162,55 @@ final class IASDKWrapper {
             return nil
         }
         return String(pharmacyId)
+    }
+
+    func savePharmacyId(arguments: Any) async throws -> Any? {
+        let arguments = try argumentDecoder.decode(IaSetPharmacyIdArguments.self, from: arguments)
+        IASDK.Pharmacy.savePharmacyID(try arguments.pharmacyIdInt)
+        return nil
+    }
+
+    func clearPharmacyId() async throws -> Any? {
+        IASDK.Pharmacy.savePharmacyID(nil)
+        return nil
+    }
+
+    func resetPrerequisites() async throws -> Any? {
+        try await IASDK.Prerequisites.resetAllPrerequisites()
+        return nil
+    }
+
+    func resetLegalDisclaimer() async throws -> Any? {
+        try await IASDK.Prerequisites.resetLegalDisclaimer()
+        return nil
+    }
+
+    func setIsOnboardingShown(arguments: Any) async throws -> Any? {
+        let args = arguments as? [String: Any] ?? [:]
+        guard let isOnboardingShown = args["enabled"] as? Bool else {
+            throw IaArgumentError.decodingArgumentFailed(description: "Missing or invalid Bool value for enabled.")
+        }
+        try await IASDK.Prerequisites.setIsOnboardingShown(isOnboardingShown)
+        return nil
+    }
+
+    func clearUserBillingAddress() async throws -> Any? {
+        try await IASDK.setUserBillingAddress(nil)
+        return nil
+    }
+
+    func clearUserDeliveryAddress() async throws -> Any? {
+        try await IASDK.setUserDeliveryAddress(nil)
+        return nil
+    }
+
+    func presentLogs() async throws -> Any? {
+        IASDK.QA.presentLogs()
+        return nil
+    }
+
+    func getUserId() async throws -> Any? {
+        try await IASDK.QA.getUserID()
     }
 
     func setUserBillingAddress(arguments: Any) async throws -> Any? {

@@ -11,10 +11,13 @@ enum _Views with IaBaseViews implements IaBaseViews {
   }
 
   @override
-  Future<void> launch() async {
+  Future<void> launch({
+    Map<String, dynamic> arguments = const {},
+  }) async {
     return await _Methods._channel.invokeMethod(
       IaBaseViews.launchMethodId,
       {
+        ...arguments,
         IaBaseViews.launchMethodArgId: Platform.isAndroid ? viewId.substring(0, 1).toUpperCase() + viewId.substring(1) : viewId,
       },
     );

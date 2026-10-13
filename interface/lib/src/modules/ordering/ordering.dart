@@ -12,11 +12,16 @@ abstract class IaBaseOrdering extends IaBase {
   ///
   /// Each PDF entry is a record containing the binary data and its [IaPrescriptionInsuranceType].
   ///
+  /// [finishAction] decides what the SDK shows once the transfer is done. [showActivityIndicator] decides whether
+  /// a loading indicator is shown during the transfer, and is only used on iOS.
+  ///
   Future<void> transferPrescriptions({
     Iterable<Uint8List>? images,
     Iterable<({Uint8List data, IaPrescriptionInsuranceType insuranceType})>? pdfs,
     Iterable<String>? codes,
     String? orderId,
+    IaTransferPrescriptionsFinishAction finishAction = IaTransferPrescriptionsFinishAction.openCart,
+    bool showActivityIndicator = true,
   });
 
   /// Resets the state of user cart, clearing any added products or prescriptions.
@@ -29,9 +34,15 @@ abstract class IaBaseOrdering extends IaBase {
 
   /// Returns the current cart details, or `null` if the cart is empty.
   ///
+  /// With [allowCached] the SDK may return previously loaded details instead of loading them again.
+  /// With [shouldEmitCartUpdate] the result is also reported through [orderingDidUpdateCartListener].
+  ///
   /// Note: Only supported on iOS.
   ///
-  Future<Map<String, dynamic>?> getCartDetails();
+  Future<Map<String, dynamic>?> getCartDetails({
+    bool allowCached = true,
+    bool shouldEmitCartUpdate = false,
+  });
 
   /// Deletes the order history.
   ///

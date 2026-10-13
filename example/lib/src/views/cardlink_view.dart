@@ -568,6 +568,37 @@ class _CardManagementSection extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         ElevatedButton(
+          child: Text('Mock CardLink Backend (iOS)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.cardLink.setMocks(const IaCardLinkMocks());
+              onShowResult('CardLink backend mocks enabled.');
+            } catch (e) {
+              onShowResult('Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Reverse Saved Cards Order (Android)'),
+          onPressed: () async {
+            try {
+              final cardsJson = await IaSdk.instance.cardLink.getSavedCards(
+                userIdController.text,
+              );
+              final cards = (jsonDecode(cardsJson ?? '[]') as List).cast<Map<String, dynamic>>();
+              await IaSdk.instance.cardLink.reorderSavedCards(
+                userId: userIdController.text,
+                orderedCanCodes: cards.reversed.map((card) => card['can'] as String).toList(),
+              );
+              onShowResult('Reversed the order of ${cards.length} saved card(s).');
+            } catch (e) {
+              onShowResult('Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red.shade50,
             foregroundColor: Colors.red.shade700,

@@ -8,6 +8,8 @@ class IaCardLinkSavedCard {
   const IaCardLinkSavedCard({
     required this.name,
     this.canCode,
+    this.id,
+    this.phoneNumber,
   });
 
   /// User-defined name for the saved card.
@@ -18,12 +20,22 @@ class IaCardLinkSavedCard {
   ///
   final String? canCode;
 
+  /// Identifier of the saved card. Only reported on iOS.
+  ///
+  final String? id;
+
+  /// Phone number linked to the saved card.
+  ///
+  final String? phoneNumber;
+
   /// Creates an instance from a map of values.
   ///
   factory IaCardLinkSavedCard.fromMap(Map<String, dynamic> map) {
     return IaCardLinkSavedCard(
       name: map['name'] as String,
       canCode: map['canCode'] as String?,
+      id: map['id'] as String?,
+      phoneNumber: map['phoneNumber'] as String?,
     );
   }
 
@@ -33,6 +45,8 @@ class IaCardLinkSavedCard {
     return {
       'name': name,
       if (canCode != null) 'canCode': canCode,
+      if (id != null) 'id': id,
+      if (phoneNumber != null) 'phoneNumber': phoneNumber,
     };
   }
 }

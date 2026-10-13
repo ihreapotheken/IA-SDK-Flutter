@@ -34,6 +34,12 @@ enum IaSalutation: String, Decodable {
         let container = try decoder.singleValueContainer()
         let rawValue = try container.decode(String.self).lowercased()
 
+        // "Divers" is the label the Android AppSDK uses, accept it so the same Dart value works on both platforms.
+        if rawValue == "divers" {
+            self = .diverse
+            return
+        }
+
         guard let value = IaSalutation(rawValue: rawValue) else {
             throw DecodingError.dataCorruptedError(
                 in: container,

@@ -8,6 +8,8 @@ struct IaTransferPrescriptionsArguments {
     let pdfs: [(data: Data, insuranceType: PrescriptionInsuranceType)]
     let codes: [String]
     let orderId: String?
+    let finishAction: TransferPrescriptionsFinishAction
+    let showActivityIndicator: Bool
 
     /// Initializes arguments from Flutter method call arguments.
     /// - Parameter arguments: Arguments object from Flutter method call
@@ -32,6 +34,15 @@ struct IaTransferPrescriptionsArguments {
         } ?? []
         self.codes = dictionary["codes"] as? [String] ?? []
         self.orderId = dictionary["orderId"] as? String
+        switch dictionary["finishAction"] as? String {
+        case "showBottomSheet":
+            self.finishAction = .showBottomSheet
+        case "noAction":
+            self.finishAction = .noAction
+        default:
+            self.finishAction = .openCart
+        }
+        self.showActivityIndicator = dictionary["showActivityIndicator"] as? Bool ?? true
     }
 
     /// Maps arguments to SDK types for IAOrderingSDK.

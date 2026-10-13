@@ -17,6 +17,8 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
     switch (this) {
       case _Methods.transferPrescriptions:
         return _RequestModelTransferPrescriptions;
+      case _Methods.getCartDetails:
+        return _RequestModelGetCartDetails;
       default:
         return null;
     }

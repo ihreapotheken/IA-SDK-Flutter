@@ -62,9 +62,10 @@ class CardLinkEventSender(
 
     fun sendCardSavedEvent(card: InsuranceCard) {
         val formattedCard = listOf(
+            // The Android SDK has no card identifier, unlike iOS.
             mapOf(
-                "id" to card.userId,
-                "name" to card.userId,
+                "id" to null,
+                "name" to card.name,
                 "canNumber" to card.can,
                 "phoneNumber" to card.phoneNumber
             )

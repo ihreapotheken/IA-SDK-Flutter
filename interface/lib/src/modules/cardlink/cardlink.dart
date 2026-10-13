@@ -25,12 +25,15 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [buttonsColor]: Optional buttons UI color (as integer ARGB value).
   /// - [textLinkColor]: Optional text link UI color (as integer ARGB value).
   /// - [bottomNavigationColor]: Optional bottom navigation UI color (as integer ARGB value).
-  /// - [environment]: Optional SDK environment (defaults to production). Unused on iOS, which reads the environment from IASDK.
-  /// - [saveCardEnabled]: Optional flag to enable card saving (defaults to false).
+  /// - [environment]: Optional SDK environment (defaults to production).
+  /// - [saveCardEnabled]: Optional flag to enable card saving (defaults to true).
   /// - [finishAction]: Determines what happens with prescriptions after NFC scanning.
   /// - [appId]: Optional application ID (maps to `applicationId` on Android and `appID` on iOS).
   /// - [coreAppLogFileURL]: Optional file path to the host app's log file. When provided, the log file is included in CardLink's "Report Problem" feature, allowing users to attach app-level logs alongside CardLink logs when reporting issues.
   /// - [supportsLiquidGlass]: Flag to enable Liquid Glass UI style.
+  /// - [illustrationColor]: Optional color of the CardLink illustrations (defaults to red). Only used on Android.
+  /// - [mockInvalidXmlData]: QA option that makes the read prescriptions invalid, to test the error handling.
+  ///   Only used on Android, see [setMocks] for iOS.
   ///
   Future<void> launch({
     required String sdkApiKey,
@@ -51,6 +54,8 @@ abstract class IaBaseCardLink extends IaBase {
     String? appId,
     String? coreAppLogFileURL,
     required bool supportsLiquidGlass,
+    IaCardLinkIllustrationColor? illustrationColor,
+    bool? mockInvalidXmlData,
   });
 
   /// Returns the CardLink SDK version string.
@@ -82,13 +87,45 @@ abstract class IaBaseCardLink extends IaBase {
     required String cardName,
   });
 
+  /// Replaces the details of a saved card.
+  ///
+  /// Parameters:
+  /// - [userId]: User identifier.
+  /// - [originalName]: Current name of the card to update.
+  /// - [name]: New name of the card.
+  /// - [phoneNumber]: Phone number linked to the card.
+  /// - [canCode]: CAN code of the card.
+  ///
+  /// Note: Only supported on Android.
+  ///
+  Future<void> updateCard({
+    required String userId,
+    required String originalName,
+    required String name,
+    required String phoneNumber,
+    required String canCode,
+  });
+
+  /// Changes the order in which saved cards are listed.
+  ///
+  /// Parameters:
+  /// - [userId]: User identifier.
+  /// - [orderedCanCodes]: CAN codes of the saved cards, in the new order.
+  ///
+  /// Note: Only supported on Android.
+  ///
+  Future<void> reorderSavedCards({
+    required String userId,
+    required List<String> orderedCanCodes,
+  });
+
   /// Deletes all saved cards.
   ///
   /// Returns a status string indicating the result:
   /// - "successDeleteAll": All cards were deleted.
   /// - "emptyStorage": No cards to delete.
   ///
-  /// Note: Only supported on iOS.
+  /// Note: On Android all CardLink data is cleared and `null` is returned.
   ///
   Future<String?> deleteAllCards();
 
@@ -96,13 +133,23 @@ abstract class IaBaseCardLink extends IaBase {
   ///
   /// This includes saved cards and any other user-specific data.
   ///
-  /// Note: Only supported on iOS.
-  ///
   Future<void> deleteAllUserRelatedData();
+
+  /// Sets the host app's log file, which users can attach to CardLink problem reports.
+  ///
+  /// [IaSdkConfiguration.hostAppLogFilePath] calls this automatically when the CardLink module is registered.
+  ///
+  Future<void> setHostAppLogFilePath(String path);
+
+  /// Replaces the CardLink backend with simulated responses, for testing CardLink flows. Not meant for production builds.
+  ///
+  /// Note: Only supported on iOS. On Android see the `mockInvalidXmlData` option of [launch].
+  ///
+  Future<void> setMocks(IaCardLinkMocks mocks);
 
   /// Programmatically finishes the active CardLink session.
   ///
-  /// Note: Only supported on iOS.
+  /// Note: Only has an effect on iOS.
   ///
   Future<void> finish();
 
@@ -193,4 +240,27 @@ abstract class IaBaseCardLink extends IaBase {
   /// ```
   ///
   StreamController<String> get analyticsEventListener;
+
+  /// Notifier for the phone number the user entered when accepting the consent.
+  ///
+  /// Note: Only reported on iOS, the Android SDK asks the host for the phone number instead.
+  ///
+  StreamController<String> get consentPhoneNumberListener;
+
+  /// Notifier for the cards saved with [IaCardLinkEvent.cardSaved].
+  ///
+  StreamController<List<IaCardLinkSavedCard>> get savedCardsListener;
+
+  /// Notifier for the error description of [IaCardLinkEvent.failedToInitialize], `null` if none is reported.
+  ///
+  /// Note: The description is only reported on iOS.
+  ///
+  StreamController<String?> get initializationErrorListener;
+
+  /// Notifier for the result of [IaCardLinkEvent.finished]: the result message, or `"canceled"` when the user
+  /// cancelled CardLink.
+  ///
+  /// Note: Only reported on Android.
+  ///
+  StreamController<String?> get resultListener;
 }

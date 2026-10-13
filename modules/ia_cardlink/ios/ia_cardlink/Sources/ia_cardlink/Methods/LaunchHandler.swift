@@ -115,6 +115,19 @@ class LaunchHandler {
         )
     }
 
+    /// Reports an action of a CardLink flow the SDK started itself, for example from the redeem prescription screen.
+    /// The SDK manages those flows, so only the events are sent, without finishing or reopening CardLink.
+    func handleSdkFlowOutputAction(_ action: CardLinkOutputAction) {
+        switch action {
+        case .backButtonPressed:
+            eventSender.sendEvent(.willExit)
+        case .reopenCardlink:
+            break
+        default:
+            handleOutputAction(action)
+        }
+    }
+
     private func handleOutputAction(_ action: CardLinkOutputAction) {
         switch action {
         case .consentAccepted(let phoneNumber):

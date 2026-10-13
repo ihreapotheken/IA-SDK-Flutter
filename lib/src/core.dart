@@ -1,21 +1,32 @@
+import 'dart:async';
 import 'dart:ui' show Color;
 
 import 'package:ia_interface/ia_interface.dart';
 
+part 'common/callbacks.dart';
 part 'common/methods.dart';
 part 'common/navigation.dart';
 part 'common/views.dart';
 part 'config/_config.dart';
+part 'config/analytics_consent.dart';
+part 'config/card_link.dart';
 part 'config/footer.dart';
 part 'config/initialization.dart';
+part 'config/qa.dart';
 part 'config/server_environment.dart';
 part 'config/ui_configuration.dart';
+part 'models/request/analytics_consent.dart';
 part 'models/request/guest_user_data.dart';
 part 'models/request/init_config.dart';
 part 'models/request/register_modules.dart';
 part 'models/request/clean_cache.dart';
+part 'models/request/set_enabled.dart';
 part 'models/request/set_user_address.dart';
 part 'models/request/mascot_illustrations.dart';
+part 'models/response/analytics_event.dart';
+part 'models/response/initialization_state.dart';
+part 'models/response/log_message.dart';
+part 'models/response/prerequisites_result.dart';
 
 /// Main entrypoint for the ia.de AppSDK services and features.
 ///
@@ -178,10 +189,13 @@ class IaSdk {
   }) async {
     if (!_initialized) {
       final arguments = _RequestModelInitConfig.fromConfig(config);
-      return await _Methods.initialize.invoke(arguments).then((value) {
-        _initialized = true;
-        return value;
-      });
+      await _Methods.initialize.invoke(arguments);
+      _initialized = true;
+      // Android only attaches the host log file to CardLink, so the CardLink module forwards it there.
+      final hostAppLogFilePath = config.hostAppLogFilePath;
+      if (hostAppLogFilePath != null) {
+        await _cardLink?.setHostAppLogFilePath(hostAppLogFilePath);
+      }
     }
   }
 
@@ -212,6 +226,53 @@ class IaSdk {
     return await _Methods.logout.invoke();
   }
 
+  /// Resets the prerequisites state, so the SDK runs the prerequisites flow
+  /// (legal documents, onboarding) again the next time it's required.
+  ///
+  /// Unlike [logout], user data is kept.
+  ///
+  Future<void> resetPrerequisites() async {
+    return await _Methods.resetPrerequisites.invoke();
+  }
+
+  /// Resets only the accepted legal documents, so the user is asked to accept them again.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<void> resetLegalDisclaimer() async {
+    return await _Methods.resetLegalDisclaimer.invoke();
+  }
+
+  /// Marks the onboarding as shown or not shown, which decides whether the prerequisites flow shows it.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<void> setIsOnboardingShown(bool isOnboardingShown) async {
+    final arguments = _RequestModelSetEnabled(
+      enabled: isOnboardingShown,
+    );
+    return await _Methods.setIsOnboardingShown.invoke(arguments);
+  }
+
+  /// Returns `true` if the user has completed the prerequisites flow (legal documents, onboarding).
+  ///
+  /// Note: Only supported on Android.
+  ///
+  Future<bool> isPrerequisiteFlowCompleted() async {
+    final result = await _Methods.isPrerequisiteFlowCompleted.invoke<bool>();
+    return result ?? false;
+  }
+
+  /// Launches the prerequisites flow (legal documents, onboarding) on top of the navigation stack.
+  ///
+  /// The outcome is reported through [prerequisitesResultListener].
+  ///
+  /// Note: Only supported on Android. On iOS the prerequisites run automatically when an SDK screen needs them.
+  ///
+  Future<void> launchPrerequisiteFlow() async {
+    return await _Views.prerequisiteFlow.launch();
+  }
+
   /// Launches the start screen experience on top of the navigation stack.
   ///
   Future<void> launchStartRoute() async {
@@ -222,8 +283,16 @@ class IaSdk {
   ///
   /// The selected pharmacy is reported through [onApofinderDidChangePharmacy].
   ///
-  Future<void> launchApofinder() async {
-    return await _Views.apofinderScreen.launch();
+  /// [isCancellable] decides whether the user can close Apofinder without selecting a pharmacy. It's only used on iOS.
+  ///
+  Future<void> launchApofinder({
+    bool isCancellable = true,
+  }) async {
+    return await _Views.apofinderScreen.launch(
+      arguments: {
+        'isCancellable': isCancellable,
+      },
+    );
   }
 
   /// Closes any overlaying ia.de screen contents.
@@ -264,8 +333,6 @@ class IaSdk {
   }
 
   /// Returns the current server environment.
-  ///
-  /// Note: Only supported on iOS.
   ///
   Future<IaSdkConfigurationServerEnvironment?> getEnvironment() async {
     final result = await _Methods.getEnvironment.invoke<String?>();
@@ -315,8 +382,6 @@ class IaSdk {
   /// Pass a salutation matching the values accepted by [setGuestUserData]
   /// (for example "Herr"/"Frau") or `null` to leave it unset.
   ///
-  /// Note: Only supported on iOS.
-  ///
   Future<void> setUserBillingAddress({
     required String firstName,
     required String lastName,
@@ -349,8 +414,6 @@ class IaSdk {
   /// Pass a salutation matching the values accepted by [setGuestUserData]
   /// (for example "Herr"/"Frau") or `null` to leave it unset.
   ///
-  /// Note: Only supported on iOS.
-  ///
   Future<void> setUserDeliveryAddress({
     required String firstName,
     required String lastName,
@@ -378,6 +441,72 @@ class IaSdk {
     return await _Methods.setUserDeliveryAddress.invoke(arguments);
   }
 
+  /// Removes the billing address set with [setUserBillingAddress].
+  ///
+  Future<void> clearUserBillingAddress() async {
+    return await _Methods.clearUserBillingAddress.invoke();
+  }
+
+  /// Removes the delivery address set with [setUserDeliveryAddress].
+  ///
+  Future<void> clearUserDeliveryAddress() async {
+    return await _Methods.clearUserDeliveryAddress.invoke();
+  }
+
+  /// Sets the user's consent for the SDK's analytics tracking.
+  ///
+  /// Call it after [initialize]. Tracking also needs [IaSdkConfiguration.isAnalyticsEnabled].
+  ///
+  /// Note: Only supported on Android.
+  ///
+  Future<void> setAnalyticsConsent(IaSdkAnalyticsConsent consent) async {
+    final arguments = _RequestModelSetAnalyticsConsent(
+      consent: consent,
+    );
+    return await _Methods.setAnalyticsConsent.invoke(arguments);
+  }
+
+  /// Turns haptic feedback in SDK screens on or off.
+  ///
+  /// Note: Only supported on Android.
+  ///
+  Future<void> setHapticFeedbackEnabled(bool isEnabled) async {
+    final arguments = _RequestModelSetEnabled(
+      enabled: isEnabled,
+    );
+    return await _Methods.setHapticFeedbackEnabled.invoke(arguments);
+  }
+
+  /// Presents the SDK's log viewer, for debugging an integration.
+  ///
+  Future<void> presentLogs() async {
+    return await _Methods.presentLogs.invoke();
+  }
+
+  /// Writes the SDK's logs to a file and returns its path, or `null` if there are no logs.
+  ///
+  /// Note: Only supported on Android. On iOS the log viewer opened with [presentLogs] can share the logs.
+  ///
+  Future<String?> exportLogs() async {
+    return await _Methods.exportLogs.invoke<String?>();
+  }
+
+  /// Returns the SDK's identifier for the current user, for example to include in support requests.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<String?> getUserId() async {
+    return await _Methods.getUserId.invoke<String?>();
+  }
+
+  /// Removes all cached network responses of the SDK, for testing an integration with fresh data.
+  ///
+  /// Note: Only supported on iOS. See [cleanCache] for the initialization and prerequisites caches.
+  ///
+  Future<void> removeAllCachedResponses() async {
+    return await _Methods.removeAllCachedResponses.invoke();
+  }
+
   /// Property holding internal state of the native callback handlers.
   ///
   // ignore: unused_field
@@ -385,14 +514,77 @@ class IaSdk {
     handlers: [
       const _NavigationHandler(),
       const _ApofinderPharmacyChangedHandler(),
+      const _InitializationStateHandler(),
+      const _AnalyticsEventHandler(),
+      const _LogMessageHandler(),
+      const _BackActionHandler(),
+      const _PrerequisitesResultHandler(),
     ],
   );
+
+  /// Called when the user leaves an SDK screen opened from the host app with the system back action.
+  ///
+  /// Return `true` to close the screen, `false` to keep it open. When not set, the screen closes.
+  ///
+  /// Note: Only supported on Android.
+  ///
+  Future<bool> Function()? onSdkBackAction;
+
+  /// Notifier object informing the client integration of the outcome of the prerequisites flow
+  /// (onboarding, legal documents, pharmacy selection).
+  ///
+  /// On iOS it reports every completed prerequisites run, on Android the runs started with [launchPrerequisiteFlow].
+  ///
+  final prerequisitesResultListener = StreamController<IaSdkPrerequisitesResult>.broadcast();
+
+  /// Notifier object informing the client integration of SDK initialization state changes.
+  ///
+  /// Usage:
+  ///
+  /// ```dart
+  /// IaSdk.instance.initializationStateListener.stream.listen((state) {
+  ///   // Process state.
+  /// });
+  /// ```
+  ///
+  final initializationStateListener = StreamController<IaSdkInitializationState>.broadcast();
+
+  /// Notifier object informing the client integration of analytics events tracked by the SDK.
+  ///
+  /// Events are only tracked with [IaSdkConfiguration.isAnalyticsEnabled] and the user's consent,
+  /// see [setAnalyticsConsent].
+  ///
+  /// Note: Only supported on Android.
+  ///
+  final analyticsEventListener = StreamController<IaSdkAnalyticsEvent>.broadcast();
+
+  /// Notifier object informing the client integration of messages the SDK logs, for debugging an integration.
+  ///
+  /// Messages are only forwarded from the native SDK while the stream has listeners.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  late final logMessageListener = StreamController<IaSdkLogMessage>.broadcast(
+    onListen: () => _setLogMessageForwardingEnabled(true),
+    onCancel: () => _setLogMessageForwardingEnabled(false),
+  );
+
+  void _setLogMessageForwardingEnabled(bool isEnabled) {
+    final arguments = _RequestModelSetEnabled(
+      enabled: isEnabled,
+    );
+    // Android has no log messages to forward and leaves the call unimplemented.
+    _Methods.setLogMessageForwardingEnabled.invoke(arguments).catchError((Object _) => null);
+  }
 
   /// Called when the SDK is about to navigate to a destination that the host app can override.
   ///
   /// For example, if the SDK would present the cart screen contents, the host app can switch to its own contents by returning `false`.
   ///
   /// Return `true` to let the SDK proceed with its built-in presentation.
+  ///
+  /// On Android the SDK waits at most 500 ms for the answer and otherwise proceeds with its
+  /// built-in presentation, so answer without awaiting slow work.
   ///
   /// Usage:
   ///
@@ -415,6 +607,8 @@ class IaSdk {
   /// Called when the user changes their pharmacy via the Apofinder flow.
   ///
   /// Provides the new [pharmacyId] and whether the change was triggered from the prerequisites flow.
+  ///
+  /// Note: On Android only pharmacies selected in the screen opened with [launchApofinder] are reported.
   ///
   void Function({
     required String pharmacyId,
