@@ -130,6 +130,25 @@ class IaClientCallbacks(
             "orderingDidUpdateCart",
             arguments
         )
+
+        val handlers = synchronized(nextCartChangeHandlers) {
+            nextCartChangeHandlers.toList().also { nextCartChangeHandlers.clear() }
+        }
+        handlers.forEach { it() }
+    }
+
+    /**
+     * Handlers for the next cart change only, see [onNextCartChange].
+     */
+    private val nextCartChangeHandlers = mutableListOf<() -> Unit>()
+
+    /**
+     * Calls [handler] once, on the next cart change. A prescription transfer that opens the cart finishes then.
+     */
+    fun onNextCartChange(handler: () -> Unit) {
+        synchronized(nextCartChangeHandlers) {
+            nextCartChangeHandlers.add(handler)
+        }
     }
 
     /**

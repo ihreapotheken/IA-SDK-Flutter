@@ -14,6 +14,8 @@ class LaunchHandler {
     private var paletteBeforeLaunch: IAColorPalette?
     /// Whether a CardLink flow launched from Flutter is shown, so its closing is reported once.
     private var isLaunchedFlowShown = false
+    /// Whether the launched flow continues from the saved cards screen into the scan flow.
+    private var isReopening = false
 
     init(eventSender: CardLinkEventSender) {
         self.eventSender = eventSender
@@ -50,6 +52,9 @@ class LaunchHandler {
                 }
             }
             CardLink.legacyAuthenticationKey = .init(value: sdkApiKey)
+            // Set before starting, as the SDK can report a failed start before `start` returns.
+            self?.isLaunchedFlowShown = true
+            self?.isReopening = false
             CardLink.start(
                 type: flowType,
                 forcePresent: false,
@@ -59,7 +64,6 @@ class LaunchHandler {
                     self?.handleOutputAction(action)
                 }
             )
-            self?.isLaunchedFlowShown = true
             result(nil)
         }
     }
@@ -74,6 +78,9 @@ class LaunchHandler {
         Self.finishCardLink { [weak self] in
             // Looked up after CardLink is dismissed, so it isn't CardLink's own view controller.
             guard let rootViewController = Self.topPresentedViewController() else { return }
+            self?.isLaunchedFlowShown = true
+            // The saved cards screen has closed; a failed start of the scan flow then ends the launched flow.
+            self?.isReopening = true
             CardLink.start(
                 type: .startCardlink,
                 forcePresent: false,
@@ -83,7 +90,6 @@ class LaunchHandler {
                     self?.handleOutputAction(action)
                 }
             )
-            self?.isLaunchedFlowShown = true
         }
     }
 
@@ -259,10 +265,16 @@ class LaunchHandler {
         case .willStartScanning:
             eventSender.sendEvent(.willStartScanning)
         case .failedToInitialize(let error):
-            // CardLink isn't shown then.
             eventSender.sendFailedToInitializeEvent(error: error)
-            isLaunchedFlowShown = false
-            restorePalette()
+            if isReopening {
+                // The saved cards screen that was shown has closed, like on Android.
+                isReopening = false
+                reportClosed()
+            } else {
+                // CardLink wasn't shown.
+                isLaunchedFlowShown = false
+                restorePalette()
+            }
         case .trackEvent(let event):
             eventSender.sendAnalyticsEvent(event: event)
         case .addedPrescriptionsToCart(let prescriptions):

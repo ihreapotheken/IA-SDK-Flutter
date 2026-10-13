@@ -5,11 +5,11 @@ part of '_models.dart';
 /// These events represent various states and actions during the CardLink flow.
 ///
 enum IaCardLinkEvent {
-  /// CardLink will exit/close.
+  /// CardLink has closed.
   ///
-  /// On Android it's reported once CardLink has closed, when its last screen has closed. When the user continues
-  /// from the saved cards screen into the scan flow, the SDK can close the saved cards screen before the scan flow
-  /// opens. It's then reported for both.
+  /// It's reported once CardLink is gone, on Android when its last screen has closed. When the user continues from
+  /// the saved cards screen into the scan flow on Android, the SDK can close the saved cards screen before the scan
+  /// flow opens. It's then reported for both.
   ///
   willExit,
 

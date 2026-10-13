@@ -21,6 +21,12 @@ abstract class IaBaseOrdering extends IaBase {
   /// Call it after `IaSdk.initialize`; before that the call fails. On iOS the SDK first runs its prerequisites when
   /// needed, which can show Apofinder or the legal documents.
   ///
+  /// It completes once the prescriptions are in the cart. On Android, the SDK reports that through the updated cart
+  /// with [IaTransferPrescriptionsFinishAction.openCart] and [IaTransferPrescriptionsFinishAction.noAction], and
+  /// only once the user has closed the confirmation with [IaTransferPrescriptionsFinishAction.showBottomSheet].
+  ///
+  /// An eRezept code the SDK can't read fails the call on iOS. Android skips it and transfers the others.
+  ///
   Future<void> transferPrescriptions({
     Iterable<Uint8List>? images,
     Iterable<({Uint8List data, IaPrescriptionInsuranceType insuranceType})>? pdfs,

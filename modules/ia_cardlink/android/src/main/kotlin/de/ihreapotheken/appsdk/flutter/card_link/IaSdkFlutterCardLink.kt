@@ -81,7 +81,12 @@ class IaSdkFlutterCardLink :
 
     private val activityLifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-            if (!activity.isCardLinkScreen()) return
+            if (!activity.isCardLinkScreen()) {
+                // Continuing into the scan flow opens no other screen first, while a CardLink flow the SDK starts
+                // itself is started from one of its screens.
+                savedCardsExitTime = 0L
+                return
+            }
             // A scan flow that opens soon after the saved cards screen closed belongs to the launched flow.
             if (!isCardLinkSessionActive && savedCardsExitTime != 0L &&
                 SystemClock.elapsedRealtime() - savedCardsExitTime < SAVED_CARDS_CONTINUATION_MS
@@ -289,7 +294,7 @@ class IaSdkFlutterCardLink :
                     )
                     return
                 }
-                runStorageCall(result) { context ->
+                runStorageCall(result, "UPDATE_CARD_ERROR") { context ->
                     CardLink.updateCard(
                         context,
                         originalName,
@@ -310,13 +315,14 @@ class IaSdkFlutterCardLink :
                     result.error("INVALID_ARGUMENTS", "userId and orderedCanCodes are required", null)
                     return
                 }
-                runStorageCall(result) { context ->
+                runStorageCall(result, "REORDER_SAVED_CARDS_ERROR") { context ->
                     CardLink.reorderSavedCards(context, orderedCanCodes, userId)
                 }
             }
 
             "deleteAllCards", "deleteAllUserRelatedData" -> {
-                runStorageCall(result) { context ->
+                val errorCode = if (call.method == "deleteAllCards") "DELETE_ALL_CARDS_ERROR" else "DELETE_ALL_USER_DATA_ERROR"
+                runStorageCall(result, errorCode) { context ->
                     CardLink.clearAllCardLinkData(context)
                 }
             }
@@ -334,7 +340,7 @@ class IaSdkFlutterCardLink :
     /**
      * Runs a blocking SDK storage call off the main thread and reports its completion to Flutter.
      */
-    private fun runStorageCall(result: Result, block: (Context) -> Unit) {
+    private fun runStorageCall(result: Result, errorCode: String, block: (Context) -> Unit) {
         val context = storageContext()
         if (context == null) {
             result.error("NO_CONTEXT", "Context not available", null)
@@ -349,7 +355,7 @@ class IaSdkFlutterCardLink :
                 }
                 result.success(null)
             } catch (e: Exception) {
-                result.error("STORAGE_ERROR", e.localizedMessage, null)
+                result.error(errorCode, e.localizedMessage, null)
             }
         }
     }

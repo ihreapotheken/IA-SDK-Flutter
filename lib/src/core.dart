@@ -37,9 +37,9 @@ part 'models/response/prerequisites_result.dart';
 ///
 /// Failed calls throw a [PlatformException]. Its code is `ARG_ERROR` for invalid arguments, and otherwise names the
 /// method, for example `CLEAR_CART_ERROR` for `clearCart`. On Android, calls that need an initialized SDK fail with
-/// `SDK_NOT_INITIALIZED` before [initialize], and `transferPrescriptions` and CardLink's `launch` fail with
-/// `NO_ACTIVITY` without an attached activity. Other screens then open in a new task, and [launchPrerequisiteFlow]
-/// can't report its result.
+/// `SDK_NOT_INITIALIZED` before [initialize], and `transferPrescriptions` fails with `NO_ACTIVITY` without an attached
+/// activity. Other screens then open in a new task, and [launchPrerequisiteFlow] can't report its result. CardLink
+/// has its own codes, see `IaBaseCardLink`.
 ///
 class IaSdk {
   IaSdk._();

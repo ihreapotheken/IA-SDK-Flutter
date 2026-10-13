@@ -523,11 +523,12 @@ internal class IaClientMethods(
                     )
                     return
                 }
-                val pharmacyId = args["pharmacyId"] as? String
-                if (pharmacyId == null) {
+                // Trimmed and checked like on iOS, which rejects other IDs as invalid arguments too.
+                val pharmacyId = (args["pharmacyId"] as? String)?.trim()
+                if (pharmacyId?.toIntOrNull() == null) {
                     result.error(
                         "ARG_ERROR",
-                        "Missing or invalid pharmacyId. Expected String value for pharmacyId.",
+                        "Missing or invalid pharmacyId. Expected a numeric String value for pharmacyId.",
                         null,
                     )
                     return
@@ -804,6 +805,13 @@ internal class IaClientMethods(
                 }
                 // The listener can report several events, but Flutter accepts only one reply per call.
                 val hasReplied = AtomicBoolean(false)
+                // OVERLAY shows a confirmation bottom sheet, every other mode opens the cart.
+                // Android has no counterpart of the iOS noAction finish action.
+                val presentationMode = if (data["finishAction"] == "showBottomSheet") {
+                    PresentationMode.OVERLAY
+                } else {
+                    PresentationMode.FULL_FLOW
+                }
                 val isStarted = bindings.sdkModule.ordering.transferPrescriptions(
                     context = activity,
                     transferPrescriptionRequest = TransferPrescriptionRequest(
@@ -812,15 +820,16 @@ internal class IaClientMethods(
                         codes = prescriptionCodes as? ArrayList<String>,
                         orderId = orderId,
                     ),
-                    // OVERLAY shows a confirmation bottom sheet, every other mode opens the cart.
-                    // Android has no counterpart of the iOS noAction finish action.
-                    presentationMode = if (data["finishAction"] == "showBottomSheet") {
-                        PresentationMode.OVERLAY
-                    } else {
-                        PresentationMode.FULL_FLOW
-                    },
+                    presentationMode = presentationMode,
                     transferPrescriptionListener = object : TransferPrescriptionListener {
                         override fun onTransferPrescriptionEvent(event: TransferPrescriptionEvent): HandlingDecision {
+                            if (event is TransferPrescriptionEvent.Loading && presentationMode == PresentationMode.FULL_FLOW) {
+                                // In this mode the SDK reports no success: it opens the cart, which reports the
+                                // updated cart.
+                                bindings.callbacks.onNextCartChange {
+                                    if (!hasReplied.getAndSet(true)) result.success(null)
+                                }
+                            }
                             if (event is TransferPrescriptionEvent.Success && !hasReplied.getAndSet(true)) {
                                 result.success(null)
                             }

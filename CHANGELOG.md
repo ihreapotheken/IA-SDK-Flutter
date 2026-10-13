@@ -73,9 +73,13 @@ Native SDK 2.9.0 on both platforms.
 - `getCartDetails` returns nested maps with `String` keys.
 - CardLink on iOS: the privacy link on the consent screen closed CardLink without `willExit` and kept the launch
   colors for all SDK screens; a CardLink flow closed by `finishAllActivities` now reports `willExit`; the cart and
-  terms events of SDK-started flows are reported; deleting a card that isn't saved no longer fails.
+  terms events of SDK-started flows are reported; deleting a card that isn't saved no longer fails; a failed
+  continuation from the saved cards screen now reports `willExit`, and a failed launch no longer leads to one.
 - CardLink on Android: a failed scan-flow sign-in from the saved cards screen stopped all later `willExit` events,
-  and `getLogFilePath` returned a path when there was no log file.
+  `getLogFilePath` returned a path when there was no log file, and a CardLink flow the SDK started soon after the
+  saved cards screen closed was reported as the launched one.
+- Android: `transferPrescriptions` with `openCart` or `noAction` never completed.
+- Android: `setPharmacyId` trims the ID and rejects non-numeric IDs with `ARG_ERROR`, as on iOS.
 
 ### Changed
 
@@ -101,6 +105,8 @@ Native SDK 2.9.0 on both platforms.
 - **Android error codes name the failed method**, for example `CLEAR_CART_ERROR`, as on iOS, instead of
   `METHOD_ERROR`.
 - **`exportLogs` returns a non-null path** and fails when the logs can't be exported.
+- **CardLink error codes name the failed method on both platforms**, for example `GET_SAVED_CARDS_ERROR`, instead of
+  `STORAGE_ERROR`, `ENCODING_ERROR` or `JSON_ERROR`.
 - **Android inline components need a `ComponentActivity`**, such as `FlutterFragmentActivity`, as the app's activity.
 - **Android:**
   - `onSdkBackAction` is asked before any SDK screen closes, except through `finishAllActivities`.

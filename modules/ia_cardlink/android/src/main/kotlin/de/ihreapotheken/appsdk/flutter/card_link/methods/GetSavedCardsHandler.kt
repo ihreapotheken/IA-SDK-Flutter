@@ -41,7 +41,7 @@ class GetSavedCardsHandler(
                 }
                 result.success(json)
             } catch (e: Exception) {
-                result.error("ENCODING_ERROR", "Error reading or encoding the saved cards", e.localizedMessage)
+                result.error("GET_SAVED_CARDS_ERROR", "Error reading or encoding the saved cards", e.localizedMessage)
             }
         }
     }

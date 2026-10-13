@@ -7,6 +7,11 @@ part of '../../common/_interface.dart';
 /// Methods documented as "Only supported on iOS" or "Only supported on Android" throw a
 /// [MissingPluginException] on the other platform. Callbacks and streams with such a note never fire there.
 ///
+/// Failed calls throw a [PlatformException]. Its code is `INVALID_ARGUMENTS` or `MISSING_<ARGUMENT>` for invalid
+/// arguments, and otherwise names the method, for example `GET_SAVED_CARDS_ERROR` or `DELETE_CARD_ERROR`.
+/// [launch] fails with `NO_ACTIVITY` on Android and `NO_VIEW_CONTROLLER` on iOS when there's no screen to show
+/// CardLink on.
+///
 abstract class IaBaseCardLink extends IaBase {
   @override
   IaBaseModule get module {
@@ -33,8 +38,9 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [environment]: Optional CardLink environment. When `null`, the environment `IaSdk` was initialized with
   ///   is used. On iOS, passing it also switches the environment of the whole SDK.
   /// - [saveCardEnabled]: Optional flag to enable card saving (defaults to true).
-  /// - [finishAction]: Determines what happens with prescriptions after NFC scanning. Only used on iOS. On
-  ///   Android the prescriptions are always only reported through [prescriptionsRedeemedListener], as with
+  /// - [finishAction]: Determines what happens with prescriptions after NFC scanning. Only used on iOS, where
+  ///   [IaCardLinkFinishAction.uploadPrescriptions] needs the Ordering module and an initialized SDK. On Android
+  ///   the prescriptions are always only reported through [prescriptionsRedeemedListener], as with
   ///   [IaCardLinkFinishAction.sendRawPrescriptions]; they aren't added to the cart.
   /// - [appId]: Optional application ID (maps to `applicationId` on Android and to the SDK-wide
   ///   `IASDK.configuration.appStoreID` on iOS).
@@ -229,8 +235,7 @@ abstract class IaBaseCardLink extends IaBase {
   /// Notifier for CardLink lifecycle and interaction events.
   ///
   /// Consolidates various events into a single stream:
-  /// - [IaCardLinkEvent.willExit]: CardLink will close. It's reported once CardLink has closed on Android, and on
-  ///   iOS when CardLink added the prescriptions to the cart itself.
+  /// - [IaCardLinkEvent.willExit]: CardLink has closed. It's reported once CardLink is gone.
   /// - [IaCardLinkEvent.willStartScanning]: NFC scanning is about to start. Only reported on iOS.
   /// - [IaCardLinkEvent.failedToInitialize]: Initialization failed
   /// - [IaCardLinkEvent.goToCart]: User requested to go to cart
