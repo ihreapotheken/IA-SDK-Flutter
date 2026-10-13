@@ -1,7 +1,10 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
 import IaClientFlutterViewFactory
+import android.app.Activity
+import android.app.Application
 import android.content.Context
+import android.os.Bundle
 import androidx.lifecycle.MutableLiveData
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.view.IaScreen
@@ -41,15 +44,50 @@ class IaClientBindings(
     private var methodHandler: IaClientMethods? = null
 
     /**
+     * Open SDK screens, including those `IaSdkActivity.finishAllActivities` doesn't close, such as the overlay a
+     * prescription transfer with a confirmation sheet runs in. CardLink screens aren't included, like on iOS.
+     */
+    private val openSdkScreens = mutableSetOf<Activity>()
+
+    private val sdkScreenTracker = object : Application.ActivityLifecycleCallbacks {
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+            val name = activity.javaClass.name
+            if (name.startsWith("de.ihreapotheken.sdk.") && !name.startsWith("de.ihreapotheken.sdk.cardlink.")) {
+                openSdkScreens.add(activity)
+            }
+        }
+
+        override fun onActivityDestroyed(activity: Activity) {
+            openSdkScreens.remove(activity)
+        }
+
+        override fun onActivityStarted(activity: Activity) = Unit
+        override fun onActivityResumed(activity: Activity) = Unit
+        override fun onActivityPaused(activity: Activity) = Unit
+        override fun onActivityStopped(activity: Activity) = Unit
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+    }
+
+    /**
+     * Finishes the open SDK screens, see [openSdkScreens].
+     */
+    fun finishOpenSdkScreens() {
+        openSdkScreens.toList().forEach { if (!it.isFinishing) it.finish() }
+    }
+
+    /**
      * Stops the work that would otherwise outlive the detached Flutter engine.
      */
     fun dispose() {
         initStateJob?.cancel()
         methodHandler?.dispose()
         channel.setMethodCallHandler(null)
+        (applicationContext as? Application)?.unregisterActivityLifecycleCallbacks(sdkScreenTracker)
+        openSdkScreens.clear()
     }
 
     init {
+        (applicationContext as? Application)?.registerActivityLifecycleCallbacks(sdkScreenTracker)
         val methodHandler = IaClientMethods(this)
         channel.setMethodCallHandler(methodHandler::callHandler)
 

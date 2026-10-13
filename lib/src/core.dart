@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui' show Color;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show PlatformException;
 
 import 'package:ia_interface/ia_interface.dart';
 
@@ -224,6 +225,9 @@ class IaSdk {
   /// Only the first successful call has an effect; later calls return without applying their [config], and a call
   /// made while another one runs completes with it.
   ///
+  /// An empty [IaSdkConfiguration.accessKey] or [IaSdkConfiguration.clientId] fails with `ARG_ERROR` before the SDK
+  /// starts initializing.
+  ///
   /// On Android a failed initialization can't be retried: the SDK keeps its error state, so later calls fail too
   /// until the app restarts. On iOS a later call initializes the SDK again.
   ///
@@ -248,6 +252,10 @@ class IaSdk {
   Future<void>? _pendingInitialization;
 
   Future<void> _initialize(IaSdkConfiguration config) async {
+    // The Android SDK rejects these without reporting an error state, unlike the iOS SDK, so both fail the same here.
+    if (config.accessKey.trim().isEmpty || config.clientId.trim().isEmpty) {
+      throw PlatformException(code: 'ARG_ERROR', message: 'accessKey and clientId must not be empty.');
+    }
     final arguments = _RequestModelInitConfig.fromConfig(config);
     await _Methods.initialize.invoke(arguments);
     _initialized = true;

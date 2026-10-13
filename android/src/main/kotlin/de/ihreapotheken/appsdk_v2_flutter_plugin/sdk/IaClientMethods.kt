@@ -906,8 +906,9 @@ internal class IaClientMethods(
                 // SDK screens ask onSdkBackAction before closing, which finishAllActivities skips.
                 bindings.callbacks.skipBackActionWhileFinishingAll()
                 IaSdkActivity.finishAllActivities()
-                // The prerequisites activity isn't one of the SDK's tracked screens.
+                // The prerequisites activity and the transfer overlay aren't among the SDK's tracked screens.
                 (bindings.activityContext() as? Activity)?.finishActivity(REQUEST_CODE_PREREQUISITES)
+                bindings.finishOpenSdkScreens()
                 result.success(null)
             }
 

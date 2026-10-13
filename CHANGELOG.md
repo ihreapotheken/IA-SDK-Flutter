@@ -84,6 +84,11 @@ Native SDK 2.9.0 on both platforms.
   without the prescriptions in the cart. The call now fails.
 - iOS: `setGuestUserData` passed the phone country code without "+", so checkout saved addresses with a wrong one.
 - iOS: `transferPrescriptions` replayed the cached prerequisites result through `prerequisitesResultListener`.
+- `initialize` with an empty `accessKey` or `clientId` fails with `ARG_ERROR` on both platforms. Android used to
+  leave the initialization state at `uninitialized`.
+- Android: `finishAllActivities` left the overlay of a `showBottomSheet` prescription transfer open.
+- CardLink on iOS: closing a CardLink launched with colors before `initialize` finished replaced the remote theme,
+  and a launch without an `environment` kept the one of an earlier launch instead of the `IaSdk` one.
 - CardLink on iOS: the configured `IaSdkConfigurationCardLink.phoneNumber` replaced the number of a picked saved
   card; `finish` right after `launch` reported `willExit` for a flow that still opened; a launch without a screen to
   show on kept the launch colors.

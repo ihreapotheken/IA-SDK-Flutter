@@ -94,6 +94,9 @@ abstract class IaBaseCardLink extends IaBase {
   ///
   /// The returned string contains JSON-encoded card data. Fails when the stored cards can't be read.
   ///
+  /// The cards' `id` is the card's identifier on iOS and the user identifier on Android, where cards have none.
+  /// [getSavedCardList] returns the cards parsed, without an `id` on Android.
+  ///
   Future<String?> getSavedCards(String userId);
 
   /// Returns the saved cards for the specified user, parsed from [getSavedCards].
@@ -245,9 +248,9 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [IaCardLinkEvent.finished]: CardLink closed with a result (Android), see [resultListener]
   ///
   /// On iOS, CardLink flows the SDK starts itself (for example from the "redeem prescription" screen) report
-  /// consent, session, prescription (see [prescriptionsRedeemedListener]), saved-card, error and analytics events
-  /// too. Their [IaCardLinkEvent.willExit] isn't reported, because the SDK closes and reopens them itself. Their
-  /// [IaCardLinkEvent.openTermsAndConditions] is, as the SDK only closes CardLink for it.
+  /// consent, session, prescription (see [prescriptionsRedeemedListener]), saved-card, scanning, error and analytics
+  /// events too. Their [IaCardLinkEvent.willExit] isn't reported, because the SDK closes and reopens them itself.
+  /// Their [IaCardLinkEvent.openTermsAndConditions] is, as the SDK only closes CardLink for it.
   ///
   /// Usage:
   ///

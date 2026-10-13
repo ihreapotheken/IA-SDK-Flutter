@@ -27,6 +27,9 @@ abstract class IaBasePharmacy extends IaBase {
   ///
   /// [pharmacyId] is the numeric pharmacy identifier; other values are rejected.
   ///
+  /// Use it before `IaSdk.initialize`. Afterwards use [setPharmacyId], which also tells the SDK about the change and
+  /// clears the cart of the previous pharmacy.
+  ///
   /// Note: Only supported on iOS.
   ///
   Future<void> savePharmacyId(String pharmacyId);
