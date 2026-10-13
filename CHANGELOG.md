@@ -142,8 +142,8 @@ Native SDK 2.9.0 on both platforms.
   - `launchPrerequisiteFlow` opens the SDK's prerequisites activity.
   - Calls that need an initialized SDK fail before `initialize`: the address setters, `setGuestUserData`, `logout`,
     `resetPrerequisites`, `isPrerequisiteFlowCompleted`, `setAnalyticsConsent`, `setHapticFeedbackEnabled`,
-    `clearCart`, `transferPrescriptions`, `presentLogs`, `exportLogs`, and the pharmacy ID getter and clearer. The SDK used to ignore them or
-    answer with defaults.
+    `clearCart`, `transferPrescriptions`, `presentLogs`, `exportLogs`, and the pharmacy ID getter and clearer. The
+    SDK used to ignore them or answer with defaults.
   - CardLink without an `environment` follows the SDK's environment.
 
 ## 0.0.1
