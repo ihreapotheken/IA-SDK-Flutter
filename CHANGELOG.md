@@ -123,7 +123,8 @@ Native SDK 2.9.0 on both platforms.
 - **`register` waits for the native part of each module** and fails when one is missing. A later call that adds
   modules throws a `StateError`; pass all modules in the first call.
 - **`register` has to come before `initialize`**, and throws a `StateError` afterwards: the Android SDK only starts
-  the modules registered before it initializes. `initialize` waits for a `register` call that's still running.
+  the modules registered before it initializes. `initialize` waits for a `register` call that's still running, and
+  a `register` call made while another one runs waits for it, then counts as a later call.
 - **CardLink `launch` takes `supportsLiquidGlass` as an optional `bool?`**; without it the `initialize` setting is
   kept.
 - **`setAnalyticsConsent` takes `consent` as a named parameter**, like the other setters.

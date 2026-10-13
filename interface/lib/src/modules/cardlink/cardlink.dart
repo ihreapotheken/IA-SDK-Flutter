@@ -166,9 +166,8 @@ abstract class IaBaseCardLink extends IaBase {
   /// Sets the host app's log file, which users can attach to CardLink problem reports. On iOS it's the SDK-wide
   /// setting, so it applies to the problem reports of all SDK screens, and an empty [path] removes the file there.
   ///
-  /// `IaSdk.initialize` and `IaSdk.register` call this with `IaSdkConfiguration.hostAppLogFilePath`, whichever
-  /// of them runs second, so a file set here before then is replaced. [launch] with `coreAppLogFileURL` replaces
-  /// it too.
+  /// `IaSdk.initialize` calls this with `IaSdkConfiguration.hostAppLogFilePath`, so a file set here before then is
+  /// replaced. [launch] with `coreAppLogFileURL` replaces it too.
   ///
   /// On Android an empty [path] keeps the previously set file, the SDK can't detach it.
   ///

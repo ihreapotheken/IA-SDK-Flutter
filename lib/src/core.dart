@@ -152,6 +152,11 @@ class IaSdk {
   Future<void> register({
     required List<IaBase> modules,
   }) async {
+    // A call made while another one runs waits for it, then counts as a later call.
+    final pendingRegistration = _pendingRegistration;
+    if (pendingRegistration != null) {
+      await pendingRegistration.catchError((Object _) {});
+    }
     if (_modulesRegistered) {
       final unregisteredModules = [
         for (final moduleEntry in modules)
@@ -232,7 +237,6 @@ class IaSdk {
         }
         _modulesRegistered = true;
         _registeredModules.addAll(modules.map((moduleEntry) => moduleEntry.module));
-        await _forwardHostAppLogFilePath();
         return value;
       });
     }
@@ -295,9 +299,8 @@ class IaSdk {
   ///
   String? _hostAppLogFilePath;
 
-  /// Android only attaches the host log file to CardLink, so the CardLink module forwards it there, whichever of
-  /// [register] and [initialize] completes second. A failure only affects CardLink problem reports, so it doesn't fail
-  /// [register] or [initialize].
+  /// Android only attaches the host log file to CardLink, so [initialize] forwards it to the CardLink module, which
+  /// [register] added before. A failure only affects CardLink problem reports, so it doesn't fail [initialize].
   ///
   Future<void> _forwardHostAppLogFilePath() async {
     final hostAppLogFilePath = _hostAppLogFilePath;
