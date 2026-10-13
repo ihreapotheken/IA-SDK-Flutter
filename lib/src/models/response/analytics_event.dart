@@ -25,7 +25,7 @@ class IaSdkAnalyticsEvent {
   ///
   final String sessionId;
 
-  /// Event timestamp as reported by the SDK.
+  /// Time of the event, in milliseconds since the Unix epoch.
   ///
   final int timestamp;
 

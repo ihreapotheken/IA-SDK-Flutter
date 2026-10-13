@@ -4,8 +4,8 @@ part of '../../common/_interface.dart';
 ///
 /// CardLink enables NFC-based prescription transfer functionality.
 ///
-/// Members documented as "Only supported on iOS" or "Only supported on Android" throw a
-/// [MissingPluginException] on the other platform.
+/// Methods documented as "Only supported on iOS" or "Only supported on Android" throw a
+/// [MissingPluginException] on the other platform. Callbacks and streams with such a note never fire there.
 ///
 abstract class IaBaseCardLink extends IaBase {
   @override
@@ -219,6 +219,12 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [IaCardLinkEvent.goToCart]: User requested to go to cart
   /// - [IaCardLinkEvent.openTermsAndConditions]: User requested to view terms
   /// - [IaCardLinkEvent.cardSaved]: A card was saved
+  /// - [IaCardLinkEvent.finished]: CardLink closed with a result (Android), see [resultListener]
+  ///
+  /// On iOS, CardLink flows the SDK starts itself (for example from the "redeem prescription" screen) report
+  /// consent, session, prescription, saved-card, error and analytics events too. Their navigation events
+  /// ([IaCardLinkEvent.willExit], [IaCardLinkEvent.goToCart], [IaCardLinkEvent.openTermsAndConditions]) aren't
+  /// reported, because the SDK handles them.
   ///
   /// Usage:
   ///

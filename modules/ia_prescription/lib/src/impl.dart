@@ -13,16 +13,36 @@ part 'models/request/set_scanner_camera_state.dart';
 /// Method and property definitions for the ia.de AppSDK Prescription service.
 ///
 class IaModulePrescription extends IaBasePrescription {
-  /// Constructs the module. The first constructed module receives the native prescription scan callbacks,
-  /// like `IaSdk.register` keeps the first registered module.
+  /// The scan callbacks are shared by all instances, like the streams of the other modules, so a callback set on
+  /// any instance (for example `IaSdk.instance.prescription`) receives the native scan callbacks.
   ///
-  IaModulePrescription() {
-    _instance ??= this;
+  static Future<IaModelPrescriptionScanDecision> Function(Uint8List imageData)? _onPrescriptionPhotoScanned;
+
+  static Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)?
+  _onEPrescriptionScanned;
+
+  @override
+  Future<IaModelPrescriptionScanDecision> Function(Uint8List imageData)? get onPrescriptionPhotoScanned {
+    return _onPrescriptionPhotoScanned;
   }
 
-  /// The first constructed module, which the native scan callbacks are routed to.
-  ///
-  static IaModulePrescription? _instance;
+  @override
+  set onPrescriptionPhotoScanned(Future<IaModelPrescriptionScanDecision> Function(Uint8List imageData)? callback) {
+    _onPrescriptionPhotoScanned = callback;
+  }
+
+  @override
+  Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)?
+  get onEPrescriptionScanned {
+    return _onEPrescriptionScanned;
+  }
+
+  @override
+  set onEPrescriptionScanned(
+    Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)? callback,
+  ) {
+    _onEPrescriptionScanned = callback;
+  }
 
   @override
   Future<void> launchRedeemPrescriptionScreen() async {

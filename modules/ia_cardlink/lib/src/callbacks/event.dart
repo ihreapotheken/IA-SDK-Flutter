@@ -19,14 +19,12 @@ Future<void> _eventHandler(dynamic args) async {
       final cards = args['cards'];
       IaModuleCardLink._savedCardsListener.add(
         cards is Iterable
-            ? cards.whereType<Map>().map((card) {
-                return IaCardLinkSavedCard(
-                  name: card['name'] as String,
-                  canCode: card['canNumber'] as String?,
-                  id: card['id'] as String?,
-                  phoneNumber: card['phoneNumber'] as String?,
-                );
-              }).toList()
+            ? cards
+                  .whereType<Map>()
+                  // A card without a name can't be represented, so it's left out instead of dropping the event.
+                  .where((card) => card['name'] is String)
+                  .map((card) => IaCardLinkSavedCard.fromMap(Map<String, dynamic>.from(card)))
+                  .toList()
             : const [],
       );
     case IaCardLinkEvent.failedToInitialize:

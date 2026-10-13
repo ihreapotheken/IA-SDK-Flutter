@@ -47,7 +47,9 @@ enum IASDKViewIdentifier: String, CaseIterable {
      * Visual interface representation.
      */
     @MainActor
-    func iaScreen(isCancellable: Bool = true, focusesOnAppear: Bool? = nil) -> any IAScreen {
+    /// - Parameter controlsScannerCamera: Whether scanners take their camera state from `PrescriptionScannerCameraController`,
+    ///   which only applies to scanners launched from Flutter, not to embedded platform views.
+    func iaScreen(isCancellable: Bool = true, focusesOnAppear: Bool? = nil, controlsScannerCamera: Bool = false) -> any IAScreen {
         switch self {
         case IASDKViewIdentifier.startScreen:
             IAStartScreen()
@@ -72,10 +74,18 @@ enum IASDKViewIdentifier: String, CaseIterable {
             IARedeemPrescriptionScreen()
 
         case IASDKViewIdentifier.prescriptionScanner:
-            CameraControlledPrescriptionScannerScreen(type: .prescription)
+            if controlsScannerCamera {
+                CameraControlledPrescriptionScannerScreen(type: .prescription)
+            } else {
+                IAPrescriptionScannerScreen(type: .prescription)
+            }
 
         case IASDKViewIdentifier.ePrescriptionScanner:
-            CameraControlledPrescriptionScannerScreen(type: .ePrescription)
+            if controlsScannerCamera {
+                CameraControlledPrescriptionScannerScreen(type: .ePrescription)
+            } else {
+                IAPrescriptionScannerScreen(type: .ePrescription)
+            }
         }
     }
 }

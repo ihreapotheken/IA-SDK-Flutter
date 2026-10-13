@@ -15,11 +15,20 @@ class _ComponentsViewState extends State<ComponentsView> {
 
   final _customPznsController = TextEditingController();
 
+  /// Product the recommendation-based grids are based on.
+  final _recommendationPznController = TextEditingController();
+
   List<String> _customPzns = const [];
+
+  bool get _needsPzn {
+    return _selectedGridType == IaProductDisplayType.productRecommendations ||
+        _selectedGridType == IaProductDisplayType.customersAlsoBought;
+  }
 
   @override
   void dispose() {
     _customPznsController.dispose();
+    _recommendationPznController.dispose();
     super.dispose();
   }
 
@@ -61,10 +70,20 @@ class _ComponentsViewState extends State<ComponentsView> {
           }).toList(),
         ),
         const SizedBox(height: 12),
-        IaProductGrid(
-          key: ValueKey(_selectedGridType),
-          type: _selectedGridType,
-        ),
+        if (_needsPzn) ...[
+          TextField(
+            controller: _recommendationPznController,
+            decoration: const InputDecoration(labelText: 'PZN the recommendations are based on'),
+            onSubmitted: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (!_needsPzn || _recommendationPznController.text.trim().isNotEmpty)
+          IaProductGrid(
+            key: ValueKey('$_selectedGridType ${_recommendationPznController.text.trim()}'),
+            type: _selectedGridType,
+            pzn: _needsPzn ? _recommendationPznController.text.trim() : null,
+          ),
         const SizedBox(height: 24),
         const _SectionHeader('Custom Product Grid'),
         TextField(

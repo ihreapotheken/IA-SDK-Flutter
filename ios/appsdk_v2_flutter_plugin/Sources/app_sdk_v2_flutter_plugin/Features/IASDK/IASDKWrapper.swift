@@ -11,7 +11,7 @@ final class IASDKWrapper {
 
     func initialize(arguments: Any, delegate: IaClientDelegate) async throws -> Any? {
         let arguments = try argumentDecoder.decode(IaInitSdkArguments.self, from: arguments)
-        delegate.cardLinkConfiguration = arguments.cardLink
+        IaClientDelegate.cardLinkConfiguration = arguments.cardLink
         let initializationOptions = arguments.initialization.mappedToSDK()
         
         // Configuration
@@ -37,8 +37,10 @@ final class IASDKWrapper {
             IASDK.configuration.hostAppLogFileURL = URL(fileURLWithPath: hostAppLogFilePath)
         }
 
-        // Without a QA configuration no QA feature is enabled, so production apps don't list test pharmacies.
-        IASDK.QA.setQAFeatures(arguments.qaConfiguration?.mappedToSDK() ?? [])
+        // Without a QA configuration the SDK keeps its defaults, so production apps don't list test pharmacies.
+        if let qaConfiguration = arguments.qaConfiguration {
+            IASDK.QA.setQAFeatures(qaConfiguration.mappedToSDK())
+        }
         
         // Auto initialization is enabled to match Android behavior in terms of prerequisites.
         IASDK.configuration.isAutoInitializationEnabled = true
@@ -94,7 +96,8 @@ final class IASDKWrapper {
         }
         let screen = view.iaScreen(
             isCancellable: arguments.isCancellable ?? true,
-            focusesOnAppear: arguments.focusesOnAppear
+            focusesOnAppear: arguments.focusesOnAppear,
+            controlsScannerCamera: true
         )
         screen.present()
         return nil
@@ -120,12 +123,8 @@ final class IASDKWrapper {
     }
 
     func isInitialized() async throws -> Any? {
-        let state = IASDK.initializationState
-        let summary = state.summary
-        // Cancelled prerequisites don't undo the initialization, matching the initialization state stream and Android.
-        return summary == .initializationFinished
-            || summary == .initializationAndPrerequisitesFinished
-            || summary == .prerequisitesCancelled
+        // Matches the initialization state stream and Android: prerequisites don't affect it.
+        IASDK.initializationState.flutterName == "initialized"
     }
 
     func deleteUser() async throws -> Any? {
@@ -227,5 +226,17 @@ final class IASDKWrapper {
         let arguments = try argumentDecoder.decode(IaSetUserAddressArguments.self, from: arguments)
         try await IASDK.setUserDeliveryAddress(arguments.mappedToSDK())
         return nil
+    }
+}
+
+extension IASDKInitializationState {
+    /// The initialization state as Dart's `IaSdkInitializationState` names it, matching the Android SDK's states.
+    /// It follows the initialization only, so prerequisites that run later don't make it flip back to initializing.
+    var flutterName: String {
+        switch initializationResult {
+        case .success: "initialized"
+        case .failure: "error"
+        case nil: isInProgress ? "initializing" : "uninitialized"
+        }
     }
 }

@@ -7,6 +7,8 @@ import io.flutter.plugin.common.MethodChannel.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -14,6 +16,7 @@ import kotlinx.serialization.json.Json
 class GetSavedCardsHandler(
     private val contextProvider: () -> Context?,
     private val scope: CoroutineScope,
+    private val storageMutex: Mutex,
 ) {
     fun handle(call: MethodCall, result: Result) {
         val args = call.arguments as? Map<*, *>
@@ -31,8 +34,10 @@ class GetSavedCardsHandler(
         scope.launch {
             try {
                 // The SDK blocks on encrypted storage, so it runs off the main thread.
-                val json = withContext(Dispatchers.IO) {
-                    Json.encodeToString(CardLink.getSavedCards(context, userId))
+                val json = storageMutex.withLock {
+                    withContext(Dispatchers.IO) {
+                        Json.encodeToString(CardLink.getSavedCards(context, userId))
+                    }
                 }
                 result.success(json)
             } catch (e: Exception) {

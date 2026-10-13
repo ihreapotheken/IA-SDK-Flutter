@@ -7,7 +7,7 @@ import 'package:appsdk_v2_flutter_plugin_example/src/file_utils.dart';
 import 'package:flutter/material.dart';
 
 class CardLinkViewStateData {
-  final userIdController = TextEditingController(text: 'test_user_123');
+  final userIdController = TextEditingController(text: ExampleAppConfig.cardLinkUserId);
   final cardNameController = TextEditingController(text: 'My Card');
   final phoneNumberController = TextEditingController(text: '+491234567890');
   final canCodeController = TextEditingController();
@@ -15,6 +15,7 @@ class CardLinkViewStateData {
   IaCardLinkConsentStatus consentStatus = IaCardLinkConsentStatus.showConsent;
   bool saveCardEnabled = false;
   bool includeCoreAppLogs = false;
+  IaCardLinkIllustrationColor illustrationColor = IaCardLinkIllustrationColor.red;
 
   String resultText = '';
   final List<String> eventLog = [];
@@ -92,6 +93,30 @@ class _CardLinkViewStateData extends State<CardLinkView> {
         _addEventLog('Analytics: $event');
       }),
     );
+
+    _subscriptions.add(
+      cardLink.consentPhoneNumberListener.stream.listen((phoneNumber) {
+        _addEventLog('Consent phone number: $phoneNumber');
+      }),
+    );
+
+    _subscriptions.add(
+      cardLink.savedCardsListener.stream.listen((cards) {
+        _addEventLog('Saved cards: ${cards.map((card) => '${card.name} (CAN ${card.canCode})').join(', ')}');
+      }),
+    );
+
+    _subscriptions.add(
+      cardLink.initializationErrorListener.stream.listen((message) {
+        _addEventLog('Failed to initialize: ${message ?? 'no description'}');
+      }),
+    );
+
+    _subscriptions.add(
+      cardLink.resultListener.stream.listen((result) {
+        _addEventLog('Result: $result');
+      }),
+    );
   }
 
   void _addEventLog(String entry) {
@@ -141,6 +166,20 @@ class _CardLinkViewStateData extends State<CardLinkView> {
         ),
 
         const SizedBox(height: 24),
+        Text('Illustration Color (Android)', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 4),
+        Wrap(
+          spacing: 8,
+          children: [
+            for (final color in IaCardLinkIllustrationColor.values)
+              ChoiceChip(
+                label: Text(color.name),
+                selected: _data.illustrationColor == color,
+                onSelected: (_) => setState(() => _data.illustrationColor = color),
+              ),
+          ],
+        ),
+        const SizedBox(height: 24),
         _LaunchSection(
           saveCardEnabled: _data.saveCardEnabled,
           onSaveCardEnabledChanged: (value) => setState(() => _data.saveCardEnabled = value),
@@ -160,10 +199,12 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 cardName: _data.cardNameController.text,
                 canCode: canCode.isNotEmpty ? canCode : null,
                 saveCardEnabled: _data.saveCardEnabled,
-                environment: IaCardLinkEnvironment.debug,
+                // Without an environment CardLink follows the SDK's, so it matches the selected server environment.
+                environment: null,
                 finishAction: IaCardLinkFinishAction.uploadPrescriptions,
                 coreAppLogFileURL: logFileURL,
                 supportsLiquidGlass: true,
+                illustrationColor: _data.illustrationColor,
               );
               _showResult('CardLink launched');
             } catch (e) {
@@ -184,10 +225,12 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 cardName: _data.cardNameController.text,
                 canCode: canCode.isNotEmpty ? canCode : null,
                 saveCardEnabled: _data.saveCardEnabled,
-                environment: IaCardLinkEnvironment.debug,
+                // Without an environment CardLink follows the SDK's, so it matches the selected server environment.
+                environment: null,
                 finishAction: IaCardLinkFinishAction.uploadPrescriptions,
                 coreAppLogFileURL: logFileURL,
                 supportsLiquidGlass: true,
+                illustrationColor: _data.illustrationColor,
               );
               _showResult('Saved Cards launched');
             } catch (e) {
@@ -546,6 +589,62 @@ class _CardManagementSection extends StatelessWidget {
                 jsonDecode(cardsJson),
               );
               onShowResult('Saved cards:\n$formatted');
+            } catch (e) {
+              onShowResult('Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Get Saved Card List'),
+          onPressed: () async {
+            try {
+              final cards = await IaSdk.instance.cardLink.getSavedCardList(userIdController.text);
+              onShowResult(
+                cards.isEmpty
+                    ? 'No saved cards found.'
+                    : cards
+                          .map((card) => '${card.name}: CAN ${card.canCode}, phone ${card.phoneNumber}, id ${card.id}')
+                          .join('\n'),
+              );
+            } catch (e) {
+              onShowResult('Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Rename Saved Card (Android)'),
+          onPressed: () async {
+            try {
+              final cards = await IaSdk.instance.cardLink.getSavedCardList(userIdController.text);
+              final card = cards.where((card) => card.name == cardNameController.text).firstOrNull;
+              if (card == null) {
+                onShowResult('No saved card named "${cardNameController.text}".');
+                return;
+              }
+              final newName = '${card.name} (renamed)';
+              await IaSdk.instance.cardLink.updateCard(
+                userId: userIdController.text,
+                originalName: card.name,
+                name: newName,
+                phoneNumber: card.phoneNumber ?? '',
+                canCode: card.canCode ?? '',
+              );
+              onShowResult('Renamed "${card.name}" to "$newName".');
+            } catch (e) {
+              onShowResult('Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Attach Host Log File to Problem Reports'),
+          onPressed: () async {
+            try {
+              final path = await FileUtils.createDemoCoreAppLogFile();
+              await IaSdk.instance.cardLink.setHostAppLogFilePath(path);
+              onShowResult('Host log file attached: $path');
             } catch (e) {
               onShowResult('Error: $e');
             }

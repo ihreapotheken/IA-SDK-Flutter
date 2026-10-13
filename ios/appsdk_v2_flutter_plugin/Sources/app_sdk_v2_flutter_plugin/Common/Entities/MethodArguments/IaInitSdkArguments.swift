@@ -26,20 +26,29 @@ struct IaCardLinkConfigurationArguments: Decodable {
 
     /// Applies the configured values to the configuration the SDK is about to start CardLink with.
     func applied(to configuration: CardLinkConfiguration) -> CardLinkConfiguration {
-        guard isSaveCardEnabled != nil || userId != nil || phoneNumber != nil else {
-            return configuration
+        var updated = configuration
+        // userId can only be set through the initializer; the other values are changed in place, so the SDK's own
+        // phone number isn't passed through the initializer's formatting again.
+        if let userId, userId != configuration.userId {
+            updated = CardLinkConfiguration(
+                pharmacyId: configuration.pharmacyId,
+                consentStatus: configuration.consentStatus,
+                canCode: configuration.canCode,
+                phoneNumber: configuration.phoneNumber,
+                userId: userId,
+                cardName: configuration.cardName,
+                isSaveCardEnabled: configuration.isSaveCardEnabled,
+                source: configuration.source,
+                finishAction: configuration.finishAction
+            )
         }
-        return CardLinkConfiguration(
-            pharmacyId: configuration.pharmacyId,
-            consentStatus: configuration.consentStatus,
-            canCode: configuration.canCode,
-            phoneNumber: phoneNumber ?? configuration.phoneNumber,
-            userId: userId ?? configuration.userId,
-            cardName: configuration.cardName,
-            isSaveCardEnabled: isSaveCardEnabled ?? configuration.isSaveCardEnabled,
-            source: configuration.source,
-            finishAction: configuration.finishAction
-        )
+        if let phoneNumber {
+            updated.setRawPhoneNumber(phoneNumber)
+        }
+        if let isSaveCardEnabled {
+            updated.isSaveCardEnabled = isSaveCardEnabled
+        }
+        return updated
     }
 }
 

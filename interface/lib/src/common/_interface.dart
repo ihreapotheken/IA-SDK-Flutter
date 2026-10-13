@@ -25,7 +25,7 @@ abstract class IaBase {
   /// Unnamed constructor used to allocate library resources.
   ///
   IaBase() {
-    IaBaseCallbacks._instance;
+    IaBaseCallbacks._ensureSharedChannelHandler();
     final moduleChannelId = IaBaseMethods._channelId + '/${module.name}';
     final moduleMethodChannel = MethodChannel(moduleChannelId);
     moduleMethodChannel.invokeMethod('register').catchError(

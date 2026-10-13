@@ -9,8 +9,13 @@ class IaClientDelegate: SDKDelegate {
     /// Whether SDK log messages are sent to Flutter. Only on while Dart listens, as the SDK logs a lot.
     var isLogMessageForwardingEnabled = false
 
-    /// Values the host configured for CardLink flows the SDK starts itself.
-    var cardLinkConfiguration: IaCardLinkConfigurationArguments?
+    /// Values the host configured for CardLink flows the SDK starts itself. Static, so a delegate created for another
+    /// Flutter engine keeps them.
+    static var cardLinkConfiguration: IaCardLinkConfigurationArguments?
+
+    /// How long the SDK waits for Flutter's scan decision. Without an answer, for example when the Flutter engine is
+    /// gone, it continues with its default handling.
+    private static let scanDecisionTimeout: TimeInterval = 120
 
     /// Posted for actions of CardLink flows the SDK starts itself, with the `CardLinkOutputAction` under the "action" key.
     /// The ia_cardlink plugin observes it to report the actions to Dart, as this plugin can't depend on it.
@@ -145,7 +150,7 @@ class IaClientDelegate: SDKDelegate {
     }
 
     func cardLinkWillStartWithConfiguration(configuration: CardLinkConfiguration) -> CardLinkConfiguration {
-        cardLinkConfiguration?.applied(to: configuration) ?? configuration
+        Self.cardLinkConfiguration?.applied(to: configuration) ?? configuration
     }
 
     func cardLinkDidSendAction(action: CardLinkOutputAction) -> HandlingDecision {
@@ -163,9 +168,25 @@ class IaClientDelegate: SDKDelegate {
             "sdkDidLogMessage",
             arguments: [
                 "message": message,
-                "level": level.title,
+                "level": Self.levelName(level),
             ]
         )
+    }
+
+    /// Stable names for the SDK's log levels, matching the Dart doc of `IaSdkLogMessage.level`.
+    private static func levelName(_ level: IALogLevel) -> String {
+        switch level {
+        case .debug: "debug"
+        case .info: "info"
+        case .warning: "warning"
+        case .error: "error"
+        case .userInteraction: "userInteraction"
+        case .cameraError: "cameraError"
+        case .httpClientInfo: "httpClientInfo"
+        case .httpClientSuccess: "httpClientSuccess"
+        case .httpClientError: "httpClientError"
+        default: level.title
+        }
     }
 
     func didScanPrescription(_ prescription: Data) async -> IAPrescriptionScanResult {
@@ -189,21 +210,40 @@ class IaClientDelegate: SDKDelegate {
     /// Any missing or invalid answer, for example when the prescription module isn't used in Dart, keeps the SDK default.
     private func requestScanResult(method: String, arguments: [String: Any]) async -> IAPrescriptionScanResult {
         await withCheckedContinuation { continuation in
+            // Resumed by Flutter's answer or the timeout, whichever comes first.
+            let resumer = ScanResultResumer(continuation)
+            DispatchQueue.main.asyncAfter(deadline: .now() + Self.scanDecisionTimeout) {
+                resumer.resume(.performDefault)
+            }
             channel.invokeMethod(method, arguments: arguments) { result in
                 guard let response = result as? [String: Any],
                       let decision = response["decision"] as? String else {
-                    continuation.resume(returning: .performDefault)
+                    resumer.resume(.performDefault)
                     return
                 }
                 switch decision {
                 case "handled":
-                    continuation.resume(returning: .handled)
+                    resumer.resume(.handled)
                 case "error":
-                    continuation.resume(returning: .error(message: response["message"] as? String ?? ""))
+                    resumer.resume(.error(message: response["message"] as? String ?? ""))
                 default:
-                    continuation.resume(returning: .performDefault)
+                    resumer.resume(.performDefault)
                 }
             }
         }
+    }
+}
+
+/// Resumes a scan decision continuation once; later answers are ignored. Only used on the main thread.
+private final class ScanResultResumer: @unchecked Sendable {
+    private var continuation: CheckedContinuation<IAPrescriptionScanResult, Never>?
+
+    init(_ continuation: CheckedContinuation<IAPrescriptionScanResult, Never>) {
+        self.continuation = continuation
+    }
+
+    func resume(_ result: IAPrescriptionScanResult) {
+        continuation?.resume(returning: result)
+        continuation = nil
     }
 }

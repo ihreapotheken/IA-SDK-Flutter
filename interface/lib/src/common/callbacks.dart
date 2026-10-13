@@ -7,8 +7,9 @@ class IaBaseCallbacks {
   ///
   ///
   /// The first subscriber with a matching handler handles the call. Without one, native receives
-  /// "not implemented" and falls back to its default. A failing handler is reported through
-  /// [FlutterError.reportError] and rethrown, so native receives the error instead of a silent default.
+  /// "not implemented" and falls back to its default. A failing handler is logged with
+  /// [FlutterError.presentError] and rethrown, so native receives the error instead of a silent default.
+  /// It isn't passed to [FlutterError.onError], so host crash reporting doesn't record it.
   ///
   Future<dynamic> _methodCallHandler(MethodCall call) async {
     for (final subscriber in _subscribers) {
@@ -17,7 +18,7 @@ class IaBaseCallbacks {
         try {
           return await handler.handler(call.arguments);
         } catch (exception, stack) {
-          FlutterError.reportError(
+          FlutterError.presentError(
             FlutterErrorDetails(
               exception: exception,
               stack: stack,
@@ -43,9 +44,6 @@ class IaBaseCallbacks {
   }) {
     if (channel != null) {
       channel!.setMethodCallHandler(_methodCallHandler);
-    } else {
-      // Subscribers of the shared channel need its handler installed, even when no module was constructed yet.
-      _instance;
     }
     for (final subscriber in _subscribers) {
       for (final handler in handlers) {
@@ -82,6 +80,16 @@ class IaBaseCallbacks {
   /// Singleton instance used for allocating unnamed constructor resources.
   ///
   static final _instance = IaBaseCallbacks._();
+
+  /// Installs the handler of the shared `de.ihreapotheken/sdk` channel.
+  ///
+  /// Called on the first use of the channel (a method call, screen launch, platform view or module), so native
+  /// callbacks reach Dart even when no module was constructed. It needs the Flutter binding, which every channel
+  /// use needs anyway.
+  ///
+  static void _ensureSharedChannelHandler() {
+    _instance;
+  }
 }
 
 /// Handler method used in conjunction with [IaBaseCallbacks].

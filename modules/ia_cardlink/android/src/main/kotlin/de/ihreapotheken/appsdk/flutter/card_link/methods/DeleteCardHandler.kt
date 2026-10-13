@@ -7,11 +7,14 @@ import io.flutter.plugin.common.MethodChannel.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 class DeleteCardHandler(
     private val contextProvider: () -> Context?,
     private val scope: CoroutineScope,
+    private val storageMutex: Mutex,
 ) {
     fun handle(call: MethodCall, result: Result) {
         val args = call.arguments as? Map<*, *>
@@ -40,8 +43,10 @@ class DeleteCardHandler(
         scope.launch {
             try {
                 // The SDK blocks on encrypted storage, so it runs off the main thread.
-                withContext(Dispatchers.IO) {
-                    CardLink.deleteCard(context, cardName, userId)
+                storageMutex.withLock {
+                    withContext(Dispatchers.IO) {
+                        CardLink.deleteCard(context, cardName, userId)
+                    }
                 }
                 result.success(null)
             } catch (e: Exception) {

@@ -15,6 +15,7 @@ class LaunchHandler(
     private val activityProvider: () -> Activity?,
     private val eventSender: CardLinkEventSender,
     private val onLaunched: () -> Unit,
+    private val onFailedToInitialize: () -> Unit,
 ) {
     companion object {
         private const val GUEST_USER_ID = "guest_user_id"
@@ -58,7 +59,7 @@ class LaunchHandler(
 
         val flowType = call.argument<String>("flowType") ?: "launchCardLinkSdk"
 
-        val listener = CardLinkListenerImpl(phoneNumber, eventSender)
+        val listener = CardLinkListenerImpl(phoneNumber, eventSender, onFailedToInitialize)
 
         val config = CardLinkConfig(
             sdkApiKey = sdkApiKey,

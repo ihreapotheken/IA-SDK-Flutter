@@ -32,7 +32,7 @@ enum IaSalutation: String, Decodable {
     /// Custom decoding is needed because we want case insensitive matching.
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        let rawValue = try container.decode(String.self).lowercased()
+        let rawValue = try container.decode(String.self).trimmingCharacters(in: .whitespaces).lowercased()
 
         // "Divers" is the label the Android AppSDK uses, accept it so the same Dart value works on both platforms.
         if rawValue == "divers" {
@@ -40,13 +40,8 @@ enum IaSalutation: String, Decodable {
             return
         }
 
-        guard let value = IaSalutation(rawValue: rawValue) else {
-            throw DecodingError.dataCorruptedError(
-                in: container,
-                debugDescription: "Invalid salutation value: \(rawValue)"
-            )
-        }
-        self = value
+        // Unknown values are stored as "not specified", like on Android, instead of losing the user data.
+        self = IaSalutation(rawValue: rawValue) ?? .notSpecified
     }
 
     func mappedToSDK() -> IAUserSalutation {

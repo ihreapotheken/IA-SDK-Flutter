@@ -4,8 +4,8 @@ part of '../core.dart';
 ///
 /// CardLink flows launched with `IaSdk.instance.cardLink.launch` use the values passed there instead.
 ///
-/// Events of CardLink flows the SDK starts itself are reported through the CardLink module's streams on iOS only;
-/// the Android SDK doesn't expose them.
+/// Events of CardLink flows the SDK starts itself are reported through the CardLink module's streams on iOS only,
+/// except their navigation events, which the SDK handles. The Android SDK doesn't expose these events.
 ///
 class IaSdkConfigurationCardLink {
   /// Generates an instance of CardLink configuration.

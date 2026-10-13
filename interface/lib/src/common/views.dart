@@ -18,6 +18,7 @@ abstract mixin class IaBaseViews {
   Future<void> launch({
     Map<String, dynamic> arguments = const {},
   }) async {
+    IaBaseCallbacks._ensureSharedChannelHandler();
     return await IaBaseMethods._channel.invokeMethod(
       launchMethodId,
       {
@@ -79,6 +80,13 @@ class IaSdkPlatformView extends StatefulWidget {
 class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
   int? _platformViewId;
   Size? _measuredSize;
+
+  @override
+  void initState() {
+    super.initState();
+    // Size and tap updates arrive on the shared channel.
+    IaBaseCallbacks._ensureSharedChannelHandler();
+  }
 
   String get _platformViewType {
     if (Platform.isAndroid) {

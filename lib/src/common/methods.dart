@@ -54,6 +54,8 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
   setLogMessageForwardingEnabled,
 
   removeAllCachedResponses,
+
+  getInitializationState,
   ;
 
   @override

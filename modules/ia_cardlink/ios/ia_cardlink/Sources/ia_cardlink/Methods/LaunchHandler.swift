@@ -61,13 +61,14 @@ class LaunchHandler {
 
     func reopenCardLink() {
         guard let config = savedConfiguration,
-              let apiKey = savedSdkApiKey,
-              let rootViewController = Self.topPresentedViewController() else {
+              let apiKey = savedSdkApiKey else {
             return
         }
 
         CardLink.legacyAuthenticationKey = .init(value: apiKey)
         CardLink.finish { [weak self] in
+            // Looked up after CardLink is dismissed, so it isn't CardLink's own view controller.
+            guard let rootViewController = Self.topPresentedViewController() else { return }
             CardLink.start(
                 type: .startCardlink,
                 forcePresent: false,
@@ -126,12 +127,11 @@ class LaunchHandler {
     }
 
     /// Reports an action of a CardLink flow the SDK started itself, for example from the redeem prescription screen.
-    /// The SDK manages those flows, so only the events are sent, without finishing or reopening CardLink.
+    /// The SDK handles those flows, including their navigation, so navigation events aren't sent: a host following the
+    /// docs would otherwise navigate as well.
     func handleSdkFlowOutputAction(_ action: CardLinkOutputAction) {
         switch action {
-        case .backButtonPressed:
-            eventSender.sendEvent(.willExit)
-        case .reopenCardlink:
+        case .backButtonPressed, .goToCart, .openTermsAndConditions, .reopenCardlink:
             break
         default:
             handleOutputAction(action)

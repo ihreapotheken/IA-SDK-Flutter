@@ -1,7 +1,7 @@
 part of '../impl.dart';
 
 Future<Map<String, dynamic>> _prescriptionPhotoScannedHandler(dynamic args) async {
-  final callback = IaModulePrescription._instance?.onPrescriptionPhotoScanned;
+  final callback = IaModulePrescription._onPrescriptionPhotoScanned;
   if (callback == null) {
     return IaModelPrescriptionScanDecision.performDefault.toJson();
   }
@@ -21,7 +21,7 @@ Future<Map<String, dynamic>> _prescriptionPhotoScannedHandler(dynamic args) asyn
 }
 
 Future<Map<String, dynamic>> _ePrescriptionScannedHandler(dynamic args) async {
-  final callback = IaModulePrescription._instance?.onEPrescriptionScanned;
+  final callback = IaModulePrescription._onEPrescriptionScanned;
   if (callback == null) {
     return IaModelPrescriptionScanDecision.performDefault.toJson();
   }

@@ -45,7 +45,10 @@ import de.ihreapotheken.sdk.integrations.api.view.SdkNavigationTarget
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.Dispatchers
+import de.ihreapotheken.sdk.integrations.api.InitState
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -258,6 +261,11 @@ internal class IaClientMethods(
          * doesn't expose the scanner screen.
          */
         setPrescriptionScannerCameraState,
+
+        /**
+         * Returns the current initialization state.
+         */
+        getInitializationState,
     }
 
     companion object {
@@ -268,15 +276,19 @@ internal class IaClientMethods(
         const val REQUEST_CODE_PREREQUISITES = 7301
 
         private const val LOG_TAG = "IaSdkFlutter"
-
-        private const val UNSUPPORTED_SALUTATION_MESSAGE =
-            "Unsupported salutation. Expected one of Herr, Frau, Divers or Keine Angabe."
     }
 
     /**
      * Scope for the AppSDK's suspending calls; results are delivered on the main thread, as Flutter requires.
      */
     private val scope = MainScope()
+
+    /**
+     * Cancels pending suspending calls when the Flutter engine detaches.
+     */
+    fun dispose() {
+        scope.cancel()
+    }
 
     /**
      * Runs a suspending AppSDK call and reports its value, or its failure, to Flutter.
@@ -419,21 +431,28 @@ internal class IaClientMethods(
                     sdkEventListener = SdkEventListener { event ->
                         // The listener keeps receiving SDK events after initialization, but Flutter
                         // accepts only one reply per call.
-                        if (event is SdkEvent.InitStatus && event !is SdkEvent.InitStatus.Initializing) {
-                            // AlreadyInitialized: the SDK outlives a recreated Flutter engine, whose new
-                            // callbacks need attaching as well.
-                            if (event is SdkEvent.InitStatus.InitializationCompleted ||
-                                event is SdkEvent.InitStatus.AlreadyInitialized
-                            ) {
-                                // Set up centralized callbacks handler
-                                bindings.sdkModule.ordering.setCartListener(bindings.callbacks)
-                                bindings.sdkModule.ordering.setCheckoutListener(bindings.callbacks)
-                                bindings.sdkModule.rx.setRedeemPrescriptionListener(bindings.callbacks)
-                                // Requires an initialized SDK, unlike the click listener set above.
-                                bindings.sdkModule.setHostUiConfig(HostUiConfig(showDataProcessing = shouldShowDataProcessing))
-                            }
+                        if (event is SdkEvent.InitStatus.InitializationCompleted) {
+                            attachSdkListeners(shouldShowDataProcessing)
                             if (!hasReplied.getAndSet(true)) {
                                 result.success(null)
+                            }
+                        } else if (event is SdkEvent.InitStatus.AlreadyInitialized) {
+                            // The SDK sends this whenever it isn't uninitialized: it may still be initializing, have
+                            // failed, or outlive a recreated Flutter engine whose new callbacks need attaching.
+                            scope.launch {
+                                val state = IaSdk.initState.first { it == InitState.INITIALIZED || it == InitState.ERROR }
+                                if (state == InitState.INITIALIZED) {
+                                    attachSdkListeners(shouldShowDataProcessing)
+                                    if (!hasReplied.getAndSet(true)) {
+                                        result.success(null)
+                                    }
+                                } else if (!hasReplied.getAndSet(true)) {
+                                    result.error(
+                                        "INIT_ERROR",
+                                        "An earlier initialization failed, and the SDK can't be initialized again until the app restarts.",
+                                        null,
+                                    )
+                                }
                             }
                         } else if (event is SdkEvent.InitError) {
                             if (!hasReplied.getAndSet(true)) {
@@ -510,11 +529,7 @@ internal class IaClientMethods(
                     )
                     return
                 }
-                val salutation = (args["salutation"] as? String)?.let(::normalizedSalutation)
-                if (salutation == null) {
-                    result.error("ARG_ERROR", UNSUPPORTED_SALUTATION_MESSAGE, null)
-                    return
-                }
+                val salutation = normalizedSalutation(args["salutation"] as? String ?: "")
                 val firstName = args["firstName"] as String
                 val lastName = args["lastName"] as String
                 val email = args["email"] as String
@@ -549,11 +564,6 @@ internal class IaClientMethods(
                     )
                     return
                 }
-                val salutation = args["salutation"] as? String
-                if (salutation != null && normalizedSalutation(salutation) == null) {
-                    result.error("ARG_ERROR", UNSUPPORTED_SALUTATION_MESSAGE, null)
-                    return
-                }
                 val address = parseUserAddress(args)
                 if (address == null) {
                     result.error(
@@ -563,6 +573,7 @@ internal class IaClientMethods(
                     )
                     return
                 }
+                if (!requireInitialized(result)) return
                 if (call.method == FlutterCall.setUserBillingAddress.name) {
                     bindings.sdkModule.setUserBillingAddress(address)
                 } else {
@@ -639,13 +650,10 @@ internal class IaClientMethods(
                 val onBackAction: suspend () -> Boolean = {
                     bindings.callbacks.handleBackAction()
                 }
-                if (entryPoint == IaScreen.PrerequisiteFlow) {
+                val activity = activityContext as? Activity
+                if (entryPoint == IaScreen.PrerequisiteFlow && activity != null) {
                     // The dedicated prerequisites activity reports whether the flow completed or was cancelled.
-                    val activity = activityContext as? Activity
-                    if (activity == null) {
-                        result.error("NO_ACTIVITY", "The prerequisite flow needs an activity.", null)
-                        return
-                    }
+                    // Without an activity the flow still opens below, but its result can't be reported.
                     activity.startActivityForResult(
                         IaPrerequisiteActivity.createIntent(activity),
                         REQUEST_CODE_PREREQUISITES,
@@ -737,6 +745,11 @@ internal class IaClientMethods(
                 // Note: CheckoutListener is already set globally in init, but we still need to
                 // update orderSignatures for prescription-specific flows
                 // The global listener will handle the Flutter callback
+                if (SdkFeatureProvider.orderingFeatureProvider == null) {
+                    // The SDK would only show a "not included in your subscription" message and never report back.
+                    result.error("METHOD_ERROR", "Ordering isn't available. Is the ordering module registered and entitled?", null)
+                    return
+                }
                 // The listener can report several events, but Flutter accepts only one reply per call.
                 val hasReplied = AtomicBoolean(false)
                 val isStarted = bindings.sdkModule.ordering.transferPrescriptions(
@@ -777,7 +790,11 @@ internal class IaClientMethods(
             }
 
             FlutterCall.finishAllActivities.name -> {
+                // SDK screens ask onSdkBackAction before closing, which finishAllActivities skips.
+                bindings.callbacks.skipBackActionWhileFinishingAll()
                 IaSdkActivity.finishAllActivities()
+                // The prerequisites activity isn't one of the SDK's tracked screens.
+                (bindings.activityContext() as? Activity)?.finishActivity(REQUEST_CODE_PREREQUISITES)
                 result.success(null)
             }
 
@@ -808,6 +825,7 @@ internal class IaClientMethods(
             }
 
             FlutterCall.clearPharmacyId.name -> {
+                if (!requireInitialized(result)) return
                 respondSuspending(result) {
                     bindings.sdkModule.pharmacy.clearPharmacyId()
                     null
@@ -834,11 +852,13 @@ internal class IaClientMethods(
             }
 
             FlutterCall.clearUserBillingAddress.name -> {
+                if (!requireInitialized(result)) return
                 bindings.sdkModule.setUserBillingAddress(null)
                 result.success(null)
             }
 
             FlutterCall.clearUserDeliveryAddress.name -> {
+                if (!requireInitialized(result)) return
                 bindings.sdkModule.setUserDeliveryAddress(null)
                 result.success(null)
             }
@@ -857,6 +877,7 @@ internal class IaClientMethods(
                         return
                     }
                 }
+                if (!requireInitialized(result)) return
                 bindings.sdkModule.setAnalyticsConsent(consent)
                 result.success(null)
             }
@@ -873,6 +894,10 @@ internal class IaClientMethods(
                 }
                 bindings.sdkModule.setHapticFeedbackEnabled(enabled)
                 result.success(null)
+            }
+
+            FlutterCall.getInitializationState.name -> {
+                result.success(IaClientCallbacks.initStateName(IaSdk.initState.value))
             }
 
             FlutterCall.getEnvironment.name -> {
@@ -927,16 +952,15 @@ internal class IaClientMethods(
 
     /**
      * Maps the case-insensitive salutation values to the labels the AppSDK lists in its
-     * salutation picker ("Frau", "Herr", "Divers", "Keine Angabe"). Unknown values return
-     * `null` and are rejected, as on iOS.
+     * salutation picker ("Frau", "Herr", "Divers", "Keine Angabe"). Unknown values are stored as
+     * "Keine Angabe", as on iOS.
      */
-    private fun normalizedSalutation(salutation: String): String? {
+    private fun normalizedSalutation(salutation: String): String {
         return when (salutation.trim().lowercase()) {
             "herr" -> "Herr"
             "frau" -> "Frau"
             "divers", "diverse" -> "Divers"
-            "keine angabe" -> "Keine Angabe"
-            else -> null
+            else -> "Keine Angabe"
         }
     }
 
@@ -1006,6 +1030,27 @@ internal class IaClientMethods(
             // the counterpart of the iOS `additionalInfo` address line.
             company = map["additionalInfo"] as? String,
         )
+    }
+
+    /**
+     * Attaches the plugin's listeners to the initialized SDK, and applies the settings that need an
+     * initialized SDK.
+     */
+    private fun attachSdkListeners(shouldShowDataProcessing: Boolean) {
+        bindings.sdkModule.ordering.setCartListener(bindings.callbacks)
+        bindings.sdkModule.ordering.setCheckoutListener(bindings.callbacks)
+        bindings.sdkModule.rx.setRedeemPrescriptionListener(bindings.callbacks)
+        bindings.sdkModule.setHostUiConfig(HostUiConfig(showDataProcessing = shouldShowDataProcessing))
+    }
+
+    /**
+     * Replies an error and returns `false` when the SDK isn't initialized. The SDK silently ignores
+     * these calls before its initialization, so they'd otherwise report success without effect.
+     */
+    private fun requireInitialized(result: MethodChannel.Result): Boolean {
+        if (bindings.sdkModule.isInitialized()) return true
+        result.error("SDK_NOT_INITIALIZED", "Call initialize first; the SDK ignores this call before it's initialized.", null)
+        return false
     }
 
     /**

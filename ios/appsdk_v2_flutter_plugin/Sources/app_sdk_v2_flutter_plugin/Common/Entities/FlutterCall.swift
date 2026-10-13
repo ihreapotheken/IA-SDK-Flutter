@@ -178,6 +178,11 @@ enum FlutterCall: CaseIterable {
     case setPrescriptionScannerCameraState
 
     /**
+     * Returns the current initialization state.
+     */
+    case getInitializationState
+
+    /**
      * String identifier getter definition.
      */
     var name: String {

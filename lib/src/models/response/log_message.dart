@@ -14,7 +14,9 @@ class IaSdkLogMessage {
   ///
   final String message;
 
-  /// Name of the log level, for example `debug`, `info`, `warning` or `error`.
+  /// Name of the log level: `debug`, `info`, `warning`, `error`, `userInteraction`, `cameraError`,
+  /// `httpClientInfo`, `httpClientSuccess` or `httpClientError`. Levels added in newer SDK versions are reported by
+  /// their SDK title.
   ///
   final String level;
 }

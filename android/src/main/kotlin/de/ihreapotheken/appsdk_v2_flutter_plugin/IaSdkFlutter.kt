@@ -51,7 +51,7 @@ class IaSdkFlutter :
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        // Do nothing.
+        bindings.dispose()
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {

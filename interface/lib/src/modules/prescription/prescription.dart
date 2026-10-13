@@ -2,8 +2,8 @@ part of '../../common/_interface.dart';
 
 /// Method and property definitions for the ia.de AppSDK Prescription service.
 ///
-/// Members documented as "Only supported on iOS" or "Only supported on Android" throw a
-/// [MissingPluginException] on the other platform.
+/// Methods documented as "Only supported on iOS" or "Only supported on Android" throw a
+/// [MissingPluginException] on the other platform. Callbacks and streams with such a note never fire there.
 ///
 abstract class IaBasePrescription extends IaBase {
   @override
@@ -50,7 +50,8 @@ abstract class IaBasePrescription extends IaBase {
   ///
   /// Return [IaModelPrescriptionScanDecision.handled] to take over the prescription,
   /// or [IaModelPrescriptionScanDecision.error] to reject it. When not set, or when it returns
-  /// [IaModelPrescriptionScanDecision.performDefault], the SDK continues with its built-in handling.
+  /// [IaModelPrescriptionScanDecision.performDefault], the SDK continues with its built-in handling. The SDK
+  /// also continues with it when the callback throws, or doesn't answer within 2 minutes.
   ///
   /// Usage:
   ///
@@ -61,13 +62,15 @@ abstract class IaBasePrescription extends IaBase {
   /// };
   /// ```
   ///
-  Future<IaModelPrescriptionScanDecision> Function(Uint8List imageData)? onPrescriptionPhotoScanned;
+  abstract Future<IaModelPrescriptionScanDecision> Function(Uint8List imageData)? onPrescriptionPhotoScanned;
 
   /// Called when the user scans an e-prescription (eRezept) QR code in the SDK scanner.
   ///
   /// Return [IaModelPrescriptionScanDecision.handled] to take over the prescription,
   /// or [IaModelPrescriptionScanDecision.error] to reject it. When not set, or when it returns
-  /// [IaModelPrescriptionScanDecision.performDefault], the SDK continues with its built-in handling.
+  /// [IaModelPrescriptionScanDecision.performDefault], the SDK continues with its built-in handling. The SDK
+  /// also continues with it when the callback throws, or doesn't answer within 2 minutes.
   ///
-  Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)? onEPrescriptionScanned;
+  abstract Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)?
+  onEPrescriptionScanned;
 }

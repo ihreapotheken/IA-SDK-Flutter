@@ -23,7 +23,9 @@ class IaModelPharmacy {
 
   /// Creates an instance from the map sent by the native platform.
   ///
-  factory IaModelPharmacy.fromMap(Map<String, dynamic> map) {
+  factory IaModelPharmacy.fromMap(Map<String, dynamic> rawMap) {
+    // Platform channels deliver nested maps as Map<Object?, Object?>.
+    final map = _stringKeyed(rawMap) as Map<String, dynamic>;
     final additionalInformation = Map<String, dynamic>.from(map['additionalInformation'] as Map);
     final contact = Map<String, dynamic>.from(map['contact'] as Map);
     final location = Map<String, dynamic>.from(map['location'] as Map);
@@ -95,5 +97,19 @@ class IaModelPharmacy {
 
   /// All pharmacy details reported by the SDK, for example `businessHours`, `delivery` and `services`.
   ///
+  /// Nested maps are `Map<String, dynamic>` and nested lists `List<dynamic>`.
+  ///
   final Map<String, dynamic> data;
+
+  /// Converts nested maps to `Map<String, dynamic>`, so [data] can be read without casts per level.
+  ///
+  static Object? _stringKeyed(Object? value) {
+    if (value is Map) {
+      return value.map((key, nested) => MapEntry('$key', _stringKeyed(nested)));
+    }
+    if (value is List) {
+      return value.map(_stringKeyed).toList();
+    }
+    return value;
+  }
 }

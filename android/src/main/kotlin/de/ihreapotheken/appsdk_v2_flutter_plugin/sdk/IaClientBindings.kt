@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import de.ihreapotheken.sdk.integrations.api.IaSdk
 import de.ihreapotheken.sdk.integrations.api.view.IaScreen
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import io.flutter.plugin.common.BinaryMessenger
@@ -35,16 +36,30 @@ class IaClientBindings(
      */
     val callbacks: IaClientCallbacks = IaClientCallbacks(channel, orderSignatures)
 
+    private var initStateJob: Job? = null
+
+    private var methodHandler: IaClientMethods? = null
+
+    /**
+     * Stops the work that would otherwise outlive the detached Flutter engine.
+     */
+    fun dispose() {
+        initStateJob?.cancel()
+        methodHandler?.dispose()
+        channel.setMethodCallHandler(null)
+    }
+
     init {
         val methodHandler = IaClientMethods(this)
         channel.setMethodCallHandler(methodHandler::callHandler)
 
         // Report initialization state changes, like the iOS initializationStatePublisher.
-        MainScope().launch {
+        initStateJob = MainScope().launch {
             IaSdk.initState.collect { state ->
                 callbacks.onInitStateChanged(state)
             }
         }
+        this.methodHandler = methodHandler
 
         // Register all SDK entry point views
         val entryPoints = listOf(

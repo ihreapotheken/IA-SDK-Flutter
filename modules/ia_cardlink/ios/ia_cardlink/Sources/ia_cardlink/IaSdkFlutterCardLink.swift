@@ -12,6 +12,10 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
     private let getSavedCardsHandler = GetSavedCardsHandler()
     private let deleteCardHandler = DeleteCardHandler()
 
+    /// Observer of the core plugin's SDK-flow notification. One per process: re-registering the plugins, for example
+    /// for another Flutter engine, replaces it, like the core plugin replaces the SDK delegate.
+    private static var sdkFlowActionObserver: NSObjectProtocol?
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(
             name: "de.ihreapotheken/sdk/cardLink",
@@ -23,7 +27,10 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
         instance.eventSender.setMethodChannel(channel)
 
         // Actions of CardLink flows the SDK starts itself reach the SDK delegate in the core plugin, which posts them.
-        NotificationCenter.default.addObserver(
+        if let previousObserver = sdkFlowActionObserver {
+            NotificationCenter.default.removeObserver(previousObserver)
+        }
+        sdkFlowActionObserver = NotificationCenter.default.addObserver(
             forName: Notification.Name("de.ihreapotheken.sdk.flutter.cardLinkDidSendAction"),
             object: nil,
             queue: .main

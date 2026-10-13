@@ -28,7 +28,19 @@ class ServicesView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         ElevatedButton(
-          child: Text('Get Environment (iOS)'),
+          child: Text('Get Initialization State'),
+          onPressed: () async {
+            try {
+              final state = await IaSdk.instance.getInitializationState();
+              if (context.mounted) _showResult(context, 'Initialization state: ${state.name}');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Get Environment'),
           onPressed: () async {
             try {
               final env = await IaSdk.instance.getEnvironment();
@@ -67,7 +79,7 @@ class ServicesView extends StatelessWidget {
           child: Text('Mark Onboarding Not Shown (iOS)'),
           onPressed: () async {
             try {
-              await IaSdk.instance.setIsOnboardingShown(false);
+              await IaSdk.instance.setIsOnboardingShown(isOnboardingShown: false);
               if (context.mounted) _showResult(context, 'Onboarding marked as not shown');
             } catch (e) {
               if (context.mounted) _showResult(context, 'Error: $e');
@@ -119,6 +131,20 @@ class ServicesView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         ElevatedButton(
+          child: Text('Save Pharmacy ID Without Validation (iOS)'),
+          onPressed: () async {
+            final pharmacyId = await _promptForText(context, 'Pharmacy ID', initialValue: '2163');
+            if (pharmacyId == null) return;
+            try {
+              await IaSdk.instance.pharmacy.savePharmacyId(pharmacyId);
+              if (context.mounted) _showResult(context, 'Pharmacy ID $pharmacyId saved');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
           child: Text('Clear Pharmacy ID'),
           onPressed: () async {
             try {
@@ -151,6 +177,38 @@ class ServicesView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         ElevatedButton(
+          child: Text('Get Cart State (iOS)'),
+          onPressed: () async {
+            try {
+              final cart = await IaSdk.instance.ordering.getCartState();
+              if (context.mounted) {
+                _showResult(
+                  context,
+                  cart == null
+                      ? 'Cart is empty'
+                      : '${cart.totalAmountInCart} items: '
+                            '${cart.products?.map((product) => '${product.pzn} x${product.amount}').join(', ')}',
+                );
+              }
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
+          child: Text('Reload Cart and Emit Update (iOS)'),
+          onPressed: () async {
+            try {
+              await IaSdk.instance.ordering.getCartDetails(allowCached: false, shouldEmitCartUpdate: true);
+              if (context.mounted) _showResult(context, 'Cart reloaded, see the Events tab');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton(
           child: Text('Clear Cart'),
           onPressed: () => IaSdk.instance.ordering.clearCart(),
         ),
@@ -167,35 +225,23 @@ class ServicesView extends StatelessWidget {
           },
         ),
         const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Transfer prescriptions'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.ordering.transferPrescriptions(
-                images: [
-                  base64Decode(ExampleAppConfig.instance.mockPngPrescription),
-                  base64Decode(ExampleAppConfig.instance.mockJpgPrescription),
-                ],
-                pdfs: [
-                  (
-                    data: base64Decode(
-                      ExampleAppConfig.instance.mockPdfPrescription,
-                    ),
-                    insuranceType:
-                        IaPrescriptionInsuranceType.privateInsurance,
-                  ),
-                ],
-                codes: [
-                  '{"urls":["Task/test9ba2fee0d07e4ef2b6205f8012e1445b/\$accept?ac=5e24cc059ff244bdbb01efcccf834a6329bdac67a4a64733938fe1b799ac19a9"]}',
-                ],
-                orderId: 'Some order id from host app',
-              );
-            } catch (e) {
-              debugPrint('ERROR TRANSFER');
-              debugPrint('$e', wrapWidth: 999999999999);
-            }
-          },
-        ),
+        for (final variant in _transferVariants) ...[
+          ElevatedButton(
+            child: Text(variant.label),
+            onPressed: () async {
+              try {
+                await _transferMockPrescriptions(
+                  finishAction: variant.finishAction,
+                  showActivityIndicator: variant.showActivityIndicator,
+                );
+                if (context.mounted) _showResult(context, 'Prescriptions transferred');
+              } catch (e) {
+                if (context.mounted) _showResult(context, 'Error: $e');
+              }
+            },
+          ),
+          const SizedBox(height: 8),
+        ],
         const SizedBox(height: 24),
         _SectionHeader(title: 'User'),
         const SizedBox(height: 8),
@@ -299,36 +345,47 @@ class ServicesView extends StatelessWidget {
         const SizedBox(height: 8),
         const _MascotIllustrationsToggle(),
         const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Disable Haptic Feedback (Android)'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.setHapticFeedbackEnabled(false);
-              if (context.mounted) _showResult(context, 'Haptic feedback disabled');
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
-        ),
+        for (final isEnabled in [false, true]) ...[
+          ElevatedButton(
+            child: Text('${isEnabled ? 'Enable' : 'Disable'} Haptic Feedback (Android)'),
+            onPressed: () async {
+              try {
+                await IaSdk.instance.setHapticFeedbackEnabled(isEnabled: isEnabled);
+                if (context.mounted) _showResult(context, 'Haptic feedback ${isEnabled ? 'enabled' : 'disabled'}');
+              } catch (e) {
+                if (context.mounted) _showResult(context, 'Error: $e');
+              }
+            },
+          ),
+          const SizedBox(height: 8),
+        ],
         const SizedBox(height: 24),
         _SectionHeader(title: 'Analytics'),
         const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Grant Analytics Consent (Android)'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.setAnalyticsConsent(IaSdkAnalyticsConsent.granted);
-              if (context.mounted) _showResult(context, 'Analytics consent granted');
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
+        Text(
+          'Events show in the Events tab. Tracking is on for the internal environments, see iaAnalytics.',
+          style: Theme.of(context).textTheme.bodySmall,
         ),
+        const SizedBox(height: 8),
+        for (final consent in IaSdkAnalyticsConsent.values) ...[
+          ElevatedButton(
+            child: Text('Analytics Consent: ${consent.name} (Android)'),
+            onPressed: () async {
+              try {
+                await IaSdk.instance.setAnalyticsConsent(consent);
+                if (context.mounted) _showResult(context, 'Analytics consent ${consent.name}');
+              } catch (e) {
+                if (context.mounted) _showResult(context, 'Error: $e');
+              }
+            },
+          ),
+          const SizedBox(height: 8),
+        ],
         const SizedBox(height: 24),
         _SectionHeader(title: 'Debugging'),
         const SizedBox(height: 8),
         ElevatedButton(
-          child: Text('Present Logs (iOS)'),
+          child: Text('Present Logs'),
           onPressed: () async {
             try {
               await IaSdk.instance.presentLogs();
@@ -414,6 +471,57 @@ class ServicesView extends StatelessWidget {
         duration: const Duration(seconds: 3),
       ),
     );
+  }
+
+  static const _transferVariants = <({String label, IaTransferPrescriptionsFinishAction finishAction, bool showActivityIndicator})>[
+    (label: 'Transfer Prescriptions, Open Cart', finishAction: IaTransferPrescriptionsFinishAction.openCart, showActivityIndicator: true),
+    (label: 'Transfer Prescriptions, Bottom Sheet', finishAction: IaTransferPrescriptionsFinishAction.showBottomSheet, showActivityIndicator: true),
+    (label: 'Transfer Prescriptions, No Action or Indicator (iOS)', finishAction: IaTransferPrescriptionsFinishAction.noAction, showActivityIndicator: false),
+  ];
+
+  /// Transfers the example's mock image, PDF and e-prescription data.
+  ///
+  static Future<void> _transferMockPrescriptions({
+    required IaTransferPrescriptionsFinishAction finishAction,
+    required bool showActivityIndicator,
+  }) {
+    return IaSdk.instance.ordering.transferPrescriptions(
+      images: [
+        base64Decode(ExampleAppConfig.instance.mockPngPrescription),
+        base64Decode(ExampleAppConfig.instance.mockJpgPrescription),
+      ],
+      pdfs: [
+        (
+          data: base64Decode(ExampleAppConfig.instance.mockPdfPrescription),
+          insuranceType: IaPrescriptionInsuranceType.privateInsurance,
+        ),
+      ],
+      codes: [
+        '{"urls":["Task/test9ba2fee0d07e4ef2b6205f8012e1445b/\$accept?ac=5e24cc059ff244bdbb01efcccf834a6329bdac67a4a64733938fe1b799ac19a9"]}',
+      ],
+      orderId: 'Some order id from host app',
+      finishAction: finishAction,
+      showActivityIndicator: showActivityIndicator,
+    );
+  }
+
+  /// Asks for a text value, `null` when cancelled.
+  ///
+  static Future<String?> _promptForText(BuildContext context, String title, {String initialValue = ''}) {
+    final controller = TextEditingController(text: initialValue);
+    return showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: TextField(controller: controller, autofocus: true),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.of(context).pop(controller.text.trim()), child: const Text('OK')),
+          ],
+        );
+      },
+    ).whenComplete(controller.dispose);
   }
 }
 

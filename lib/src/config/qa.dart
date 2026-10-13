@@ -29,7 +29,7 @@ class IaSdkConfigurationQa {
   ///
   /// Note: Only used on Android.
   ///
-  final int? apofinderCustomPharmacyId;
+  final String? apofinderCustomPharmacyId;
 
   /// Upper limit for the scroll speed in SDK lists.
   ///

@@ -64,6 +64,7 @@ extension Error {
         case .removeAllCachedResponses: "REMOVE_ALL_CACHED_RESPONSES_ERROR"
         case .savePharmacyId: "SAVE_PHARMACY_ID_ERROR"
         case .setPrescriptionScannerCameraState: "SET_PRESCRIPTION_SCANNER_CAMERA_STATE_ERROR"
+        case .getInitializationState: "GET_INITIALIZATION_STATE_ERROR"
         }
     }
 }

@@ -29,6 +29,8 @@ import io.flutter.plugin.common.PluginRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /** IaSdkFlutterCardLink */
@@ -49,17 +51,35 @@ class IaSdkFlutterCardLink :
     private val scope = MainScope()
 
     /**
-     * Whether a CardLink screen launched by this plugin is shown. The Android SDK has no exit
-     * callback, so its closing is detected when the host activity resumes.
+     * Whether CardLink was launched and hasn't covered the host activity yet. The SDK signs in before
+     * it opens its screen, and doesn't open it when that fails.
+     */
+    private var isCardLinkLaunching = false
+
+    /**
+     * Whether a CardLink screen launched by this plugin covers the host activity. The Android SDK has
+     * no exit callback, so its closing is detected when the host activity resumes.
      */
     private var isCardLinkShown = false
 
     private val lifecycleObserver = LifecycleEventObserver { _, event ->
-        if (event == Lifecycle.Event.ON_RESUME && isCardLinkShown) {
-            isCardLinkShown = false
-            eventSender.sendWillExitEvent()
+        when (event) {
+            Lifecycle.Event.ON_PAUSE -> if (isCardLinkLaunching) {
+                isCardLinkLaunching = false
+                isCardLinkShown = true
+            }
+            Lifecycle.Event.ON_RESUME -> if (isCardLinkShown) {
+                isCardLinkShown = false
+                eventSender.sendWillExitEvent()
+            }
+            else -> Unit
         }
     }
+
+    /**
+     * Serializes the SDK's storage calls: its card storage isn't safe to create from two threads at once.
+     */
+    private val storageMutex = Mutex()
 
     private val activityResultListener = PluginRegistry.ActivityResultListener { requestCode, resultCode, data ->
         if (requestCode == REQUEST_CODE_CARD_LINK_ACTIVITY) {
@@ -91,16 +111,17 @@ class IaSdkFlutterCardLink :
         LaunchHandler(
             activityProvider = { activity },
             eventSender = eventSender,
-            onLaunched = { isCardLinkShown = true },
+            onLaunched = { isCardLinkLaunching = true },
+            onFailedToInitialize = { isCardLinkLaunching = false },
         )
     }
 
     private val getSavedCardsHandler by lazy {
-        GetSavedCardsHandler(contextProvider = ::storageContext, scope = scope)
+        GetSavedCardsHandler(contextProvider = ::storageContext, scope = scope, storageMutex = storageMutex)
     }
 
     private val deleteCardHandler by lazy {
-        DeleteCardHandler(contextProvider = ::storageContext, scope = scope)
+        DeleteCardHandler(contextProvider = ::storageContext, scope = scope, storageMutex = storageMutex)
     }
 
     companion object {
@@ -259,8 +280,10 @@ class IaSdkFlutterCardLink :
         }
         scope.launch {
             try {
-                withContext(Dispatchers.IO) {
-                    block(context)
+                storageMutex.withLock {
+                    withContext(Dispatchers.IO) {
+                        block(context)
+                    }
                 }
                 result.success(null)
             } catch (e: Exception) {

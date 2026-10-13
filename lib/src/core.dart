@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:ui' show Color;
 
+import 'package:flutter/foundation.dart';
+
 import 'package:ia_interface/ia_interface.dart';
 
 part 'common/callbacks.dart';
@@ -30,8 +32,8 @@ part 'models/response/prerequisites_result.dart';
 
 /// Main entrypoint for the ia.de AppSDK services and features.
 ///
-/// Members documented as "Only supported on iOS" or "Only supported on Android" throw a
-/// [MissingPluginException] on the other platform.
+/// Methods documented as "Only supported on iOS" or "Only supported on Android" throw a
+/// [MissingPluginException] on the other platform. Callbacks and streams with such a note never fire there.
 ///
 class IaSdk {
   IaSdk._();
@@ -140,7 +142,7 @@ class IaSdk {
           },
         ).toList(),
       );
-      return await _Methods.register.invoke(arguments).then((value) {
+      return await _Methods.register.invoke(arguments).then((value) async {
         for (final module in modules) {
           for (final internalModule
               in <
@@ -176,6 +178,7 @@ class IaSdk {
           }
         }
         _modulesRegistered = true;
+        await _forwardHostAppLogFilePath();
         return value;
       });
     }
@@ -194,18 +197,41 @@ class IaSdk {
       final arguments = _RequestModelInitConfig.fromConfig(config);
       await _Methods.initialize.invoke(arguments);
       _initialized = true;
-      // Android only attaches the host log file to CardLink, so the CardLink module forwards it there.
-      final hostAppLogFilePath = config.hostAppLogFilePath;
-      if (hostAppLogFilePath != null) {
-        await _cardLink?.setHostAppLogFilePath(hostAppLogFilePath);
-      }
+      _hostAppLogFilePath = config.hostAppLogFilePath;
+      await _forwardHostAppLogFilePath();
+    }
+  }
+
+  /// Host log file of the [initialize] configuration, see [IaSdkConfiguration.hostAppLogFilePath].
+  ///
+  String? _hostAppLogFilePath;
+
+  /// Android only attaches the host log file to CardLink, so the CardLink module forwards it there, whether it was
+  /// registered before or after [initialize]. A failure only affects CardLink problem reports, so it doesn't fail
+  /// [register] or [initialize].
+  ///
+  Future<void> _forwardHostAppLogFilePath() async {
+    final hostAppLogFilePath = _hostAppLogFilePath;
+    final cardLink = _cardLink;
+    if (hostAppLogFilePath == null || cardLink == null) return;
+    try {
+      await cardLink.setHostAppLogFilePath(hostAppLogFilePath);
+    } catch (exception, stack) {
+      FlutterError.presentError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'appsdk_v2_flutter_plugin',
+          context: ErrorDescription('while forwarding the host app log file to CardLink'),
+        ),
+      );
     }
   }
 
   /// Forwards the client personal information to the ia.de library for checkout purposes.
   ///
   /// [salutation] is one of "Herr", "Frau", "Divers" (or "Diverse") and "Keine Angabe", matched case-insensitively.
-  /// Other values are rejected with an `ARG_ERROR`.
+  /// Other values are stored as "Keine Angabe".
   ///
   /// The phone number is passed as an `int`, so leading zeros of [phoneNumberWithoutCountryCode] are lost.
   ///
@@ -255,7 +281,9 @@ class IaSdk {
   ///
   /// Note: Only supported on iOS.
   ///
-  Future<void> setIsOnboardingShown(bool isOnboardingShown) async {
+  Future<void> setIsOnboardingShown({
+    required bool isOnboardingShown,
+  }) async {
     final arguments = _RequestModelSetEnabled(
       enabled: isOnboardingShown,
     );
@@ -325,6 +353,14 @@ class IaSdk {
     return await _Methods.legacySetupAsCoreApp.invoke();
   }
 
+  /// Returns the current initialization state, see also [initializationStateListener].
+  ///
+  Future<IaSdkInitializationState> getInitializationState() async {
+    final result = await _Methods.getInitializationState.invoke<String>();
+    return IaSdkInitializationState.values.where((state) => state.name == result).firstOrNull ??
+        IaSdkInitializationState.uninitialized;
+  }
+
   /// Returns `true` if the SDK has been successfully initialized.
   ///
   Future<bool> isInitialized() async {
@@ -342,7 +378,7 @@ class IaSdk {
     return await _Methods.deleteUser.invoke();
   }
 
-  /// Returns the current server environment.
+  /// Returns the current server environment. Before [initialize] it's the SDK's default, production.
   ///
   Future<IaSdkConfigurationServerEnvironment?> getEnvironment() async {
     final result = await _Methods.getEnvironment.invoke<String?>();
@@ -389,6 +425,8 @@ class IaSdk {
 
   /// Sets the user's billing address, used to pre-fill the checkout flow.
   ///
+  /// Call it after [initialize]; before that the call fails.
+  ///
   /// Pass a salutation matching the values accepted by [setGuestUserData]
   /// (for example "Herr"/"Frau") or `null` to leave it unset.
   ///
@@ -422,6 +460,8 @@ class IaSdk {
   }
 
   /// Sets the user's delivery address, used to pre-fill the checkout flow.
+  ///
+  /// Call it after [initialize]; before that the call fails.
   ///
   /// Pass a salutation matching the values accepted by [setGuestUserData]
   /// (for example "Herr"/"Frau") or `null` to leave it unset.
@@ -457,11 +497,15 @@ class IaSdk {
 
   /// Removes the billing address set with [setUserBillingAddress].
   ///
+  /// Like the address setters, it needs an initialized SDK; before [initialize] the call fails.
+  ///
   Future<void> clearUserBillingAddress() async {
     return await _Methods.clearUserBillingAddress.invoke();
   }
 
   /// Removes the delivery address set with [setUserDeliveryAddress].
+  ///
+  /// Like the address setters, it needs an initialized SDK; before [initialize] the call fails.
   ///
   Future<void> clearUserDeliveryAddress() async {
     return await _Methods.clearUserDeliveryAddress.invoke();
@@ -469,7 +513,7 @@ class IaSdk {
 
   /// Sets the user's consent for the SDK's analytics tracking.
   ///
-  /// Call it after [initialize]. Tracking also needs [IaSdkConfiguration.isAnalyticsEnabled].
+  /// Call it after [initialize]; before that the call fails. Tracking also needs [IaSdkConfiguration.isAnalyticsEnabled].
   ///
   /// Note: Only supported on Android.
   ///
@@ -484,7 +528,9 @@ class IaSdk {
   ///
   /// Note: Only supported on Android.
   ///
-  Future<void> setHapticFeedbackEnabled(bool isEnabled) async {
+  Future<void> setHapticFeedbackEnabled({
+    required bool isEnabled,
+  }) async {
     final arguments = _RequestModelSetEnabled(
       enabled: isEnabled,
     );
@@ -536,9 +582,11 @@ class IaSdk {
     ],
   );
 
-  /// Called when the user leaves an SDK screen opened from the host app with the system back action.
+  /// Called before an SDK screen opened from the host app closes, for example with the system back action or the
+  /// SDK's own close buttons.
   ///
-  /// Return `true` to close the screen, `false` to keep it open. When not set, the screen closes.
+  /// Return `true` to close the screen, `false` to keep it open. When not set, when it throws, or when it doesn't
+  /// answer within 5 seconds, the screen closes. [finishAllActivities] always closes the screens without asking.
   ///
   /// It isn't called for the prerequisites flow opened with [launchPrerequisiteFlow], whose SDK screen has no
   /// back hook.
@@ -555,6 +603,9 @@ class IaSdk {
   final prerequisitesResultListener = StreamController<IaSdkPrerequisitesResult>.broadcast();
 
   /// Notifier object informing the client integration of SDK initialization state changes.
+  ///
+  /// Changes that happen before the stream has a listener aren't replayed; read the current state with
+  /// [getInitializationState].
   ///
   /// Usage:
   ///
