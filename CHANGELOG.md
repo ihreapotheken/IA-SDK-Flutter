@@ -80,6 +80,13 @@ Native SDK 2.9.0 on both platforms.
   saved cards screen closed was reported as the launched one.
 - Android: `transferPrescriptions` with `openCart` or `noAction` never completed.
 - Android: `setPharmacyId` trims the ID and rejects non-numeric IDs with `ARG_ERROR`, as on iOS.
+- Android: closing the transfer screen during the upload left `transferPrescriptions` pending, or completed it later
+  without the prescriptions in the cart. The call now fails.
+- iOS: `setGuestUserData` passed the phone country code without "+", so checkout saved addresses with a wrong one.
+- iOS: `transferPrescriptions` replayed the cached prerequisites result through `prerequisitesResultListener`.
+- CardLink on iOS: the configured `IaSdkConfigurationCardLink.phoneNumber` replaced the number of a picked saved
+  card; `finish` right after `launch` reported `willExit` for a flow that still opened; a launch without a screen to
+  show on kept the launch colors.
 
 ### Changed
 

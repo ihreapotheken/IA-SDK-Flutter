@@ -11,11 +11,13 @@ struct IaSetGuestUserDataArguments: Decodable {
     let phoneNumberWithoutCountryCode: String
 
     func mappedToSDK() -> IAUserData {
-        IAUserData(
+        // The SDK expects the country code with a leading "+", like its default "+49", and reads it back that way.
+        let countryCode = phoneNumberCountryCode.trimmingCharacters(in: .whitespaces)
+        return IAUserData(
             salutation: salutation.mappedToSDK(),
             firstName: firstName,
             lastName: lastName,
-            countryCode: phoneNumberCountryCode,
+            countryCode: countryCode.hasPrefix("+") ? countryCode : "+" + countryCode,
             phoneNumber: phoneNumberWithoutCountryCode,
             email: email
         )

@@ -24,6 +24,7 @@ abstract class IaBaseOrdering extends IaBase {
   /// It completes once the prescriptions are in the cart. On Android, the SDK reports that through the updated cart
   /// with [IaTransferPrescriptionsFinishAction.openCart] and [IaTransferPrescriptionsFinishAction.noAction], and
   /// only once the user has closed the confirmation with [IaTransferPrescriptionsFinishAction.showBottomSheet].
+  /// Closing the transfer screen during the upload cancels it there, and the call fails.
   ///
   /// An eRezept code the SDK can't read fails the call on iOS. Android skips it and transfers the others.
   ///

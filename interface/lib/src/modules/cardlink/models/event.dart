@@ -25,6 +25,8 @@ enum IaCardLinkEvent {
 
   /// User requested to go to cart.
   ///
+  /// Note: Only reported on Android. The iOS SDK has no such action.
+  ///
   goToCart,
 
   /// User requested to open terms and conditions.

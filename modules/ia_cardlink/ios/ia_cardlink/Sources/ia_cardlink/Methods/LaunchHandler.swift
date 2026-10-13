@@ -39,6 +39,7 @@ class LaunchHandler {
 
         DispatchQueue.main.async { [weak self] in
             guard let rootViewController = Self.topPresentedViewController() else {
+                self?.restorePalette()
                 result(FlutterError(code: "NO_VIEW_CONTROLLER", message: "Could not find root view controller", details: nil))
                 return
             }
@@ -112,8 +113,13 @@ class LaunchHandler {
 
     /// Closes CardLink, then replies.
     func finish(result: @escaping FlutterResult) {
+        // Right after a launch CardLink signs in before it shows anything, and the SDK opens it afterwards anyway, so
+        // its closing is only reported for a shown CardLink.
+        let isShown = Self.isCardLinkShown()
         Self.finishCardLink { [weak self] in
-            self?.reportClosed()
+            if isShown {
+                self?.reportClosed()
+            }
             result(nil)
         }
     }

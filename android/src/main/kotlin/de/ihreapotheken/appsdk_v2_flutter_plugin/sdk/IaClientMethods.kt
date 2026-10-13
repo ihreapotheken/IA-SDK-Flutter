@@ -2,6 +2,8 @@ package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
 import android.content.Context
 import android.app.Activity
+import android.app.Application
+import android.os.Bundle
 import de.ihreapotheken.sdk.core.api.SdkFeatureProvider
 import de.ihreapotheken.sdk.integrations.api.view.IaPrerequisiteActivity
 import java.util.concurrent.atomic.AtomicBoolean
@@ -327,6 +329,47 @@ internal class IaClientMethods(
             FlutterCall.transferSDKv1UserData.name -> "TRANSFER_SDK_V1_USER_DATA_ERROR"
             else -> method.replace(Regex("([a-z0-9])([A-Z])"), "\$1_\$2").uppercase() + "_ERROR"
         }
+    }
+
+    /**
+     * Watches the first SDK screen that opens after it's created, the prescription transfer's, and calls [onClosed]
+     * when that screen closes for good. A screen recreated after a configuration change is watched again.
+     */
+    private class TransferScreenWatcher(
+        private val application: Application?,
+        private val onClosed: () -> Unit,
+    ) : Application.ActivityLifecycleCallbacks {
+        private var transferScreen: Activity? = null
+
+        init {
+            application?.registerActivityLifecycleCallbacks(this)
+        }
+
+        fun stop() {
+            application?.unregisterActivityLifecycleCallbacks(this)
+            transferScreen = null
+        }
+
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+            if (transferScreen == null && activity.javaClass.name.startsWith("de.ihreapotheken.sdk.")) {
+                transferScreen = activity
+            }
+        }
+
+        override fun onActivityDestroyed(activity: Activity) {
+            if (activity !== transferScreen) return
+            transferScreen = null
+            if (activity.isFinishing) {
+                stop()
+                onClosed()
+            }
+        }
+
+        override fun onActivityStarted(activity: Activity) = Unit
+        override fun onActivityResumed(activity: Activity) = Unit
+        override fun onActivityPaused(activity: Activity) = Unit
+        override fun onActivityStopped(activity: Activity) = Unit
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
     }
 
     /**
@@ -805,6 +848,12 @@ internal class IaClientMethods(
                 }
                 // The listener can report several events, but Flutter accepts only one reply per call.
                 val hasReplied = AtomicBoolean(false)
+                // Closing the transfer screen during the upload cancels it without a listener event.
+                val transferScreenWatcher = TransferScreenWatcher(bindings.applicationContext as? Application) {
+                    if (!hasReplied.getAndSet(true)) {
+                        result.error("METHOD_ERROR", "The transfer screen was closed before the transfer finished.", null)
+                    }
+                }
                 // OVERLAY shows a confirmation bottom sheet, every other mode opens the cart.
                 // Android has no counterpart of the iOS noAction finish action.
                 val presentationMode = if (data["finishAction"] == "showBottomSheet") {
@@ -845,8 +894,11 @@ internal class IaClientMethods(
                     },
                 )
                 // The SDK returns false without calling the listener, for example before it's initialized.
-                if (!isStarted && !hasReplied.getAndSet(true)) {
-                    result.error("METHOD_ERROR", "The SDK couldn't start the prescription transfer. Is it initialized?", null)
+                if (!isStarted) {
+                    transferScreenWatcher.stop()
+                    if (!hasReplied.getAndSet(true)) {
+                        result.error("METHOD_ERROR", "The SDK couldn't start the prescription transfer. Is it initialized?", null)
+                    }
                 }
             }
 

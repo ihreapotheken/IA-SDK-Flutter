@@ -177,7 +177,8 @@ abstract class IaBaseCardLink extends IaBase {
 
   /// Programmatically finishes the active CardLink session.
   ///
-  /// Completes right away when no CardLink screen is shown.
+  /// Completes right away when no CardLink screen is shown. Right after [launch], CardLink signs in before it shows
+  /// anything; `finish` has no effect then, and CardLink opens afterwards.
   ///
   /// Note: Only has an effect on iOS.
   ///
@@ -238,7 +239,7 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [IaCardLinkEvent.willExit]: CardLink has closed. It's reported once CardLink is gone.
   /// - [IaCardLinkEvent.willStartScanning]: NFC scanning is about to start. Only reported on iOS.
   /// - [IaCardLinkEvent.failedToInitialize]: Initialization failed
-  /// - [IaCardLinkEvent.goToCart]: User requested to go to cart
+  /// - [IaCardLinkEvent.goToCart]: User requested to go to cart. Only reported on Android.
   /// - [IaCardLinkEvent.openTermsAndConditions]: User requested to view terms
   /// - [IaCardLinkEvent.cardSaved]: A card was saved
   /// - [IaCardLinkEvent.finished]: CardLink closed with a result (Android), see [resultListener]
@@ -246,8 +247,7 @@ abstract class IaBaseCardLink extends IaBase {
   /// On iOS, CardLink flows the SDK starts itself (for example from the "redeem prescription" screen) report
   /// consent, session, prescription (see [prescriptionsRedeemedListener]), saved-card, error and analytics events
   /// too. Their [IaCardLinkEvent.willExit] isn't reported, because the SDK closes and reopens them itself. Their
-  /// [IaCardLinkEvent.goToCart] and [IaCardLinkEvent.openTermsAndConditions] are, as the SDK only closes CardLink
-  /// for them.
+  /// [IaCardLinkEvent.openTermsAndConditions] is, as the SDK only closes CardLink for it.
   ///
   /// Usage:
   ///

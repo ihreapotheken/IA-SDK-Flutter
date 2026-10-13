@@ -13,6 +13,10 @@ class IaClientDelegate: SDKDelegate {
     /// Flutter engine keeps them.
     static var cardLinkConfiguration: IaCardLinkConfigurationArguments?
 
+    /// Whether prerequisites results are a replay of the SDK's cached result rather than a run, see
+    /// `IAOrderingWrapper.transferPrescriptions`.
+    static var skipsPrerequisitesResults = false
+
     /// How long the SDK waits for Flutter's scan decision. Without an answer, for example when the Flutter engine is
     /// gone, it continues with its default handling.
     private static let scanDecisionTimeout: TimeInterval = 120
@@ -124,7 +128,8 @@ class IaClientDelegate: SDKDelegate {
         result: Result<IASDKInitializationAndPrerequisitesResult, any Error>,
         type: SDKInitializationType
     ) {
-        guard case .success(let initializationResult) = result,
+        guard !Self.skipsPrerequisitesResults,
+              case .success(let initializationResult) = result,
               let prerequisites = initializationResult.prerequisitesResult else {
             return
         }

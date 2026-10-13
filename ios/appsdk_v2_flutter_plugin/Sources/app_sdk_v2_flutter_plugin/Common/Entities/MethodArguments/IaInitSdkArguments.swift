@@ -42,7 +42,8 @@ struct IaCardLinkConfigurationArguments: Decodable {
                 finishAction: configuration.finishAction
             )
         }
-        if let phoneNumber {
+        // A saved card the user picked brings its own phone number, which its SMS code goes to.
+        if let phoneNumber, configuration.canCode?.isEmpty ?? true {
             updated.setRawPhoneNumber(Self.formatted(phoneNumber: phoneNumber))
         }
         if let isSaveCardEnabled {
