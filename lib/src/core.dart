@@ -367,7 +367,8 @@ class IaSdk {
     return await _Methods.setIsOnboardingShown.invoke(arguments);
   }
 
-  /// Returns `true` if the user has completed the prerequisites flow (legal documents, onboarding).
+  /// Returns `true` if the user has completed the prerequisites flow (legal documents, onboarding) and a valid
+  /// pharmacy is selected, unless [IaPrerequisitesConfiguration.runApofinderIfNeeded] is `false`.
   ///
   /// Call it after [initialize]; before that the call fails.
   ///
@@ -378,7 +379,7 @@ class IaSdk {
     return result ?? false;
   }
 
-  /// Launches the prerequisites flow (legal documents, onboarding) on top of the navigation stack.
+  /// Launches the prerequisites flow (legal documents, onboarding, pharmacy selection) on top of the navigation stack.
   ///
   /// The outcome is reported through [prerequisitesResultListener].
   ///
@@ -617,6 +618,9 @@ class IaSdk {
   /// Sets the user's consent for the SDK's analytics tracking.
   ///
   /// Call it after [initialize]; before that the call fails. Tracking also needs [IaSdkConfiguration.isAnalyticsEnabled].
+  ///
+  /// The SDK doesn't store the consent: it starts as unknown, without tracking, so set it again after every
+  /// [initialize].
   ///
   /// Note: Only supported on Android.
   ///

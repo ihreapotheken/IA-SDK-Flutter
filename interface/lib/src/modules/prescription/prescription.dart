@@ -46,7 +46,8 @@ abstract class IaBasePrescription extends IaBase {
   ///
   StreamController<String> get scannerCameraErrorListener;
 
-  /// Called when the user photographs a paper prescription in the SDK scanner, with the encoded photo as [imageData].
+  /// Called when the user photographs a paper prescription in the SDK scanner, or picks a photo of one from the
+  /// gallery, with the encoded image as [imageData].
   ///
   /// Return [IaModelPrescriptionScanDecision.handled] to take over the prescription,
   /// or [IaModelPrescriptionScanDecision.error] to reject it. When not set, or when it returns

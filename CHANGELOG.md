@@ -98,6 +98,7 @@ Native SDK 2.9.0 on both platforms.
 - iOS: `clearPharmacyId` left the cart of the cleared pharmacy, which Android empties.
 - Android: `orderingDidUpdateCartListener` didn't report the cart emptied by `clearCart` or `clearPharmacyId`.
 - Android: closing the confirmation sheet of a `showBottomSheet` prescription transfer opened the cart.
+- Android: `logout` kept the cart, which iOS empties.
 - CardLink on iOS: a launch without an `environment` could undo the environment `initialize` set after an earlier
   launch with one.
 - CardLink on iOS: the configured `IaSdkConfigurationCardLink.phoneNumber` replaced the number of a picked saved

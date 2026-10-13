@@ -12,8 +12,9 @@ enum IaCardLinkFinishAction {
 
   /// Upload prescriptions to the server (default ordering flow).
   ///
-  /// Needs the Ordering module and an initialized SDK. Without them, the SDK sends the raw prescriptions instead,
-  /// as with [sendRawPrescriptions].
+  /// Needs the Ordering module and an initialized SDK whose prerequisites ran in the current app session, for
+  /// example after an SDK screen was shown. Without them, the SDK sends the raw prescriptions instead, as with
+  /// [sendRawPrescriptions].
   ///
   uploadPrescriptions;
 

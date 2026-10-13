@@ -681,6 +681,9 @@ internal class IaClientMethods(
                 if (!requireInitialized(result)) return
                 val success = bindings.sdkModule.clearAllData()
                 if (success) {
+                    // Unlike the iOS SDK's, the Android SDK's clearAllData keeps the cart.
+                    bindings.sdkModule.ordering.deleteCart()
+                    bindings.callbacks.reportEmptyCart()
                     result.success(null)
                 } else {
                     result.error(
