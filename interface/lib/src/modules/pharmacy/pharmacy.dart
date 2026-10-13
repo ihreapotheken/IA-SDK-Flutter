@@ -19,7 +19,7 @@ abstract class IaBasePharmacy extends IaBase {
   ///
   /// [pharmacyId] is the numeric pharmacy identifier, for example `"1234"`. Both platforms reject other values.
   ///
-  /// Call it after `IaSdk.initialize`; before that the call fails.
+  /// Call it after `IaSdk.initialize`; before that the call fails, on Android with `SDK_NOT_INITIALIZED`.
   ///
   Future<void> setPharmacyId(String pharmacyId);
 

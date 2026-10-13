@@ -12,11 +12,13 @@ class LaunchHandler {
     private let eventSender: CardLinkEventSender
     /// SDK-wide palette from before a launch with colors, restored when CardLink closes.
     private var paletteBeforeLaunch: IAColorPalette?
-    /// Whether the SDK was initialized when the palette was replaced. An initialization finishing later sets the SDK's
-    /// theme, which is then kept.
-    private var wasInitializedAtLaunch = false
+    /// The palette the launch set. When the SDK replaced it meanwhile, with the remote theme of an initialization
+    /// that finished, the SDK's palette is kept.
+    private var paletteSetByLaunch: IAColorPalette?
     /// SDK-wide environment from before a launch with an environment, restored by a launch without one.
     private var environmentBeforeLaunch: EnvironmentID?
+    /// The environment the launch set. When `IaSdk.initialize` set another one meanwhile, that one is kept.
+    private var environmentSetByLaunch: EnvironmentID?
     /// Whether a CardLink flow launched from Flutter is shown, so its closing is reported once.
     private var isLaunchedFlowShown = false
     /// Whether the launched flow continues from the saved cards screen into the scan flow.
@@ -51,18 +53,19 @@ class LaunchHandler {
 
             // @TODO high: This is just for core app, remove it after it starts using SDK initialization.
             if let environmentString = args["environment"] as? String {
-                if self?.environmentBeforeLaunch == nil {
+                let environment: EnvironmentID = environmentString == "PRODUCTION" ? .prod : .staging
+                if self?.environmentBeforeLaunch == nil || IASDK.getEnvironment() != self?.environmentSetByLaunch {
                     self?.environmentBeforeLaunch = IASDK.getEnvironment()
                 }
-                if environmentString == "PRODUCTION" {
-                    IASDK.setEnvironment(.prod)
-                } else if environmentString == "DEBUG" {
-                    IASDK.setEnvironment(.staging)
-                }
+                IASDK.setEnvironment(environment)
+                self?.environmentSetByLaunch = environment
             } else if let environmentBeforeLaunch = self?.environmentBeforeLaunch {
-                // The environment IaSdk was initialized with, as on Android.
-                IASDK.setEnvironment(environmentBeforeLaunch)
+                // The environment IaSdk was initialized with, as on Android, unless initialize set it since.
+                if IASDK.getEnvironment() == self?.environmentSetByLaunch {
+                    IASDK.setEnvironment(environmentBeforeLaunch)
+                }
                 self?.environmentBeforeLaunch = nil
+                self?.environmentSetByLaunch = nil
             }
             CardLink.legacyAuthenticationKey = .init(value: sdkApiKey)
             // Set before starting, as the SDK can report a failed start before `start` returns.
@@ -163,15 +166,18 @@ class LaunchHandler {
 
     private func restorePalette() {
         guard let paletteBeforeLaunch else { return }
-        self.paletteBeforeLaunch = nil
-        if wasInitializedAtLaunch || !Self.isSDKInitialized {
+        if let paletteSetByLaunch, Self.isSamePalette(Color.ia, paletteSetByLaunch) {
             Color.ia = paletteBeforeLaunch
         }
+        self.paletteBeforeLaunch = nil
+        self.paletteSetByLaunch = nil
     }
 
-    private static var isSDKInitialized: Bool {
-        if case .success = IASDK.initializationState.initializationResult { return true }
-        return false
+    /// Compares the colors a launch sets, which tell its palette apart from the SDK's.
+    private static func isSamePalette(_ palette: IAColorPalette, _ otherPalette: IAColorPalette) -> Bool {
+        palette.primary == otherPalette.primary
+            && palette.link == otherPalette.link
+            && palette.bottomNavigation == otherPalette.bottomNavigation
     }
 
     /// The view controller CardLink is presented on. A view controller that already presents one can't present
@@ -220,14 +226,15 @@ class LaunchHandler {
         }
         if paletteBeforeLaunch == nil {
             paletteBeforeLaunch = Color.ia
-            wasInitializedAtLaunch = Self.isSDKInitialized
         }
-        Color.ia = .init(
+        let palette = IAColorPalette(
             primary: primaryColor.map { .init($0) },
             button: buttonsColor.map { .init($0) },
             link: textLinkColor.map { .init($0) },
             bottomNavigation: bottomNavigationColor.map { .init($0) }
         )
+        Color.ia = palette
+        paletteSetByLaunch = palette
     }
 
     /// Reports an action of a CardLink flow the SDK started itself, for example from the redeem prescription screen.

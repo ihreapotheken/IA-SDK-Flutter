@@ -48,7 +48,8 @@ abstract class IaBaseOrdering extends IaBase {
   ///
   Future<void> launchCartScreen();
 
-  /// Returns the current cart details, or `null` if the cart is empty.
+  /// Returns the current cart details, or `null` if there's no cart. A cart the user emptied can be returned
+  /// without items.
   ///
   /// It fails until the SDK has run its prerequisites in the current app session, for example when an SDK screen or
   /// component was shown, and again after they're reset.
@@ -63,7 +64,7 @@ abstract class IaBaseOrdering extends IaBase {
     bool shouldEmitCartUpdate = false,
   });
 
-  /// Returns the current cart as the model [orderingDidUpdateCartListener] reports, or `null` if the cart is empty.
+  /// Returns the current cart as the model [orderingDidUpdateCartListener] reports, or `null` if there's no cart.
   ///
   /// Like [getCartDetails], it fails until the SDK has run its prerequisites in the current app session.
   ///

@@ -11,6 +11,8 @@ class IaModelPrescriptionScanDecision {
 
   /// The host app has taken over the scanned prescription, so the SDK does nothing further with it.
   ///
+  /// The scanner stays open and resumes scanning, so the host app closes it when it's done.
+  ///
   static const handled = IaModelPrescriptionScanDecision._('handled');
 
   /// The host app rejects the scanned prescription, and the SDK reports [message] as the error.

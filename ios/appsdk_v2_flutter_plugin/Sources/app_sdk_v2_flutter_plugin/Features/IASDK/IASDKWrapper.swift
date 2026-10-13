@@ -91,6 +91,14 @@ final class IASDKWrapper {
             return FlutterMethodNotImplemented
         }
         let view = try arguments.view
+        // An SDK screen decides once, when it appears, whether to run the initialization and prerequisites. One that
+        // appears while the initialization runs would wait for it forever, so it opens once that's done.
+        if IASDK.initializationState.isInProgress, IASDK.initializationState.initializationResult == nil {
+            for await state in IASDK.initializationStatePublisher.values
+            where !state.isInProgress || state.initializationResult != nil {
+                break
+            }
+        }
         if view == .prescriptionScanner || view == .ePrescriptionScanner {
             PrescriptionScannerCameraController.shared.reset()
         }

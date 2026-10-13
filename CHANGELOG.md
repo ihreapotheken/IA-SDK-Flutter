@@ -87,8 +87,12 @@ Native SDK 2.9.0 on both platforms.
 - `initialize` with an empty `accessKey` or `clientId` fails with `ARG_ERROR` on both platforms. Android used to
   leave the initialization state at `uninitialized`.
 - Android: `finishAllActivities` left the overlay of a `showBottomSheet` prescription transfer open.
-- CardLink on iOS: closing a CardLink launched with colors before `initialize` finished replaced the remote theme,
-  and a launch without an `environment` kept the one of an earlier launch instead of the `IaSdk` one.
+- CardLink on iOS: closing a CardLink launched with colors while `initialize` finished replaced the remote theme,
+  or kept the CardLink colors without one; a launch without an `environment` kept the one of an earlier launch
+  instead of the `IaSdk` one.
+- Android: `setPharmacyId` before `initialize` fails with `SDK_NOT_INITIALIZED`, and its other errors no longer
+  show an object hash.
+- iOS: an SDK screen launched while `initialize` was running kept loading. It now opens once initialization is done.
 - CardLink on iOS: the configured `IaSdkConfigurationCardLink.phoneNumber` replaced the number of a picked saved
   card; `finish` right after `launch` reported `willExit` for a flow that still opened; a launch without a screen to
   show on kept the launch colors.

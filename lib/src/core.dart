@@ -228,6 +228,9 @@ class IaSdk {
   /// An empty [IaSdkConfiguration.accessKey] or [IaSdkConfiguration.clientId] fails with `ARG_ERROR` before the SDK
   /// starts initializing.
   ///
+  /// On iOS, open SDK screens and show inline components after it completed. A screen launched while it runs opens
+  /// once it's done, but a screen or component shown before it starts keeps loading.
+  ///
   /// On Android a failed initialization can't be retried: the SDK keeps its error state, so later calls fail too
   /// until the app restarts. On iOS a later call initializes the SDK again.
   ///

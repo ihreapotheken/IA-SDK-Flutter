@@ -53,6 +53,9 @@ abstract class IaBasePrescription extends IaBase {
   /// [IaModelPrescriptionScanDecision.performDefault], the SDK continues with its built-in handling. The SDK
   /// also continues with it when the callback throws, or doesn't answer within 2 minutes.
   ///
+  /// After returning [IaModelPrescriptionScanDecision.handled], the scanner keeps scanning; close it, for example
+  /// with `IaSdk.finishAllActivities`, once the host app has the prescription.
+  ///
   /// Usage:
   ///
   /// ```dart
@@ -70,6 +73,9 @@ abstract class IaBasePrescription extends IaBase {
   /// or [IaModelPrescriptionScanDecision.error] to reject it. When not set, or when it returns
   /// [IaModelPrescriptionScanDecision.performDefault], the SDK continues with its built-in handling. The SDK
   /// also continues with it when the callback throws, or doesn't answer within 2 minutes.
+  ///
+  /// After returning [IaModelPrescriptionScanDecision.handled], the scanner keeps scanning; close it, for example
+  /// with `IaSdk.finishAllActivities`, once the host app has the prescription.
   ///
   abstract Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)?
   onEPrescriptionScanned;

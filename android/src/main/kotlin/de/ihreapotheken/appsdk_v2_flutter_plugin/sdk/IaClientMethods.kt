@@ -577,6 +577,7 @@ internal class IaClientMethods(
                     return
                 }
 
+                if (!requireInitialized(result)) return
                 bindings.sdkModule.pharmacy.setPharmacyId(
                     pharmacyId,
                     object : PharmacyConfigListener {
@@ -585,7 +586,7 @@ internal class IaClientMethods(
                                 || pharmacyConfigResult is PharmacyConfigResult.ValidationFailed) {
                                 result.error(
                                     "METHOD_ERROR",
-                                    "Setting pharmacy ID failed: $pharmacyConfigResult",
+                                    "Setting pharmacy ID failed: ${pharmacyConfigResult::class.simpleName}",
                                     null
                                 )
                             } else {
