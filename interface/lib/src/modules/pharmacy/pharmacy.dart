@@ -43,6 +43,8 @@ abstract class IaBasePharmacy extends IaBase {
 
   /// Clears the selected pharmacy, so [getPharmacyId] returns `null` until a pharmacy is selected again.
   ///
+  /// The cart, which belongs to the cleared pharmacy, is emptied too.
+  ///
   /// On Android, call it after `IaSdk.initialize`; before that the call fails.
   ///
   Future<void> clearPharmacyId();

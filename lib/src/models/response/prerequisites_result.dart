@@ -24,7 +24,8 @@ class IaSdkPrerequisitesResult {
   ///
   final IaSdkLegalResult? legal;
 
-  /// Pharmacy the user selected, `null` if the selection was cancelled. Only reported on iOS.
+  /// Pharmacy after the flow: the one the user selected, or the stored one when it's still valid and no selection was
+  /// needed. `null` if the user closed the pharmacy selection. Only reported on iOS.
   ///
   final String? pharmacyId;
 }
@@ -32,7 +33,7 @@ class IaSdkPrerequisitesResult {
 /// Outcome of the onboarding step of the prerequisites flow.
 ///
 enum IaSdkOnboardingResult {
-  /// The onboarding wasn't shown, for example because it was already completed.
+  /// The onboarding step wasn't part of the flow, as the prerequisites options don't run it.
   ///
   notStarted,
 
@@ -40,7 +41,7 @@ enum IaSdkOnboardingResult {
   ///
   noOnboardingData,
 
-  /// The user finished the onboarding.
+  /// The onboarding is done: the user finished it now, or it was already shown before.
   ///
   finished,
 
@@ -52,7 +53,7 @@ enum IaSdkOnboardingResult {
 /// Outcome of the legal documents step of the prerequisites flow.
 ///
 enum IaSdkLegalResult {
-  /// The user accepted the legal documents.
+  /// The legal documents are accepted: by the user now, or already before.
   ///
   accepted,
 
@@ -60,7 +61,7 @@ enum IaSdkLegalResult {
   ///
   cancelled,
 
-  /// The legal documents weren't shown, for example because they were already accepted.
+  /// The legal documents step wasn't part of the flow, as the prerequisites options don't run it.
   ///
   notStarted,
 

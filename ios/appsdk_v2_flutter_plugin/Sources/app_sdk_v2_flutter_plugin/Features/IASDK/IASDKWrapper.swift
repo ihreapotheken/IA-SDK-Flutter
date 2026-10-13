@@ -16,6 +16,7 @@ final class IASDKWrapper {
         
         // Configuration
         IASDK.setEnvironment(arguments.serverEnvironment.mappedToSDK())
+        NotificationCenter.default.post(name: IaClientDelegate.sdkEnvironmentWasSetNotification, object: nil)
         IASDK.configuration.apiKey = arguments.accessKey
         IASDK.configuration.clientID = arguments.clientId
         if let channelId = arguments.initialization.channelId {
@@ -92,10 +93,10 @@ final class IASDKWrapper {
         }
         let view = try arguments.view
         // An SDK screen decides once, when it appears, whether to run the initialization and prerequisites. One that
-        // appears while the initialization runs would wait for it forever, so it opens once that's done.
-        if IASDK.initializationState.isInProgress, IASDK.initializationState.initializationResult == nil {
-            for await state in IASDK.initializationStatePublisher.values
-            where !state.isInProgress || state.initializationResult != nil {
+        // appears while the initialization runs would wait for it forever, so it opens once that's done. A retry
+        // keeps the earlier failure until it finishes.
+        if Self.isInitializing(IASDK.initializationState) {
+            for await state in IASDK.initializationStatePublisher.values where !Self.isInitializing(state) {
                 break
             }
         }
@@ -121,6 +122,13 @@ final class IASDKWrapper {
             Self.presentedScreens.add(viewController)
         }
         return nil
+    }
+
+    /// Whether the initialization runs, as opposed to the prerequisites after a successful one.
+    private static func isInitializing(_ state: IASDKInitializationState) -> Bool {
+        guard state.isInProgress else { return false }
+        if case .success = state.initializationResult { return false }
+        return true
     }
 
     /// The view controller of a launched screen, which its callbacks only know after it's presented.
@@ -252,6 +260,11 @@ final class IASDKWrapper {
     func clearPharmacyId() async throws -> Any? {
         IASDK.Pharmacy.savePharmacyID(nil)
         Self.cleanPrerequisitesCache()
+        // The cart belongs to the cleared pharmacy, and the Android SDK empties it too. Without the Ordering module
+        // there's no cart.
+        if let ordering = try? IASDK.ordering {
+            try await ordering.deleteCart()
+        }
         return nil
     }
 

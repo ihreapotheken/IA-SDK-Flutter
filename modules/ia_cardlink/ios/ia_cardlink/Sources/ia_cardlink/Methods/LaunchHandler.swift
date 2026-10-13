@@ -109,6 +109,12 @@ class LaunchHandler {
         }
     }
 
+    /// Keeps the environment `IaSdk.initialize` set for launches without an environment.
+    func handleEnvironmentSetByInitialize() {
+        environmentBeforeLaunch = nil
+        environmentSetByLaunch = nil
+    }
+
     /// Handles a launched CardLink flow that closed together with the SDK screen it was shown on, for example
     /// through `finishAllActivities`.
     func handleClosedWithSdkScreens() {

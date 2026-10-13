@@ -25,6 +25,10 @@ class IaClientDelegate: SDKDelegate {
     /// The ia_cardlink plugin observes it to report the actions to Dart, as this plugin can't depend on it.
     static let cardLinkDidSendActionNotification = Notification.Name("de.ihreapotheken.sdk.flutter.cardLinkDidSendAction")
 
+    /// Posted when `initialize` set the SDK environment, which the ia_cardlink plugin's launches without an
+    /// environment then keep.
+    static let sdkEnvironmentWasSetNotification = Notification.Name("de.ihreapotheken.sdk.flutter.sdkEnvironmentWasSet")
+
     /// Posted when `finishAllActivities` closed a CardLink flow shown on top of an SDK screen, for the ia_cardlink
     /// plugin to report its closing.
     static let cardLinkDidCloseWithSdkScreensNotification = Notification.Name("de.ihreapotheken.sdk.flutter.cardLinkDidCloseWithSdkScreens")

@@ -19,6 +19,9 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
     /// Observer of the core plugin's notification that SDK screens closed together with a CardLink flow on them.
     private static var closedWithSdkScreensObserver: NSObjectProtocol?
 
+    /// Observer of the core plugin's notification that `initialize` set the SDK environment.
+    private static var environmentWasSetObserver: NSObjectProtocol?
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(
             name: "de.ihreapotheken/sdk/cardLink",
@@ -54,6 +57,19 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
         ) { [weak instance] _ in
             Task { @MainActor in
                 instance?.launchHandler.handleClosedWithSdkScreens()
+            }
+        }
+
+        if let previousObserver = environmentWasSetObserver {
+            NotificationCenter.default.removeObserver(previousObserver)
+        }
+        environmentWasSetObserver = NotificationCenter.default.addObserver(
+            forName: Notification.Name("de.ihreapotheken.sdk.flutter.sdkEnvironmentWasSet"),
+            object: nil,
+            queue: .main
+        ) { [weak instance] _ in
+            Task { @MainActor in
+                instance?.launchHandler.handleEnvironmentSetByInitialize()
             }
         }
     }
