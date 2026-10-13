@@ -260,12 +260,10 @@ class IaSdk {
     required IaSdkConfiguration config,
   }) async {
     if (_initialized) return;
-    // A call made while another one runs waits for it instead of initializing again.
+    // A call made while another one runs waits for it instead of initializing again. The running call is set before
+    // anything is awaited, so a call or a register made meanwhile sees it.
     final pendingInitialization = _pendingInitialization;
     if (pendingInitialization != null) return pendingInitialization;
-    // A register call that's still running finishes first, so its modules start. Its failure is its own caller's.
-    await _pendingRegistration?.catchError((Object _) {});
-    if (_initialized) return;
     final initialization = _initialize(config);
     _pendingInitialization = initialization;
     try {
@@ -280,6 +278,8 @@ class IaSdk {
   Future<void>? _pendingInitialization;
 
   Future<void> _initialize(IaSdkConfiguration config) async {
+    // A register call that's still running finishes first, so its modules start. Its failure is its own caller's.
+    await _pendingRegistration?.catchError((Object _) {});
     // The Android SDK rejects these without reporting an error state, unlike the iOS SDK, so both fail the same here.
     if (config.accessKey.trim().isEmpty || config.clientId.trim().isEmpty) {
       throw PlatformException(code: 'ARG_ERROR', message: 'accessKey and clientId must not be empty.');
