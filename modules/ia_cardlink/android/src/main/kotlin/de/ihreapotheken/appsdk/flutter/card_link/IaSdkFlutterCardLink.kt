@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /** IaSdkFlutterCardLink */
 class IaSdkFlutterCardLink :
@@ -154,8 +155,13 @@ class IaSdkFlutterCardLink :
                 hasLaunchedCardLink = true
                 savedCardsExitTime = 0L
             },
-            // Called on the SDK's background thread.
-            onFailedToInitialize = { mainHandler.post { isCardLinkSessionActive = false } },
+            // Called on the SDK's background thread. A scan flow started from the saved cards screen can fail while
+            // that screen is still shown; its closing then ends the session.
+            onFailedToInitialize = {
+                mainHandler.post {
+                    if (cardLinkActivityCount == 0) isCardLinkSessionActive = false
+                }
+            },
         )
     }
 
@@ -247,7 +253,8 @@ class IaSdkFlutterCardLink :
                     result.error("NO_CONTEXT", "Context not available", null)
                     return
                 }
-                result.success(CardLink.getLogFilePath(context))
+                // The SDK returns its log file's path even before anything was logged.
+                result.success(CardLink.getLogFilePath(context).takeIf { File(it).exists() })
             }
 
             "getSavedCards" -> {

@@ -34,6 +34,8 @@ The library is supported on both of the major mobile operating systems, with con
 - Target SDK Version: `36`
 - Kotlin `2.1.0`
 - Gradle `8.12.3`
+- The inline components (`IaCartButton`, `IaProductGrid`) need the app's activity to be a `ComponentActivity`, such as
+  `FlutterFragmentActivity`.
 
 ### iOS
 

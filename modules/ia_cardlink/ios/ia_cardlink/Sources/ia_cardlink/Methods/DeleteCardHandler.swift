@@ -17,6 +17,9 @@ class DeleteCardHandler {
         do {
             try CardLink.deleteCard(userId: userId, name: cardName)
             result(nil)
+        } catch CardStorageError.cardNotFound {
+            // Like on Android, deleting a card that isn't saved does nothing.
+            result(nil)
         } catch {
             result(FlutterError(code: "DELETE_CARD_ERROR", message: "\(error)", details: nil))
         }

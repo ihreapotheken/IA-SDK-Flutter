@@ -37,8 +37,9 @@ part 'models/response/prerequisites_result.dart';
 ///
 /// Failed calls throw a [PlatformException]. Its code is `ARG_ERROR` for invalid arguments, and otherwise names the
 /// method, for example `CLEAR_CART_ERROR` for `clearCart`. On Android, calls that need an initialized SDK fail with
-/// `SDK_NOT_INITIALIZED` before [initialize], and calls that open a screen fail with `NO_ACTIVITY` without an
-/// attached activity.
+/// `SDK_NOT_INITIALIZED` before [initialize], and `transferPrescriptions` and CardLink's `launch` fail with
+/// `NO_ACTIVITY` without an attached activity. Other screens then open in a new task, and [launchPrerequisiteFlow]
+/// can't report its result.
 ///
 class IaSdk {
   IaSdk._();
@@ -220,7 +221,8 @@ class IaSdk {
 
   /// Allocates the resources required for the AppSDK usage.
   ///
-  /// Only the first successful call has an effect; later calls return without applying their [config].
+  /// Only the first successful call has an effect; later calls return without applying their [config], and a call
+  /// made while another one runs completes with it.
   ///
   /// On Android a failed initialization can't be retried: the SDK keeps its error state, so later calls fail too
   /// until the app restarts. On iOS a later call initializes the SDK again.
@@ -228,13 +230,29 @@ class IaSdk {
   Future<void> initialize({
     required IaSdkConfiguration config,
   }) async {
-    if (!_initialized) {
-      final arguments = _RequestModelInitConfig.fromConfig(config);
-      await _Methods.initialize.invoke(arguments);
-      _initialized = true;
-      _hostAppLogFilePath = config.hostAppLogFilePath;
-      await _forwardHostAppLogFilePath();
+    if (_initialized) return;
+    // A call made while another one runs waits for it instead of initializing again.
+    final pendingInitialization = _pendingInitialization;
+    if (pendingInitialization != null) return pendingInitialization;
+    final initialization = _initialize(config);
+    _pendingInitialization = initialization;
+    try {
+      await initialization;
+    } finally {
+      _pendingInitialization = null;
     }
+  }
+
+  /// The [initialize] call in progress.
+  ///
+  Future<void>? _pendingInitialization;
+
+  Future<void> _initialize(IaSdkConfiguration config) async {
+    final arguments = _RequestModelInitConfig.fromConfig(config);
+    await _Methods.initialize.invoke(arguments);
+    _initialized = true;
+    _hostAppLogFilePath = config.hostAppLogFilePath;
+    await _forwardHostAppLogFilePath();
   }
 
   /// Host log file of the [initialize] configuration, see [IaSdkConfiguration.hostAppLogFilePath].
@@ -270,6 +288,9 @@ class IaSdk {
   ///
   /// On Android, call it after [initialize]; before that the call fails.
   ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
+  ///
+
   Future<void> setGuestUserData({
     required String salutation,
     required String firstName,
@@ -293,17 +314,23 @@ class IaSdk {
   ///
   /// On Android, call it after [initialize]; before that the call fails.
   ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
+  ///
+
   Future<void> logout() async {
     return await _Methods.logout.invoke();
   }
 
   /// Resets the prerequisites state, so the SDK runs the prerequisites flow
-  /// (legal documents, onboarding) again the next time it's required.
+  /// (legal documents, onboarding, pharmacy selection) again the next time it's required.
   ///
-  /// Unlike [logout], user data is kept.
+  /// The selected pharmacy is cleared too. Unlike [logout], other user data is kept.
   ///
   /// On Android, call it after [initialize]; before that the call fails.
   ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
+  ///
+
   Future<void> resetPrerequisites() async {
     return await _Methods.resetPrerequisites.invoke();
   }
@@ -374,7 +401,8 @@ class IaSdk {
 
   /// Closes the ia.de screens shown on top of the app, including screens the SDK opened from them.
   ///
-  /// Screens the host app presented itself stay open, and so does a CardLink flow the host launched.
+  /// Screens the host app presented itself stay open, and so does a CardLink flow the host launched. On iOS, a CardLink
+  /// flow launched while an SDK screen was shown sits on that screen and closes with it, reporting `willExit`.
   ///
   Future<void> finishAllActivities() async {
     return await _Methods.finishAllActivities.invoke();
@@ -458,6 +486,8 @@ class IaSdk {
 
   /// Clears cached SDK data for initialization and/or prerequisites.
   ///
+  /// With [initialization], the SDK is uninitialized afterwards, and the next [initialize] call initializes it again.
+  ///
   /// Note: Only supported on iOS.
   ///
   Future<void> cleanCache({
@@ -468,13 +498,20 @@ class IaSdk {
       initialization: initialization,
       prerequisites: prerequisites,
     );
-    return await _Methods.cleanCache.invoke(arguments);
+    await _Methods.cleanCache.invoke(arguments);
+    if (initialization) {
+      // The SDK is uninitialized again, so the next [initialize] call has to run.
+      _initialized = false;
+    }
   }
 
   /// Sets the user's billing address, used to pre-fill the checkout flow.
   ///
   /// On Android, call it after [initialize]; before that the call fails.
   ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
+  ///
+
   /// Pass a salutation matching the values accepted by [setGuestUserData]
   /// (for example "Herr"/"Frau") or `null` to leave it unset.
   ///
@@ -511,6 +548,9 @@ class IaSdk {
   ///
   /// On Android, call it after [initialize]; before that the call fails.
   ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
+  ///
+
   /// Pass a salutation matching the values accepted by [setGuestUserData]
   /// (for example "Herr"/"Frau") or `null` to leave it unset.
   ///
@@ -547,6 +587,8 @@ class IaSdk {
   ///
   /// On Android, call it after [initialize]; before that the call fails.
   ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
+  ///
   Future<void> clearUserBillingAddress() async {
     return await _Methods.clearUserBillingAddress.invoke();
   }
@@ -554,6 +596,8 @@ class IaSdk {
   /// Removes the delivery address set with [setUserDeliveryAddress].
   ///
   /// On Android, call it after [initialize]; before that the call fails.
+  ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
   ///
   Future<void> clearUserDeliveryAddress() async {
     return await _Methods.clearUserDeliveryAddress.invoke();
@@ -592,16 +636,24 @@ class IaSdk {
 
   /// Presents the SDK's log viewer, for debugging an integration.
   ///
+  /// On Android, call it after [initialize]; before that the call fails.
+  ///
   Future<void> presentLogs() async {
     return await _Methods.presentLogs.invoke();
   }
 
-  /// Writes the SDK's logs to a file and returns its path, or `null` if there are no logs.
+  /// Writes the SDK's logs to a file and returns its path. Fails when the logs can't be exported.
+  ///
+  /// Call it after [initialize]; before that the call fails.
   ///
   /// Note: Only supported on Android. On iOS the log viewer opened with [presentLogs] can share the logs.
   ///
-  Future<String?> exportLogs() async {
-    return await _Methods.exportLogs.invoke<String?>();
+  Future<String> exportLogs() async {
+    final path = await _Methods.exportLogs.invoke<String?>();
+    if (path == null) {
+      throw StateError('exportLogs: No path returned.');
+    }
+    return path;
   }
 
   /// Returns the SDK's identifier for the current user, for example to include in support requests.

@@ -414,7 +414,7 @@ class ServicesView extends StatelessWidget {
           onPressed: () async {
             try {
               final path = await IaSdk.instance.exportLogs();
-              if (context.mounted) _showResult(context, 'Logs: ${path ?? 'none'}');
+              if (context.mounted) _showResult(context, 'Logs: $path');
             } catch (e) {
               if (context.mounted) _showResult(context, 'Error: $e');
             }

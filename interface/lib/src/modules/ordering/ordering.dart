@@ -18,7 +18,8 @@ abstract class IaBaseOrdering extends IaBase {
   /// [finishAction] decides what the SDK shows once the transfer is done. [showActivityIndicator] decides whether
   /// a loading indicator is shown during the transfer, and is only used on iOS.
   ///
-  /// On Android, call it after `IaSdk.initialize`; before that the call fails. iOS initializes the SDK itself.
+  /// Call it after `IaSdk.initialize`; before that the call fails. On iOS the SDK first runs its prerequisites when
+  /// needed, which can show Apofinder or the legal documents.
   ///
   Future<void> transferPrescriptions({
     Iterable<Uint8List>? images,
@@ -42,6 +43,9 @@ abstract class IaBaseOrdering extends IaBase {
 
   /// Returns the current cart details, or `null` if the cart is empty.
   ///
+  /// It fails until the SDK has run its prerequisites in the current app session, for example when an SDK screen or
+  /// component was shown, and again after they're reset.
+  ///
   /// With [allowCached] the SDK may return previously loaded details instead of loading them again.
   /// With [shouldEmitCartUpdate] the result is also reported through [orderingDidUpdateCartListener].
   ///
@@ -53,6 +57,8 @@ abstract class IaBaseOrdering extends IaBase {
   });
 
   /// Returns the current cart as the model [orderingDidUpdateCartListener] reports, or `null` if the cart is empty.
+  ///
+  /// Like [getCartDetails], it fails until the SDK has run its prerequisites in the current app session.
   ///
   /// The options work like those of [getCartDetails]. Client order IDs aren't part of the cart details,
   /// so [IaModelOrderingCartState.clientOrderIDs] is empty.

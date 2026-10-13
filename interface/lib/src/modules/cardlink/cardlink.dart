@@ -240,9 +240,9 @@ abstract class IaBaseCardLink extends IaBase {
   ///
   /// On iOS, CardLink flows the SDK starts itself (for example from the "redeem prescription" screen) report
   /// consent, session, prescription (see [prescriptionsRedeemedListener]), saved-card, error and analytics events
-  /// too. Their navigation events
-  /// ([IaCardLinkEvent.willExit], [IaCardLinkEvent.goToCart], [IaCardLinkEvent.openTermsAndConditions]) aren't
-  /// reported, because the SDK handles them.
+  /// too. Their [IaCardLinkEvent.willExit] isn't reported, because the SDK closes and reopens them itself. Their
+  /// [IaCardLinkEvent.goToCart] and [IaCardLinkEvent.openTermsAndConditions] are, as the SDK only closes CardLink
+  /// for them.
   ///
   /// Usage:
   ///
@@ -283,6 +283,8 @@ abstract class IaBaseCardLink extends IaBase {
   StreamController<String> get consentPhoneNumberListener;
 
   /// Notifier for the cards saved with [IaCardLinkEvent.cardSaved].
+  ///
+  /// On iOS each event carries all saved cards of the user, on Android only the card just saved.
   ///
   StreamController<List<IaCardLinkSavedCard>> get savedCardsListener;
 

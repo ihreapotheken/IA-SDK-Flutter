@@ -12,6 +12,8 @@ class LaunchHandler {
     private let eventSender: CardLinkEventSender
     /// SDK-wide palette from before a launch with colors, restored when CardLink closes.
     private var paletteBeforeLaunch: IAColorPalette?
+    /// Whether a CardLink flow launched from Flutter is shown, so its closing is reported once.
+    private var isLaunchedFlowShown = false
 
     init(eventSender: CardLinkEventSender) {
         self.eventSender = eventSender
@@ -57,6 +59,7 @@ class LaunchHandler {
                     self?.handleOutputAction(action)
                 }
             )
+            self?.isLaunchedFlowShown = true
             result(nil)
         }
     }
@@ -80,14 +83,31 @@ class LaunchHandler {
                     self?.handleOutputAction(action)
                 }
             )
+            self?.isLaunchedFlowShown = true
         }
+    }
+
+    /// Handles a launched CardLink flow that closed together with the SDK screen it was shown on, for example
+    /// through `finishAllActivities`.
+    func handleClosedWithSdkScreens() {
+        Self.finishCardLink { [weak self] in
+            self?.reportClosed()
+        }
+    }
+
+    /// Reports `willExit` for a closed launched flow, once, and restores the palette.
+    private func reportClosed() {
+        restorePalette()
+        guard isLaunchedFlowShown else { return }
+        isLaunchedFlowShown = false
+        eventSender.sendEvent(.willExit)
     }
 
 
     /// Closes CardLink, then replies.
     func finish(result: @escaping FlutterResult) {
         Self.finishCardLink { [weak self] in
-            self?.restorePalette()
+            self?.reportClosed()
             result(nil)
         }
     }
@@ -179,12 +199,16 @@ class LaunchHandler {
     }
 
     /// Reports an action of a CardLink flow the SDK started itself, for example from the redeem prescription screen.
-    /// The SDK handles those flows, including their navigation, so navigation events aren't sent: a host following the
-    /// docs would otherwise navigate as well.
+    /// The SDK closes and reopens those flows itself, so their closing isn't reported. It only closes CardLink for the
+    /// cart and terms actions, so those are reported for the host to act on.
     func handleSdkFlowOutputAction(_ action: CardLinkOutputAction) {
         switch action {
-        case .backButtonPressed, .goToCart, .openTermsAndConditions, .reopenCardlink:
+        case .backButtonPressed, .reopenCardlink:
             break
+        case .goToCart:
+            eventSender.sendEvent(.goToCart)
+        case .openTermsAndConditions:
+            eventSender.sendEvent(.openTermsAndConditions)
         case .addedPrescriptionsToCart(let prescriptions):
             eventSender.sendPrescriptionsRedeemedEvent(prescriptions: Self.prescriptionsJSON(prescriptions))
         default:
@@ -218,9 +242,8 @@ class LaunchHandler {
         case .sessionCreated(let session):
             eventSender.sendSessionCreatedEvent(session: session)
         case .backButtonPressed:
-            eventSender.sendEvent(.willExit)
             Self.finishCardLink { [weak self] in
-                self?.restorePalette()
+                self?.reportClosed()
             }
         case .prescriptionsRedeemed(let prescriptions):
             // The SDK sends .backButtonPressed next, which closes CardLink.
@@ -228,7 +251,9 @@ class LaunchHandler {
         case .goToCart:
             eventSender.sendEvent(.goToCart)
         case .openTermsAndConditions:
+            // The SDK has closed CardLink before this action, without .backButtonPressed.
             eventSender.sendEvent(.openTermsAndConditions)
+            reportClosed()
         case .cardsSaved(let cards):
             eventSender.sendCardSavedEvent(cards: cards)
         case .willStartScanning:
@@ -236,14 +261,14 @@ class LaunchHandler {
         case .failedToInitialize(let error):
             // CardLink isn't shown then.
             eventSender.sendFailedToInitializeEvent(error: error)
+            isLaunchedFlowShown = false
             restorePalette()
         case .trackEvent(let event):
             eventSender.sendAnalyticsEvent(event: event)
         case .addedPrescriptionsToCart(let prescriptions):
             // With the uploadPrescriptions finish action the SDK closes CardLink itself and sends only this action.
             eventSender.sendPrescriptionsRedeemedEvent(prescriptions: Self.prescriptionsJSON(prescriptions))
-            eventSender.sendEvent(.willExit)
-            restorePalette()
+            reportClosed()
         case .reopenCardlink:
             reopenCardLink()
         @unknown default:

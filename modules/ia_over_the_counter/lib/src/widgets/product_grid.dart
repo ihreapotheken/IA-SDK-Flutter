@@ -5,6 +5,9 @@ import 'package:ia_interface/ia_interface.dart';
 ///
 /// Native reads the options once, when it creates the grid, so changing any of them recreates the native grid.
 ///
+/// On Android the app's activity must be a `ComponentActivity`, such as `FlutterFragmentActivity`; with
+/// `FlutterActivity` creating the component fails.
+///
 class IaProductGrid extends StatelessWidget {
   /// Default constructor for [IaProductGrid].
   ///

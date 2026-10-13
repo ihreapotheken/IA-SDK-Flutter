@@ -6,20 +6,10 @@ import android.content.ContextWrapper
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import androidx.activity.ComponentActivity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
-import androidx.lifecycle.findViewTreeLifecycleOwner
-import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.savedstate.SavedStateRegistry
-import androidx.savedstate.SavedStateRegistryController
-import androidx.savedstate.SavedStateRegistryOwner
-import androidx.savedstate.findViewTreeSavedStateRegistryOwner
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import de.ihreapotheken.sdk.core.api.featureproviders.ProductType
 import de.ihreapotheken.sdk.integrations.api.view.components.IaCartButton
 import de.ihreapotheken.sdk.integrations.api.view.components.IaProductGrid
@@ -59,6 +49,13 @@ internal class IaClientComponentsViewFactory(
         val identifier = IaComponentIdentifier.fromViewTypeId(creationParams?.get("viewId") as? String)
             ?: throw IllegalArgumentException("Unknown component viewId in args: $args")
 
+        // The SDK's components use what a ComponentActivity gives Compose: lifecycle, saved state and activity
+        // results. Failing here reaches Dart as an error, where the component would otherwise crash the app.
+        val activity = context.findActivity()
+        check(activity is ComponentActivity) {
+            "IaCartButton and IaProductGrid need the app's activity to be a ComponentActivity, such as " +
+                "FlutterFragmentActivity; ${activity?.javaClass?.name} isn't one."
+        }
         val hasTapHandler = creationParams?.get("hasTapHandler") == true
         val composeView = ComposeView(context).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
@@ -80,10 +77,16 @@ internal class IaClientComponentsViewFactory(
                 }
             }
         }
-        val lifecycleOwner = IaComponentLifecycleOwner.installIfMissing(composeView, context)
-        // The cart button has a fixed size, while the grid fills the width.
-        val wrapsWidth = identifier == IaComponentIdentifier.CartButton
-        return IaClientComponentPlatformView(composeView, viewId, componentsChannel, wrapsWidth, lifecycleOwner)
+        return IaClientComponentPlatformView(composeView, viewId, componentsChannel)
+    }
+
+    private fun Context.findActivity(): Activity? {
+        var context: Context? = this
+        while (context is ContextWrapper) {
+            if (context is Activity) return context
+            context = context.baseContext
+        }
+        return null
     }
 
     @androidx.compose.runtime.Composable
@@ -108,10 +111,8 @@ private class IaClientComponentPlatformView(
     private val composeView: ComposeView,
     viewId: Int,
     componentsChannel: MethodChannel,
-    wrapsWidth: Boolean,
-    private val lifecycleOwner: IaComponentLifecycleOwner?,
 ) : PlatformView {
-    private val sizeReporter = IaComponentSizeReporter(viewId, componentsChannel, wrapsWidth)
+    private val sizeReporter = IaComponentSizeReporter(viewId, componentsChannel)
 
     init {
         sizeReporter.attachTo(composeView)
@@ -121,79 +122,18 @@ private class IaClientComponentPlatformView(
 
     override fun dispose() {
         sizeReporter.detach(composeView)
-        lifecycleOwner?.destroy()
     }
 }
 
 /**
- * Lifecycle and saved state for a component whose activity doesn't provide them to its views, like
- * `FlutterActivity`; Compose needs both. The lifecycle follows the activity's when it has one.
- */
-private class IaComponentLifecycleOwner private constructor(
-    private val activityLifecycle: Lifecycle?,
-) : SavedStateRegistryOwner {
-    private val lifecycleRegistry = LifecycleRegistry(this)
-    private val savedStateRegistryController = SavedStateRegistryController.create(this)
-    private val activityObserver = LifecycleEventObserver { _, event -> lifecycleRegistry.handleLifecycleEvent(event) }
-
-    override val lifecycle: Lifecycle
-        get() = lifecycleRegistry
-
-    override val savedStateRegistry: SavedStateRegistry
-        get() = savedStateRegistryController.savedStateRegistry
-
-    private fun start() {
-        savedStateRegistryController.performRestore(null)
-        if (activityLifecycle != null) {
-            // The observer first receives the events up to the activity's current state.
-            activityLifecycle.addObserver(activityObserver)
-        } else {
-            lifecycleRegistry.currentState = Lifecycle.State.RESUMED
-        }
-    }
-
-    fun destroy() {
-        activityLifecycle?.removeObserver(activityObserver)
-        if (lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.CREATED)) {
-            lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
-        }
-    }
-
-    companion object {
-        /** Returns the installed owner, or `null` when the activity's views already have both owners. */
-        fun installIfMissing(view: View, context: Context): IaComponentLifecycleOwner? {
-            val activity = context.findActivity()
-            val decorView = activity?.window?.decorView
-            if (decorView?.findViewTreeLifecycleOwner() != null && decorView.findViewTreeSavedStateRegistryOwner() != null) {
-                return null
-            }
-            val owner = IaComponentLifecycleOwner((activity as? LifecycleOwner)?.lifecycle)
-            owner.start()
-            view.setViewTreeLifecycleOwner(owner)
-            view.setViewTreeSavedStateRegistryOwner(owner)
-            return owner
-        }
-
-        private fun Context.findActivity(): Activity? {
-            var context: Context? = this
-            while (context is ContextWrapper) {
-                if (context is Activity) return context
-                context = context.baseContext
-            }
-            return null
-        }
-    }
-}
-
-/**
- * Measures a [ComposeView] using "fill width, wrap content height" semantics, or its own width with
- * [wrapsWidth], and reports the resulting size to Flutter via the shared components MethodChannel.
- * Sizes are reported in logical pixels (dp).
+ * Measures a [ComposeView] using "fill width, wrap content height" semantics
+ * and reports the resulting size to Flutter via the shared components
+ * MethodChannel. Sizes are reported in logical pixels (dp). The SDK's components
+ * fill the width they're given, the cart button included.
  */
 private class IaComponentSizeReporter(
     private val viewId: Int,
     private val channel: MethodChannel,
-    private val wrapsWidth: Boolean,
 ) {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var lastReportedWidth = -1
@@ -218,7 +158,7 @@ private class IaComponentSizeReporter(
         if (parentWidth <= 0) return
 
         view.measure(
-            View.MeasureSpec.makeMeasureSpec(parentWidth, if (wrapsWidth) View.MeasureSpec.AT_MOST else View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(parentWidth, View.MeasureSpec.EXACTLY),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
         )
         val width = view.measuredWidth

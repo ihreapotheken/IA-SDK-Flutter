@@ -3,6 +3,12 @@ import 'package:ia_interface/ia_interface.dart';
 
 /// Inline native cart button component.
 ///
+/// On iOS the button takes its own size. On Android it fills the width it's given, so give it a width in a `Row`
+/// or an app bar, for example with a `SizedBox`.
+///
+/// On Android the app's activity must be a `ComponentActivity`, such as `FlutterFragmentActivity`; with
+/// `FlutterActivity` creating the component fails.
+///
 class IaCartButton extends StatelessWidget {
   /// Default constructor for [IaCartButton].
   ///

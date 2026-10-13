@@ -123,8 +123,28 @@ final class IASDKWrapper {
     func finishAllActivities(arguments: Any) async throws -> Any? {
         // Dismissing the lowest SDK screen also closes everything presented above it, while the host's own
         // screens below it stay open, like on Android.
-        Self.lowestPresentedSDKScreen()?.presentingViewController?.dismiss(animated: true)
+        guard let sdkScreen = Self.lowestPresentedSDKScreen() else { return nil }
+        // A CardLink flow launched while an SDK screen was shown sits on that screen, so it closes too.
+        let closesCardLink = Self.containsCardLink(from: sdkScreen)
+        sdkScreen.presentingViewController?.dismiss(animated: true) {
+            if closesCardLink {
+                NotificationCenter.default.post(name: IaClientDelegate.cardLinkDidCloseWithSdkScreensNotification, object: nil)
+            }
+        }
         return nil
+    }
+
+    /// Whether a CardLink screen is pushed or presented on the given screen or above it.
+    private static func containsCardLink(from viewController: UIViewController) -> Bool {
+        var current: UIViewController? = viewController
+        while let viewController = current {
+            let stack = [viewController] + ((viewController as? UINavigationController)?.viewControllers ?? [])
+            if stack.contains(where: { String(reflecting: type(of: $0)).hasPrefix("IACardLink.") }) {
+                return true
+            }
+            current = viewController.presentedViewController
+        }
+        return false
     }
 
     /// Screens presented through launchRoute.
@@ -293,7 +313,8 @@ extension IASDKInitializationState {
     var flutterName: String {
         switch initializationResult {
         case .success: "initialized"
-        case .failure: "error"
+        // A retry keeps the earlier failure until it finishes.
+        case .failure: isInProgress ? "initializing" : "error"
         case nil: isInProgress ? "initializing" : "uninitialized"
         }
     }

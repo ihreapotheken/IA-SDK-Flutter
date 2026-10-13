@@ -52,7 +52,19 @@ class IaModuleOrdering extends IaBaseOrdering {
     );
     final result = await _Methods.getCartDetails.invoke<Map?>(arguments);
     if (result == null) return null;
-    return Map<String, dynamic>.from(result);
+    return _stringKeyed(result) as Map<String, dynamic>;
+  }
+
+  /// Platform channels deliver nested maps as `Map<Object?, Object?>`.
+  ///
+  static Object? _stringKeyed(Object? value) {
+    if (value is Map) {
+      return value.map((key, nested) => MapEntry('$key', _stringKeyed(nested)));
+    }
+    if (value is List) {
+      return value.map(_stringKeyed).toList();
+    }
+    return value;
   }
 
   @override

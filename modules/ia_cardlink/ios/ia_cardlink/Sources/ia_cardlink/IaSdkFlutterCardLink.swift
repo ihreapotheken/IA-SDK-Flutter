@@ -16,6 +16,9 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
     /// for another Flutter engine, replaces it, like the core plugin replaces the SDK delegate.
     private static var sdkFlowActionObserver: NSObjectProtocol?
 
+    /// Observer of the core plugin's notification that SDK screens closed together with a CardLink flow on them.
+    private static var closedWithSdkScreensObserver: NSObjectProtocol?
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(
             name: "de.ihreapotheken/sdk/cardLink",
@@ -38,6 +41,19 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
             guard let action = notification.userInfo?["action"] as? CardLinkOutputAction else { return }
             Task { @MainActor in
                 instance?.launchHandler.handleSdkFlowOutputAction(action)
+            }
+        }
+
+        if let previousObserver = closedWithSdkScreensObserver {
+            NotificationCenter.default.removeObserver(previousObserver)
+        }
+        closedWithSdkScreensObserver = NotificationCenter.default.addObserver(
+            forName: Notification.Name("de.ihreapotheken.sdk.flutter.cardLinkDidCloseWithSdkScreens"),
+            object: nil,
+            queue: .main
+        ) { [weak instance] _ in
+            Task { @MainActor in
+                instance?.launchHandler.handleClosedWithSdkScreens()
             }
         }
     }

@@ -62,11 +62,20 @@ Native SDK 2.9.0 on both platforms.
 - iOS: `launchApofinder` didn't report the selected pharmacy through `onApofinderDidChangePharmacy` and didn't close.
 - iOS: `resetPrerequisites`, `resetLegalDisclaimer`, `setIsOnboardingShown` and `clearPharmacyId` only took effect
   after an app restart.
-- Android: inline components crashed in apps using `FlutterActivity` instead of `FlutterFragmentActivity`.
-- Inline components failed to lay out without a width limit, for example in a `Row` or `AppBar.actions`. The
-  Android cart button now has its own width, as on iOS.
-- iOS: an empty product grid kept its loading height.
+- Android: inline components crashed in apps using `FlutterActivity`. They now fail with an error instead, see
+  Changed.
+- Inline components failed to lay out without a width limit, for example in a `Row` or `AppBar.actions`.
+- iOS: an empty product grid kept its loading height, and components took an endless height while the SDK showed
+  its loading or error view.
 - Android: the `IaCartButton` without `onTap` opened the cart without asking `onSdkWillNavigateToTarget`.
+- iOS: `cleanCache(initialization: true)` left `initialize` doing nothing, an initialization retry reported
+  `error` instead of `initializing`, and a second `initialize` call during the first failed.
+- `getCartDetails` returns nested maps with `String` keys.
+- CardLink on iOS: the privacy link on the consent screen closed CardLink without `willExit` and kept the launch
+  colors for all SDK screens; a CardLink flow closed by `finishAllActivities` now reports `willExit`; the cart and
+  terms events of SDK-started flows are reported; deleting a card that isn't saved no longer fails.
+- CardLink on Android: a failed scan-flow sign-in from the saved cards screen stopped all later `willExit` events,
+  and `getLogFilePath` returned a path when there was no log file.
 
 ### Changed
 
@@ -91,12 +100,14 @@ Native SDK 2.9.0 on both platforms.
 - **`getEnvironment` returns a non-null `IaSdkConfigurationServerEnvironment`.**
 - **Android error codes name the failed method**, for example `CLEAR_CART_ERROR`, as on iOS, instead of
   `METHOD_ERROR`.
+- **`exportLogs` returns a non-null path** and fails when the logs can't be exported.
+- **Android inline components need a `ComponentActivity`**, such as `FlutterFragmentActivity`, as the app's activity.
 - **Android:**
   - `onSdkBackAction` is asked before any SDK screen closes, except through `finishAllActivities`.
   - `launchPrerequisiteFlow` opens the SDK's prerequisites activity.
   - Calls that need an initialized SDK fail before `initialize`: the address setters, `setGuestUserData`, `logout`,
     `resetPrerequisites`, `isPrerequisiteFlowCompleted`, `setAnalyticsConsent`, `setHapticFeedbackEnabled`,
-    `clearCart`, `transferPrescriptions`, and the pharmacy ID getter and clearer. The SDK used to ignore them or
+    `clearCart`, `transferPrescriptions`, `presentLogs`, `exportLogs`, and the pharmacy ID getter and clearer. The SDK used to ignore them or
     answer with defaults.
   - CardLink without an `environment` follows the SDK's environment.
 

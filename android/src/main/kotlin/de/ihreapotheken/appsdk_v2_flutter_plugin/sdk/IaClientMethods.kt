@@ -963,6 +963,8 @@ internal class IaClientMethods(
             }
 
             FlutterCall.presentLogs.name -> {
+                // The SDK installs its log viewer during initialization.
+                if (!requireInitialized(result)) return
                 val provider = SdkFeatureProvider.debugViewerFeatureProvider
                 if (provider == null) {
                     result.error("METHOD_ERROR", "The SDK log viewer isn't available.", null)
@@ -973,10 +975,12 @@ internal class IaClientMethods(
             }
 
             FlutterCall.exportLogs.name -> {
+                if (!requireInitialized(result)) return
                 respondSuspending(result) {
+                    // The SDK writes a file even without logs, and returns null only when exporting failed.
                     withContext(Dispatchers.IO) {
                         DebugViewerModule.exportLogs(bindings.applicationContext)?.absolutePath
-                    }
+                    } ?: throw IllegalStateException("The SDK couldn't export its logs.")
                 }
             }
 
