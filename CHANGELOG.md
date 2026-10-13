@@ -95,6 +95,8 @@ Native SDK 2.9.0 on both platforms.
   show an object hash.
 - iOS: an SDK screen launched while `initialize` was running, a retry included, kept loading. It now opens once
   initialization is done.
+- iOS: retrying `initialize` while an SDK screen ran the initialization and prerequisites itself failed with
+  `INIT_ERROR`. The retry now waits for them.
 - iOS: `clearPharmacyId` left the cart of the cleared pharmacy, which Android empties.
 - Android: `orderingDidUpdateCartListener` didn't report the cart emptied by `clearCart` or `clearPharmacyId`.
 - Android: closing the confirmation sheet of a `showBottomSheet` prescription transfer opened the cart.

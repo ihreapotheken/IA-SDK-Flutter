@@ -39,8 +39,8 @@ abstract class IaBaseCardLink extends IaBase {
   ///   is used. On iOS, passing it also switches the environment of the whole SDK.
   /// - [saveCardEnabled]: Optional flag to enable card saving (defaults to true).
   /// - [finishAction]: Determines what happens with prescriptions after NFC scanning. Only used on iOS, where
-  ///   [IaCardLinkFinishAction.uploadPrescriptions] needs the Ordering module and the SDK's prerequisites to have
-  ///   run in the current app session. On Android
+  ///   [IaCardLinkFinishAction.uploadPrescriptions] needs the Ordering module, an API key entitled to ordering, and
+  ///   the SDK's prerequisites to have run in the current app session. On Android
   ///   the prescriptions are always only reported through [prescriptionsRedeemedListener], as with
   ///   [IaCardLinkFinishAction.sendRawPrescriptions]; they aren't added to the cart.
   /// - [appId]: Optional application ID (maps to `applicationId` on Android and to the SDK-wide

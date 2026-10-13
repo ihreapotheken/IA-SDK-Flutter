@@ -11,6 +11,13 @@ final class IASDKWrapper {
 
     func initialize(arguments: Any, delegate: IaClientDelegate) async throws -> Any? {
         let arguments = try argumentDecoder.decode(IaInitSdkArguments.self, from: arguments)
+        // After a failed initialization, an SDK screen can run the initialization and prerequisites itself. The SDK
+        // rejects another initialization meanwhile, so a retry waits until that's done.
+        if IASDK.initializationState.isInProgress {
+            for await state in IASDK.initializationStatePublisher.values where !state.isInProgress {
+                break
+            }
+        }
         IaClientDelegate.cardLinkConfiguration = arguments.cardLink
         let initializationOptions = arguments.initialization.mappedToSDK()
         

@@ -152,10 +152,10 @@ class IaSdk {
   Future<void> register({
     required List<IaBase> modules,
   }) async {
-    // A call made while another one runs waits for it, then counts as a later call.
-    final pendingRegistration = _pendingRegistration;
-    if (pendingRegistration != null) {
-      await pendingRegistration.catchError((Object _) {});
+    // A call made while another one runs waits for it, then counts as a later call. When that one failed, another
+    // waiting call may have started meanwhile, so this waits until none runs.
+    for (var pending = _pendingRegistration; pending != null; pending = _pendingRegistration) {
+      await pending.catchError((Object _) {});
     }
     if (_modulesRegistered) {
       final unregisteredModules = [
@@ -258,7 +258,8 @@ class IaSdk {
   /// once it's done, but a screen or component shown before it starts keeps loading.
   ///
   /// On Android a failed initialization can't be retried: the SDK keeps its error state, so later calls fail too
-  /// until the app restarts. On iOS a later call initializes the SDK again.
+  /// until the app restarts. On iOS a later call initializes the SDK again; while an SDK screen runs the
+  /// initialization and prerequisites itself, the call waits until they're done.
   ///
   Future<void> initialize({
     required IaSdkConfiguration config,
