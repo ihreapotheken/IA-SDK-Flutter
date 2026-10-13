@@ -708,7 +708,8 @@ class IaSdk {
   ///
   /// It isn't called for the prerequisites flow opened with [launchPrerequisiteFlow], whose SDK screen has no
   /// back hook, nor for the screens the SDK opens from `IaProductGrid` or for `transferPrescriptions`, which it
-  /// starts without one.
+  /// starts without one. The SDK keeps a single back hook for all its screens and removes it when one of them closes,
+  /// so after a screen launched on top of another one closes, the screen below closes without asking.
   ///
   /// Note: Only supported on Android.
   ///

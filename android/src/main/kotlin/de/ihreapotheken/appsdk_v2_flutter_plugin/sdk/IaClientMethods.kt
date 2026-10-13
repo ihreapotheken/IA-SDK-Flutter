@@ -602,6 +602,7 @@ internal class IaClientMethods(
                 // The SDK clears the cart in the background and returns once it has started.
                 val success = bindings.sdkModule.ordering.deleteCart()
                 if (success) {
+                    bindings.callbacks.reportEmptyCart()
                     result.success(null)
                 } else {
                     result.error(
@@ -937,7 +938,9 @@ internal class IaClientMethods(
             FlutterCall.clearPharmacyId.name -> {
                 if (!requireInitialized(result)) return
                 respondSuspending(result) {
+                    // The SDK empties the cart of the cleared pharmacy too.
                     bindings.sdkModule.pharmacy.clearPharmacyId()
+                    bindings.callbacks.reportEmptyCart()
                     null
                 }
             }

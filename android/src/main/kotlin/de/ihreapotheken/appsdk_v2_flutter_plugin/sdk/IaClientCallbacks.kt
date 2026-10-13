@@ -115,10 +115,24 @@ class IaClientCallbacks(
         totalPrescription: Int,
         totalItems: Int
     ) {
-        // Note: The iOS version receives cartState with totalAmountInCart and clientOrderIDs
-        // The Android SDK provides totalProducts, totalPrescription, and totalItems
-        // Using totalItems as totalAmountInCart for now
-        // The Android SDK doesn't report client order IDs, so the list stays empty.
+        sendCartUpdate(totalProducts, totalPrescription, totalItems)
+
+        val handlers = synchronized(nextCartChangeHandlers) {
+            nextCartChangeHandlers.toList().also { nextCartChangeHandlers.clear() }
+        }
+        handlers.forEach { it() }
+    }
+
+    /**
+     * Reports the emptied cart after the plugin cleared it. The SDK reports no cart change then, unlike the iOS SDK.
+     */
+    fun reportEmptyCart() {
+        sendCartUpdate(totalProducts = 0, totalPrescription = 0, totalItems = 0)
+    }
+
+    private fun sendCartUpdate(totalProducts: Int, totalPrescription: Int, totalItems: Int) {
+        // The iOS SDK reports totalAmountInCart and client order IDs. The Android SDK reports the item count,
+        // used as totalAmountInCart, and no client order IDs, so the list stays empty.
         val arguments = mapOf(
             "totalAmountInCart" to totalItems,
             "clientOrderIDs" to emptyList<String>(),
@@ -130,11 +144,6 @@ class IaClientCallbacks(
             "orderingDidUpdateCart",
             arguments
         )
-
-        val handlers = synchronized(nextCartChangeHandlers) {
-            nextCartChangeHandlers.toList().also { nextCartChangeHandlers.clear() }
-        }
-        handlers.forEach { it() }
     }
 
     /**

@@ -95,6 +95,7 @@ Native SDK 2.9.0 on both platforms.
 - iOS: an SDK screen launched while `initialize` was running, a retry included, kept loading. It now opens once
   initialization is done.
 - iOS: `clearPharmacyId` left the cart of the cleared pharmacy, which Android empties.
+- Android: `orderingDidUpdateCartListener` didn't report the cart emptied by `clearCart` or `clearPharmacyId`.
 - CardLink on iOS: a launch without an `environment` could undo the environment `initialize` set after an earlier
   launch with one.
 - CardLink on iOS: the configured `IaSdkConfigurationCardLink.phoneNumber` replaced the number of a picked saved
