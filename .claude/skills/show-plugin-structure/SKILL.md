@@ -1,11 +1,20 @@
 ---
-name: plugin-structure
-description: Explain where code lives in the IA SDK Flutter plugin repo (iOS native Swift, Android native Kotlin, Dart interfaces, Dart implementations, example app, versioning, scripts, CI). Use when asked about project structure, "where is X code", or how the repo is laid out.
+name: show-plugin-structure
+description: Explain where code lives in the IA SDK Flutter plugin repo (iOS native Swift, Android native Kotlin, Dart interfaces, Dart implementations, example app, versioning, scripts, CI). Use when asked about project structure, "where is X code", or how the repo is laid out. Writes the result to generated/PLUGIN_STRUCTURE.md.
 ---
 
 # IA SDK Flutter plugin structure
 
-Give the user a nested-list overview of where code lives in this repo.
+Write a nested-list overview of where code lives in this repo to `generated/PLUGIN_STRUCTURE.md`.
+
+## Output
+
+- Always write to `generated/PLUGIN_STRUCTURE.md` at the repo root. Create the folder if needed and overwrite the file.
+- Start the file with a title, the generation date, and the current branch and short commit (`git rev-parse --abbrev-ref HEAD`, `git rev-parse --short HEAD`).
+- Prefix every link path with `../`, since links resolve from the file's own folder.
+- Before replying, check that every link target in the file exists and every `#L` anchor is within its file. Fix any broken link.
+- Do not print the overview in chat. Reply with a clickable link to the file, `[generated/PLUGIN_STRUCTURE.md](generated/PLUGIN_STRUCTURE.md)`, plus one line naming the branch and commit and any notable changes to the layout (e.g. a new module).
+- Any argument text narrows the scope, for example `only iOS`.
 
 ## Steps
 
@@ -15,7 +24,7 @@ Give the user a nested-list overview of where code lives in this repo.
    - `ls interface/lib/src/common interface/lib/src/modules lib/src example/lib/src example/lib/src/views scripts .github/workflows`
    - `cat .env`
 2. Fix any path in the map that no longer matches, and add any new important folders, such as a new module.
-3. Answer with a nested list in the format below. Make every path a clickable markdown link relative to the workspace root. Keep the descriptions short.
+3. Write a nested list in the format below. Make every path a clickable markdown link (with the `../` prefix). Keep the descriptions short.
 
 ## Output format
 
