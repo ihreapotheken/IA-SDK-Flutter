@@ -2,6 +2,9 @@ part of '../core.dart';
 
 /// QA options for testing an integration. Not meant for production builds.
 ///
+/// The SDKs apply these options only in test setups: Android with the development or staging server environment,
+/// iOS in Debug and TestFlight builds. Elsewhere they have no effect.
+///
 class IaSdkConfigurationQa {
   /// Generates an instance of QA configuration.
   ///
@@ -102,6 +105,9 @@ enum IaSdkQaFeature {
   showInteractionWithRealPharmacyWarning,
 
   /// Lets the user enter a pharmacy identifier in Apofinder.
+  ///
+  /// The iOS SDK decides this itself in Debug and TestFlight builds: the input is shown for the development and
+  /// staging environments and hidden for production, whether this feature is passed or not.
   ///
   showPharmacyIdInputOnApofinder,
 

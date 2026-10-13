@@ -14,6 +14,8 @@ class IaSdkPrerequisitesResult {
 
   /// Whether the user cancelled the flow.
   ///
+  /// The steps after a cancelled one don't run, and iOS reports them as cancelled too, with a `null` [pharmacyId].
+  ///
   final bool isCancelled;
 
   /// Outcome of the onboarding step. Only reported on iOS.

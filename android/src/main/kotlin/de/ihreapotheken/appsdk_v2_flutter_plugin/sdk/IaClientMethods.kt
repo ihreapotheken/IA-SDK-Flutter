@@ -891,6 +891,11 @@ internal class IaClientMethods(
                                     null,
                                 )
                             }
+                            // Closing the confirmation sheet reports success without the cart; the SDK only closes
+                            // its screen when that's handled, and opens the cart otherwise.
+                            if (event is TransferPrescriptionEvent.Success && !event.navigateToCart) {
+                                return HandlingDecision.HANDLED
+                            }
                             return HandlingDecision.PERFORM_DEFAULT
                         }
                     },

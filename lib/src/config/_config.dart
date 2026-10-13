@@ -95,7 +95,8 @@ class IaSdkConfiguration {
 
   /// QA options for testing an integration. Not meant for production builds.
   ///
-  /// `null` keeps the SDK defaults, which enable no QA option.
+  /// `null` keeps the SDK defaults, which enable no QA option. See [IaSdkConfigurationQa] for when the SDKs apply
+  /// them.
   ///
   final IaSdkConfigurationQa? qaConfiguration;
 

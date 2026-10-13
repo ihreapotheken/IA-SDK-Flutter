@@ -83,7 +83,8 @@ Native SDK 2.9.0 on both platforms.
 - Android: closing the transfer screen during the upload left `transferPrescriptions` pending, or completed it later
   without the prescriptions in the cart. The call now fails.
 - iOS: `setGuestUserData` passed the phone country code without "+", so checkout saved addresses with a wrong one.
-- iOS: `transferPrescriptions` replayed the cached prerequisites result through `prerequisitesResultListener`.
+- iOS: `transferPrescriptions` replayed the cached prerequisites result through `prerequisitesResultListener`,
+  without dropping a real run after a cancelled one.
 - `initialize` with an empty `accessKey` or `clientId` fails with `ARG_ERROR` on both platforms. Android used to
   leave the initialization state at `uninitialized`.
 - Android: `finishAllActivities` left the overlay of a `showBottomSheet` prescription transfer open.
@@ -96,6 +97,7 @@ Native SDK 2.9.0 on both platforms.
   initialization is done.
 - iOS: `clearPharmacyId` left the cart of the cleared pharmacy, which Android empties.
 - Android: `orderingDidUpdateCartListener` didn't report the cart emptied by `clearCart` or `clearPharmacyId`.
+- Android: closing the confirmation sheet of a `showBottomSheet` prescription transfer opened the cart.
 - CardLink on iOS: a launch without an `environment` could undo the environment `initialize` set after an earlier
   launch with one.
 - CardLink on iOS: the configured `IaSdkConfigurationCardLink.phoneNumber` replaced the number of a picked saved

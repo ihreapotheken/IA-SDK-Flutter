@@ -37,8 +37,9 @@ final class IAOrderingWrapper {
         let mapped = arguments.mappedToSDK()
 
         // The SDK initializes again before the transfer. With prerequisites that already ran, it reports their cached
-        // result again without running them, which isn't forwarded as a prerequisites run.
-        if case .success = IASDK.initializationState.prerequisitesResult {
+        // result again without running them, which isn't forwarded as a prerequisites run. After a cancelled run it
+        // runs them again, and that result is forwarded.
+        if case .success(let cachedResult) = IASDK.initializationState.prerequisitesResult, !cachedResult.isCancelled {
             IaClientDelegate.skipsPrerequisitesResults = true
         }
         defer { IaClientDelegate.skipsPrerequisitesResults = false }
