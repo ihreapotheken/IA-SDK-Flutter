@@ -142,8 +142,10 @@ class IaSdk {
   /// - [pharmacy]
   /// - [prescription]
   ///
-  /// Pass all modules in one call. Later calls have no effect, and throw a [StateError] when they pass a module the
-  /// first call didn't.
+  /// Pass all modules in one call, before [initialize]: the Android SDK only starts the modules registered before it
+  /// initializes, so a call after [initialize] throws a [StateError]. Later calls have no effect, and throw a
+  /// [StateError] when they pass a module the first call didn't. Create the module objects for this call too, as
+  /// their native part registers when they're created.
   ///
   /// Fails when a module's native part is missing, for example when the app wasn't rebuilt after adding the module.
   ///
@@ -163,6 +165,26 @@ class IaSdk {
       }
       return;
     }
+    if (_initialized || _pendingInitialization != null) {
+      throw StateError(
+        'Call IaSdk.register before initialize: the Android SDK only starts the modules registered before it '
+        'initializes.',
+      );
+    }
+    final registration = _register(modules);
+    _pendingRegistration = registration;
+    try {
+      await registration;
+    } finally {
+      _pendingRegistration = null;
+    }
+  }
+
+  /// The [register] call in progress, which [initialize] waits for.
+  ///
+  Future<void>? _pendingRegistration;
+
+  Future<void> _register(List<IaBase> modules) async {
     // Each module starts its native registration when it's created; a missing native part fails here.
     await Future.wait(modules.map((moduleEntry) => moduleEntry.nativeRegistration));
     if (!_modulesRegistered) {
@@ -241,6 +263,9 @@ class IaSdk {
     // A call made while another one runs waits for it instead of initializing again.
     final pendingInitialization = _pendingInitialization;
     if (pendingInitialization != null) return pendingInitialization;
+    // A register call that's still running finishes first, so its modules start. Its failure is its own caller's.
+    await _pendingRegistration?.catchError((Object _) {});
+    if (_initialized) return;
     final initialization = _initialize(config);
     _pendingInitialization = initialization;
     try {
@@ -270,8 +295,8 @@ class IaSdk {
   ///
   String? _hostAppLogFilePath;
 
-  /// Android only attaches the host log file to CardLink, so the CardLink module forwards it there, whether it was
-  /// registered before or after [initialize]. A failure only affects CardLink problem reports, so it doesn't fail
+  /// Android only attaches the host log file to CardLink, so the CardLink module forwards it there, whichever of
+  /// [register] and [initialize] completes second. A failure only affects CardLink problem reports, so it doesn't fail
   /// [register] or [initialize].
   ///
   Future<void> _forwardHostAppLogFilePath() async {

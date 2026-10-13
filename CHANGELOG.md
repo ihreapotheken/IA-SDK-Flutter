@@ -122,6 +122,8 @@ Native SDK 2.9.0 on both platforms.
 - **`IaModelOrderingTransactionSignatures.clientOrderIDs` is no longer nullable**; it's empty without order IDs.
 - **`register` waits for the native part of each module** and fails when one is missing. A later call that adds
   modules throws a `StateError`; pass all modules in the first call.
+- **`register` has to come before `initialize`**, and throws a `StateError` afterwards: the Android SDK only starts
+  the modules registered before it initializes. `initialize` waits for a `register` call that's still running.
 - **CardLink `launch` takes `supportsLiquidGlass` as an optional `bool?`**; without it the `initialize` setting is
   kept.
 - **`setAnalyticsConsent` takes `consent` as a named parameter**, like the other setters.
