@@ -1,11 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:ia_interface/ia_interface.dart';
 
 part 'methods.dart';
-part 'views.dart';
 part 'models/request/launch.dart';
 part 'models/request/get_saved_cards.dart';
 part 'models/request/delete_card.dart';
@@ -44,7 +44,6 @@ class IaModuleCardLink extends IaBaseCardLink {
     String? coreAppLogFileURL,
     required bool supportsLiquidGlass,
     IaCardLinkIllustrationColor? illustrationColor,
-    bool? mockInvalidXmlData,
   }) async {
     final arguments = _RequestModelLaunch(
       sdkApiKey: sdkApiKey,
@@ -66,7 +65,6 @@ class IaModuleCardLink extends IaBaseCardLink {
       coreAppLogFileURL: coreAppLogFileURL,
       supportsLiquidGlass: supportsLiquidGlass,
       illustrationColor: illustrationColor,
-      mockInvalidXmlData: mockInvalidXmlData,
     );
     return await _Methods.launch.invoke<void>(arguments);
   }
@@ -91,6 +89,21 @@ class IaModuleCardLink extends IaBaseCardLink {
   Future<String?> getSavedCards(String userId) async {
     final arguments = _RequestModelGetSavedCards(userId: userId);
     return await _Methods.getSavedCards.invoke<String?>(arguments);
+  }
+
+  @override
+  Future<List<IaCardLinkSavedCard>> getSavedCardList(String userId) async {
+    final json = await getSavedCards(userId);
+    if (json == null || json.isEmpty) return const [];
+    final cards = jsonDecode(json);
+    if (cards is! List) return const [];
+    return cards.whereType<Map>().map((card) {
+      final savedCard = IaCardLinkSavedCard.fromMap(Map<String, dynamic>.from(card));
+      // Android's card JSON uses "id" for the user identifier, not a card identifier.
+      return Platform.isAndroid
+          ? IaCardLinkSavedCard(name: savedCard.name, canCode: savedCard.canCode, phoneNumber: savedCard.phoneNumber)
+          : savedCard;
+    }).toList();
   }
 
   @override

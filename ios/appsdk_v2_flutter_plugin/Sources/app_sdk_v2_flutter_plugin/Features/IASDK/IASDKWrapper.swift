@@ -1,3 +1,4 @@
+import Flutter
 import Foundation
 import Combine
 import IACore
@@ -36,12 +37,8 @@ final class IASDKWrapper {
             IASDK.configuration.hostAppLogFileURL = URL(fileURLWithPath: hostAppLogFilePath)
         }
 
-        if let qaConfiguration = arguments.qaConfiguration {
-            IASDK.QA.setQAFeatures(qaConfiguration.mappedToSDK())
-        } else {
-            // @TODO: remove, just for testing
-            IASDK.QA.setQAFeatures([.showTestPharmaciesOnApofinder])
-        }
+        // Without a QA configuration no QA feature is enabled, so production apps don't list test pharmacies.
+        IASDK.QA.setQAFeatures(arguments.qaConfiguration?.mappedToSDK() ?? [])
         
         // Auto initialization is enabled to match Android behavior in terms of prerequisites.
         IASDK.configuration.isAutoInitializationEnabled = true
@@ -87,6 +84,10 @@ final class IASDKWrapper {
     
     func launchRoute(arguments: Any) async throws -> Any? {
         let arguments = try argumentDecoder.decode(IaLaunchRouteArguments.self, from: arguments)
+        // Android-only screens, reported like the other platform-only calls.
+        if arguments.viewId == "prerequisiteFlow" {
+            return FlutterMethodNotImplemented
+        }
         let view = try arguments.view
         if view == .prescriptionScanner || view == .ePrescriptionScanner {
             PrescriptionScannerCameraController.shared.reset()
@@ -121,7 +122,10 @@ final class IASDKWrapper {
     func isInitialized() async throws -> Any? {
         let state = IASDK.initializationState
         let summary = state.summary
-        return summary == .initializationFinished || summary == .initializationAndPrerequisitesFinished
+        // Cancelled prerequisites don't undo the initialization, matching the initialization state stream and Android.
+        return summary == .initializationFinished
+            || summary == .initializationAndPrerequisitesFinished
+            || summary == .prerequisitesCancelled
     }
 
     func deleteUser() async throws -> Any? {

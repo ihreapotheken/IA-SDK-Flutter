@@ -30,6 +30,9 @@ part 'models/response/prerequisites_result.dart';
 
 /// Main entrypoint for the ia.de AppSDK services and features.
 ///
+/// Members documented as "Only supported on iOS" or "Only supported on Android" throw a
+/// [MissingPluginException] on the other platform.
+///
 class IaSdk {
   IaSdk._();
 
@@ -201,6 +204,11 @@ class IaSdk {
 
   /// Forwards the client personal information to the ia.de library for checkout purposes.
   ///
+  /// [salutation] is one of "Herr", "Frau", "Divers" (or "Diverse") and "Keine Angabe", matched case-insensitively.
+  /// Other values are rejected with an `ARG_ERROR`.
+  ///
+  /// The phone number is passed as an `int`, so leading zeros of [phoneNumberWithoutCountryCode] are lost.
+  ///
   Future<void> setGuestUserData({
     required String salutation,
     required String firstName,
@@ -311,6 +319,8 @@ class IaSdk {
 
   /// Legacy setup required when the host app is the Core app.
   ///
+  /// Note: Only has an effect on iOS.
+  ///
   Future<void> legacySetupAsCoreApp() async {
     return await _Methods.legacySetupAsCoreApp.invoke();
   }
@@ -382,6 +392,8 @@ class IaSdk {
   /// Pass a salutation matching the values accepted by [setGuestUserData]
   /// (for example "Herr"/"Frau") or `null` to leave it unset.
   ///
+  /// The phone number is only stored when both [phoneNumberCountryCode] and [phoneNumberWithoutCountryCode] are set.
+  ///
   Future<void> setUserBillingAddress({
     required String firstName,
     required String lastName,
@@ -413,6 +425,8 @@ class IaSdk {
   ///
   /// Pass a salutation matching the values accepted by [setGuestUserData]
   /// (for example "Herr"/"Frau") or `null` to leave it unset.
+  ///
+  /// The phone number is only stored when both [phoneNumberCountryCode] and [phoneNumberWithoutCountryCode] are set.
   ///
   Future<void> setUserDeliveryAddress({
     required String firstName,
@@ -526,6 +540,9 @@ class IaSdk {
   ///
   /// Return `true` to close the screen, `false` to keep it open. When not set, the screen closes.
   ///
+  /// It isn't called for the prerequisites flow opened with [launchPrerequisiteFlow], whose SDK screen has no
+  /// back hook.
+  ///
   /// Note: Only supported on Android.
   ///
   Future<bool> Function()? onSdkBackAction;
@@ -584,7 +601,8 @@ class IaSdk {
   /// Return `true` to let the SDK proceed with its built-in presentation.
   ///
   /// On Android the SDK waits at most 500 ms for the answer and otherwise proceeds with its
-  /// built-in presentation, so answer without awaiting slow work.
+  /// built-in presentation. A later answer is ignored, so answer without awaiting slow work, or the
+  /// host's screen and the SDK's screen both open.
   ///
   /// Usage:
   ///

@@ -583,13 +583,12 @@ class _CardManagementSection extends StatelessWidget {
           child: Text('Reverse Saved Cards Order (Android)'),
           onPressed: () async {
             try {
-              final cardsJson = await IaSdk.instance.cardLink.getSavedCards(
+              final cards = await IaSdk.instance.cardLink.getSavedCardList(
                 userIdController.text,
               );
-              final cards = (jsonDecode(cardsJson ?? '[]') as List).cast<Map<String, dynamic>>();
               await IaSdk.instance.cardLink.reorderSavedCards(
                 userId: userIdController.text,
-                orderedCanCodes: cards.reversed.map((card) => card['can'] as String).toList(),
+                orderedCanCodes: cards.reversed.map((card) => card.canCode).whereType<String>().toList(),
               );
               onShowResult('Reversed the order of ${cards.length} saved card(s).');
             } catch (e) {

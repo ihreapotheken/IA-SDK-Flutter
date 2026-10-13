@@ -2,6 +2,9 @@ part of '../../common/_interface.dart';
 
 /// Method and property definitions for the ia.de AppSDK Over-the-Counter service.
 ///
+/// Members documented as "Only supported on iOS" or "Only supported on Android" throw a
+/// [MissingPluginException] on the other platform.
+///
 abstract class IaBaseOverTheCounter extends IaBase {
   @override
   IaBaseModule get module {

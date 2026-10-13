@@ -13,11 +13,15 @@ class IaCartButton extends StatelessWidget {
 
   /// Called when the button is tapped. When `null`, the SDK opens its cart screen.
   ///
+  /// Switching between `null` and a callback recreates the native button.
+  ///
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return IaSdkPlatformView(
+      // The native button reads whether it has a tap handler once, so switching between none and one recreates it.
+      key: ValueKey(onTap != null),
       viewId: 'cartButton',
       onTap: onTap,
     );

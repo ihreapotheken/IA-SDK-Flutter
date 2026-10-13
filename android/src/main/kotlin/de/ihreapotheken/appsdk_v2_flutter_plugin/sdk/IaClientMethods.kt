@@ -3,6 +3,7 @@ package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 import android.app.Activity
 import de.ihreapotheken.sdk.core.api.SdkFeatureProvider
 import de.ihreapotheken.sdk.integrations.api.view.IaPrerequisiteActivity
+import android.util.Log
 import java.util.concurrent.atomic.AtomicBoolean
 import de.ihreapotheken.sdk.apofinder.ApofinderModule
 import de.ihreapotheken.sdk.appointments.AppointmentsModule
@@ -222,7 +223,7 @@ internal class IaClientMethods(
         setHapticFeedbackEnabled,
 
         /**
-         * Presents the SDK's log viewer. iOS only, Android exports the logs with [exportLogs].
+         * Presents the SDK's log viewer.
          */
         presentLogs,
 
@@ -265,6 +266,11 @@ internal class IaClientMethods(
          * is reported to Flutter by the plugin's activity result listener.
          */
         const val REQUEST_CODE_PREREQUISITES = 7301
+
+        private const val LOG_TAG = "IaSdkFlutter"
+
+        private const val UNSUPPORTED_SALUTATION_MESSAGE =
+            "Unsupported salutation. Expected one of Herr, Frau, Divers or Keine Angabe."
     }
 
     /**
@@ -316,7 +322,7 @@ internal class IaClientMethods(
                     if (modules.contains("apofinder")) ApofinderModule else null,
                     if (modules.contains("appointments")) AppointmentsModule else null,
                 ).toTypedArray<SdkModule>()
-                bindings.sdkModule = IaSdk.register(
+                IaSdk.register(
                     *modulesCollection,
                 )
                 result.success(null)
@@ -414,7 +420,11 @@ internal class IaClientMethods(
                         // The listener keeps receiving SDK events after initialization, but Flutter
                         // accepts only one reply per call.
                         if (event is SdkEvent.InitStatus && event !is SdkEvent.InitStatus.Initializing) {
-                            if (event is SdkEvent.InitStatus.InitializationCompleted) {
+                            // AlreadyInitialized: the SDK outlives a recreated Flutter engine, whose new
+                            // callbacks need attaching as well.
+                            if (event is SdkEvent.InitStatus.InitializationCompleted ||
+                                event is SdkEvent.InitStatus.AlreadyInitialized
+                            ) {
                                 // Set up centralized callbacks handler
                                 bindings.sdkModule.ordering.setCartListener(bindings.callbacks)
                                 bindings.sdkModule.ordering.setCheckoutListener(bindings.callbacks)
@@ -500,14 +510,18 @@ internal class IaClientMethods(
                     )
                     return
                 }
-                val salutation = args["salutation"] as String
+                val salutation = (args["salutation"] as? String)?.let(::normalizedSalutation)
+                if (salutation == null) {
+                    result.error("ARG_ERROR", UNSUPPORTED_SALUTATION_MESSAGE, null)
+                    return
+                }
                 val firstName = args["firstName"] as String
                 val lastName = args["lastName"] as String
                 val email = args["email"] as String
                 val phoneNumberCountryCode = args["phoneNumberCountryCode"] as String?
                 val phoneNumberWithoutCountryCode = args["phoneNumberWithoutCountryCode"] as String?
                 val userData = IaUserData(
-                    salutation = normalizedSalutation(salutation),
+                    salutation = salutation,
                     firstName = firstName,
                     lastName = lastName,
                     email = email,
@@ -533,6 +547,11 @@ internal class IaClientMethods(
                         "Arguments for ${call.method} must be of Map type.",
                         null,
                     )
+                    return
+                }
+                val salutation = args["salutation"] as? String
+                if (salutation != null && normalizedSalutation(salutation) == null) {
+                    result.error("ARG_ERROR", UNSUPPORTED_SALUTATION_MESSAGE, null)
                     return
                 }
                 val address = parseUserAddress(args)
@@ -595,6 +614,11 @@ internal class IaClientMethods(
                     IaScreen.PrerequisiteFlow::class.simpleName -> IaScreen.PrerequisiteFlow
                     IaScreen.ApofinderScreen::class.simpleName -> IaScreen.ApofinderScreen
                     IaScreen.RedeemPrescription::class.simpleName -> IaScreen.RedeemPrescription
+                    // iOS-only screens, reported like the other platform-only calls.
+                    "PrescriptionScanner", "EPrescriptionScanner" -> {
+                        result.notImplemented()
+                        return
+                    }
                     else -> {
                         result.error(
                             "ARG_ERROR",
@@ -664,27 +688,35 @@ internal class IaClientMethods(
                 ) {
                     result.error(
                         "ARG_ERROR",
-                        "Prescription image data must be provided as a ArrayList<ByteData> type argument \"images\".",
+                        "Prescription image data must be provided as a List<Uint8List> type argument \"images\".",
                         null,
                     )
+                    return
                 }
                 val prescriptionPdfs = data["pdfs"]
                 if (prescriptionPdfs != null && prescriptionPdfs !is ArrayList<*>) {
                     result.error(
                         "ARG_ERROR",
-                        "Prescription PDF data must be provided as a ArrayList<Map> type argument \"pdfs\".",
+                        "Prescription PDF data must be provided as a List<Map> type argument \"pdfs\".",
                         null,
                     )
+                    return
                 }
                 val prescriptionCodes = data["codes"]
                 if (prescriptionCodes != null && (prescriptionCodes !is ArrayList<*> ||
-                            prescriptionCodes.all { it !is String })
+                            prescriptionCodes.any { it !is String })
                 ) {
                     result.error(
                         "ARG_ERROR",
-                        "Prescription code data must be provided as a ArrayList<ArrayList<String>> type argument \"pdfs\".",
+                        "Prescription code data must be provided as a List<String> type argument \"codes\".",
                         null,
                     )
+                    return
+                }
+                val activity = bindings.activityContext() as? Activity
+                if (activity == null) {
+                    result.error("NO_ACTIVITY", "Transferring prescriptions needs an activity.", null)
+                    return
                 }
                 val orderId = data["orderId"] as? String
                 // Map PDF entries with insurance type
@@ -705,8 +737,10 @@ internal class IaClientMethods(
                 // Note: CheckoutListener is already set globally in init, but we still need to
                 // update orderSignatures for prescription-specific flows
                 // The global listener will handle the Flutter callback
-                bindings.sdkModule.ordering.transferPrescriptions(
-                    context = (bindings.activityContext() ?: bindings.applicationContext) as Activity,
+                // The listener can report several events, but Flutter accepts only one reply per call.
+                val hasReplied = AtomicBoolean(false)
+                val isStarted = bindings.sdkModule.ordering.transferPrescriptions(
+                    context = activity,
                     transferPrescriptionRequest = TransferPrescriptionRequest(
                         images = imagePrescriptions,
                         pdfs = pdfPrescriptions,
@@ -722,10 +756,10 @@ internal class IaClientMethods(
                     },
                     transferPrescriptionListener = object : TransferPrescriptionListener {
                         override fun onTransferPrescriptionEvent(event: TransferPrescriptionEvent): HandlingDecision {
-                            if (event is TransferPrescriptionEvent.Success) {
+                            if (event is TransferPrescriptionEvent.Success && !hasReplied.getAndSet(true)) {
                                 result.success(null)
                             }
-                            if (event is TransferPrescriptionEvent.Failed) {
+                            if (event is TransferPrescriptionEvent.Failed && !hasReplied.getAndSet(true)) {
                                 result.error(
                                     "METHOD_ERROR",
                                     event.errorMessage,
@@ -736,6 +770,10 @@ internal class IaClientMethods(
                         }
                     },
                 )
+                // The SDK returns false without calling the listener, for example before it's initialized.
+                if (!isStarted && !hasReplied.getAndSet(true)) {
+                    result.error("METHOD_ERROR", "The SDK couldn't start the prescription transfer. Is it initialized?", null)
+                }
             }
 
             FlutterCall.finishAllActivities.name -> {
@@ -757,20 +795,16 @@ internal class IaClientMethods(
             }
 
             FlutterCall.getPharmacyId.name -> {
-                Thread {
-                    try {
-                        val pharmacyId = kotlinx.coroutines.runBlocking {
-                            bindings.sdkModule.pharmacy.getPharmacyId()
-                        }
-                        android.os.Handler(android.os.Looper.getMainLooper()).post {
-                            result.success(pharmacyId)
-                        }
+                scope.launch {
+                    val pharmacyId = try {
+                        bindings.sdkModule.pharmacy.getPharmacyId().ifEmpty { null }
                     } catch (e: Exception) {
-                        android.os.Handler(android.os.Looper.getMainLooper()).post {
-                            result.success(null)
-                        }
+                        // Reported as "no pharmacy selected", as before, but no longer silently.
+                        Log.w(LOG_TAG, "Reading the pharmacy ID failed.", e)
+                        null
                     }
-                }.start()
+                    result.success(pharmacyId)
+                }
             }
 
             FlutterCall.clearPharmacyId.name -> {
@@ -892,17 +926,17 @@ internal class IaClientMethods(
     }
 
     /**
-     * Maps the case-insensitive salutation values accepted on iOS to the labels the
-     * AppSDK lists in its salutation picker ("Frau", "Herr", "Divers", "Keine Angabe").
-     * Unknown values are forwarded unchanged.
+     * Maps the case-insensitive salutation values to the labels the AppSDK lists in its
+     * salutation picker ("Frau", "Herr", "Divers", "Keine Angabe"). Unknown values return
+     * `null` and are rejected, as on iOS.
      */
-    private fun normalizedSalutation(salutation: String): String {
+    private fun normalizedSalutation(salutation: String): String? {
         return when (salutation.trim().lowercase()) {
             "herr" -> "Herr"
             "frau" -> "Frau"
             "divers", "diverse" -> "Divers"
             "keine angabe" -> "Keine Angabe"
-            else -> salutation
+            else -> null
         }
     }
 
@@ -953,7 +987,9 @@ internal class IaClientMethods(
         val houseNumber = map["houseNumber"] as? String ?: return null
         val zipCode = map["zipCode"] as? String ?: return null
         val city = map["city"] as? String ?: return null
-        val phoneNumber = map["phoneNumberWithoutCountryCode"] as? String
+        val countryCode = (map["phoneNumberCountryCode"] as? Number)?.toInt()
+        // Like iOS, the phone number is only set when both of its parts are present.
+        val phoneNumber = (map["phoneNumberWithoutCountryCode"] as? String)?.takeIf { countryCode != null }
         return IaUserAddress(
             // The AppSDK maps missing address values to empty strings, so an empty
             // salutation leaves it unset, matching a `nil` salutation on iOS.
@@ -965,13 +1001,18 @@ internal class IaClientMethods(
             zipCode = zipCode,
             city = city,
             phoneNumber = phoneNumber,
-            // The country code is only meaningful alongside a phone number, as on iOS.
-            countryCode = if (phoneNumber != null) (map["phoneNumberCountryCode"] as? Number)?.toInt() else null,
+            countryCode = if (phoneNumber != null) countryCode else null,
             // The AppSDK labels this field "Firma, c/o, Gebäude oder Zusatzinformation",
             // the counterpart of the iOS `additionalInfo` address line.
             company = map["additionalInfo"] as? String,
         )
     }
+
+    /**
+     * Dart sends colors as ARGB ints. `Color(Long)` is Compose's ARGB factory, unlike the
+     * `Color(ULong)` constructor, which expects Compose's packed color value.
+     */
+    private fun argbColor(argb: Long): Color = Color(argb)
 
     private fun parseUIConfiguration(map: Map<*, *>?): IAUIConfiguration {
         if (map == null) return IAUIConfiguration()
@@ -996,20 +1037,20 @@ internal class IaClientMethods(
         if (map == null) return IAHeaderConfiguration()
         return IAHeaderConfiguration(
             style = if (map["style"] == "monotone") IAHeaderStyle.MONOTONE else IAHeaderStyle.DUOTONE,
-            primaryColor = (map["primaryColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
-            secondaryColor = (map["secondaryColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            primaryColor = (map["primaryColor"] as? Number)?.toLong()?.let(::argbColor),
+            secondaryColor = (map["secondaryColor"] as? Number)?.toLong()?.let(::argbColor),
         )
     }
 
     private fun parsePrimaryButtonConfiguration(map: Map<*, *>?): IAPrimaryButtonConfiguration {
         if (map == null) return IAPrimaryButtonConfiguration()
         return IAPrimaryButtonConfiguration(
-            backgroundColor = (map["backgroundColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
-            backgroundDisabledColor = (map["backgroundDisabledColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
-            textColor = (map["textColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
-            textDisabledColor = (map["textDisabledColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
-            borderColor = (map["borderColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
-            borderDisabledColor = (map["borderDisabledColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            backgroundColor = (map["backgroundColor"] as? Number)?.toLong()?.let(::argbColor),
+            backgroundDisabledColor = (map["backgroundDisabledColor"] as? Number)?.toLong()?.let(::argbColor),
+            textColor = (map["textColor"] as? Number)?.toLong()?.let(::argbColor),
+            textDisabledColor = (map["textDisabledColor"] as? Number)?.toLong()?.let(::argbColor),
+            borderColor = (map["borderColor"] as? Number)?.toLong()?.let(::argbColor),
+            borderDisabledColor = (map["borderDisabledColor"] as? Number)?.toLong()?.let(::argbColor),
             borderWidth = (map["borderWidth"] as? Number)?.toFloat(),
             borderRadius = (map["borderRadius"] as? Number)?.toFloat(),
         )
@@ -1018,12 +1059,12 @@ internal class IaClientMethods(
     private fun parseSecondaryButtonConfiguration(map: Map<*, *>?): IASecondaryButtonConfiguration {
         if (map == null) return IASecondaryButtonConfiguration()
         return IASecondaryButtonConfiguration(
-            backgroundColor = (map["backgroundColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
-            backgroundDisabledColor = (map["backgroundDisabledColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
-            textColor = (map["textColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
-            textDisabledColor = (map["textDisabledColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
-            borderColor = (map["borderColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
-            borderDisabledColor = (map["borderDisabledColor"] as? Number)?.toLong()?.let { Color(it.toULong()) },
+            backgroundColor = (map["backgroundColor"] as? Number)?.toLong()?.let(::argbColor),
+            backgroundDisabledColor = (map["backgroundDisabledColor"] as? Number)?.toLong()?.let(::argbColor),
+            textColor = (map["textColor"] as? Number)?.toLong()?.let(::argbColor),
+            textDisabledColor = (map["textDisabledColor"] as? Number)?.toLong()?.let(::argbColor),
+            borderColor = (map["borderColor"] as? Number)?.toLong()?.let(::argbColor),
+            borderDisabledColor = (map["borderDisabledColor"] as? Number)?.toLong()?.let(::argbColor),
             borderWidth = (map["borderWidth"] as? Number)?.toFloat(),
             borderRadius = (map["borderRadius"] as? Number)?.toFloat(),
         )

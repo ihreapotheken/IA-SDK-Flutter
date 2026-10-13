@@ -56,6 +56,31 @@ class IaModuleOrdering extends IaBaseOrdering {
   }
 
   @override
+  Future<IaModelOrderingCartState?> getCartState({
+    bool allowCached = true,
+    bool shouldEmitCartUpdate = false,
+  }) async {
+    final details = await getCartDetails(
+      allowCached: allowCached,
+      shouldEmitCartUpdate: shouldEmitCartUpdate,
+    );
+    if (details == null) return null;
+    final products = details['products'];
+    return IaModelOrderingCartState(
+      totalAmountInCart: details['totalAmountInCart'] as int,
+      clientOrderIDs: const [],
+      products: products is Iterable
+          ? products.whereType<Map>().map((product) {
+              return IaModelOrderingCartProduct(
+                pzn: product['pzn'] as String,
+                amount: product['amount'] as int,
+              );
+            }).toList()
+          : const [],
+    );
+  }
+
+  @override
   Future<void> deleteOrderHistory() async {
     return await _Methods.deleteOrderHistory.invoke<void>(null);
   }

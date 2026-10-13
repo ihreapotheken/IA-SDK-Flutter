@@ -103,7 +103,8 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
     if (widget.selfSizing) {
       _ComponentSizeDispatcher.instance.register(id, _onSizeUpdate);
     }
-    // Looked up on each tap, so a rebuilt widget's new callback is used.
+    // Looked up on each tap, so a rebuilt widget's new callback is used. Whether native reports taps at all
+    // is fixed at creation, see IaCartButton.
     _ComponentTapDispatcher.instance.register(id, () => widget.onTap?.call());
   }
 

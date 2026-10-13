@@ -8,7 +8,7 @@ struct IaSetPharmacyIdArguments: Decodable {
     /// Pharmacy ID as Int. Didn't use custom decoding because it is an overkill.
     var pharmacyIdInt: Int {
         get throws {
-            guard let id = Int(pharmacyId) else {
+            guard let id = Int(pharmacyId.trimmingCharacters(in: .whitespacesAndNewlines)) else {
                 throw IaArgumentError.decodingArgumentFailed(description: "Failed to convert pharmacyId to Int")
             }
             return id

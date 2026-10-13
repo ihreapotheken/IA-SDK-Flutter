@@ -19,7 +19,10 @@ class IaClientBindings(
 ) {
     val channel: MethodChannel = MethodChannel(binaryMessenger, "de.ihreapotheken/sdk")
 
-    lateinit var sdkModule: IaSdk
+    /**
+     * The AppSDK entry point. It's a process-wide object, so it's usable before `register`.
+     */
+    val sdkModule: IaSdk = IaSdk
     
     /**
      * Property holding the value of the [orderSignaturesListener].

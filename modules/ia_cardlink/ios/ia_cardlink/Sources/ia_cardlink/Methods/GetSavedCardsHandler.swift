@@ -6,7 +6,8 @@ import IACardLink
 class GetSavedCardsHandler {
     func handle(args: [String: Any], result: @escaping FlutterResult) {
         let userId = args["userId"] as? String ?? ""
-        let cards = CardLink.getSavedCards(userId: userId)
+        // No saved cards is an empty list, not the JSON literal "null".
+        let cards = CardLink.getSavedCards(userId: userId) ?? []
 
         do {
             let jsonData = try JSONEncoder().encode(cards)

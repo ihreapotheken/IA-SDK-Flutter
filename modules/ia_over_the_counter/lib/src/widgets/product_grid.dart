@@ -13,13 +13,24 @@ class IaProductGrid extends StatelessWidget {
     this.shouldShowLoading = true,
     this.title,
     this.pzns,
-  });
+  }) : assert(
+         (type != IaProductDisplayType.productRecommendations && type != IaProductDisplayType.customersAlsoBought) ||
+             pzn != null,
+         'productRecommendations and customersAlsoBought need a pzn.',
+       ),
+       assert(
+         type != IaProductDisplayType.custom || (pzns != null && pzns.length > 0),
+         'The custom type needs pzns.',
+       );
 
   /// Product collection to display.
   ///
   final IaProductDisplayType type;
 
-  /// Optional product identifier (pzn) for recommendation-based types.
+  /// Product identifier (pzn) the recommendation-based types are based on, required for them.
+  ///
+  /// For [IaProductDisplayType.currentOffers] and [IaProductDisplayType.productsOfTheMonth], iOS leaves this
+  /// product out of the grid. Android ignores it for those types.
   ///
   final String? pzn;
 

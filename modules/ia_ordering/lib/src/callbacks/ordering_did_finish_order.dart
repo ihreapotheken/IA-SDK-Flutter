@@ -28,9 +28,11 @@ Future<void> _orderingDidFinishOrderHandler(dynamic args) async {
       'orderingDidFinishOrder: Incorect type clientOrderIDs: $clientOrderIDs.',
     );
   }
+  final orderCodes = args['orderCodes'];
   IaModuleOrdering._orderingDidFinishOrderListener.add(
     IaModelOrderingTransactionSignatures(
       orderCode: orderCode,
+      orderCodes: orderCodes is Iterable ? orderCodes.whereType<String>().toList() : [orderCode],
       clientOrderIDs: clientOrderIDs == null
           ? null
           : List<String>.from(

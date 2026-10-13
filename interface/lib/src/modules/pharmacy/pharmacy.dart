@@ -2,6 +2,9 @@ part of '../../common/_interface.dart';
 
 /// Method and property definitions for the ia.de AppSDK Pharmacy service.
 ///
+/// Members documented as "Only supported on iOS" or "Only supported on Android" throw a
+/// [MissingPluginException] on the other platform.
+///
 abstract class IaBasePharmacy extends IaBase {
   @override
   IaBaseModule get module {
@@ -13,6 +16,8 @@ abstract class IaBasePharmacy extends IaBase {
   Future<void> launchPharmacyDetails();
 
   /// Specifies a pharmacy identifier to be loaded into the AppSDK module for user interaction.
+  ///
+  /// [pharmacyId] is the numeric pharmacy identifier, for example `"1234"`. iOS rejects other values.
   ///
   Future<void> setPharmacyId(String pharmacyId);
 

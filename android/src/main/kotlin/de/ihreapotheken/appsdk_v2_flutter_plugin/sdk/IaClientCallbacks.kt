@@ -18,6 +18,7 @@ import de.ihreapotheken.sdk.integrations.api.view.IaScreen
 import de.ihreapotheken.sdk.integrations.api.view.SdkNavigationTarget
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -65,7 +66,10 @@ class IaClientCallbacks(
             // (onImpressumClick, onShowDataProcessingClick).
         }
 
-        val handledByHost = suspendCoroutine { continuation ->
+        // Cancellable, so the SDK's 500 ms timeout stops the wait; a late answer is then ignored
+        // and the SDK navigates itself. Method channel calls must be made on the main thread.
+        val handledByHost = withContext(Dispatchers.Main) {
+            suspendCancellableCoroutine { continuation ->
             channel.invokeMethod(
                 "sdkWillNavigateToTarget",
                 mapOf("navigationTarget" to navigationTargetString),
@@ -94,6 +98,7 @@ class IaClientCallbacks(
                     }
                 }
             )
+            }
         }
         return handledByHost
     }
@@ -137,10 +142,12 @@ class IaClientCallbacks(
             hostOrderCode = hostOrderId,
         )
 
-        // Send callback to Flutter
+        // Send callback to Flutter. The SDK reports an empty host order ID when the host didn't
+        // pass one, which iOS leaves out of the list.
         val arguments = mapOf(
             "orderCode" to sdkOrderId,
-            "clientOrderIDs" to listOf(hostOrderId)
+            "orderCodes" to listOf(sdkOrderId),
+            "clientOrderIDs" to listOf(hostOrderId).filter { it.isNotEmpty() }
         )
 
         channel.invokeMethod(

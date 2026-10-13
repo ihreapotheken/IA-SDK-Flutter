@@ -2,6 +2,9 @@ part of '../../common/_interface.dart';
 
 /// Method and property definitions for the ia.de AppSDK Ordering service.
 ///
+/// Members documented as "Only supported on iOS" or "Only supported on Android" throw a
+/// [MissingPluginException] on the other platform.
+///
 abstract class IaBaseOrdering extends IaBase {
   @override
   IaBaseModule get module {
@@ -40,6 +43,18 @@ abstract class IaBaseOrdering extends IaBase {
   /// Note: Only supported on iOS.
   ///
   Future<Map<String, dynamic>?> getCartDetails({
+    bool allowCached = true,
+    bool shouldEmitCartUpdate = false,
+  });
+
+  /// Returns the current cart as the model [orderingDidUpdateCartListener] reports, or `null` if the cart is empty.
+  ///
+  /// The options work like those of [getCartDetails]. Client order IDs aren't part of the cart details,
+  /// so [IaModelOrderingCartState.clientOrderIDs] is empty.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<IaModelOrderingCartState?> getCartState({
     bool allowCached = true,
     bool shouldEmitCartUpdate = false,
   });

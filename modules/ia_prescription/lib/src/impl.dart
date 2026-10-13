@@ -13,13 +13,14 @@ part 'models/request/set_scanner_camera_state.dart';
 /// Method and property definitions for the ia.de AppSDK Prescription service.
 ///
 class IaModulePrescription extends IaBasePrescription {
-  /// Constructs the module and makes it the receiver of native prescription scan callbacks.
+  /// Constructs the module. The first constructed module receives the native prescription scan callbacks,
+  /// like `IaSdk.register` keeps the first registered module.
   ///
   IaModulePrescription() {
-    _instance = this;
+    _instance ??= this;
   }
 
-  /// The most recently constructed module, which the native scan callbacks are routed to.
+  /// The first constructed module, which the native scan callbacks are routed to.
   ///
   static IaModulePrescription? _instance;
 

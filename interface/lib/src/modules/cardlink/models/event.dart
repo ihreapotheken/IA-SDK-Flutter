@@ -7,9 +7,13 @@ part of '_models.dart';
 enum IaCardLinkEvent {
   /// CardLink will exit/close.
   ///
+  /// On Android it's reported once CardLink has closed, when the host app's screen shows again.
+  ///
   willExit,
 
   /// NFC scanning is about to start.
+  ///
+  /// Note: Only reported on iOS.
   ///
   willStartScanning,
 
@@ -30,6 +34,8 @@ enum IaCardLinkEvent {
   cardSaved,
 
   /// CardLink closed with a result, reported through `resultListener`.
+  ///
+  /// Not reported for the saved cards flow, whose Android screen returns no result.
   ///
   /// Note: Only reported on Android.
   ///

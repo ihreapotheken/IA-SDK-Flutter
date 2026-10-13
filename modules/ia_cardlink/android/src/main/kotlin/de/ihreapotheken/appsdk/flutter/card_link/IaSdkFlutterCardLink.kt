@@ -1,6 +1,10 @@
 package de.ihreapotheken.appsdk.flutter.card_link
 
 import android.app.Activity
+import android.content.Context
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import de.ihreapotheken.appsdk.flutter.card_link.events.CardLinkEventSender
 import de.ihreapotheken.appsdk.flutter.card_link.methods.DeleteCardHandler
 import de.ihreapotheken.appsdk.flutter.card_link.methods.GetSavedCardsHandler
@@ -21,6 +25,11 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.PluginRegistry
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** IaSdkFlutterCardLink */
 class IaSdkFlutterCardLink :
@@ -30,6 +39,46 @@ class IaSdkFlutterCardLink :
 
     private lateinit var channel: MethodChannel
     private var activity: Activity? = null
+    private var applicationContext: Context? = null
+    private var activityBinding: ActivityPluginBinding? = null
+    private var activityLifecycle: Lifecycle? = null
+
+    /**
+     * Scope for the SDK's storage calls, which block and therefore run on the IO dispatcher.
+     */
+    private val scope = MainScope()
+
+    /**
+     * Whether a CardLink screen launched by this plugin is shown. The Android SDK has no exit
+     * callback, so its closing is detected when the host activity resumes.
+     */
+    private var isCardLinkShown = false
+
+    private val lifecycleObserver = LifecycleEventObserver { _, event ->
+        if (event == Lifecycle.Event.ON_RESUME && isCardLinkShown) {
+            isCardLinkShown = false
+            eventSender.sendWillExitEvent()
+        }
+    }
+
+    private val activityResultListener = PluginRegistry.ActivityResultListener { requestCode, resultCode, data ->
+        if (requestCode == REQUEST_CODE_CARD_LINK_ACTIVITY) {
+            if (resultCode == Activity.RESULT_OK) {
+                val message = data?.getStringExtra("card_link_result")
+                eventSender.sendCardLinkResultEvent(message)
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                eventSender.sendCardLinkCanceledEvent()
+            }
+            true
+        } else {
+            false
+        }
+    }
+
+    /**
+     * The SDK's storage calls accept any context, so they work before an activity is attached.
+     */
+    private fun storageContext(): Context? = activity ?: applicationContext
 
     private val eventSender by lazy {
         CardLinkEventSender(
@@ -41,16 +90,17 @@ class IaSdkFlutterCardLink :
     private val launchHandler by lazy {
         LaunchHandler(
             activityProvider = { activity },
-            eventSender = eventSender
+            eventSender = eventSender,
+            onLaunched = { isCardLinkShown = true },
         )
     }
 
     private val getSavedCardsHandler by lazy {
-        GetSavedCardsHandler(activityProvider = { activity })
+        GetSavedCardsHandler(contextProvider = ::storageContext, scope = scope)
     }
 
     private val deleteCardHandler by lazy {
-        DeleteCardHandler(activityProvider = { activity })
+        DeleteCardHandler(contextProvider = ::storageContext, scope = scope)
     }
 
     companion object {
@@ -63,6 +113,7 @@ class IaSdkFlutterCardLink :
             CHANNEL_ID
         )
         channel.setMethodCallHandler(this)
+        applicationContext = flutterPluginBinding.applicationContext
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -71,22 +122,19 @@ class IaSdkFlutterCardLink :
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
-        binding.addActivityResultListener { requestCode, resultCode, data ->
-            if (requestCode == REQUEST_CODE_CARD_LINK_ACTIVITY) {
-                if (resultCode == Activity.RESULT_OK) {
-                    val message = data?.getStringExtra("card_link_result")
-                    eventSender.sendCardLinkResultEvent(message)
-                } else if (resultCode == Activity.RESULT_CANCELED) {
-                    eventSender.sendCardLinkCanceledEvent()
-                }
-                true
-            } else {
-                false
-            }
+        activityBinding = binding
+        binding.addActivityResultListener(activityResultListener)
+        // FlutterActivity and FlutterFragmentActivity are lifecycle owners.
+        activityLifecycle = (binding.activity as? LifecycleOwner)?.lifecycle?.also {
+            it.addObserver(lifecycleObserver)
         }
     }
 
     override fun onDetachedFromActivity() {
+        activityBinding?.removeActivityResultListener(activityResultListener)
+        activityLifecycle?.removeObserver(lifecycleObserver)
+        activityBinding = null
+        activityLifecycle = null
         activity = null
     }
 
@@ -118,10 +166,12 @@ class IaSdkFlutterCardLink :
             }
 
             "getLogFilePath" -> {
-                activity?.let {
-                    val logFilePath = CardLink.getLogFilePath(it)
-                    result.success(logFilePath)
-                } ?: result.success("")
+                val context = storageContext()
+                if (context == null) {
+                    result.error("NO_CONTEXT", "Context not available", null)
+                    return
+                }
+                result.success(CardLink.getLogFilePath(context))
             }
 
             "getSavedCards" -> {
@@ -156,9 +206,9 @@ class IaSdkFlutterCardLink :
                     )
                     return
                 }
-                activity?.let {
+                runStorageCall(result) { context ->
                     CardLink.updateCard(
-                        it,
+                        context,
                         originalName,
                         SavedCardData(
                             name = name,
@@ -167,8 +217,7 @@ class IaSdkFlutterCardLink :
                             userId = userId,
                         ),
                     )
-                    result.success(null)
-                } ?: result.error("NO_ACTIVITY", "Activity not available", null)
+                }
             }
 
             "reorderSavedCards" -> {
@@ -178,24 +227,15 @@ class IaSdkFlutterCardLink :
                     result.error("INVALID_ARGUMENTS", "userId and orderedCanCodes are required", null)
                     return
                 }
-                activity?.let {
-                    CardLink.reorderSavedCards(it, orderedCanCodes, userId)
-                    result.success(null)
-                } ?: result.error("NO_ACTIVITY", "Activity not available", null)
+                runStorageCall(result) { context ->
+                    CardLink.reorderSavedCards(context, orderedCanCodes, userId)
+                }
             }
 
-            "deleteAllCards" -> {
-                activity?.let {
-                    CardLink.clearAllCardLinkData(it)
-                    result.success(null)
-                } ?: result.error("NO_ACTIVITY", "Activity not available", null)
-            }
-
-            "deleteAllUserRelatedData" -> {
-                activity?.let {
-                    CardLink.clearAllCardLinkData(it)
-                    result.success(null)
-                } ?: result.error("NO_ACTIVITY", "Activity not available", null)
+            "deleteAllCards", "deleteAllUserRelatedData" -> {
+                runStorageCall(result) { context ->
+                    CardLink.clearAllCardLinkData(context)
+                }
             }
 
             "finish" -> {
@@ -204,6 +244,27 @@ class IaSdkFlutterCardLink :
 
             else -> {
                 result.notImplemented()
+            }
+        }
+    }
+
+    /**
+     * Runs a blocking SDK storage call off the main thread and reports its completion to Flutter.
+     */
+    private fun runStorageCall(result: Result, block: (Context) -> Unit) {
+        val context = storageContext()
+        if (context == null) {
+            result.error("NO_CONTEXT", "Context not available", null)
+            return
+        }
+        scope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    block(context)
+                }
+                result.success(null)
+            } catch (e: Exception) {
+                result.error("STORAGE_ERROR", e.localizedMessage, null)
             }
         }
     }

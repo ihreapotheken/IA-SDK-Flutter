@@ -85,6 +85,7 @@ class IaClientDelegate: SDKDelegate {
             "orderingDidFinishOrder",
             arguments: [
                 "orderCode": orderCode,
+                "orderCodes": orders.map(\.orderCode),
                 "clientOrderIDs": clientOrderIDs,
             ],
         )

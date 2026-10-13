@@ -25,12 +25,13 @@ class _RequestModelTransferPrescriptions implements IaBaseRequest {
   @override
   Map<String, dynamic> toSupportedType() {
     return {
-      'images': images,
+      // The message codec only encodes lists, not other iterables such as sets or lazy maps.
+      'images': images?.toList(),
       'pdfs': pdfs?.map((pdf) => {
         'data': pdf.data,
         'insuranceType': pdf.insuranceType.rawValue,
       }).toList(),
-      'codes': codes,
+      'codes': codes?.toList(),
       'orderId': orderId,
       'finishAction': finishAction.name,
       'showActivityIndicator': showActivityIndicator,

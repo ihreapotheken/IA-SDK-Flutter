@@ -32,7 +32,7 @@ class LaunchHandler {
         let flowType: CardlinkFlowType = flowTypeString == "launchCardLinkCards" ? .startSavedCards : .startCardlink
 
         DispatchQueue.main.async { [weak self] in
-            guard let rootViewController = UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.rootViewController else {
+            guard let rootViewController = Self.topPresentedViewController() else {
                 result(FlutterError(code: "NO_VIEW_CONTROLLER", message: "Could not find root view controller", details: nil))
                 return
             }
@@ -62,7 +62,7 @@ class LaunchHandler {
     func reopenCardLink() {
         guard let config = savedConfiguration,
               let apiKey = savedSdkApiKey,
-              let rootViewController = UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.rootViewController else {
+              let rootViewController = Self.topPresentedViewController() else {
             return
         }
 
@@ -80,6 +80,16 @@ class LaunchHandler {
         }
     }
 
+
+    /// The view controller CardLink is presented on. A view controller that already presents one can't present
+    /// another, so this is the top-most presented one, for example an SDK screen shown on top of the app.
+    private static func topPresentedViewController() -> UIViewController? {
+        var viewController = UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.rootViewController
+        while let presented = viewController?.presentedViewController, !presented.isBeingDismissed {
+            viewController = presented
+        }
+        return viewController
+    }
 
     private func setupConfigurationAndStyle(args: [String: Any]) {
         let configuration = CardLinkConfiguration(args: args)

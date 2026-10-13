@@ -4,6 +4,9 @@ part of '../../common/_interface.dart';
 ///
 /// CardLink enables NFC-based prescription transfer functionality.
 ///
+/// Members documented as "Only supported on iOS" or "Only supported on Android" throw a
+/// [MissingPluginException] on the other platform.
+///
 abstract class IaBaseCardLink extends IaBase {
   @override
   IaBaseModule get module {
@@ -25,15 +28,17 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [buttonsColor]: Optional buttons UI color (as integer ARGB value).
   /// - [textLinkColor]: Optional text link UI color (as integer ARGB value).
   /// - [bottomNavigationColor]: Optional bottom navigation UI color (as integer ARGB value).
-  /// - [environment]: Optional SDK environment (defaults to production).
+  /// - [environment]: Optional CardLink environment. When `null`, the environment `IaSdk` was initialized with
+  ///   is used. On iOS, passing it also switches the environment of the whole SDK.
   /// - [saveCardEnabled]: Optional flag to enable card saving (defaults to true).
-  /// - [finishAction]: Determines what happens with prescriptions after NFC scanning.
-  /// - [appId]: Optional application ID (maps to `applicationId` on Android and `appID` on iOS).
+  /// - [finishAction]: Determines what happens with prescriptions after NFC scanning. Only used on iOS, the
+  ///   Android SDK always uploads them.
+  /// - [appId]: Optional application ID (maps to `applicationId` on Android and to the SDK-wide
+  ///   `IASDK.configuration.appStoreID` on iOS).
   /// - [coreAppLogFileURL]: Optional file path to the host app's log file. When provided, the log file is included in CardLink's "Report Problem" feature, allowing users to attach app-level logs alongside CardLink logs when reporting issues.
-  /// - [supportsLiquidGlass]: Flag to enable Liquid Glass UI style.
+  /// - [supportsLiquidGlass]: Flag to enable Liquid Glass UI style. Only used on iOS, where it also changes the
+  ///   setting for all SDK screens.
   /// - [illustrationColor]: Optional color of the CardLink illustrations (defaults to red). Only used on Android.
-  /// - [mockInvalidXmlData]: QA option that makes the read prescriptions invalid, to test the error handling.
-  ///   Only used on Android, see [setMocks] for iOS.
   ///
   Future<void> launch({
     required String sdkApiKey,
@@ -55,7 +60,6 @@ abstract class IaBaseCardLink extends IaBase {
     String? coreAppLogFileURL,
     required bool supportsLiquidGlass,
     IaCardLinkIllustrationColor? illustrationColor,
-    bool? mockInvalidXmlData,
   });
 
   /// Returns the CardLink SDK version string.
@@ -75,6 +79,10 @@ abstract class IaBaseCardLink extends IaBase {
   /// The returned string contains JSON-encoded card data.
   ///
   Future<String?> getSavedCards(String userId);
+
+  /// Returns the saved cards for the specified user, parsed from [getSavedCards].
+  ///
+  Future<List<IaCardLinkSavedCard>> getSavedCardList(String userId);
 
   /// Deletes a saved card for the specified user.
   ///
@@ -137,13 +145,16 @@ abstract class IaBaseCardLink extends IaBase {
 
   /// Sets the host app's log file, which users can attach to CardLink problem reports.
   ///
-  /// [IaSdkConfiguration.hostAppLogFilePath] calls this automatically when the CardLink module is registered.
+  /// `IaSdk.initialize` calls this with `IaSdkConfiguration.hostAppLogFilePath` when the CardLink module was
+  /// registered before.
+  ///
+  /// On Android an empty [path] keeps the previously set file, the SDK can't detach it.
   ///
   Future<void> setHostAppLogFilePath(String path);
 
   /// Replaces the CardLink backend with simulated responses, for testing CardLink flows. Not meant for production builds.
   ///
-  /// Note: Only supported on iOS. On Android see the `mockInvalidXmlData` option of [launch].
+  /// Note: Only supported on iOS. The Android SDK's only CardLink mock is disabled in its release builds.
   ///
   Future<void> setMocks(IaCardLinkMocks mocks);
 
@@ -202,8 +213,8 @@ abstract class IaBaseCardLink extends IaBase {
   /// Notifier for CardLink lifecycle and interaction events.
   ///
   /// Consolidates various events into a single stream:
-  /// - [IaCardLinkEvent.willExit]: CardLink will close
-  /// - [IaCardLinkEvent.willStartScanning]: NFC scanning is about to start
+  /// - [IaCardLinkEvent.willExit]: CardLink will close. On Android it's reported once CardLink has closed.
+  /// - [IaCardLinkEvent.willStartScanning]: NFC scanning is about to start. Only reported on iOS.
   /// - [IaCardLinkEvent.failedToInitialize]: Initialization failed
   /// - [IaCardLinkEvent.goToCart]: User requested to go to cart
   /// - [IaCardLinkEvent.openTermsAndConditions]: User requested to view terms

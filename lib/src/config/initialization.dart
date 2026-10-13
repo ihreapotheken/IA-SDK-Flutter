@@ -15,9 +15,13 @@ class IaPrerequisitesConfiguration {
 
   /// Whether the prerequisites flow can be cancelled.
   ///
+  /// Note: Only used on iOS.
+  ///
   final bool isCancellable;
 
   /// Whether to show animations during prerequisites flow.
+  ///
+  /// Note: Only used on iOS.
   ///
   final bool isAnimated;
 
