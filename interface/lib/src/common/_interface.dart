@@ -25,15 +25,25 @@ abstract class IaBase {
   /// Unnamed constructor used to allocate library resources.
   ///
   IaBase() {
-    IaBaseCallbacks._instance;
+    IaBaseCallbacks._ensureSharedChannelHandler();
+    // Modules share their callbacks between instances and create them lazily; reading them registers the handlers.
+    callbacks;
     final moduleChannelId = IaBaseMethods._channelId + '/${module.name}';
     final moduleMethodChannel = MethodChannel(moduleChannelId);
-    moduleMethodChannel.invokeMethod('register').catchError(
-      (e) {
+    nativeRegistration = moduleMethodChannel.invokeMethod<void>('register');
+    // Logged here too, since a module that's never passed to IaSdk.register has no one awaiting the result.
+    nativeRegistration.catchError(
+      (Object e) {
         debugPrint('Error registering ${module.name} module: $e');
       },
     );
   }
+
+  /// Registration of the module with its native plugin, started when the module is created.
+  ///
+  /// Fails when the module's native part is missing. `IaSdk.register` waits for it.
+  ///
+  late final Future<void> nativeRegistration;
 
   /// Relevant [IaBaseModule] with functionality extended by this base class.
   ///
@@ -44,6 +54,9 @@ abstract class IaBase {
   }
 
   /// Default module native callback definitions.
+  ///
+  /// Read when the module is created, which registers its handlers. Return the same object for every instance,
+  /// since each [IaBaseCallbacks] stays registered.
   ///
   IaBaseCallbacks? get callbacks {
     return null;

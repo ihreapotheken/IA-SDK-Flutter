@@ -3,6 +3,8 @@ part 'consent_event.dart';
 part 'environment.dart';
 part 'finish_action.dart';
 part 'flow_type.dart';
+part 'illustration_color.dart';
+part 'mocks.dart';
 part 'session.dart';
 part 'saved_card.dart';
 part 'event.dart';

@@ -7,14 +7,19 @@ class IaModelOrderingTransactionSignatures {
   ///
   const IaModelOrderingTransactionSignatures({
     required this.orderCode,
-    this.clientOrderIDs,
+    this.clientOrderIDs = const [],
+    this.orderCodes = const [],
   });
 
-  /// Order code from backend.
+  /// Order code from backend. With several orders, the code of the first one, see [orderCodes].
   ///
   final String orderCode;
 
-  /// Order ID provided by host app using transferPrescriptions (optional).
+  /// Order codes of all orders the checkout created.
   ///
-  final List<String>? clientOrderIDs;
+  final List<String> orderCodes;
+
+  /// Order IDs the host app passed to transferPrescriptions. Empty when it passed none.
+  ///
+  final List<String> clientOrderIDs;
 }
