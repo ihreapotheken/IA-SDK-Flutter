@@ -34,15 +34,39 @@ enum IASDKViewIdentifier: String, CaseIterable {
     case redeemPrescription = "redeemPrescription"
 
     /**
+     * Prescription photo scanner from IAPrescription module.
+     */
+    case prescriptionScanner = "prescriptionScanner"
+
+    /**
+     * E-prescription QR code scanner from IAPrescription module.
+     */
+    case ePrescriptionScanner = "ePrescriptionScanner"
+
+    /**
      * Visual interface representation.
      */
-    func iaScreen() -> any IAScreen {
+    @MainActor
+    /// - Parameter controlsScannerCamera: Whether scanners take their camera state from `PrescriptionScannerCameraController`,
+    ///   which only applies to scanners launched from Flutter, not to embedded platform views.
+    /// - Parameter onApofinderFinish: Called with the selected pharmacy, or `nil` when the user closed Apofinder. The
+    ///   screen reports the selection only here, and leaves closing it to the caller.
+    func iaScreen(
+        isCancellable: Bool = true,
+        focusesOnAppear: Bool? = nil,
+        controlsScannerCamera: Bool = false,
+        onApofinderFinish: @escaping (Pharmacy?) -> Void = { _ in }
+    ) -> any IAScreen {
         switch self {
         case IASDKViewIdentifier.startScreen:
             IAStartScreen()
 
         case IASDKViewIdentifier.productSearchScreen:
-            IAProductSearchScreen()
+            if let focusesOnAppear {
+                IAProductSearchScreen().focusesOnAppear(focusesOnAppear)
+            } else {
+                IAProductSearchScreen()
+            }
 
         case IASDKViewIdentifier.cartScreen:
             IACartScreen()
@@ -51,10 +75,24 @@ enum IASDKViewIdentifier: String, CaseIterable {
             IAPharmacyScreen()
 
         case IASDKViewIdentifier.apofinderScreen:
-            IAApofinderScreen(isCancellable: true, onFinish: { _ in })
+            IAApofinderScreen(isCancellable: isCancellable, onFinish: onApofinderFinish)
 
         case IASDKViewIdentifier.redeemPrescription:
             IARedeemPrescriptionScreen()
+
+        case IASDKViewIdentifier.prescriptionScanner:
+            if controlsScannerCamera {
+                CameraControlledPrescriptionScannerScreen(type: .prescription)
+            } else {
+                IAPrescriptionScannerScreen(type: .prescription)
+            }
+
+        case IASDKViewIdentifier.ePrescriptionScanner:
+            if controlsScannerCamera {
+                CameraControlledPrescriptionScannerScreen(type: .ePrescription)
+            } else {
+                IAPrescriptionScannerScreen(type: .ePrescription)
+            }
         }
     }
 }

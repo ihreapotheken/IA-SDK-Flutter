@@ -108,6 +108,81 @@ enum FlutterCall: CaseIterable {
     case setShouldShowMascotIllustrations
 
     /**
+     * Clears the selected pharmacy identifier.
+     */
+    case clearPharmacyId
+
+    /**
+     * Resets the prerequisites state so the prerequisites flow runs again.
+     */
+    case resetPrerequisites
+
+    /**
+     * Clears the cached products of product grids.
+     */
+    case clearProductGridCache
+
+    /**
+     * Resets the accepted legal documents.
+     */
+    case resetLegalDisclaimer
+
+    /**
+     * Marks the onboarding as shown or not shown.
+     */
+    case setIsOnboardingShown
+
+    /**
+     * Removes the user's billing address.
+     */
+    case clearUserBillingAddress
+
+    /**
+     * Removes the user's delivery address.
+     */
+    case clearUserDeliveryAddress
+
+    /**
+     * Presents the SDK's log viewer.
+     */
+    case presentLogs
+
+    /**
+     * Returns the SDK's identifier for the current user.
+     */
+    case getUserId
+
+    /**
+     * Turns forwarding of SDK log messages to Flutter on or off.
+     */
+    case setLogMessageForwardingEnabled
+
+    /**
+     * Returns the details of the selected pharmacy.
+     */
+    case getPharmacy
+
+    /**
+     * Removes all cached network responses of the SDK.
+     */
+    case removeAllCachedResponses
+
+    /**
+     * Stores a pharmacy identifier without validating it.
+     */
+    case savePharmacyId
+
+    /**
+     * Changes the camera state of the prescription scanner.
+     */
+    case setPrescriptionScannerCameraState
+
+    /**
+     * Returns the current initialization state.
+     */
+    case getInitializationState
+
+    /**
      * String identifier getter definition.
      */
     var name: String {

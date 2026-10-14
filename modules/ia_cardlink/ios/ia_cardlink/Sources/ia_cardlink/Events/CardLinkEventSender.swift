@@ -14,7 +14,7 @@ class CardLinkEventSender {
         let status = accepted ? "accepted" : "declined"
         methodChannel?.invokeMethod(
             "cardLinkConsentEvent",
-            arguments: ["status": status]
+            arguments: ["status": status, "phoneNumber": phoneNumber ?? NSNull()] as [String: Any]
         )
     }
 
@@ -67,6 +67,10 @@ class CardLinkEventSender {
             reason = "Missing pharmacy ID."
         case .failedToAuthenticate:
             reason = "Failed to authenticate, please check your authentication key and bundle id."
+        case .sdkNotInitialized:
+            reason = "The SDK isn't initialized."
+        case .missingCardLinkEntitlement:
+            reason = "The API key isn't entitled to CardLink."
         default:
             reason = "Unknown error"
         }

@@ -12,6 +12,14 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
     private let getSavedCardsHandler = GetSavedCardsHandler()
     private let deleteCardHandler = DeleteCardHandler()
 
+    /// Observer of the core plugin's SDK-flow notification. One per process: re-registering the plugins, for example
+    /// for another Flutter engine, replaces it, like the core plugin replaces the SDK delegate.
+    private static var sdkFlowActionObserver: NSObjectProtocol?
+
+    private static var closedWithSdkScreensObserver: NSObjectProtocol?
+
+    private static var environmentWasSetObserver: NSObjectProtocol?
+
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(
             name: "de.ihreapotheken/sdk/cardLink",
@@ -21,6 +29,47 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
         registrar.addMethodCallDelegate(instance, channel: channel)
         instance.channel = channel
         instance.eventSender.setMethodChannel(channel)
+
+        // Actions of CardLink flows the SDK starts itself reach the SDK delegate in the core plugin, which posts them.
+        if let previousObserver = sdkFlowActionObserver {
+            NotificationCenter.default.removeObserver(previousObserver)
+        }
+        sdkFlowActionObserver = NotificationCenter.default.addObserver(
+            forName: Notification.Name("de.ihreapotheken.sdk.flutter.cardLinkDidSendAction"),
+            object: nil,
+            queue: .main
+        ) { [weak instance] notification in
+            guard let action = notification.userInfo?["action"] as? CardLinkOutputAction else { return }
+            Task { @MainActor in
+                instance?.launchHandler.handleSdkFlowOutputAction(action)
+            }
+        }
+
+        if let previousObserver = closedWithSdkScreensObserver {
+            NotificationCenter.default.removeObserver(previousObserver)
+        }
+        closedWithSdkScreensObserver = NotificationCenter.default.addObserver(
+            forName: Notification.Name("de.ihreapotheken.sdk.flutter.cardLinkDidCloseWithSdkScreens"),
+            object: nil,
+            queue: .main
+        ) { [weak instance] _ in
+            Task { @MainActor in
+                instance?.launchHandler.handleClosedWithSdkScreens()
+            }
+        }
+
+        if let previousObserver = environmentWasSetObserver {
+            NotificationCenter.default.removeObserver(previousObserver)
+        }
+        environmentWasSetObserver = NotificationCenter.default.addObserver(
+            forName: Notification.Name("de.ihreapotheken.sdk.flutter.sdkEnvironmentWasSet"),
+            object: nil,
+            queue: .main
+        ) { [weak instance] _ in
+            Task { @MainActor in
+                instance?.launchHandler.handleEnvironmentSetByInitialize()
+            }
+        }
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -48,7 +97,9 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
             result(value)
 
         case "getLogFilePath":
-            result(CardLink.logsPath)
+            // The SDK returns a file URL of an exported log copy, or "" when exporting fails.
+            let logsPath = CardLink.logsPath
+            result(logsPath.isEmpty ? nil : (URL(string: logsPath)?.path ?? logsPath))
 
         case "getSavedCards":
             guard let args = call.arguments as? [String: Any] else {
@@ -82,10 +133,24 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
                 }
             }
 
-        case "finish":
-            CardLink.finish {
-                result(nil)
+        case "setHostAppLogFilePath":
+            guard let path = (call.arguments as? [String: Any])?["path"] as? String else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "path is required", details: nil))
+                return
             }
+            IASDK.configuration.hostAppLogFileURL = path.isEmpty ? nil : URL(fileURLWithPath: path)
+            result(nil)
+
+        case "setMocks":
+            guard let args = call.arguments as? [String: Any] else {
+                result(FlutterError(code: "INVALID_ARGUMENTS", message: "Invalid arguments received", details: nil))
+                return
+            }
+            CardLink.setMocks(CardLinkMocks.fromFlutter(args))
+            result(nil)
+
+        case "finish":
+            launchHandler.finish(result: result)
 
         default:
             result(FlutterMethodNotImplemented)
