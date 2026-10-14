@@ -4,9 +4,13 @@ import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/e2e/e2e_config.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/e2e/e2e_harness.dart';
+import 'package:appsdk_v2_flutter_plugin_example/src/file_utils.dart';
+import 'package:appsdk_v2_flutter_plugin_example/src/testing/event_log.dart';
+import 'package:appsdk_v2_flutter_plugin_example/src/testing/test_settings.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/views/cardlink_view.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/views/home_view.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/views/components_view.dart';
+import 'package:appsdk_v2_flutter_plugin_example/src/views/events_view.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/views/screens_view.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/views/services_view.dart';
 import 'package:flutter/material.dart';
@@ -35,26 +39,54 @@ class _ExampleAppState extends State<ExampleApp> {
     (label: 'Services', icon: Icons.category),
     (label: 'Screens', icon: Icons.screenshot),
     (label: 'Components', icon: Icons.widgets),
+    (label: 'Events', icon: Icons.receipt_long),
   ];
 
   Future<void> _initializeSdk() async {
     if (_isInitialized) return;
 
+    final log = ExampleEventLog.instance;
+    final settings = ExampleTestSettings.instance;
+
     IaSdk.instance.onSdkWillNavigateToTarget = (navigationTarget) async {
-      debugPrint('Host app: SDK wants to navigate to: $navigationTarget');
       // The E2E harness has no host destinations to navigate to — let the SDK
       // handle every target internally so the flows match the native demos.
-      return !E2EConfig.enabled;
+      final isHandledByHost = !E2EConfig.enabled && settings.handlesNavigation;
+      log.add('Navigation', '${navigationTarget.name}${isHandledByHost ? ', handled by the host' : ''}');
+      return !isHandledByHost;
     };
 
-    IaSdk.instance.onApofinderDidChangePharmacy = ({
-      required pharmacyId,
-      required isFromPrerequisites,
-    }) {
-      debugPrint(
-        'Host app: Apofinder changed pharmacy to $pharmacyId (fromPrerequisites: $isFromPrerequisites)',
-      );
+    IaSdk.instance.onApofinderDidChangePharmacy =
+        ({
+          required pharmacyId,
+          required isFromPrerequisites,
+        }) {
+          log.add('Apofinder', 'Pharmacy $pharmacyId selected (from prerequisites: $isFromPrerequisites)');
+        };
+
+    IaSdk.instance.onSdkBackAction = () async {
+      final closes = !settings.blocksBackAction;
+      log.add('Back action', closes ? 'Screen closes' : 'Screen stays open');
+      return closes;
     };
+
+    IaSdk.instance.initializationStateListener.stream.listen(
+      (state) => log.add('Initialization', state.name),
+    );
+
+    IaSdk.instance.prerequisitesResultListener.stream.listen(
+      (result) => log.add(
+        'Prerequisites',
+        'cancelled: ${result.isCancelled}, onboarding: ${result.onboarding?.name}, '
+            'legal: ${result.legal?.name}, pharmacy: ${result.pharmacyId}',
+      ),
+    );
+
+    IaSdk.instance.analyticsEventListener.stream.listen(
+      (event) => log.add('Analytics', '${event.type} ${event.parameters}'),
+    );
+
+    ExampleAppConfig.instance.hostAppLogFilePath = await FileUtils.createDemoCoreAppLogFile();
 
     await IaSdk.instance.register(
       modules: [
@@ -71,43 +103,63 @@ class _ExampleAppState extends State<ExampleApp> {
     );
 
     IaSdk.instance.ordering.orderingDidFinishOrderListener.stream.listen(
-      (order) {
-        debugPrint(
-          'Host app: Order completed! Order Code: ${order.orderCode}, client order ID: ${order.clientOrderIDs}',
-        );
-      },
+      (order) => log.add(
+        'Order',
+        'Completed, order codes: ${order.orderCodes}, client order IDs: ${order.clientOrderIDs}',
+      ),
     );
 
     IaSdk.instance.ordering.orderingDidUpdateCartListener.stream.listen(
-      (cart) {
-        debugPrint(
-          'Host app: Cart updated - ${cart.totalAmountInCart} items, ${cart.clientOrderIDs.length} orders',
-        );
-      },
-    );
-
-    IaSdk.instance.cardLink.consentEventListener.stream.listen(
-      (event) => debugPrint('Host app: CardLink consent event: $event'),
-    );
-
-    IaSdk.instance.cardLink.sessionCreatedListener.stream.listen(
-      (session) => debugPrint(
-        'Host app: CardLink session created - data: ${session.data}',
+      (cart) => log.add(
+        'Cart',
+        '${cart.totalAmountInCart} items (products: ${cart.totalProducts}, prescriptions: ${cart.totalPrescriptions}), '
+            'products: ${cart.products?.map((product) => '${product.pzn} x${product.amount}').join(', ')}',
       ),
     );
 
-    IaSdk.instance.cardLink.prescriptionsRedeemedListener.stream.listen(
-      (prescriptions) => debugPrint(
-        'Host app: CardLink prescriptions redeemed: $prescriptions',
-      ),
+    IaSdk.instance.prescription.onPrescriptionPhotoScanned = (imageData) async {
+      final decision = settings.scanDecision;
+      log.add('Prescription', 'Photo scanned (${imageData.length} bytes), answer: ${decision.name}');
+      return decision.sdkDecision;
+    };
+
+    IaSdk.instance.prescription.onEPrescriptionScanned = (scan) async {
+      final decision = settings.scanDecision;
+      log.add('Prescription', 'E-prescription scanned (${scan.urls.length} prescriptions), answer: ${decision.name}');
+      return decision.sdkDecision;
+    };
+
+    IaSdk.instance.prescription.scannerCameraErrorListener.stream.listen(
+      (message) => log.add('Scanner camera', message),
     );
 
-    IaSdk.instance.cardLink.eventListener.stream.listen(
-      (event) => debugPrint('Host app: CardLink event: $event'),
+    final cardLink = IaSdk.instance.cardLink;
+    cardLink.consentEventListener.stream.listen(
+      (event) => log.add('CardLink', 'Consent ${event.name}'),
     );
-
-    IaSdk.instance.cardLink.analyticsEventListener.stream.listen(
-      (event) => debugPrint('Host app: CardLink analytics event: $event'),
+    cardLink.consentPhoneNumberListener.stream.listen(
+      (phoneNumber) => log.add('CardLink', 'Consent phone number $phoneNumber'),
+    );
+    cardLink.sessionCreatedListener.stream.listen(
+      (session) => log.add('CardLink', 'Session created: ${session.data}'),
+    );
+    cardLink.prescriptionsRedeemedListener.stream.listen(
+      (prescriptions) => log.add('CardLink', 'Prescriptions redeemed: $prescriptions'),
+    );
+    cardLink.eventListener.stream.listen(
+      (event) => log.add('CardLink', 'Event ${event.name}'),
+    );
+    cardLink.savedCardsListener.stream.listen(
+      (cards) => log.add('CardLink', 'Saved cards: ${cards.map((card) => card.name).join(', ')}'),
+    );
+    cardLink.initializationErrorListener.stream.listen(
+      (message) => log.add('CardLink', 'Failed to initialize: ${message ?? 'no description'}'),
+    );
+    cardLink.resultListener.stream.listen(
+      (result) => log.add('CardLink', 'Result: $result'),
+    );
+    cardLink.analyticsEventListener.stream.listen(
+      (event) => log.add('CardLink', 'Analytics: $event'),
     );
 
     if (E2EConfig.enabled && E2EConfig.pharmacyId.isNotEmpty) {
@@ -208,20 +260,19 @@ class _ExampleAppState extends State<ExampleApp> {
                       ServicesView(),
                       ScreensView(),
                       ComponentsView(),
+                      EventsView(),
                     ],
                   ),
                 ),
                 DecoratedBox(
-                  decoration:
-                      BoxDecoration(border: Border(top: BorderSide())),
+                  decoration: BoxDecoration(border: Border(top: BorderSide())),
                   child: Padding(
                     padding: EdgeInsets.only(
                       bottom: MediaQuery.of(context).padding.bottom + 16,
                     ),
                     child: Row(
                       children: [
-                        for (final (index, item)
-                            in _navigationItems.indexed)
+                        for (final (index, item) in _navigationItems.indexed)
                           Expanded(
                             child: _NavigationButton(
                               label: item.label,
