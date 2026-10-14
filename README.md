@@ -34,6 +34,8 @@ The library is supported on both of the major mobile operating systems, with con
 - Target SDK Version: `36`
 - Kotlin `2.1.0`
 - Gradle `8.12.3`
+- The inline components (`IaCartButton`, `IaProductGrid`) need the app's activity to be a `ComponentActivity`, such as
+  `FlutterFragmentActivity`.
 
 ### iOS
 
@@ -168,7 +170,8 @@ dependencies:
 ```
 
 After implementing the modules with the `pubspec.yaml` file, 
-it's public API declaration object needs to be instantiated, after which it can be forwarded to the `register` method:
+it's public API declaration object needs to be instantiated, after which it can be forwarded to the `register` method.
+Register all modules in one call, before `initialize`: the Android SDK only starts the modules registered before it initializes.
 
 ```dart
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
