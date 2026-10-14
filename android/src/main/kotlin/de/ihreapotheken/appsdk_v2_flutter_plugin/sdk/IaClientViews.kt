@@ -1,6 +1,7 @@
 
 import android.content.Context
 import android.view.View
+import de.ihreapotheken.appsdk_v2_flutter_plugin.sdk.IaClientCallbacks
 import de.ihreapotheken.sdk.integrations.api.view.IaScreen
 import de.ihreapotheken.sdk.integrations.api.view.IaSdkView
 import de.ihreapotheken.sdk.integrations.api.view.SdkEntryPoint
@@ -12,6 +13,7 @@ internal class IaClientNativeView(
     context: Context,
     id: Int,
     creationParams: Map<*, *>?,
+    callbacks: IaClientCallbacks,
 ) : PlatformView {
     private var nativeView: View
 
@@ -29,12 +31,15 @@ internal class IaClientNativeView(
             IaScreen.PharmacyScreen::class.simpleName -> IaScreen.PharmacyScreen
             IaScreen.PrerequisiteFlow::class.simpleName -> IaScreen.PrerequisiteFlow
             IaScreen.TransferPrescriptionsScreen::class.simpleName -> IaScreen.TransferPrescriptionsScreen
+            IaScreen.ApofinderScreen::class.simpleName -> IaScreen.ApofinderScreen
+            IaScreen.RedeemPrescription::class.simpleName -> IaScreen.RedeemPrescription
             else -> throw Exception("Unknown view ID: $viewId")
         }
         
         nativeView = IaSdkView.createView(
             context,
             entryPoint,
+            onNavigateToTarget = { target -> callbacks.handleNavigationTarget(target) },
         )
     }
 
@@ -45,9 +50,11 @@ internal class IaClientNativeView(
     override fun dispose() {}
 }
 
-internal class IaClientFlutterViewFactory : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+internal class IaClientFlutterViewFactory(
+    private val callbacks: IaClientCallbacks,
+) : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
     override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
         val creationParams = args as Map<*, *>?
-        return IaClientNativeView(context, viewId, creationParams)
+        return IaClientNativeView(context, viewId, creationParams, callbacks)
     }
 }
