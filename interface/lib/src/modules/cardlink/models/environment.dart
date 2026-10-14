@@ -3,7 +3,10 @@ part of '_models.dart';
 /// CardLink SDK environment configuration.
 ///
 enum IaCardLinkEnvironment {
-  /// Debug/development environment.
+  /// Non-production environment.
+  ///
+  /// On iOS, launching CardLink with it switches the whole SDK to its staging environment, and
+  /// `getEnvironment` reports both the development and the staging environment as [debug].
   ///
   debug,
 
