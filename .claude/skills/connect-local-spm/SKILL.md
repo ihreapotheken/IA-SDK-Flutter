@@ -65,7 +65,7 @@ Compile errors in the SDK or plugin sources are the user's to fix unless they as
 
 - **Quick check:** edit SDK code in `IA-SDK-Dev-iOS`, then run `cd example && flutter run` (or `flutter build ios --debug --simulator`). Only the changed SDK targets recompile.
 - **Breakpoints in SDK code:** open `example/ios/Runner.xcworkspace` in Xcode. The SDK appears under *Package Dependencies → IASDK* as editable local sources. Set breakpoints there and run the `Runner` scheme. Run `flutter build ios --debug` (or `flutter pub get`) once first, so the generated Flutter files exist.
-- **Real device:** use `flutter run -d <device id>`, or Xcode with a signing team set for `Runner`. You need a device for CardLink/NFC. The SPM setup is the same as for the simulator; only signing is extra. The simulator build is the verified path; a device build hasn't been tested yet.
+- **Real device:** use `flutter run -d <device id>`, or Xcode with a signing team set for `Runner`. You need a device for CardLink/NFC. The SPM setup is the same as for the simulator; only signing is extra. Both simulator and device builds were tested on 2026-10-14.
 
 ## Disconnect
 
