@@ -1,6 +1,3 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="de.ihreapotheken.appsdk_v2_flutter_plugin">
-    <application>
-        <activity android:name="de.ihreapotheken.appsdk_v2_flutter_plugin.sdk.IaClientComponentActivity" />
-    </application>
 </manifest>
