@@ -98,12 +98,6 @@ class _E2EHarnessState extends State<E2EHarness> {
   }
 
   @override
-  void dispose() {
-    _semanticsHandle?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final selectedTab = _tabs[_selectedIndex];
 
@@ -132,6 +126,12 @@ class _E2EHarnessState extends State<E2EHarness> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _semanticsHandle?.dispose();
+    super.dispose();
   }
 }
 
