@@ -106,6 +106,8 @@ Native SDK 2.9.0 on both platforms.
 - CardLink on iOS: the configured `IaSdkConfigurationCardLink.phoneNumber` replaced the number of a picked saved
   card; `finish` right after `launch` reported `willExit` for a flow that still opened; a launch without a screen to
   show on kept the launch colors.
+- Android: the prerequisite screens the SDK opens itself drew behind the navigation bar, and, in apps without a theme
+  of their own such as the Flutter template, behind the status bar.
 
 ### Changed
 
