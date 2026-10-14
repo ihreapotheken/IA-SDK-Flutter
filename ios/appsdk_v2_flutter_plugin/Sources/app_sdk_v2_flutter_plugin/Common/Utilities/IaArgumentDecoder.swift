@@ -19,7 +19,11 @@ class IaArgumentDecoder {
             throw IaArgumentError.invalidInputArguments
         }
 
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: dictionary) else {
+        // JSONSerialization raises an Objective-C exception, which `try` can't catch, for values JSON can't hold,
+        // such as NaN or infinite numbers.
+        guard JSONSerialization.isValidJSONObject(dictionary),
+              let jsonData = try? JSONSerialization.data(withJSONObject: dictionary)
+        else {
             throw IaArgumentError.jsonSerializationFailed
         }
 

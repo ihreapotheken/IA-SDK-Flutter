@@ -31,7 +31,11 @@ final class IASDKComponentsViewFactory: NSObject, FlutterPlatformViewFactory {
 
         switch identifier {
         case .cartButton:
-            return IASDKComponentPlatformView(rootView: AnyView(IACartButton())) { rootView in
+            let channel = componentsChannel
+            let onTap: EmptyCallback? = params["hasTapHandler"] as? Bool == true
+                ? { channel.invokeMethod("componentTapped", arguments: ["viewId": viewId]) }
+                : nil
+            return IASDKComponentPlatformView(rootView: AnyView(IACartButton(onTap: onTap))) { rootView in
                 SizeReportingHostingController(viewId: viewId, channel: self.componentsChannel, rootView: rootView)
             }
 
@@ -63,6 +67,8 @@ final class IASDKComponentsViewFactory: NSObject, FlutterPlatformViewFactory {
             return .productRecommendations(pzn: pzn ?? "")
         case "customersAlsoBought":
             return .customersAlsoBought(pzn: pzn ?? "")
+        case "custom":
+            return .custom(title: params["title"] as? String ?? "", pzns: params["pzns"] as? [String] ?? [])
         default:
             return .currentOffers(pznToExclude: pzn)
         }
@@ -106,6 +112,8 @@ final class SizeReportingHostingController<Content: View>: UIHostingController<C
     private let viewId: Int64
     private let channel: FlutterMethodChannel
     private var lastReported: CGSize = .zero
+    private let maximumContentHeight: CGFloat = 100_000
+    private var lastMeasuredWidth: CGFloat = 0
 
     init(viewId: Int64, channel: FlutterMethodChannel, rootView: Content) {
         self.viewId = viewId
@@ -133,10 +141,19 @@ final class SizeReportingHostingController<Content: View>: UIHostingController<C
         let width = view.bounds.width
         guard width > 0 else { return }
         let target = CGSize(width: width, height: .greatestFiniteMagnitude)
-        let size = sizeThatFits(in: target)
-        guard size.width > 0, size.height > 0 else { return }
-        guard size != lastReported else { return }
+        let fittingSize = sizeThatFits(in: target)
+        // The SDK's loading and error views fill the proposed height, which isn't a content height. The last size
+        // is kept until the content shows.
+        guard fittingSize.height < maximumContentHeight else { return }
+        // A height of 0 is reported too, so an emptied component collapses in Flutter. Empty SwiftUI content
+        // measures 0×0, so it keeps the layout width.
+        let size = fittingSize.height == 0 ? CGSize(width: width, height: 0) : fittingSize
+        guard size.width > 0, size.height >= 0 else { return }
+        // Also reported again for a new layout width: Flutter widens the view when its available width changes,
+        // and waits for the size measured against it.
+        guard size != lastReported || width != lastMeasuredWidth else { return }
         lastReported = size
+        lastMeasuredWidth = width
 
         channel.invokeMethod(
             "updateComponentSize",
