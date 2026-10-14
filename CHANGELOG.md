@@ -27,7 +27,8 @@ Native SDK 2.9.0 on both platforms.
   `illustrationColor`, and the streams `consentPhoneNumberListener`, `savedCardsListener`,
   `initializationErrorListener` and `resultListener`.
 - Navigation targets reported on Android: `start`, `search`, `redeemPrescription`, `thankYouCompleted`.
-- Example app: an Events tab with all callbacks and switchable host answers, and buttons for the new APIs.
+- Example app: an Events tab with all callbacks and switchable host answers, and buttons for the new APIs. Buttons
+  for single-platform APIs only show on their platform.
 
 ### Fixed
 
@@ -106,6 +107,11 @@ Native SDK 2.9.0 on both platforms.
 - CardLink on iOS: the configured `IaSdkConfigurationCardLink.phoneNumber` replaced the number of a picked saved
   card; `finish` right after `launch` reported `willExit` for a flow that still opened; a launch without a screen to
   show on kept the launch colors.
+- Android: the prerequisite screens the SDK opens itself drew behind the navigation bar. In apps without a theme of
+  their own, such as the Flutter template, they also drew behind the status bar, and the debug viewer showed an extra
+  bar with the app's name.
+- Android: `orderingDidUpdateCartListener` repeated an update when the SDK loaded an unchanged cart again, for
+  example twice after a prescription transfer.
 
 ### Changed
 

@@ -4,9 +4,17 @@ import IaClientFlutterViewFactory
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.view.Window
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.MutableLiveData
 import de.ihreapotheken.sdk.integrations.api.IaSdk
+import de.ihreapotheken.sdk.integrations.api.view.IaPrerequisiteActivity
 import de.ihreapotheken.sdk.integrations.api.view.IaScreen
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -57,6 +65,14 @@ class IaClientBindings(
             }
         }
 
+        override fun onActivityPreCreated(activity: Activity, savedInstanceState: Bundle?) {
+            if (usesHostTheme(activity)) activity.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        }
+
+        override fun onActivityPostCreated(activity: Activity, savedInstanceState: Bundle?) {
+            if (activity is IaPrerequisiteActivity) padForNavigationBarAndKeyboard(activity)
+        }
+
         override fun onActivityDestroyed(activity: Activity) {
             openSdkScreens.remove(activity)
         }
@@ -66,6 +82,41 @@ class IaClientBindings(
         override fun onActivityPaused(activity: Activity) = Unit
         override fun onActivityStopped(activity: Activity) = Unit
         override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+    }
+
+    /**
+     * Whether [activity] is an SDK activity that declares no theme, so it gets the host app's. Without an app theme
+     * that's the platform default one, whose action bar shows the app's name above the debug viewer. Its layout also
+     * passes window insets on to the content only when they change, so the prerequisites screens, which start reading
+     * insets later, would get none and draw behind the status bar. The SDK screens have their own top bars.
+     */
+    private fun usesHostTheme(activity: Activity): Boolean {
+        if (!activity.javaClass.name.startsWith("de.ihreapotheken.sdk.")) return false
+        val packageManager = activity.packageManager
+        val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.getActivityInfo(activity.componentName, PackageManager.ComponentInfoFlags.of(0))
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.getActivityInfo(activity.componentName, 0)
+        }
+        return info.theme == 0
+    }
+
+    /**
+     * The SDK's prerequisites activity draws edge to edge, but unlike `IaSdkActivity` it doesn't pad its screens for
+     * the navigation bar and the keyboard, so they'd draw behind them. This pads them like `IaSdkActivity` does, and
+     * consumes those insets so the screens don't pad again.
+     */
+    private fun padForNavigationBarAndKeyboard(activity: Activity) {
+        val content = activity.findViewById<View>(android.R.id.content)
+        ViewCompat.setOnApplyWindowInsetsListener(content) { view, insets ->
+            val padding = insets.getInsets(WindowInsetsCompat.Type.navigationBars() or WindowInsetsCompat.Type.ime())
+            view.setPadding(padding.left, 0, padding.right, padding.bottom)
+            WindowInsetsCompat.Builder(insets)
+                .setInsets(WindowInsetsCompat.Type.navigationBars(), Insets.NONE)
+                .setInsets(WindowInsetsCompat.Type.ime(), Insets.NONE)
+                .build()
+        }
     }
 
     fun finishOpenSdkScreens() {

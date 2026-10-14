@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:appsdk_v2_flutter_plugin_example/src/testing/event_log.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/testing/test_settings.dart';
 import 'package:flutter/material.dart';
@@ -30,20 +32,22 @@ class EventsView extends StatelessWidget {
               value: settings.handlesNavigation,
               onChanged: (value) => settings.handlesNavigation = value,
             ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Block the back action (Android)'),
-              subtitle: const Text('SDK screens stay open on system back'),
-              value: settings.blocksBackAction,
-              onChanged: (value) => settings.blocksBackAction = value,
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Log SDK messages (iOS)'),
-              subtitle: const Text('Adds the SDK\'s own log messages below'),
-              value: settings.logsSdkMessages,
-              onChanged: (value) => settings.logsSdkMessages = value,
-            ),
+            if (Platform.isAndroid)
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Block the back action (Android)'),
+                subtitle: const Text('SDK screens stay open on system back'),
+                value: settings.blocksBackAction,
+                onChanged: (value) => settings.blocksBackAction = value,
+              ),
+            if (Platform.isIOS)
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Log SDK messages (iOS)'),
+                subtitle: const Text('Adds the SDK\'s own log messages below'),
+                value: settings.logsSdkMessages,
+                onChanged: (value) => settings.logsSdkMessages = value,
+              ),
             const SizedBox(height: 8),
             Text('Prescription scan answer', style: Theme.of(context).textTheme.bodySmall),
             const SizedBox(height: 4),
