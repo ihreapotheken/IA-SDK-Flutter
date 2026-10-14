@@ -13,5 +13,9 @@ Future<void> _consentEventHandler(dynamic args) async {
     );
   }
   final consentEvent = IaCardLinkConsentEvent.fromRawValue(eventType);
+  final phoneNumber = args['phoneNumber'];
+  if (phoneNumber is String && phoneNumber.isNotEmpty) {
+    IaModuleCardLink._consentPhoneNumberListener.add(phoneNumber);
+  }
   IaModuleCardLink._consentEventListener.add(consentEvent);
 }

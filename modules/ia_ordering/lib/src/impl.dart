@@ -6,6 +6,7 @@ import 'package:ia_interface/ia_interface.dart';
 part 'methods.dart';
 part 'views.dart';
 part 'models/request/transfer_prescriptions.dart';
+part 'models/request/get_cart_details.dart';
 part 'callbacks/_callbacks.dart';
 part 'callbacks/ordering_did_finish_order.dart';
 part 'callbacks/ordering_did_update_cart.dart';
@@ -19,12 +20,16 @@ class IaModuleOrdering extends IaBaseOrdering {
     Iterable<({Uint8List data, IaPrescriptionInsuranceType insuranceType})>? pdfs,
     Iterable<String>? codes,
     String? orderId,
+    IaTransferPrescriptionsFinishAction finishAction = IaTransferPrescriptionsFinishAction.openCart,
+    bool showActivityIndicator = true,
   }) async {
     final arguments = _RequestModelTransferPrescriptions(
       images: images,
       pdfs: pdfs,
       codes: codes,
       orderId: orderId,
+      finishAction: finishAction,
+      showActivityIndicator: showActivityIndicator,
     );
     return await _Methods.transferPrescriptions.invoke<void>(
       arguments,
@@ -37,10 +42,54 @@ class IaModuleOrdering extends IaBaseOrdering {
   }
 
   @override
-  Future<Map<String, dynamic>?> getCartDetails() async {
-    final result = await _Methods.getCartDetails.invoke<Map?>(null);
+  Future<Map<String, dynamic>?> getCartDetails({
+    bool allowCached = true,
+    bool shouldEmitCartUpdate = false,
+  }) async {
+    final arguments = _RequestModelGetCartDetails(
+      allowCached: allowCached,
+      shouldEmitCartUpdate: shouldEmitCartUpdate,
+    );
+    final result = await _Methods.getCartDetails.invoke<Map?>(arguments);
     if (result == null) return null;
-    return Map<String, dynamic>.from(result);
+    return _stringKeyed(result) as Map<String, dynamic>;
+  }
+
+  /// Platform channels deliver nested maps as `Map<Object?, Object?>`.
+  ///
+  static Object? _stringKeyed(Object? value) {
+    if (value is Map) {
+      return value.map((key, nested) => MapEntry('$key', _stringKeyed(nested)));
+    }
+    if (value is List) {
+      return value.map(_stringKeyed).toList();
+    }
+    return value;
+  }
+
+  @override
+  Future<IaModelOrderingCartState?> getCartState({
+    bool allowCached = true,
+    bool shouldEmitCartUpdate = false,
+  }) async {
+    final details = await getCartDetails(
+      allowCached: allowCached,
+      shouldEmitCartUpdate: shouldEmitCartUpdate,
+    );
+    if (details == null) return null;
+    final products = details['products'];
+    return IaModelOrderingCartState(
+      totalAmountInCart: details['totalAmountInCart'] as int,
+      clientOrderIDs: const [],
+      products: products is Iterable
+          ? products.whereType<Map>().map((product) {
+              return IaModelOrderingCartProduct(
+                pzn: product['pzn'] as String,
+                amount: product['amount'] as int,
+              );
+            }).toList()
+          : const [],
+    );
   }
 
   @override
@@ -68,7 +117,12 @@ class IaModuleOrdering extends IaBaseOrdering {
   }
 
   @override
-  final callbacks = IaBaseCallbacks(
+  IaBaseCallbacks get callbacks {
+    return _callbacks;
+  }
+
+  // Shared by all instances, like the streams, so creating more instances doesn't add more subscribers.
+  static final _callbacks = IaBaseCallbacks(
     handlers: _Callbacks.values,
   );
 }
