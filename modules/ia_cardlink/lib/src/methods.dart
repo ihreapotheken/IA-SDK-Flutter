@@ -7,6 +7,10 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
   getLogFilePath,
   getSavedCards,
   deleteCard,
+  updateCard,
+  reorderSavedCards,
+  setMocks,
+  setHostAppLogFilePath,
   deleteAllCards,
   deleteAllUserRelatedData,
   finish,
@@ -37,6 +41,14 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
         return _RequestModelLaunch;
       case _Methods.getSavedCards:
         return _RequestModelGetSavedCards;
+      case _Methods.updateCard:
+        return _RequestModelUpdateCard;
+      case _Methods.reorderSavedCards:
+        return _RequestModelReorderSavedCards;
+      case _Methods.setMocks:
+        return _RequestModelSetMocks;
+      case _Methods.setHostAppLogFilePath:
+        return _RequestModelSetHostAppLogFilePath;
       case _Methods.deleteCard:
         return _RequestModelDeleteCard;
       default:

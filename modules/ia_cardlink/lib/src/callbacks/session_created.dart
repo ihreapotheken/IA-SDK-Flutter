@@ -7,11 +7,12 @@ Future<void> _sessionCreatedHandler(dynamic args) async {
     );
   }
   final sessionData = args['session'];
-  if (sessionData is! Map<String, dynamic>) {
+  // Platform channels deliver maps as Map<Object?, Object?>, so convert instead of type-checking for Map<String, dynamic>.
+  if (sessionData is! Map) {
     throw Exception(
       'cardLinkSessionCreated: Missing or incorrect type session: ${sessionData.runtimeType} $sessionData.',
     );
   }
-  final session = IaCardLinkSession.fromMap(sessionData);
+  final session = IaCardLinkSession.fromMap(Map<String, dynamic>.from(sessionData));
   IaModuleCardLink._sessionCreatedListener.add(session);
 }
