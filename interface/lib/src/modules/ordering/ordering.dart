@@ -98,6 +98,8 @@ abstract class IaBaseOrdering extends IaBase {
 
   /// Notifier object implemented for informing the client integration of cart item changes.
   ///
+  /// On Android, where updates only carry the counts, an update with the same counts as the previous one isn't sent.
+  ///
   /// Usage:
   ///
   /// ```dart

@@ -125,7 +125,16 @@ class IaClientCallbacks(
         sendCartUpdate(totalProducts = 0, totalPrescription = 0, totalItems = 0)
     }
 
+    /**
+     * Counts of the last cart update sent. The SDK reports every time it loads the cart, so a prescription transfer
+     * that loads it twice reported the same cart twice.
+     */
+    private var lastCartCounts: Triple<Int, Int, Int>? = null
+
     private fun sendCartUpdate(totalProducts: Int, totalPrescription: Int, totalItems: Int) {
+        val counts = Triple(totalProducts, totalPrescription, totalItems)
+        if (counts == lastCartCounts) return
+        lastCartCounts = counts
         val arguments = mapOf(
             "totalAmountInCart" to totalItems,
             "clientOrderIDs" to emptyList<String>(),

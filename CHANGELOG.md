@@ -110,6 +110,8 @@ Native SDK 2.9.0 on both platforms.
 - Android: the prerequisite screens the SDK opens itself drew behind the navigation bar. In apps without a theme of
   their own, such as the Flutter template, they also drew behind the status bar, and the debug viewer showed an extra
   bar with the app's name.
+- Android: `orderingDidUpdateCartListener` repeated an update when the SDK loaded an unchanged cart again, for
+  example twice after a prescription transfer.
 
 ### Changed
 
