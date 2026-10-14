@@ -359,18 +359,15 @@ internal class IaClientMethods(
                 }
                 val shouldFetchThemeFromRemote = args["shouldFetchThemeFromRemote"] == true
                 val initializationOptions = args["initialization"] as? Map<*, *>
-                // Dart sends channelId inside the initialization options, not at the top level.
                 val channelId = (initializationOptions?.get("channelId") as? Number)?.toInt()
                 val shouldShowIndicator = initializationOptions?.get("shouldShowIndicator") == true
                 val prerequisites = initializationOptions?.get("prerequisites") as? Map<*, *>
                 val shouldRunLegal = prerequisites?.get("runLegalIfNeeded") == true
                 val shouldRunOnboarding = prerequisites?.get("runOnboardingIfNeeded") == true
-                // Absent value keeps the SDK default (Apofinder runs).
                 val shouldRunApofinder = prerequisites?.get("runApofinderIfNeeded") != false
                 val uiConfiguration = parseUIConfiguration(args["uiConfiguration"] as? Map<*, *>)
                 val footer = args["footer"] as? Map<*, *>
                 val shouldShowDataProcessing = footer?.get("shouldShowDataProcessing") == true
-                // Absent values keep the SDK defaults.
                 val isPickupLockerAndCourierShippingEnabled = args["isPickupLockerAndCourierShippingEnabled"] as? Boolean ?: false
                 val isAnalyticsEnabled = args["isAnalyticsEnabled"] as? Boolean ?: false
                 val isHapticFeedbackEnabled = args["isHapticFeedbackEnabled"] as? Boolean ?: true
@@ -380,7 +377,6 @@ internal class IaClientMethods(
                     IaSdk.setQaConfiguration(parseQaConfiguration(qaConfiguration))
                 }
                 val isCardLinkSaveCardEnabled = (args["cardLink"] as? Map<*, *>)?.get("isSaveCardEnabled") as? Boolean ?: false
-                // Footer "Datenverarbeitung" taps are reported like the iOS hostAppPrivacyPolicy navigation target.
                 bindings.sdkModule.setShowDataProcessingClickListener(bindings.callbacks)
                 // A set imprint listener replaces the SDK's own imprint page, so it's only set when the host handles it.
                 if (footer?.get("isImprintHandledByHostApp") == true) {
@@ -616,7 +612,6 @@ internal class IaClientMethods(
                     bindings.callbacks.handleBackAction()
                 }
                 if (entryPoint == IaScreen.PrerequisiteFlow) {
-                    // The dedicated prerequisites activity reports whether the flow completed or was cancelled.
                     val activity = activityContext as? Activity
                     if (activity == null) {
                         result.error("NO_ACTIVITY", "The prerequisite flow needs an activity.", null)
@@ -627,7 +622,6 @@ internal class IaClientMethods(
                         REQUEST_CODE_PREREQUISITES,
                     )
                 } else if (entryPoint == IaScreen.ApofinderScreen) {
-                    // Report the selected pharmacy, like the iOS apofinderDidChangePharmacy delegate call.
                     IaSdkActivity.start(
                         context = activityContext ?: bindings.applicationContext,
                         view = IaScreen.ApofinderScreen,
@@ -713,8 +707,6 @@ internal class IaClientMethods(
                         codes = prescriptionCodes as? ArrayList<String>,
                         orderId = orderId,
                     ),
-                    // OVERLAY shows a confirmation bottom sheet, every other mode opens the cart.
-                    // Android has no counterpart of the iOS noAction finish action.
                     presentationMode = if (data["finishAction"] == "showBottomSheet") {
                         PresentationMode.OVERLAY
                     } else {
@@ -955,8 +947,6 @@ internal class IaClientMethods(
         val city = map["city"] as? String ?: return null
         val phoneNumber = map["phoneNumberWithoutCountryCode"] as? String
         return IaUserAddress(
-            // The AppSDK maps missing address values to empty strings, so an empty
-            // salutation leaves it unset, matching a `nil` salutation on iOS.
             salutation = (map["salutation"] as? String)?.let(::normalizedSalutation) ?: "",
             firstName = firstName,
             lastName = lastName,
@@ -965,7 +955,6 @@ internal class IaClientMethods(
             zipCode = zipCode,
             city = city,
             phoneNumber = phoneNumber,
-            // The country code is only meaningful alongside a phone number, as on iOS.
             countryCode = if (phoneNumber != null) (map["phoneNumberCountryCode"] as? Number)?.toInt() else null,
             // The AppSDK labels this field "Firma, c/o, Gebäude oder Zusatzinformation",
             // the counterpart of the iOS `additionalInfo` address line.

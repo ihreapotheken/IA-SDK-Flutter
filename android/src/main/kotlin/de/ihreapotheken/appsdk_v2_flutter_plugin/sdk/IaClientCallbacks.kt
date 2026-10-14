@@ -49,8 +49,6 @@ class IaClientCallbacks(
      * @return true if the host app handled the navigation, false to let SDK handle it
      */
     suspend fun handleNavigationTarget(target: SdkNavigationTarget): Boolean {
-        // Convert navigation target to string. SdkNavigationTarget is sealed, so targets added
-        // in a new SDK version fail to compile here until they're mapped.
         val navigationTargetString: String = when (target) {
             IaScreen.CartScreen -> "cart"
             IaScreen.PharmacyScreen -> "pharmacyDetails"
@@ -60,9 +58,6 @@ class IaClientCallbacks(
             IaScreen.SearchScreen -> "search"
             IaScreen.RedeemPrescription -> "redeemPrescription"
             IaScreen.ThankYouScreenCompleted -> "thankYouCompleted"
-            // Note: iOS reports imprint and hostAppPrivacyPolicy as navigation targets,
-            // the Android SDK reports footer taps through dedicated click listeners instead
-            // (onImpressumClick, onShowDataProcessingClick).
         }
 
         val handledByHost = suspendCoroutine { continuation ->
@@ -111,7 +106,6 @@ class IaClientCallbacks(
         // Note: The iOS version receives cartState with totalAmountInCart and clientOrderIDs
         // The Android SDK provides totalProducts, totalPrescription, and totalItems
         // Using totalItems as totalAmountInCart for now
-        // The Android SDK doesn't report client order IDs, so the list stays empty.
         val arguments = mapOf(
             "totalAmountInCart" to totalItems,
             "clientOrderIDs" to emptyList<String>(),
@@ -355,12 +349,10 @@ class IaClientCallbacks(
                         }
 
                         override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                            // On error, let SDK handle
                             continuation.resume(RedeemPrescriptionDecision.PerformDefault)
                         }
 
                         override fun notImplemented() {
-                            // Not implemented, let SDK handle
                             continuation.resume(RedeemPrescriptionDecision.PerformDefault)
                         }
                     }

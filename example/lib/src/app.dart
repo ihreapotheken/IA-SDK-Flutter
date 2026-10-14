@@ -111,7 +111,6 @@ class _ExampleAppState extends State<ExampleApp> {
       },
     );
 
-    // Log scanned prescriptions and let the SDK add them to the cart as usual.
     IaSdk.instance.prescription.onPrescriptionPhotoScanned = (imageData) async {
       debugPrint('Host app: Prescription photo scanned (${imageData.length} bytes)');
       return IaModelPrescriptionScanDecision.performDefault;

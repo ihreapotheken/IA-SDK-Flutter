@@ -51,7 +51,6 @@ internal class IaClientComponentsViewFactory(
                 when (identifier) {
                     IaComponentIdentifier.CartButton -> IaCartButton(
                         Modifier,
-                        // With a Dart tap handler the tap is reported instead of the SDK opening the cart.
                         onClick = if (creationParams?.get("hasTapHandler") == true) {
                             { componentsChannel.invokeMethod("componentTapped", mapOf("viewId" to viewId)) }
                         } else {
