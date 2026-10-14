@@ -63,13 +63,10 @@ class IaClientBindings(
             if (name.startsWith("de.ihreapotheken.sdk.") && !name.startsWith("de.ihreapotheken.sdk.cardlink.")) {
                 openSdkScreens.add(activity)
             }
-        }
-
-        override fun onActivityPreCreated(activity: Activity, savedInstanceState: Bundle?) {
+            // Runs within the activity's super.onCreate, before the SDK sets its content. onActivityPreCreated and
+            // onActivityPostCreated would only run from API 29. The feature request has to come first, since looking
+            // up the content view for the padding installs the window decor.
             if (usesHostTheme(activity)) activity.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        }
-
-        override fun onActivityPostCreated(activity: Activity, savedInstanceState: Bundle?) {
             if (activity is IaPrerequisiteActivity) padForNavigationBarAndKeyboard(activity)
         }
 
