@@ -22,9 +22,6 @@ class IaSdkFlutter :
 
     private var activityBinding: ActivityPluginBinding? = null
 
-    /**
-     * Reports the result of the prerequisites activity launched by launchRoute.
-     */
     private val activityResultListener = PluginRegistry.ActivityResultListener { requestCode, resultCode, _ ->
         if (requestCode == IaClientMethods.REQUEST_CODE_PREREQUISITES) {
             bindings.callbacks.onPrerequisiteFlowFinished(isCancelled = resultCode != Activity.RESULT_OK)

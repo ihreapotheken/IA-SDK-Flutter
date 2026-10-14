@@ -56,12 +56,13 @@ class _ExampleAppState extends State<ExampleApp> {
       return !isHandledByHost;
     };
 
-    IaSdk.instance.onApofinderDidChangePharmacy = ({
-      required pharmacyId,
-      required isFromPrerequisites,
-    }) {
-      log.add('Apofinder', 'Pharmacy $pharmacyId selected (from prerequisites: $isFromPrerequisites)');
-    };
+    IaSdk.instance.onApofinderDidChangePharmacy =
+        ({
+          required pharmacyId,
+          required isFromPrerequisites,
+        }) {
+          log.add('Apofinder', 'Pharmacy $pharmacyId selected (from prerequisites: $isFromPrerequisites)');
+        };
 
     IaSdk.instance.onSdkBackAction = () async {
       final closes = !settings.blocksBackAction;
@@ -264,16 +265,14 @@ class _ExampleAppState extends State<ExampleApp> {
                   ),
                 ),
                 DecoratedBox(
-                  decoration:
-                      BoxDecoration(border: Border(top: BorderSide())),
+                  decoration: BoxDecoration(border: Border(top: BorderSide())),
                   child: Padding(
                     padding: EdgeInsets.only(
                       bottom: MediaQuery.of(context).padding.bottom + 16,
                     ),
                     child: Row(
                       children: [
-                        for (final (index, item)
-                            in _navigationItems.indexed)
+                        for (final (index, item) in _navigationItems.indexed)
                           Expanded(
                             child: _NavigationButton(
                               label: item.label,

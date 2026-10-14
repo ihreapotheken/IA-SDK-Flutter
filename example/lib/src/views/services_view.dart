@@ -489,8 +489,16 @@ class ServicesView extends StatelessWidget {
 
   static const _transferVariants = <({String label, IaTransferPrescriptionsFinishAction finishAction, bool showActivityIndicator})>[
     (label: 'Transfer Prescriptions, Open Cart', finishAction: IaTransferPrescriptionsFinishAction.openCart, showActivityIndicator: true),
-    (label: 'Transfer Prescriptions, Bottom Sheet', finishAction: IaTransferPrescriptionsFinishAction.showBottomSheet, showActivityIndicator: true),
-    (label: 'Transfer Prescriptions, No Action or Indicator (iOS)', finishAction: IaTransferPrescriptionsFinishAction.noAction, showActivityIndicator: false),
+    (
+      label: 'Transfer Prescriptions, Bottom Sheet',
+      finishAction: IaTransferPrescriptionsFinishAction.showBottomSheet,
+      showActivityIndicator: true,
+    ),
+    (
+      label: 'Transfer Prescriptions, No Action or Indicator (iOS)',
+      finishAction: IaTransferPrescriptionsFinishAction.noAction,
+      showActivityIndicator: false,
+    ),
   ];
 
   /// Transfers the example's mock image, PDF and e-prescription data.
@@ -557,15 +565,10 @@ class _MascotIllustrationsToggle extends StatefulWidget {
   }
 }
 
-class _MascotIllustrationsToggleState
-    extends State<_MascotIllustrationsToggle> {
+class _MascotIllustrationsToggleState extends State<_MascotIllustrationsToggle> {
   /// Seeded from the value the SDK was initialized with, so the button label
   /// starts out reflecting the SDK's actual state.
-  bool _shouldShow = ExampleAppConfig
-      .instance
-      .pluginConfig
-      .uiConfiguration
-      .shouldShowMascotIllustrations;
+  bool _shouldShow = ExampleAppConfig.instance.pluginConfig.uiConfiguration.shouldShowMascotIllustrations;
 
   Future<void> _toggle() async {
     final next = !_shouldShow;
@@ -591,9 +594,7 @@ class _MascotIllustrationsToggleState
     return ElevatedButton(
       onPressed: _toggle,
       child: Text(
-        _shouldShow
-            ? 'Hide mascot illustrations (iOS)'
-            : 'Show mascot illustrations (iOS)',
+        _shouldShow ? 'Hide mascot illustrations (iOS)' : 'Show mascot illustrations (iOS)',
       ),
     );
   }
@@ -619,8 +620,8 @@ class _SectionHeader extends StatelessWidget {
     return Text(
       title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 }

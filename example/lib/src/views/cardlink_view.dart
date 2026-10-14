@@ -56,15 +56,6 @@ class _CardLinkViewStateData extends State<CardLinkView> {
     _setupStreamListeners();
   }
 
-  @override
-  void dispose() {
-    for (final sub in _subscriptions) {
-      sub.cancel();
-    }
-    _data.dispose();
-    super.dispose();
-  }
-
   void _setupStreamListeners() {
     final cardLink = IaSdk.instance.cardLink;
 
@@ -274,6 +265,15 @@ class _CardLinkViewStateData extends State<CardLinkView> {
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    for (final sub in _subscriptions) {
+      sub.cancel();
+    }
+    _data.dispose();
+    super.dispose();
   }
 }
 

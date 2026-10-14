@@ -26,7 +26,6 @@ final class IASDKPlugin {
         }
     }
 
-    /// Reports initialization state changes to Flutter, using the same states as the Android SDK.
     private func observeInitializationState() {
         let channel = bindings.channel
         IASDK.initializationStatePublisher

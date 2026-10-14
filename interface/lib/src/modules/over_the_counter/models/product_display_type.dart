@@ -21,5 +21,5 @@ enum IaProductDisplayType {
 
   /// Your own selection of products, with a title. See `IaProductGrid.title` and `IaProductGrid.pzns`.
   ///
-  custom;
+  custom,
 }

@@ -131,17 +131,6 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
   }
 
   @override
-  void dispose() {
-    if (_platformViewId != null && widget.selfSizing) {
-      _ComponentSizeDispatcher.instance.unregister(_platformViewId!);
-    }
-    if (_platformViewId != null) {
-      _ComponentTapDispatcher.instance.unregister(_platformViewId!);
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final Widget platformView;
     if (Platform.isAndroid) {
@@ -211,6 +200,17 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    if (_platformViewId != null && widget.selfSizing) {
+      _ComponentSizeDispatcher.instance.unregister(_platformViewId!);
+    }
+    if (_platformViewId != null) {
+      _ComponentTapDispatcher.instance.unregister(_platformViewId!);
+    }
+    super.dispose();
   }
 }
 

@@ -1,7 +1,6 @@
 import Foundation
 import IACore
 
-/// Converts the SDK pharmacy model to the map sent to Flutter. Missing values are sent as `NSNull`.
 extension IACore.Pharmacy {
     var flutterMap: [String: Any] {
         [

@@ -27,10 +27,14 @@ class _RequestModelTransferPrescriptions implements IaBaseRequest {
     return {
       // The message codec only encodes lists, not other iterables such as sets or lazy maps.
       'images': images?.toList(),
-      'pdfs': pdfs?.map((pdf) => {
-        'data': pdf.data,
-        'insuranceType': pdf.insuranceType.rawValue,
-      }).toList(),
+      'pdfs': pdfs
+          ?.map(
+            (pdf) => {
+              'data': pdf.data,
+              'insuranceType': pdf.insuranceType.rawValue,
+            },
+          )
+          .toList(),
       'codes': codes?.toList(),
       'orderId': orderId,
       'finishAction': finishAction.name,

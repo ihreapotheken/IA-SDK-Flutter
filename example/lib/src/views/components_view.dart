@@ -26,13 +26,6 @@ class _ComponentsViewState extends State<ComponentsView> {
   }
 
   @override
-  void dispose() {
-    _customPznsController.dispose();
-    _recommendationPznController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return ListView(
       padding: EdgeInsets.fromLTRB(
@@ -114,6 +107,13 @@ class _ComponentsViewState extends State<ComponentsView> {
           ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _customPznsController.dispose();
+    _recommendationPznController.dispose();
+    super.dispose();
   }
 }
 

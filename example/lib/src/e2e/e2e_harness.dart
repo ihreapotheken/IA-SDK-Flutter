@@ -98,12 +98,6 @@ class _E2EHarnessState extends State<E2EHarness> {
   }
 
   @override
-  void dispose() {
-    _semanticsHandle?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final selectedTab = _tabs[_selectedIndex];
 
@@ -132,6 +126,12 @@ class _E2EHarnessState extends State<E2EHarness> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _semanticsHandle?.dispose();
+    super.dispose();
   }
 }
 
@@ -245,18 +245,14 @@ class _HarnessTabBar extends StatelessWidget {
                           Icon(
                             tab.icon,
                             size: 22,
-                            color: index == selectedIndex
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.black54,
+                            color: index == selectedIndex ? Theme.of(context).colorScheme.primary : Colors.black54,
                           ),
                           const SizedBox(height: 2),
                           Text(
                             tab.label,
                             style: TextStyle(
                               fontSize: 12,
-                              color: index == selectedIndex
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.black54,
+                              color: index == selectedIndex ? Theme.of(context).colorScheme.primary : Colors.black54,
                             ),
                           ),
                         ],
