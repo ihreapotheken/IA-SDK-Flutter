@@ -30,6 +30,12 @@ class ExampleApp extends StatefulWidget {
 
 class _ExampleAppState extends State<ExampleApp> {
   int _selectedTabIndex = 0;
+
+  /// Built on its first visit: its SDK components start the prerequisites when they're created, which on Android
+  /// happens even while the tab is hidden, so they'd open at app start.
+  bool _hasShownComponentsTab = false;
+
+  static const _componentsTabIndex = 4;
   bool _isInitialized = false;
   late Future<void> _initFuture = _initializeSdk();
 
@@ -254,13 +260,13 @@ class _ExampleAppState extends State<ExampleApp> {
                 Expanded(
                   child: IndexedStack(
                     index: _selectedTabIndex,
-                    children: const [
-                      HomeView(),
-                      CardLinkView(),
-                      ServicesView(),
-                      ScreensView(),
-                      ComponentsView(),
-                      EventsView(),
+                    children: [
+                      const HomeView(),
+                      const CardLinkView(),
+                      const ServicesView(),
+                      const ScreensView(),
+                      _hasShownComponentsTab ? const ComponentsView() : const SizedBox.shrink(),
+                      const EventsView(),
                     ],
                   ),
                 ),
@@ -281,6 +287,7 @@ class _ExampleAppState extends State<ExampleApp> {
                               onTap: () {
                                 setState(() {
                                   _selectedTabIndex = index;
+                                  if (index == _componentsTabIndex) _hasShownComponentsTab = true;
                                 });
                               },
                             ),
