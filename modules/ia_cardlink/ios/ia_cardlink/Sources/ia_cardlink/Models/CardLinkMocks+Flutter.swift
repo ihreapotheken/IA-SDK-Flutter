@@ -2,7 +2,6 @@ import Foundation
 import IACardLink
 
 extension CardLinkMocks {
-    /// Creates mocks from the Dart `IaCardLinkMocks` map, starting from the SDK defaults.
     static func fromFlutter(_ args: [String: Any]) -> CardLinkMocks {
         var mocks = CardLinkMocks.default
         mocks.isMockingEnabled = args["isMockingEnabled"] as? Bool ?? true

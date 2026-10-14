@@ -2,24 +2,19 @@ import Combine
 import IACore
 import SwiftUI
 
-/// Camera state of the prescription scanner launched from Flutter, which Dart can change while it's shown.
 @MainActor
 final class PrescriptionScannerCameraController: ObservableObject {
     static let shared = PrescriptionScannerCameraController()
 
     @Published var state = IACameraState()
 
-    /// Reports camera errors of the scanner.
     var onError: ((any Error) -> Void)?
 
-    /// Every launch starts with the camera on, the flashlight off and the preview running.
     func reset() {
         state = IACameraState()
     }
 }
 
-/// Prescription scanner whose camera state is driven by [PrescriptionScannerCameraController].
-///
 /// The SDK screen only takes the camera state as a SwiftUI binding, so this screen observes the controller
 /// and passes its state down, re-rendering the scanner whenever Dart changes it.
 @MainActor

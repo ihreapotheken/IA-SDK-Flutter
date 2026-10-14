@@ -260,10 +260,6 @@ internal class IaClientMethods(
     }
 
     companion object {
-        /**
-         * Request code of the [IaPrerequisiteActivity] launched by launchRoute, whose result
-         * is reported to Flutter by the plugin's activity result listener.
-         */
         const val REQUEST_CODE_PREREQUISITES = 7301
     }
 
@@ -272,9 +268,6 @@ internal class IaClientMethods(
      */
     private val scope = MainScope()
 
-    /**
-     * Runs a suspending AppSDK call and reports its value, or its failure, to Flutter.
-     */
     private fun respondSuspending(
         result: MethodChannel.Result,
         block: suspend () -> Any?,

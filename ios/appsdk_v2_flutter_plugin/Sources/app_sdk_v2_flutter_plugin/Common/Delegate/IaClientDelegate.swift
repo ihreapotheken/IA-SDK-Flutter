@@ -9,7 +9,6 @@ class IaClientDelegate: SDKDelegate {
     /// Whether SDK log messages are sent to Flutter. Only on while Dart listens, as the SDK logs a lot.
     var isLogMessageForwardingEnabled = false
 
-    /// Values the host configured for CardLink flows the SDK starts itself.
     var cardLinkConfiguration: IaCardLinkConfigurationArguments?
 
     /// Posted for actions of CardLink flows the SDK starts itself, with the `CardLinkOutputAction` under the "action" key.
@@ -184,8 +183,6 @@ class IaClientDelegate: SDKDelegate {
         )
     }
 
-    /// Asks Flutter how the SDK should continue with a scanned prescription.
-    /// Any missing or invalid answer, for example when the prescription module isn't used in Dart, keeps the SDK default.
     private func requestScanResult(method: String, arguments: [String: Any]) async -> IAPrescriptionScanResult {
         await withCheckedContinuation { continuation in
             channel.invokeMethod(method, arguments: arguments) { result in

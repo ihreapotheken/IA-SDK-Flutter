@@ -24,7 +24,6 @@ struct IaCardLinkConfigurationArguments: Decodable {
     let userId: String?
     let phoneNumber: String?
 
-    /// Applies the configured values to the configuration the SDK is about to start CardLink with.
     func applied(to configuration: CardLinkConfiguration) -> CardLinkConfiguration {
         guard isSaveCardEnabled != nil || userId != nil || phoneNumber != nil else {
             return configuration
@@ -43,7 +42,6 @@ struct IaCardLinkConfigurationArguments: Decodable {
     }
 }
 
-/// QA options for testing an integration.
 struct IaQaConfigurationArguments: Decodable {
     let showTestPharmaciesInApofinder: Bool
     let features: [String]?
@@ -56,7 +54,6 @@ struct IaQaConfigurationArguments: Decodable {
         return qaFeatures
     }
 
-    /// Maps the Dart `IaSdkQaFeature` names to the SDK's QA features.
     private static func qaFeature(named name: String) -> QAFeature? {
         switch name {
         case "easyLogsAccessInProduction": .easyLogsAccessInProduction
