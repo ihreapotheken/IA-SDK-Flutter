@@ -469,8 +469,7 @@ class IaSdk {
   ///
   Future<IaSdkInitializationState> getInitializationState() async {
     final result = await _Methods.getInitializationState.invoke<String>();
-    return IaSdkInitializationState.values.where((state) => state.name == result).firstOrNull ??
-        IaSdkInitializationState.uninitialized;
+    return IaSdkInitializationState.values.where((state) => state.name == result).firstOrNull ?? IaSdkInitializationState.uninitialized;
   }
 
   /// Returns `true` if the SDK has been successfully initialized.

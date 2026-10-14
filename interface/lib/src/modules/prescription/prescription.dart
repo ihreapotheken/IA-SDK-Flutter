@@ -78,6 +78,5 @@ abstract class IaBasePrescription extends IaBase {
   /// After returning [IaModelPrescriptionScanDecision.handled], the scanner keeps scanning; close it, for example
   /// with `IaSdk.finishAllActivities`, once the host app has the prescription.
   ///
-  abstract Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)?
-  onEPrescriptionScanned;
+  abstract Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)? onEPrescriptionScanned;
 }

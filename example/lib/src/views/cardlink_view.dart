@@ -627,9 +627,7 @@ class _CardManagementSection extends StatelessWidget {
               onShowResult(
                 cards.isEmpty
                     ? 'No saved cards found.'
-                    : cards
-                          .map((card) => '${card.name}: CAN ${card.canCode}, phone ${card.phoneNumber}, id ${card.id}')
-                          .join('\n'),
+                    : cards.map((card) => '${card.name}: CAN ${card.canCode}, phone ${card.phoneNumber}, id ${card.id}').join('\n'),
               );
             } catch (e) {
               onShowResult('Error: $e');

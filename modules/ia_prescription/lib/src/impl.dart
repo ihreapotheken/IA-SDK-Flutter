@@ -18,8 +18,7 @@ class IaModulePrescription extends IaBasePrescription {
   ///
   static Future<IaModelPrescriptionScanDecision> Function(Uint8List imageData)? _onPrescriptionPhotoScanned;
 
-  static Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)?
-  _onEPrescriptionScanned;
+  static Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)? _onEPrescriptionScanned;
 
   @override
   Future<IaModelPrescriptionScanDecision> Function(Uint8List imageData)? get onPrescriptionPhotoScanned {
@@ -32,8 +31,7 @@ class IaModulePrescription extends IaBasePrescription {
   }
 
   @override
-  Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)?
-  get onEPrescriptionScanned {
+  Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)? get onEPrescriptionScanned {
     return _onEPrescriptionScanned;
   }
 

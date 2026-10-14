@@ -49,8 +49,7 @@ class EventsView extends StatelessWidget {
             const SizedBox(height: 4),
             SegmentedButton<ExampleScanDecision>(
               segments: [
-                for (final decision in ExampleScanDecision.values)
-                  ButtonSegment(value: decision, label: Text(decision.name)),
+                for (final decision in ExampleScanDecision.values) ButtonSegment(value: decision, label: Text(decision.name)),
               ],
               selected: {settings.scanDecision},
               onSelectionChanged: (selection) => settings.scanDecision = selection.first,
