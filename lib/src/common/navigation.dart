@@ -11,14 +11,12 @@ class _NavigationHandler implements IaBaseCallbackHandler {
   @override
   Future<dynamic> Function(dynamic args) get handler {
     return (args) async {
-      // Both native platforms send `{"navigationTarget": "<target>"}`.
       final rawTarget = args is Map ? args['navigationTarget'] : args;
       if (rawTarget is! String) {
         throw Exception(
           'Missing or invalid navigationTarget for _NavigationHandler: $args.',
         );
       }
-      // Targets the host can't override (for example ones only one platform reports) keep the SDK default.
       final target = IaSdkNavigationTarget.values.where((value) => value.name == rawTarget).firstOrNull;
       if (target != null && IaSdk.instance.onSdkWillNavigateToTarget != null) {
         final result = await IaSdk.instance.onSdkWillNavigateToTarget!(target);

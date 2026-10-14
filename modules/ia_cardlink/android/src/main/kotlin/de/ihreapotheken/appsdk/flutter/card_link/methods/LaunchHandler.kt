@@ -52,7 +52,6 @@ class LaunchHandler(
         val cardLinkSdkEnvironment = EnvironmentMapper.fromString(call.argument<String>("environment"))
         val applicationId = call.argument<String>("appId")
         val coreAppLogFileURL = call.argument<String>("coreAppLogFileURL")
-        // Absent or unknown values keep the SDK default.
         val illustrationColor = CardLinkIllustrationColor.entries
             .firstOrNull { it.name == call.argument<String>("illustrationColor") }
             ?: CardLinkIllustrationColor.RED

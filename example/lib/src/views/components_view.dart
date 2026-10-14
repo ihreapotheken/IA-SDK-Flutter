@@ -70,7 +70,6 @@ class _ComponentsViewState extends State<ComponentsView> {
         const SizedBox(height: 4),
         Wrap(
           spacing: 8,
-          // The custom type needs product identifiers, see the custom grid below.
           children: IaProductDisplayType.values.where((type) => type != IaProductDisplayType.custom).map((type) {
             return ChoiceChip(
               label: Text(type.name),

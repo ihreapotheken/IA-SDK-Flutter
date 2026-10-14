@@ -31,7 +31,6 @@ final class IASDKComponentsViewFactory: NSObject, FlutterPlatformViewFactory {
 
         switch identifier {
         case .cartButton:
-            // With a Dart tap handler the tap is reported instead of the SDK opening the cart.
             let channel = componentsChannel
             let onTap: EmptyCallback? = params["hasTapHandler"] as? Bool == true
                 ? { channel.invokeMethod("componentTapped", arguments: ["viewId": viewId]) }
