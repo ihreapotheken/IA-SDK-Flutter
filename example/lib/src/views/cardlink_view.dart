@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
@@ -159,20 +160,22 @@ class _CardLinkViewStateData extends State<CardLinkView> {
           onChanged: (value) => setState(() => _data.consentStatus = value),
         ),
 
-        const SizedBox(height: 24),
-        Text('Illustration Color (Android)', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 4),
-        Wrap(
-          spacing: 8,
-          children: [
-            for (final color in IaCardLinkIllustrationColor.values)
-              ChoiceChip(
-                label: Text(color.name),
-                selected: _data.illustrationColor == color,
-                onSelected: (_) => setState(() => _data.illustrationColor = color),
-              ),
-          ],
-        ),
+        if (Platform.isAndroid) ...[
+          const SizedBox(height: 24),
+          Text('Illustration Color (Android)', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final color in IaCardLinkIllustrationColor.values)
+                ChoiceChip(
+                  label: Text(color.name),
+                  selected: _data.illustrationColor == color,
+                  onSelected: (_) => setState(() => _data.illustrationColor = color),
+                ),
+            ],
+          ),
+        ],
         const SizedBox(height: 24),
         _LaunchSection(
           saveCardEnabled: _data.saveCardEnabled,
@@ -559,18 +562,20 @@ class _InfoMethodsSection extends StatelessWidget {
             }
           },
         ),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Finish CardLink (iOS)'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.cardLink.finish();
-              onShowResult('CardLink finished');
-            } catch (e) {
-              onShowResult('Error: $e');
-            }
-          },
-        ),
+        if (Platform.isIOS) ...[
+          const SizedBox(height: 8),
+          ElevatedButton(
+            child: Text('Finish CardLink (iOS)'),
+            onPressed: () async {
+              try {
+                await IaSdk.instance.cardLink.finish();
+                onShowResult('CardLink finished');
+              } catch (e) {
+                onShowResult('Error: $e');
+              }
+            },
+          ),
+        ],
       ],
     );
   }
@@ -634,31 +639,33 @@ class _CardManagementSection extends StatelessWidget {
           },
         ),
         const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Rename Saved Card (Android)'),
-          onPressed: () async {
-            try {
-              final cards = await IaSdk.instance.cardLink.getSavedCardList(userIdController.text);
-              final card = cards.where((card) => card.name == cardNameController.text).firstOrNull;
-              if (card == null) {
-                onShowResult('No saved card named "${cardNameController.text}".');
-                return;
+        if (Platform.isAndroid) ...[
+          ElevatedButton(
+            child: Text('Rename Saved Card (Android)'),
+            onPressed: () async {
+              try {
+                final cards = await IaSdk.instance.cardLink.getSavedCardList(userIdController.text);
+                final card = cards.where((card) => card.name == cardNameController.text).firstOrNull;
+                if (card == null) {
+                  onShowResult('No saved card named "${cardNameController.text}".');
+                  return;
+                }
+                final newName = '${card.name} (renamed)';
+                await IaSdk.instance.cardLink.updateCard(
+                  userId: userIdController.text,
+                  originalName: card.name,
+                  name: newName,
+                  phoneNumber: card.phoneNumber ?? '',
+                  canCode: card.canCode ?? '',
+                );
+                onShowResult('Renamed "${card.name}" to "$newName".');
+              } catch (e) {
+                onShowResult('Error: $e');
               }
-              final newName = '${card.name} (renamed)';
-              await IaSdk.instance.cardLink.updateCard(
-                userId: userIdController.text,
-                originalName: card.name,
-                name: newName,
-                phoneNumber: card.phoneNumber ?? '',
-                canCode: card.canCode ?? '',
-              );
-              onShowResult('Renamed "${card.name}" to "$newName".');
-            } catch (e) {
-              onShowResult('Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 8),
+            },
+          ),
+          const SizedBox(height: 8),
+        ],
         ElevatedButton(
           child: Text('Attach Host Log File to Problem Reports'),
           onPressed: () async {
@@ -687,36 +694,40 @@ class _CardManagementSection extends StatelessWidget {
           },
         ),
         const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Mock CardLink Backend (iOS)'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.cardLink.setMocks(const IaCardLinkMocks());
-              onShowResult('CardLink backend mocks enabled.');
-            } catch (e) {
-              onShowResult('Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Reverse Saved Cards Order (Android)'),
-          onPressed: () async {
-            try {
-              final cards = await IaSdk.instance.cardLink.getSavedCardList(
-                userIdController.text,
-              );
-              await IaSdk.instance.cardLink.reorderSavedCards(
-                userId: userIdController.text,
-                orderedCanCodes: cards.reversed.map((card) => card.canCode).whereType<String>().toList(),
-              );
-              onShowResult('Reversed the order of ${cards.length} saved card(s).');
-            } catch (e) {
-              onShowResult('Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 8),
+        if (Platform.isIOS) ...[
+          ElevatedButton(
+            child: Text('Mock CardLink Backend (iOS)'),
+            onPressed: () async {
+              try {
+                await IaSdk.instance.cardLink.setMocks(const IaCardLinkMocks());
+                onShowResult('CardLink backend mocks enabled.');
+              } catch (e) {
+                onShowResult('Error: $e');
+              }
+            },
+          ),
+          const SizedBox(height: 8),
+        ],
+        if (Platform.isAndroid) ...[
+          ElevatedButton(
+            child: Text('Reverse Saved Cards Order (Android)'),
+            onPressed: () async {
+              try {
+                final cards = await IaSdk.instance.cardLink.getSavedCardList(
+                  userIdController.text,
+                );
+                await IaSdk.instance.cardLink.reorderSavedCards(
+                  userId: userIdController.text,
+                  orderedCanCodes: cards.reversed.map((card) => card.canCode).whereType<String>().toList(),
+                );
+                onShowResult('Reversed the order of ${cards.length} saved card(s).');
+              } catch (e) {
+                onShowResult('Error: $e');
+              }
+            },
+          ),
+          const SizedBox(height: 8),
+        ],
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red.shade50,

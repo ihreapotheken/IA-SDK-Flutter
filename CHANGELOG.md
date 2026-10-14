@@ -27,7 +27,8 @@ Native SDK 2.9.0 on both platforms.
   `illustrationColor`, and the streams `consentPhoneNumberListener`, `savedCardsListener`,
   `initializationErrorListener` and `resultListener`.
 - Navigation targets reported on Android: `start`, `search`, `redeemPrescription`, `thankYouCompleted`.
-- Example app: an Events tab with all callbacks and switchable host answers, and buttons for the new APIs.
+- Example app: an Events tab with all callbacks and switchable host answers, and buttons for the new APIs. Buttons
+  for single-platform APIs only show on their platform.
 
 ### Fixed
 

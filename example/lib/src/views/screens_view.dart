@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/testing/event_log.dart';
 import 'package:flutter/material.dart';
@@ -62,11 +64,13 @@ class ScreensView extends StatelessWidget {
           onPressed: () => IaSdk.instance.overTheCounter.launchProductSearchRoute(),
         ),
         const SizedBox(height: 16),
-        ElevatedButton(
-          child: Text('Launch Product Search, focused (iOS)'),
-          onPressed: () => IaSdk.instance.overTheCounter.launchProductSearchRoute(focusesOnAppear: true),
-        ),
-        const SizedBox(height: 16),
+        if (Platform.isIOS) ...[
+          ElevatedButton(
+            child: Text('Launch Product Search, focused (iOS)'),
+            onPressed: () => IaSdk.instance.overTheCounter.launchProductSearchRoute(focusesOnAppear: true),
+          ),
+          const SizedBox(height: 16),
+        ],
         ElevatedButton(
           child: Text('Launch Cart Screen'),
           onPressed: () => IaSdk.instance.ordering.launchCartScreen(),
@@ -82,40 +86,50 @@ class ScreensView extends StatelessWidget {
           onPressed: () => IaSdk.instance.launchApofinder(),
         ),
         const SizedBox(height: 16),
-        ElevatedButton(
-          child: Text('Launch Apofinder, not cancellable (iOS)'),
-          onPressed: () => IaSdk.instance.launchApofinder(isCancellable: false),
-        ),
-        const SizedBox(height: 16),
+        if (Platform.isIOS) ...[
+          ElevatedButton(
+            child: Text('Launch Apofinder, not cancellable (iOS)'),
+            onPressed: () => IaSdk.instance.launchApofinder(isCancellable: false),
+          ),
+          const SizedBox(height: 16),
+        ],
         ElevatedButton(
           child: Text('Launch Redeem Prescription'),
           onPressed: () => IaSdk.instance.prescription.launchRedeemPrescriptionScreen(),
         ),
         const SizedBox(height: 16),
-        ElevatedButton(
-          child: Text('Launch Prescription Photo Scanner (iOS)'),
-          onPressed: () => IaSdk.instance.prescription.launchPrescriptionScanner(
-            IaPrescriptionScannerType.prescription,
+        if (Platform.isIOS) ...[
+          ElevatedButton(
+            child: Text('Launch Prescription Photo Scanner (iOS)'),
+            onPressed: () => IaSdk.instance.prescription.launchPrescriptionScanner(
+              IaPrescriptionScannerType.prescription,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          child: Text('Launch E-Prescription Scanner (iOS)'),
-          onPressed: () => IaSdk.instance.prescription.launchPrescriptionScanner(
-            IaPrescriptionScannerType.ePrescription,
+          const SizedBox(height: 16),
+        ],
+        if (Platform.isIOS) ...[
+          ElevatedButton(
+            child: Text('Launch E-Prescription Scanner (iOS)'),
+            onPressed: () => IaSdk.instance.prescription.launchPrescriptionScanner(
+              IaPrescriptionScannerType.ePrescription,
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          child: Text('Scanner Camera Test (iOS)'),
-          onPressed: _runScannerCameraTest,
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          child: Text('Launch Prerequisite Flow (Android)'),
-          onPressed: () => IaSdk.instance.launchPrerequisiteFlow(),
-        ),
-        const SizedBox(height: 16),
+          const SizedBox(height: 16),
+        ],
+        if (Platform.isIOS) ...[
+          ElevatedButton(
+            child: Text('Scanner Camera Test (iOS)'),
+            onPressed: _runScannerCameraTest,
+          ),
+          const SizedBox(height: 16),
+        ],
+        if (Platform.isAndroid) ...[
+          ElevatedButton(
+            child: Text('Launch Prerequisite Flow (Android)'),
+            onPressed: () => IaSdk.instance.launchPrerequisiteFlow(),
+          ),
+          const SizedBox(height: 16),
+        ],
         ElevatedButton(
           child: Text('Finish All Activities Test'),
           onPressed: _runFinishAllActivitiesTest,
