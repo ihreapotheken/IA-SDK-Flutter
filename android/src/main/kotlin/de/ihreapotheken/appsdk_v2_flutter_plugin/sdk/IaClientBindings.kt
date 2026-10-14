@@ -4,6 +4,8 @@ import IaClientFlutterViewFactory
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.Window
@@ -64,10 +66,7 @@ class IaClientBindings(
         }
 
         override fun onActivityPreCreated(activity: Activity, savedInstanceState: Bundle?) {
-            // Without an app theme, SDK activities get the platform default one, whose action bar layout passes window
-            // insets on to the content only when they change. The prerequisites screens start reading insets after
-            // that, so they'd get none and draw behind the status bar. The SDK hides the action bar anyway.
-            if (activity is IaPrerequisiteActivity) activity.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            if (usesHostTheme(activity)) activity.requestWindowFeature(Window.FEATURE_NO_TITLE)
         }
 
         override fun onActivityPostCreated(activity: Activity, savedInstanceState: Bundle?) {
@@ -83,6 +82,24 @@ class IaClientBindings(
         override fun onActivityPaused(activity: Activity) = Unit
         override fun onActivityStopped(activity: Activity) = Unit
         override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+    }
+
+    /**
+     * Whether [activity] is an SDK activity that declares no theme, so it gets the host app's. Without an app theme
+     * that's the platform default one, whose action bar shows the app's name above the debug viewer. Its layout also
+     * passes window insets on to the content only when they change, so the prerequisites screens, which start reading
+     * insets later, would get none and draw behind the status bar. The SDK screens have their own top bars.
+     */
+    private fun usesHostTheme(activity: Activity): Boolean {
+        if (!activity.javaClass.name.startsWith("de.ihreapotheken.sdk.")) return false
+        val packageManager = activity.packageManager
+        val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.getActivityInfo(activity.componentName, PackageManager.ComponentInfoFlags.of(0))
+        } else {
+            @Suppress("DEPRECATION")
+            packageManager.getActivityInfo(activity.componentName, 0)
+        }
+        return info.theme == 0
     }
 
     /**
