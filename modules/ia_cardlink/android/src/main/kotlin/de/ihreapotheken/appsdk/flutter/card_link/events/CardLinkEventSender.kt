@@ -97,6 +97,15 @@ class CardLinkEventSender(
         }
     }
 
+    fun sendWillExitEvent() {
+        mainHandler.post {
+            methodChannelProvider()?.invokeMethod(
+                "cardLinkEvent",
+                mapOf("event" to "willExitCardlink")
+            )
+        }
+    }
+
     fun sendCardLinkResultEvent(result: String?) {
         mainHandler.post {
             methodChannelProvider()?.invokeMethod(

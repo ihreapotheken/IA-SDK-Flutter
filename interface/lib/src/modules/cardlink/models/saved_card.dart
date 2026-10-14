@@ -20,7 +20,7 @@ class IaCardLinkSavedCard {
   ///
   final String? canCode;
 
-  /// Identifier of the saved card. Only reported on iOS.
+  /// Identifier of the saved card. Only reported on iOS, Android saved cards have no identifier.
   ///
   final String? id;
 
@@ -33,7 +33,8 @@ class IaCardLinkSavedCard {
   factory IaCardLinkSavedCard.fromMap(Map<String, dynamic> map) {
     return IaCardLinkSavedCard(
       name: map['name'] as String,
-      canCode: map['canCode'] as String?,
+      // Native card JSON calls the CAN code "canNumber".
+      canCode: (map['canCode'] ?? map['canNumber']) as String?,
       id: map['id'] as String?,
       phoneNumber: map['phoneNumber'] as String?,
     );

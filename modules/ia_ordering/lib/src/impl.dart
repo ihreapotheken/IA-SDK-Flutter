@@ -52,7 +52,44 @@ class IaModuleOrdering extends IaBaseOrdering {
     );
     final result = await _Methods.getCartDetails.invoke<Map?>(arguments);
     if (result == null) return null;
-    return Map<String, dynamic>.from(result);
+    return _stringKeyed(result) as Map<String, dynamic>;
+  }
+
+  /// Platform channels deliver nested maps as `Map<Object?, Object?>`.
+  ///
+  static Object? _stringKeyed(Object? value) {
+    if (value is Map) {
+      return value.map((key, nested) => MapEntry('$key', _stringKeyed(nested)));
+    }
+    if (value is List) {
+      return value.map(_stringKeyed).toList();
+    }
+    return value;
+  }
+
+  @override
+  Future<IaModelOrderingCartState?> getCartState({
+    bool allowCached = true,
+    bool shouldEmitCartUpdate = false,
+  }) async {
+    final details = await getCartDetails(
+      allowCached: allowCached,
+      shouldEmitCartUpdate: shouldEmitCartUpdate,
+    );
+    if (details == null) return null;
+    final products = details['products'];
+    return IaModelOrderingCartState(
+      totalAmountInCart: details['totalAmountInCart'] as int,
+      clientOrderIDs: const [],
+      products: products is Iterable
+          ? products.whereType<Map>().map((product) {
+              return IaModelOrderingCartProduct(
+                pzn: product['pzn'] as String,
+                amount: product['amount'] as int,
+              );
+            }).toList()
+          : const [],
+    );
   }
 
   @override
@@ -80,7 +117,12 @@ class IaModuleOrdering extends IaBaseOrdering {
   }
 
   @override
-  final callbacks = IaBaseCallbacks(
+  IaBaseCallbacks get callbacks {
+    return _callbacks;
+  }
+
+  // Shared by all instances, like the streams, so creating more instances doesn't add more subscribers.
+  static final _callbacks = IaBaseCallbacks(
     handlers: _Callbacks.values,
   );
 }

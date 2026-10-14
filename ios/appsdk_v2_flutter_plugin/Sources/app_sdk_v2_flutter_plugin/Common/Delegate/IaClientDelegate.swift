@@ -9,11 +9,28 @@ class IaClientDelegate: SDKDelegate {
     /// Whether SDK log messages are sent to Flutter. Only on while Dart listens, as the SDK logs a lot.
     var isLogMessageForwardingEnabled = false
 
-    var cardLinkConfiguration: IaCardLinkConfigurationArguments?
+    /// Static, so a delegate created for another Flutter engine keeps them.
+    static var cardLinkConfiguration: IaCardLinkConfigurationArguments?
+
+    /// Whether prerequisites results are a replay of the SDK's cached result rather than a run, see
+    /// `IAOrderingWrapper.transferPrescriptions`.
+    static var skipsPrerequisitesResults = false
+
+    /// How long the SDK waits for Flutter's scan decision. Without an answer, for example when the Flutter engine is
+    /// gone, it continues with its default handling.
+    private static let scanDecisionTimeout: TimeInterval = 120
 
     /// Posted for actions of CardLink flows the SDK starts itself, with the `CardLinkOutputAction` under the "action" key.
     /// The ia_cardlink plugin observes it to report the actions to Dart, as this plugin can't depend on it.
     static let cardLinkDidSendActionNotification = Notification.Name("de.ihreapotheken.sdk.flutter.cardLinkDidSendAction")
+
+    /// Posted when `initialize` set the SDK environment, which the ia_cardlink plugin's launches without an
+    /// environment then keep.
+    static let sdkEnvironmentWasSetNotification = Notification.Name("de.ihreapotheken.sdk.flutter.sdkEnvironmentWasSet")
+
+    /// Posted when `finishAllActivities` closed a CardLink flow shown on top of an SDK screen, for the ia_cardlink
+    /// plugin to report its closing.
+    static let cardLinkDidCloseWithSdkScreensNotification = Notification.Name("de.ihreapotheken.sdk.flutter.cardLinkDidCloseWithSdkScreens")
     
     init(
         channel: FlutterMethodChannel,
@@ -84,6 +101,7 @@ class IaClientDelegate: SDKDelegate {
             "orderingDidFinishOrder",
             arguments: [
                 "orderCode": orderCode,
+                "orderCodes": orders.map(\.orderCode),
                 "clientOrderIDs": clientOrderIDs,
             ],
         )
@@ -113,7 +131,8 @@ class IaClientDelegate: SDKDelegate {
         result: Result<IASDKInitializationAndPrerequisitesResult, any Error>,
         type: SDKInitializationType
     ) {
-        guard case .success(let initializationResult) = result,
+        guard !Self.skipsPrerequisitesResults,
+              case .success(let initializationResult) = result,
               let prerequisites = initializationResult.prerequisitesResult else {
             return
         }
@@ -143,7 +162,7 @@ class IaClientDelegate: SDKDelegate {
     }
 
     func cardLinkWillStartWithConfiguration(configuration: CardLinkConfiguration) -> CardLinkConfiguration {
-        cardLinkConfiguration?.applied(to: configuration) ?? configuration
+        Self.cardLinkConfiguration?.applied(to: configuration) ?? configuration
     }
 
     func cardLinkDidSendAction(action: CardLinkOutputAction) -> HandlingDecision {
@@ -161,9 +180,25 @@ class IaClientDelegate: SDKDelegate {
             "sdkDidLogMessage",
             arguments: [
                 "message": message,
-                "level": level.title,
+                "level": Self.levelName(level),
             ]
         )
+    }
+
+    /// Stable names for the SDK's log levels, matching the Dart doc of `IaSdkLogMessage.level`.
+    private static func levelName(_ level: IALogLevel) -> String {
+        switch level {
+        case .debug: "debug"
+        case .info: "info"
+        case .warning: "warning"
+        case .error: "error"
+        case .userInteraction: "userInteraction"
+        case .cameraError: "cameraError"
+        case .httpClientInfo: "httpClientInfo"
+        case .httpClientSuccess: "httpClientSuccess"
+        case .httpClientError: "httpClientError"
+        default: level.title
+        }
     }
 
     func didScanPrescription(_ prescription: Data) async -> IAPrescriptionScanResult {
@@ -185,21 +220,40 @@ class IaClientDelegate: SDKDelegate {
 
     private func requestScanResult(method: String, arguments: [String: Any]) async -> IAPrescriptionScanResult {
         await withCheckedContinuation { continuation in
+            // Resumed by Flutter's answer or the timeout, whichever comes first.
+            let resumer = ScanResultResumer(continuation)
+            DispatchQueue.main.asyncAfter(deadline: .now() + Self.scanDecisionTimeout) {
+                resumer.resume(.performDefault)
+            }
             channel.invokeMethod(method, arguments: arguments) { result in
                 guard let response = result as? [String: Any],
                       let decision = response["decision"] as? String else {
-                    continuation.resume(returning: .performDefault)
+                    resumer.resume(.performDefault)
                     return
                 }
                 switch decision {
                 case "handled":
-                    continuation.resume(returning: .handled)
+                    resumer.resume(.handled)
                 case "error":
-                    continuation.resume(returning: .error(message: response["message"] as? String ?? ""))
+                    resumer.resume(.error(message: response["message"] as? String ?? ""))
                 default:
-                    continuation.resume(returning: .performDefault)
+                    resumer.resume(.performDefault)
                 }
             }
         }
+    }
+}
+
+/// Resumes a scan decision continuation once; later answers are ignored. Only used on the main thread.
+private final class ScanResultResumer: @unchecked Sendable {
+    private var continuation: CheckedContinuation<IAPrescriptionScanResult, Never>?
+
+    init(_ continuation: CheckedContinuation<IAPrescriptionScanResult, Never>) {
+        self.continuation = continuation
+    }
+
+    func resume(_ result: IAPrescriptionScanResult) {
+        continuation?.resume(returning: result)
+        continuation = nil
     }
 }

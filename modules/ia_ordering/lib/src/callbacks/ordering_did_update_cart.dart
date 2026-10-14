@@ -15,7 +15,7 @@ Future<void> _orderingDidUpdateCartHandler(dynamic args) async {
   final clientOrderIDs = args['clientOrderIDs'];
   if (clientOrderIDs is! Iterable) {
     throw Exception(
-      'orderingDidFinishOrder: Missing or incorect type clientOrderIDs: ${clientOrderIDs.runtimeType} $clientOrderIDs.',
+      'orderingDidUpdateCart: Missing or incorrect type clientOrderIDs: ${clientOrderIDs.runtimeType} $clientOrderIDs.',
     );
   }
   if (clientOrderIDs.any(
@@ -24,7 +24,7 @@ Future<void> _orderingDidUpdateCartHandler(dynamic args) async {
     },
   )) {
     throw Exception(
-      'orderingDidFinishOrder: Incorect type clientOrderIDs: $clientOrderIDs.',
+      'orderingDidUpdateCart: Incorrect type clientOrderIDs: $clientOrderIDs.',
     );
   }
   final products = args['products'];

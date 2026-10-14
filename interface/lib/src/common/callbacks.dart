@@ -5,21 +5,32 @@ part of '_interface.dart';
 class IaBaseCallbacks {
   /// Default callback for receiving method calls on a [MethodChannel] object.
   ///
+  /// The first subscriber with a matching handler handles the call. Without one, native receives
+  /// "not implemented" and falls back to its default. A failing handler is logged with
+  /// [FlutterError.presentError] and rethrown, so native receives the error instead of a silent default.
+  /// It isn't passed to [FlutterError.onError], so host crash reporting doesn't record it.
+  ///
   Future<dynamic> _methodCallHandler(MethodCall call) async {
     for (final subscriber in _subscribers) {
-      try {
-        final matchingCallback = subscriber.handlers.firstWhere(
-          (handler) {
-            return handler.methodId == call.method;
-          },
-        );
-        return await matchingCallback.handler(call.arguments);
-      } catch (e) {
-        continue;
+      for (final handler in subscriber.handlers) {
+        if (handler.methodId != call.method) continue;
+        try {
+          return await handler.handler(call.arguments);
+        } catch (exception, stack) {
+          FlutterError.presentError(
+            FlutterErrorDetails(
+              exception: exception,
+              stack: stack,
+              library: 'ia_interface',
+              context: ErrorDescription('while handling the native call ${call.method}'),
+            ),
+          );
+          rethrow;
+        }
       }
     }
-    throw Exception(
-      'No method call ${call.method} found.',
+    throw MissingPluginException(
+      'No handler registered for the native call ${call.method}.',
     );
   }
 
@@ -68,6 +79,16 @@ class IaBaseCallbacks {
   /// Singleton instance used for allocating unnamed constructor resources.
   ///
   static final _instance = IaBaseCallbacks._();
+
+  /// Installs the handler of the shared `de.ihreapotheken/sdk` channel.
+  ///
+  /// Called on the first use of the channel (a method call, screen launch, platform view or module), so native
+  /// callbacks reach Dart even when no module was constructed. It needs the Flutter binding, which every channel
+  /// use needs anyway.
+  ///
+  static void _ensureSharedChannelHandler() {
+    _instance;
+  }
 }
 
 /// Handler method used in conjunction with [IaBaseCallbacks].

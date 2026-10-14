@@ -1,9 +1,12 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import androidx.activity.ComponentActivity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -39,22 +42,34 @@ internal enum class IaComponentIdentifier(val viewTypeId: String) {
  */
 internal class IaClientComponentsViewFactory(
     private val componentsChannel: MethodChannel,
+    private val onCartButtonClick: (Context) -> Unit,
 ) : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
     override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
         val creationParams = args as? Map<*, *>
         val identifier = IaComponentIdentifier.fromViewTypeId(creationParams?.get("viewId") as? String)
             ?: throw IllegalArgumentException("Unknown component viewId in args: $args")
 
+        // The SDK's components use what a ComponentActivity gives Compose: lifecycle, saved state and activity
+        // results. Failing here reaches Dart as an error, where the component would otherwise crash the app.
+        val activity = context.findActivity()
+        check(activity is ComponentActivity) {
+            "IaCartButton and IaProductGrid need the app's activity to be a ComponentActivity, such as " +
+                "FlutterFragmentActivity; ${activity?.javaClass?.name} isn't one."
+        }
+        val hasTapHandler = creationParams?.get("hasTapHandler") == true
         val composeView = ComposeView(context).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             setContent {
                 when (identifier) {
                     IaComponentIdentifier.CartButton -> IaCartButton(
                         Modifier,
-                        onClick = if (creationParams?.get("hasTapHandler") == true) {
-                            { componentsChannel.invokeMethod("componentTapped", mapOf("viewId" to viewId)) }
-                        } else {
-                            null
+                        onClick = {
+                            if (hasTapHandler) {
+                                componentsChannel.invokeMethod("componentTapped", mapOf("viewId" to viewId))
+                            } else {
+                                // The SDK's own click opens the cart without asking onSdkWillNavigateToTarget.
+                                onCartButtonClick(context)
+                            }
                         },
                     )
                     IaComponentIdentifier.ProductGrid -> renderProductGrid(creationParams)
@@ -62,6 +77,15 @@ internal class IaClientComponentsViewFactory(
             }
         }
         return IaClientComponentPlatformView(composeView, viewId, componentsChannel)
+    }
+
+    private fun Context.findActivity(): Activity? {
+        var context: Context? = this
+        while (context is ContextWrapper) {
+            if (context is Activity) return context
+            context = context.baseContext
+        }
+        return null
     }
 
     @androidx.compose.runtime.Composable
@@ -103,7 +127,8 @@ private class IaClientComponentPlatformView(
 /**
  * Measures a [ComposeView] using "fill width, wrap content height" semantics
  * and reports the resulting size to Flutter via the shared components
- * MethodChannel. Sizes are reported in logical pixels (dp).
+ * MethodChannel. Sizes are reported in logical pixels (dp). The SDK's components
+ * fill the width they're given, the cart button included.
  */
 private class IaComponentSizeReporter(
     private val viewId: Int,
@@ -112,6 +137,7 @@ private class IaComponentSizeReporter(
     private val mainHandler = Handler(Looper.getMainLooper())
     private var lastReportedWidth = -1
     private var lastReportedHeight = -1
+    private var lastParentWidth = -1
 
     private val layoutListener = View.OnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
         measureAndReport(v as ComposeView)
@@ -136,10 +162,14 @@ private class IaComponentSizeReporter(
         )
         val width = view.measuredWidth
         val height = view.measuredHeight
-        if (width <= 0 || height <= 0) return
-        if (width == lastReportedWidth && height == lastReportedHeight) return
+        // A height of 0 is reported too, so an emptied component collapses in Flutter.
+        if (width <= 0 || height < 0) return
+        // Also reported again for a new layout width: Flutter widens the view when its available width changes,
+        // and waits for the size measured against it.
+        if (width == lastReportedWidth && height == lastReportedHeight && parentWidth == lastParentWidth) return
         lastReportedWidth = width
         lastReportedHeight = height
+        lastParentWidth = parentWidth
 
         val density = view.resources.displayMetrics.density
         val widthDp = width / density

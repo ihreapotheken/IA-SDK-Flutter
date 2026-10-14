@@ -18,7 +18,7 @@ class IaModelOrderingCartState {
 
   /// Array of external/client order IDs.
   ///
-  /// Always empty on Android, which doesn't report them.
+  /// Always empty on Android, which doesn't report them, and from `getCartState`, whose cart details don't include them.
   final List<String> clientOrderIDs;
 
   /// Number of products in the cart. Only reported on Android.
@@ -27,7 +27,8 @@ class IaModelOrderingCartState {
   /// Number of prescriptions in the cart. Only reported on Android.
   final int? totalPrescriptions;
 
-  /// Products in the cart with their amounts. Only reported on iOS.
+  /// Products in the cart with their amounts. Only reported on iOS, and `null` there when the SDK reports the cart
+  /// without its details. Always `null` on Android.
   final List<IaModelOrderingCartProduct>? products;
 }
 

@@ -47,7 +47,16 @@ enum IASDKViewIdentifier: String, CaseIterable {
      * Visual interface representation.
      */
     @MainActor
-    func iaScreen(isCancellable: Bool = true, focusesOnAppear: Bool? = nil) -> any IAScreen {
+    /// - Parameter controlsScannerCamera: Whether scanners take their camera state from `PrescriptionScannerCameraController`,
+    ///   which only applies to scanners launched from Flutter, not to embedded platform views.
+    /// - Parameter onApofinderFinish: Called with the selected pharmacy, or `nil` when the user closed Apofinder. The
+    ///   screen reports the selection only here, and leaves closing it to the caller.
+    func iaScreen(
+        isCancellable: Bool = true,
+        focusesOnAppear: Bool? = nil,
+        controlsScannerCamera: Bool = false,
+        onApofinderFinish: @escaping (Pharmacy?) -> Void = { _ in }
+    ) -> any IAScreen {
         switch self {
         case IASDKViewIdentifier.startScreen:
             IAStartScreen()
@@ -66,16 +75,24 @@ enum IASDKViewIdentifier: String, CaseIterable {
             IAPharmacyScreen()
 
         case IASDKViewIdentifier.apofinderScreen:
-            IAApofinderScreen(isCancellable: isCancellable, onFinish: { _ in })
+            IAApofinderScreen(isCancellable: isCancellable, onFinish: onApofinderFinish)
 
         case IASDKViewIdentifier.redeemPrescription:
             IARedeemPrescriptionScreen()
 
         case IASDKViewIdentifier.prescriptionScanner:
-            CameraControlledPrescriptionScannerScreen(type: .prescription)
+            if controlsScannerCamera {
+                CameraControlledPrescriptionScannerScreen(type: .prescription)
+            } else {
+                IAPrescriptionScannerScreen(type: .prescription)
+            }
 
         case IASDKViewIdentifier.ePrescriptionScanner:
-            CameraControlledPrescriptionScannerScreen(type: .ePrescription)
+            if controlsScannerCamera {
+                CameraControlledPrescriptionScannerScreen(type: .ePrescription)
+            } else {
+                IAPrescriptionScannerScreen(type: .ePrescription)
+            }
         }
     }
 }

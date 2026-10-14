@@ -13,7 +13,9 @@ import io.flutter.plugin.common.MethodChannel.Result
 
 class LaunchHandler(
     private val activityProvider: () -> Activity?,
-    private val eventSender: CardLinkEventSender
+    private val eventSender: CardLinkEventSender,
+    private val onLaunched: () -> Unit,
+    private val onFailedToInitialize: () -> Unit,
 ) {
     companion object {
         private const val GUEST_USER_ID = "guest_user_id"
@@ -53,11 +55,10 @@ class LaunchHandler(
         val illustrationColor = CardLinkIllustrationColor.entries
             .firstOrNull { it.name == call.argument<String>("illustrationColor") }
             ?: CardLinkIllustrationColor.RED
-        val mockInvalidXmlDataEnabled = call.argument<Boolean>("mockInvalidXmlData") ?: false
 
         val flowType = call.argument<String>("flowType") ?: "launchCardLinkSdk"
 
-        val listener = CardLinkListenerImpl(phoneNumber, eventSender)
+        val listener = CardLinkListenerImpl(phoneNumber, eventSender, onFailedToInitialize)
 
         val config = CardLinkConfig(
             sdkApiKey = sdkApiKey,
@@ -77,7 +78,6 @@ class LaunchHandler(
             applicationId = applicationId,
             hostAppLogFilePath = coreAppLogFileURL,
             illustrationColor = illustrationColor,
-            mockInvalidXmlDataEnabled = mockInvalidXmlDataEnabled,
         )
 
         activityProvider()?.let { activity ->
@@ -86,6 +86,7 @@ class LaunchHandler(
             } else {
                 CardLink.startCardLink(activity, config)
             }
+            onLaunched()
             result.success(null)
         } ?: result.error("NO_ACTIVITY", "Activity not available", null)
     }

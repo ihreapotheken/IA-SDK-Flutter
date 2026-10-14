@@ -35,7 +35,14 @@ final class IAOrderingWrapper {
     func transferPrescriptions(arguments: Any) async throws -> Any? {
         let arguments = try IaTransferPrescriptionsArguments(from: arguments)
         let mapped = arguments.mappedToSDK()
-        
+
+        // The SDK initializes again before the transfer. With prerequisites that already ran, it reports their cached
+        // result again without running them, which isn't forwarded as a prerequisites run. After a cancelled run it
+        // runs them again, and that result is forwarded.
+        if case .success(let cachedResult) = IASDK.initializationState.prerequisitesResult, !cachedResult.isCancelled {
+            IaClientDelegate.skipsPrerequisitesResults = true
+        }
+        defer { IaClientDelegate.skipsPrerequisitesResults = false }
         try await IASDK.ordering.transferPrescriptions(
             images: mapped.images,
             pdfs: mapped.pdfs,

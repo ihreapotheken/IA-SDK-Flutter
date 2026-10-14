@@ -13,15 +13,34 @@ part 'models/request/set_scanner_camera_state.dart';
 /// Method and property definitions for the ia.de AppSDK Prescription service.
 ///
 class IaModulePrescription extends IaBasePrescription {
-  /// Constructs the module and makes it the receiver of native prescription scan callbacks.
+  /// The scan callbacks are shared by all instances, like the streams of the other modules, so a callback set on
+  /// any instance (for example `IaSdk.instance.prescription`) receives the native scan callbacks.
   ///
-  IaModulePrescription() {
-    _instance = this;
+  static Future<IaModelPrescriptionScanDecision> Function(Uint8List imageData)? _onPrescriptionPhotoScanned;
+
+  static Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)? _onEPrescriptionScanned;
+
+  @override
+  Future<IaModelPrescriptionScanDecision> Function(Uint8List imageData)? get onPrescriptionPhotoScanned {
+    return _onPrescriptionPhotoScanned;
   }
 
-  /// The most recently constructed module, which the native scan callbacks are routed to.
-  ///
-  static IaModulePrescription? _instance;
+  @override
+  set onPrescriptionPhotoScanned(Future<IaModelPrescriptionScanDecision> Function(Uint8List imageData)? callback) {
+    _onPrescriptionPhotoScanned = callback;
+  }
+
+  @override
+  Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)? get onEPrescriptionScanned {
+    return _onEPrescriptionScanned;
+  }
+
+  @override
+  set onEPrescriptionScanned(
+    Future<IaModelPrescriptionScanDecision> Function(IaModelPrescriptionEPrescriptionScan scan)? callback,
+  ) {
+    _onEPrescriptionScanned = callback;
+  }
 
   @override
   Future<void> launchRedeemPrescriptionScreen() async {
@@ -58,7 +77,12 @@ class IaModulePrescription extends IaBasePrescription {
   }
 
   @override
-  final callbacks = IaBaseCallbacks(
+  IaBaseCallbacks get callbacks {
+    return _callbacks;
+  }
+
+  // Shared by all instances, like the streams, so creating more instances doesn't add more subscribers.
+  static final _callbacks = IaBaseCallbacks(
     handlers: _Callbacks.values,
   );
 }

@@ -29,15 +29,7 @@ final class IASDKPlugin {
     private func observeInitializationState() {
         let channel = bindings.channel
         IASDK.initializationStatePublisher
-            .compactMap { state -> String? in
-                switch state.summary {
-                case .idle: "uninitialized"
-                case .inProgress: "initializing"
-                case .initializationFinished, .initializationAndPrerequisitesFinished, .prerequisitesCancelled: "initialized"
-                case .error: "error"
-                @unknown default: nil
-                }
-            }
+            .map(\.flutterName)
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .sink { state in
@@ -78,7 +70,7 @@ final class IASDKPlugin {
                 return try await iaSdkWrapper.deleteAllUserRelatedData(arguments: call.arguments)
                             
             case FlutterCall.launchRoute.name:
-                return try await iaSdkWrapper.launchRoute(arguments: call.arguments)
+                return try await iaSdkWrapper.launchRoute(arguments: call.arguments, delegate: delegate)
                 
             case FlutterCall.finishAllActivities.name:
                 return try await iaSdkWrapper.finishAllActivities(arguments: call.arguments)
@@ -171,6 +163,9 @@ final class IASDKPlugin {
                     controller.state.isPreviewPaused = isPreviewPaused
                 }
                 return nil
+
+            case FlutterCall.getInitializationState.name:
+                return IASDK.initializationState.flutterName
 
             case FlutterCall.removeAllCachedResponses.name:
                 IASDK.QA.removeAllCachedResponses()

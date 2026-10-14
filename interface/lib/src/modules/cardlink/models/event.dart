@@ -5,11 +5,17 @@ part of '_models.dart';
 /// These events represent various states and actions during the CardLink flow.
 ///
 enum IaCardLinkEvent {
-  /// CardLink will exit/close.
+  /// CardLink has closed.
+  ///
+  /// It's reported once CardLink is gone, on Android when its last screen has closed. When the user continues from
+  /// the saved cards screen into the scan flow on Android, the SDK can close the saved cards screen before the scan
+  /// flow opens. It's then reported for both.
   ///
   willExit,
 
   /// NFC scanning is about to start.
+  ///
+  /// Note: Only reported on iOS.
   ///
   willStartScanning,
 
@@ -18,6 +24,8 @@ enum IaCardLinkEvent {
   failedToInitialize,
 
   /// User requested to go to cart.
+  ///
+  /// Note: Only reported on Android. The iOS 2.9.0 SDK never sends this action.
   ///
   goToCart,
 
@@ -30,6 +38,9 @@ enum IaCardLinkEvent {
   cardSaved,
 
   /// CardLink closed with a result, reported through `resultListener`.
+  ///
+  /// The saved cards flow only reports it when the backend has card saving turned off, as the SDK then opens the
+  /// CardLink flow instead. Its saved cards screen returns no result.
   ///
   /// Note: Only reported on Android.
   ///

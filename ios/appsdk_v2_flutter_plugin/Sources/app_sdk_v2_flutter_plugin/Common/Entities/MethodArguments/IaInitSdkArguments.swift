@@ -25,20 +25,38 @@ struct IaCardLinkConfigurationArguments: Decodable {
     let phoneNumber: String?
 
     func applied(to configuration: CardLinkConfiguration) -> CardLinkConfiguration {
-        guard isSaveCardEnabled != nil || userId != nil || phoneNumber != nil else {
-            return configuration
+        var updated = configuration
+        // userId can only be set through the initializer; the other values are changed in place, so the SDK's own
+        // phone number isn't passed through the initializer's formatting again.
+        if let userId, userId != configuration.userId {
+            updated = CardLinkConfiguration(
+                pharmacyId: configuration.pharmacyId,
+                consentStatus: configuration.consentStatus,
+                canCode: configuration.canCode,
+                phoneNumber: configuration.phoneNumber,
+                userId: userId,
+                cardName: configuration.cardName,
+                isSaveCardEnabled: configuration.isSaveCardEnabled,
+                source: configuration.source,
+                finishAction: configuration.finishAction
+            )
         }
-        return CardLinkConfiguration(
-            pharmacyId: configuration.pharmacyId,
-            consentStatus: configuration.consentStatus,
-            canCode: configuration.canCode,
-            phoneNumber: phoneNumber ?? configuration.phoneNumber,
-            userId: userId ?? configuration.userId,
-            cardName: configuration.cardName,
-            isSaveCardEnabled: isSaveCardEnabled ?? configuration.isSaveCardEnabled,
-            source: configuration.source,
-            finishAction: configuration.finishAction
-        )
+        // A saved card the user picked brings its own phone number, which its SMS code goes to.
+        if let phoneNumber, configuration.canCode?.isEmpty ?? true {
+            updated.setRawPhoneNumber(Self.formatted(phoneNumber: phoneNumber))
+        }
+        if let isSaveCardEnabled {
+            updated.isSaveCardEnabled = isSaveCardEnabled
+        }
+        return updated
+    }
+
+    /// Formats the number like the `CardLinkConfiguration` initializer does for launched CardLink flows: only digits
+    /// and a leading "+" are kept.
+    private static func formatted(phoneNumber: String) -> String {
+        let kept = phoneNumber.filter { $0.isNumber || $0 == "+" }
+        guard let first = kept.first else { return kept }
+        return String(first) + kept.dropFirst().filter { $0 != "+" }
     }
 }
 

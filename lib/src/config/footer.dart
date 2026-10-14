@@ -18,9 +18,13 @@ class IaSdkConfigurationFooter {
 
   /// Whether to show the app settings button in the footer.
   ///
+  /// Note: Only used on iOS, the Android SDK always shows it.
+  ///
   final bool shouldShowAppSettings;
 
   /// Whether to show the imprint button in the footer.
+  ///
+  /// Note: Only used on iOS, the Android SDK always shows it.
   ///
   final bool shouldShowImprint;
 

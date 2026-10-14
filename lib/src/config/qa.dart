@@ -2,6 +2,9 @@ part of '../core.dart';
 
 /// QA options for testing an integration. Not meant for production builds.
 ///
+/// The SDKs apply these options only in test setups: Android with the development or staging server environment,
+/// iOS in Debug and TestFlight builds. Elsewhere they have no effect.
+///
 class IaSdkConfigurationQa {
   /// Generates an instance of QA configuration.
   ///
@@ -13,7 +16,10 @@ class IaSdkConfigurationQa {
     this.mockSdkFeatures,
     this.mockBundlePermissions,
     this.mockForceUpdate,
-  });
+  }) : assert(
+         maxScrollSpeed == null || (maxScrollSpeed > -double.infinity && maxScrollSpeed < double.infinity),
+         'maxScrollSpeed must be a finite number.',
+       );
 
   /// Whether Apofinder also lists test pharmacies.
   ///
@@ -25,13 +31,14 @@ class IaSdkConfigurationQa {
   ///
   final Set<IaSdkQaFeature> features;
 
-  /// Pharmacy identifier Apofinder offers in addition to the found pharmacies.
+  /// Numeric pharmacy identifier, for example `"1234"`, that Apofinder offers in addition to the found pharmacies.
+  /// Other values make [IaSdk.initialize] fail.
   ///
   /// Note: Only used on Android.
   ///
-  final int? apofinderCustomPharmacyId;
+  final String? apofinderCustomPharmacyId;
 
-  /// Upper limit for the scroll speed in SDK lists.
+  /// Upper limit for the scroll speed in SDK lists. Must be a finite number; leave it `null` for no limit.
   ///
   /// Note: Only used on Android.
   ///
@@ -98,6 +105,9 @@ enum IaSdkQaFeature {
   showInteractionWithRealPharmacyWarning,
 
   /// Lets the user enter a pharmacy identifier in Apofinder.
+  ///
+  /// The iOS SDK decides this itself in Debug and TestFlight builds: the input is shown for the development and
+  /// staging environments and hidden for production, whether this feature is passed or not.
   ///
   showPharmacyIdInputOnApofinder,
 

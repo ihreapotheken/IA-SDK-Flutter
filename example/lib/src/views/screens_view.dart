@@ -1,8 +1,46 @@
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
+import 'package:appsdk_v2_flutter_plugin_example/src/testing/event_log.dart';
 import 'package:flutter/material.dart';
 
 class ScreensView extends StatelessWidget {
   const ScreensView({super.key});
+
+  /// Opens the photo scanner, then turns the flashlight on and off, and pauses and resumes the preview.
+  ///
+  static Future<void> _runScannerCameraTest() async {
+    final prescription = IaSdk.instance.prescription;
+    final log = ExampleEventLog.instance;
+    await prescription.launchPrescriptionScanner(IaPrescriptionScannerType.prescription);
+    final steps = <(String, Future<void> Function())>[
+      ('Flashlight on', () => prescription.setScannerCameraState(isFlashlightOn: true)),
+      ('Flashlight off', () => prescription.setScannerCameraState(isFlashlightOn: false)),
+      ('Preview paused', () => prescription.setScannerCameraState(isPreviewPaused: true)),
+      ('Preview resumed', () => prescription.setScannerCameraState(isPreviewPaused: false)),
+    ];
+    for (final (label, step) in steps) {
+      await Future<void>.delayed(const Duration(seconds: 2));
+      try {
+        await step();
+        log.add('Scanner camera test', label);
+      } catch (e) {
+        log.add('Scanner camera test', '$label failed: $e');
+      }
+    }
+  }
+
+  /// Opens product search, then closes the SDK screens after a few seconds. Screens the app presented itself stay.
+  ///
+  static Future<void> _runFinishAllActivitiesTest() async {
+    final log = ExampleEventLog.instance;
+    await IaSdk.instance.overTheCounter.launchProductSearchRoute();
+    await Future<void>.delayed(const Duration(seconds: 4));
+    try {
+      await IaSdk.instance.finishAllActivities();
+      log.add('Finish all activities test', 'SDK screens closed');
+    } catch (e) {
+      log.add('Finish all activities test', 'Failed: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,13 +107,18 @@ class ScreensView extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         ElevatedButton(
-          child: Text('Turn On Scanner Flashlight (iOS)'),
-          onPressed: () => IaSdk.instance.prescription.setScannerCameraState(isFlashlightOn: true),
+          child: Text('Scanner Camera Test (iOS)'),
+          onPressed: _runScannerCameraTest,
         ),
         const SizedBox(height: 16),
         ElevatedButton(
           child: Text('Launch Prerequisite Flow (Android)'),
           onPressed: () => IaSdk.instance.launchPrerequisiteFlow(),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          child: Text('Finish All Activities Test'),
+          onPressed: _runFinishAllActivitiesTest,
         ),
       ],
     );

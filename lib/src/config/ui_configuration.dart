@@ -63,7 +63,11 @@ class IaPrimaryButtonConfiguration {
     this.borderDisabledColor,
     this.borderWidth,
     this.borderRadius,
-  });
+  }) : assert(
+         (borderWidth == null || (borderWidth > -double.infinity && borderWidth < double.infinity)) &&
+             (borderRadius == null || (borderRadius > -double.infinity && borderRadius < double.infinity)),
+         'borderWidth and borderRadius must be finite numbers.',
+       );
 
   /// Background color of the button.
   final Color? backgroundColor;
@@ -119,7 +123,11 @@ class IaSecondaryButtonConfiguration {
     this.borderDisabledColor,
     this.borderWidth,
     this.borderRadius,
-  });
+  }) : assert(
+         (borderWidth == null || (borderWidth > -double.infinity && borderWidth < double.infinity)) &&
+             (borderRadius == null || (borderRadius > -double.infinity && borderRadius < double.infinity)),
+         'borderWidth and borderRadius must be finite numbers.',
+       );
 
   /// Background color of the button.
   final Color? backgroundColor;

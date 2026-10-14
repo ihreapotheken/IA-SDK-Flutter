@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:ui' show Color;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show PlatformException;
+
 import 'package:ia_interface/ia_interface.dart';
 
 part 'common/callbacks.dart';
@@ -29,6 +32,15 @@ part 'models/response/log_message.dart';
 part 'models/response/prerequisites_result.dart';
 
 /// Main entrypoint for the ia.de AppSDK services and features.
+///
+/// Methods documented as "Only supported on iOS" or "Only supported on Android" throw a
+/// [MissingPluginException] on the other platform. Callbacks and streams with such a note never fire there.
+///
+/// Failed calls throw a [PlatformException]. Its code is `ARG_ERROR` for invalid arguments, and otherwise names the
+/// method, for example `CLEAR_CART_ERROR` for `clearCart`. On Android, calls that need an initialized SDK fail with
+/// `SDK_NOT_INITIALIZED` before [initialize], and `transferPrescriptions` fails with `NO_ACTIVITY` without an attached
+/// activity. Other screens then open in a new task, and [launchPrerequisiteFlow] can't report its result. CardLink
+/// has its own codes, see `IaBaseCardLink`.
 ///
 class IaSdk {
   IaSdk._();
@@ -115,6 +127,10 @@ class IaSdk {
   ///
   bool _modulesRegistered = false;
 
+  /// Modules passed to the successful [register] call.
+  ///
+  final _registeredModules = <IaBaseModule>{};
+
   /// Register a collection of specified [modules] for client integration.
   ///
   /// Modules provide specific functionality to client integrations,
@@ -126,9 +142,56 @@ class IaSdk {
   /// - [pharmacy]
   /// - [prescription]
   ///
+  /// Pass all modules in one call, before [initialize]: the Android SDK only starts the modules registered before it
+  /// initializes, so a call after [initialize] throws a [StateError]. Later calls have no effect, and throw a
+  /// [StateError] when they pass a module the first call didn't. Create the module objects for this call too, as
+  /// their native part registers when they're created.
+  ///
+  /// Fails when a module's native part is missing, for example when the app wasn't rebuilt after adding the module.
+  ///
   Future<void> register({
     required List<IaBase> modules,
   }) async {
+    // A call made while another one runs waits for it, then counts as a later call. When that one failed, another
+    // waiting call may have started meanwhile, so this waits until none runs.
+    for (var pending = _pendingRegistration; pending != null; pending = _pendingRegistration) {
+      await pending.catchError((Object _) {});
+    }
+    if (_modulesRegistered) {
+      final unregisteredModules = [
+        for (final moduleEntry in modules)
+          if (!_registeredModules.contains(moduleEntry.module)) moduleEntry.module.name,
+      ];
+      if (unregisteredModules.isNotEmpty) {
+        throw StateError(
+          'IaSdk.register was already called, so ${unregisteredModules.join(', ')} can\'t be added. '
+          'Pass all modules in the first call.',
+        );
+      }
+      return;
+    }
+    if (_initialized || _pendingInitialization != null) {
+      throw StateError(
+        'Call IaSdk.register before initialize: the Android SDK only starts the modules registered before it '
+        'initializes.',
+      );
+    }
+    final registration = _register(modules);
+    _pendingRegistration = registration;
+    try {
+      await registration;
+    } finally {
+      _pendingRegistration = null;
+    }
+  }
+
+  /// The [register] call in progress, which [initialize] waits for.
+  ///
+  Future<void>? _pendingRegistration;
+
+  Future<void> _register(List<IaBase> modules) async {
+    // Each module starts its native registration when it's created; a missing native part fails here.
+    await Future.wait(modules.map((moduleEntry) => moduleEntry.nativeRegistration));
     if (!_modulesRegistered) {
       final arguments = _RequestModelRegisterModules(
         modules: modules.map(
@@ -137,7 +200,7 @@ class IaSdk {
           },
         ).toList(),
       );
-      return await _Methods.register.invoke(arguments).then((value) {
+      return await _Methods.register.invoke(arguments).then((value) async {
         for (final module in modules) {
           for (final internalModule
               in <
@@ -173,6 +236,7 @@ class IaSdk {
           }
         }
         _modulesRegistered = true;
+        _registeredModules.addAll(modules.map((moduleEntry) => moduleEntry.module));
         return value;
       });
     }
@@ -184,30 +248,92 @@ class IaSdk {
 
   /// Allocates the resources required for the AppSDK usage.
   ///
+  /// Only the first successful call has an effect; later calls return without applying their [config], and a call
+  /// made while another one runs completes with it.
+  ///
+  /// An empty [IaSdkConfiguration.accessKey] or [IaSdkConfiguration.clientId] fails with `ARG_ERROR` before the SDK
+  /// starts initializing.
+  ///
+  /// On iOS, open SDK screens and show inline components after it completed. A screen launched while it runs opens
+  /// once it's done, but a screen or component shown before it starts keeps loading.
+  ///
+  /// On Android a failed initialization can't be retried: the SDK keeps its error state, so later calls fail too
+  /// until the app restarts. On iOS a later call initializes the SDK again; while an SDK screen runs the
+  /// initialization and prerequisites itself, the call waits until they're done.
+  ///
   Future<void> initialize({
     required IaSdkConfiguration config,
   }) async {
-    if (!_initialized) {
-      final arguments = _RequestModelInitConfig.fromConfig(config);
-      await _Methods.initialize.invoke(arguments);
-      _initialized = true;
-      // Android only attaches the host log file to CardLink, so the CardLink module forwards it there.
-      final hostAppLogFilePath = config.hostAppLogFilePath;
-      if (hostAppLogFilePath != null) {
-        await _cardLink?.setHostAppLogFilePath(hostAppLogFilePath);
-      }
+    if (_initialized) return;
+    // A call made while another one runs waits for it instead of initializing again. The running call is set before
+    // anything is awaited, so a call or a register made meanwhile sees it.
+    final pendingInitialization = _pendingInitialization;
+    if (pendingInitialization != null) return pendingInitialization;
+    final initialization = _initialize(config);
+    _pendingInitialization = initialization;
+    try {
+      await initialization;
+    } finally {
+      _pendingInitialization = null;
+    }
+  }
+
+  Future<void>? _pendingInitialization;
+
+  Future<void> _initialize(IaSdkConfiguration config) async {
+    // A register call that's still running finishes first, so its modules start. Its failure is its own caller's.
+    await _pendingRegistration?.catchError((Object _) {});
+    // The Android SDK rejects these without reporting an error state, unlike the iOS SDK, so both fail the same here.
+    if (config.accessKey.trim().isEmpty || config.clientId.trim().isEmpty) {
+      throw PlatformException(code: 'ARG_ERROR', message: 'accessKey and clientId must not be empty.');
+    }
+    final arguments = _RequestModelInitConfig.fromConfig(config);
+    await _Methods.initialize.invoke(arguments);
+    _initialized = true;
+    _hostAppLogFilePath = config.hostAppLogFilePath;
+    await _forwardHostAppLogFilePath();
+  }
+
+  String? _hostAppLogFilePath;
+
+  /// Android only attaches the host log file to CardLink, so [initialize] forwards it to the CardLink module, which
+  /// [register] added before. A failure only affects CardLink problem reports, so it doesn't fail [initialize].
+  ///
+  Future<void> _forwardHostAppLogFilePath() async {
+    final hostAppLogFilePath = _hostAppLogFilePath;
+    final cardLink = _cardLink;
+    if (hostAppLogFilePath == null || cardLink == null) return;
+    try {
+      await cardLink.setHostAppLogFilePath(hostAppLogFilePath);
+    } catch (exception, stack) {
+      FlutterError.presentError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'appsdk_v2_flutter_plugin',
+          context: ErrorDescription('while forwarding the host app log file to CardLink'),
+        ),
+      );
     }
   }
 
   /// Forwards the client personal information to the ia.de library for checkout purposes.
   ///
+  /// [salutation] is one of "Herr", "Frau", "Divers" (or "Diverse") and "Keine Angabe", matched case-insensitively.
+  /// Other values are stored as "Keine Angabe".
+  ///
+  /// On Android, call it after [initialize]; before that the call fails.
+  ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
+  ///
+
   Future<void> setGuestUserData({
     required String salutation,
     required String firstName,
     required String lastName,
     required String email,
     required int phoneNumberCountryCode,
-    required int phoneNumberWithoutCountryCode,
+    required String phoneNumberWithoutCountryCode,
   }) async {
     final arguments = _RequestModelSetGuestUserData(
       salutation: salutation,
@@ -222,15 +348,25 @@ class IaSdk {
 
   /// Resets the user data and onboarding status (pharmacy selection, user consents statuses).
   ///
+  /// On Android, call it after [initialize]; before that the call fails.
+  ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
+  ///
+
   Future<void> logout() async {
     return await _Methods.logout.invoke();
   }
 
   /// Resets the prerequisites state, so the SDK runs the prerequisites flow
-  /// (legal documents, onboarding) again the next time it's required.
+  /// (legal documents, onboarding, pharmacy selection) again the next time it's required.
   ///
-  /// Unlike [logout], user data is kept.
+  /// The selected pharmacy is cleared too. Unlike [logout], other user data is kept.
   ///
+  /// On Android, call it after [initialize]; before that the call fails.
+  ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
+  ///
+
   Future<void> resetPrerequisites() async {
     return await _Methods.resetPrerequisites.invoke();
   }
@@ -247,14 +383,19 @@ class IaSdk {
   ///
   /// Note: Only supported on iOS.
   ///
-  Future<void> setIsOnboardingShown(bool isOnboardingShown) async {
+  Future<void> setIsOnboardingShown({
+    required bool isOnboardingShown,
+  }) async {
     final arguments = _RequestModelSetEnabled(
       enabled: isOnboardingShown,
     );
     return await _Methods.setIsOnboardingShown.invoke(arguments);
   }
 
-  /// Returns `true` if the user has completed the prerequisites flow (legal documents, onboarding).
+  /// Returns `true` if the user has completed the prerequisites flow (legal documents, onboarding) and a valid
+  /// pharmacy is selected, unless [IaPrerequisitesConfiguration.runApofinderIfNeeded] is `false`.
+  ///
+  /// Call it after [initialize]; before that the call fails.
   ///
   /// Note: Only supported on Android.
   ///
@@ -263,7 +404,7 @@ class IaSdk {
     return result ?? false;
   }
 
-  /// Launches the prerequisites flow (legal documents, onboarding) on top of the navigation stack.
+  /// Launches the prerequisites flow (legal documents, onboarding, pharmacy selection) on top of the navigation stack.
   ///
   /// The outcome is reported through [prerequisitesResultListener].
   ///
@@ -295,7 +436,10 @@ class IaSdk {
     );
   }
 
-  /// Closes any overlaying ia.de screen contents.
+  /// Closes the ia.de screens shown on top of the app, including screens the SDK opened from them.
+  ///
+  /// Screens the host app presented itself stay open, and so does a CardLink flow the host launched. On iOS, a CardLink
+  /// flow launched while an SDK screen was shown sits on that screen and closes with it, reporting `willExit`.
   ///
   Future<void> finishAllActivities() async {
     return await _Methods.finishAllActivities.invoke();
@@ -311,8 +455,17 @@ class IaSdk {
 
   /// Legacy setup required when the host app is the Core app.
   ///
+  /// Note: Only has an effect on iOS.
+  ///
   Future<void> legacySetupAsCoreApp() async {
     return await _Methods.legacySetupAsCoreApp.invoke();
+  }
+
+  /// Returns the current initialization state, see also [initializationStateListener].
+  ///
+  Future<IaSdkInitializationState> getInitializationState() async {
+    final result = await _Methods.getInitializationState.invoke<String>();
+    return IaSdkInitializationState.values.where((state) => state.name == result).firstOrNull ?? IaSdkInitializationState.uninitialized;
   }
 
   /// Returns `true` if the SDK has been successfully initialized.
@@ -322,9 +475,11 @@ class IaSdk {
     return result ?? false;
   }
 
-  /// Deletes the user account from the SDK.
+  /// Deletes the user data the SDK stores on the device: the guest and registered user with their name, email,
+  /// phone number and addresses.
   ///
-  /// This is different from [logout] which clears local data — this deletes the user on the backend.
+  /// It makes no backend request. [logout] deletes this data too, and also resets the prerequisites, the cart and
+  /// the pharmacy.
   ///
   /// Note: Only supported on iOS.
   ///
@@ -332,12 +487,15 @@ class IaSdk {
     return await _Methods.deleteUser.invoke();
   }
 
-  /// Returns the current server environment.
+  /// Returns the current server environment. Before [initialize] it's the SDK's default, production.
   ///
-  Future<IaSdkConfigurationServerEnvironment?> getEnvironment() async {
+  Future<IaSdkConfigurationServerEnvironment> getEnvironment() async {
     final result = await _Methods.getEnvironment.invoke<String?>();
-    if (result == null) return null;
-    return IaSdkConfigurationServerEnvironment.values.where((e) => e.name == result).firstOrNull;
+    final environment = IaSdkConfigurationServerEnvironment.values.where((e) => e.name == result).firstOrNull;
+    if (environment == null) {
+      throw StateError('getEnvironment: Unknown environment $result.');
+    }
+    return environment;
   }
 
   /// Toggles the Pharmi mascot illustrations at runtime.
@@ -364,6 +522,8 @@ class IaSdk {
 
   /// Clears cached SDK data for initialization and/or prerequisites.
   ///
+  /// With [initialization], the SDK is uninitialized afterwards, and the next [initialize] call initializes it again.
+  ///
   /// Note: Only supported on iOS.
   ///
   Future<void> cleanCache({
@@ -374,13 +534,24 @@ class IaSdk {
       initialization: initialization,
       prerequisites: prerequisites,
     );
-    return await _Methods.cleanCache.invoke(arguments);
+    await _Methods.cleanCache.invoke(arguments);
+    if (initialization) {
+      // The SDK is uninitialized again, so the next [initialize] call has to run.
+      _initialized = false;
+    }
   }
 
   /// Sets the user's billing address, used to pre-fill the checkout flow.
   ///
+  /// On Android, call it after [initialize]; before that the call fails.
+  ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
+  ///
+
   /// Pass a salutation matching the values accepted by [setGuestUserData]
   /// (for example "Herr"/"Frau") or `null` to leave it unset.
+  ///
+  /// The phone number is only stored when both [phoneNumberCountryCode] and [phoneNumberWithoutCountryCode] are set.
   ///
   Future<void> setUserBillingAddress({
     required String firstName,
@@ -411,8 +582,15 @@ class IaSdk {
 
   /// Sets the user's delivery address, used to pre-fill the checkout flow.
   ///
+  /// On Android, call it after [initialize]; before that the call fails.
+  ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
+  ///
+
   /// Pass a salutation matching the values accepted by [setGuestUserData]
   /// (for example "Herr"/"Frau") or `null` to leave it unset.
+  ///
+  /// The phone number is only stored when both [phoneNumberCountryCode] and [phoneNumberWithoutCountryCode] are set.
   ///
   Future<void> setUserDeliveryAddress({
     required String firstName,
@@ -443,11 +621,19 @@ class IaSdk {
 
   /// Removes the billing address set with [setUserBillingAddress].
   ///
+  /// On Android, call it after [initialize]; before that the call fails.
+  ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
+  ///
   Future<void> clearUserBillingAddress() async {
     return await _Methods.clearUserBillingAddress.invoke();
   }
 
   /// Removes the delivery address set with [setUserDeliveryAddress].
+  ///
+  /// On Android, call it after [initialize]; before that the call fails.
+  ///
+  /// On Android the SDK applies it in the background after the call returns, and doesn't report failures.
   ///
   Future<void> clearUserDeliveryAddress() async {
     return await _Methods.clearUserDeliveryAddress.invoke();
@@ -455,11 +641,16 @@ class IaSdk {
 
   /// Sets the user's consent for the SDK's analytics tracking.
   ///
-  /// Call it after [initialize]. Tracking also needs [IaSdkConfiguration.isAnalyticsEnabled].
+  /// Call it after [initialize]; before that the call fails. Tracking also needs [IaSdkConfiguration.isAnalyticsEnabled].
+  ///
+  /// The SDK doesn't store the consent: it starts as unknown, without tracking, so set it again after every
+  /// [initialize].
   ///
   /// Note: Only supported on Android.
   ///
-  Future<void> setAnalyticsConsent(IaSdkAnalyticsConsent consent) async {
+  Future<void> setAnalyticsConsent({
+    required IaSdkAnalyticsConsent consent,
+  }) async {
     final arguments = _RequestModelSetAnalyticsConsent(
       consent: consent,
     );
@@ -468,9 +659,14 @@ class IaSdk {
 
   /// Turns haptic feedback in SDK screens on or off.
   ///
+  /// Call it after [initialize]; before that the call fails. [IaSdkConfiguration.isHapticFeedbackEnabled] sets the
+  /// initial value.
+  ///
   /// Note: Only supported on Android.
   ///
-  Future<void> setHapticFeedbackEnabled(bool isEnabled) async {
+  Future<void> setHapticFeedbackEnabled({
+    required bool isEnabled,
+  }) async {
     final arguments = _RequestModelSetEnabled(
       enabled: isEnabled,
     );
@@ -479,16 +675,24 @@ class IaSdk {
 
   /// Presents the SDK's log viewer, for debugging an integration.
   ///
+  /// On Android, call it after [initialize]; before that the call fails.
+  ///
   Future<void> presentLogs() async {
     return await _Methods.presentLogs.invoke();
   }
 
-  /// Writes the SDK's logs to a file and returns its path, or `null` if there are no logs.
+  /// Writes the SDK's logs to a file and returns its path. Fails when the logs can't be exported.
+  ///
+  /// Call it after [initialize]; before that the call fails.
   ///
   /// Note: Only supported on Android. On iOS the log viewer opened with [presentLogs] can share the logs.
   ///
-  Future<String?> exportLogs() async {
-    return await _Methods.exportLogs.invoke<String?>();
+  Future<String> exportLogs() async {
+    final path = await _Methods.exportLogs.invoke<String?>();
+    if (path == null) {
+      throw StateError('exportLogs: No path returned.');
+    }
+    return path;
   }
 
   /// Returns the SDK's identifier for the current user, for example to include in support requests.
@@ -499,9 +703,11 @@ class IaSdk {
     return await _Methods.getUserId.invoke<String?>();
   }
 
-  /// Removes all cached network responses of the SDK, for testing an integration with fresh data.
+  /// Removes the SDK's cached image responses, for testing an integration with fresh images.
   ///
-  /// Note: Only supported on iOS. See [cleanCache] for the initialization and prerequisites caches.
+  /// Cached API data isn't affected. See [cleanCache] for the initialization and prerequisites caches.
+  ///
+  /// Note: Only supported on iOS.
   ///
   Future<void> removeAllCachedResponses() async {
     return await _Methods.removeAllCachedResponses.invoke();
@@ -522,9 +728,16 @@ class IaSdk {
     ],
   );
 
-  /// Called when the user leaves an SDK screen opened from the host app with the system back action.
+  /// Called before an SDK screen opened from the host app closes, for example with the system back action or the
+  /// SDK's own close buttons.
   ///
-  /// Return `true` to close the screen, `false` to keep it open. When not set, the screen closes.
+  /// Return `true` to close the screen, `false` to keep it open. When not set, when it throws, or when it doesn't
+  /// answer within 5 seconds, the screen closes. [finishAllActivities] always closes the screens without asking.
+  ///
+  /// It isn't called for the prerequisites flow opened with [launchPrerequisiteFlow], whose SDK screen has no
+  /// back hook, nor for the screens the SDK opens from `IaProductGrid` or for `transferPrescriptions`, which it
+  /// starts without one. The SDK keeps a single back hook for all its screens and removes it when one of them closes,
+  /// so after a screen launched on top of another one closes, the screen below closes without asking.
   ///
   /// Note: Only supported on Android.
   ///
@@ -538,6 +751,9 @@ class IaSdk {
   final prerequisitesResultListener = StreamController<IaSdkPrerequisitesResult>.broadcast();
 
   /// Notifier object informing the client integration of SDK initialization state changes.
+  ///
+  /// Changes that happen before the stream has a listener aren't replayed; read the current state with
+  /// [getInitializationState].
   ///
   /// Usage:
   ///
@@ -584,13 +800,15 @@ class IaSdk {
   /// Return `true` to let the SDK proceed with its built-in presentation.
   ///
   /// On Android the SDK waits at most 500 ms for the answer and otherwise proceeds with its
-  /// built-in presentation, so answer without awaiting slow work.
+  /// built-in presentation. A later answer is ignored, so answer without awaiting slow work, or the
+  /// host's screen and the SDK's screen both open. The Android SDK also opens the screens of `IaProductGrid`
+  /// (product details) and of `transferPrescriptions` without asking, including the navigation within them.
   ///
   /// Usage:
   ///
   /// ```dart
   /// IaSdk.instance.onSdkWillNavigateToTarget = (navigationTarget) async {
-  ///   if (navigationTarget == SdkNavigationTarget.cart) {
+  ///   if (navigationTarget == IaSdkNavigationTarget.cart) {
   ///     // Switch to your own cart tab.
   ///     switchToTab(TabType.cart);
   ///     return false;
