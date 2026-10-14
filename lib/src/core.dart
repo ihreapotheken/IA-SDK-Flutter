@@ -278,8 +278,6 @@ class IaSdk {
     }
   }
 
-  /// The [initialize] call in progress.
-  ///
   Future<void>? _pendingInitialization;
 
   Future<void> _initialize(IaSdkConfiguration config) async {
@@ -296,8 +294,6 @@ class IaSdk {
     await _forwardHostAppLogFilePath();
   }
 
-  /// Host log file of the [initialize] configuration, see [IaSdkConfiguration.hostAppLogFilePath].
-  ///
   String? _hostAppLogFilePath;
 
   /// Android only attaches the host log file to CardLink, so [initialize] forwards it to the CardLink module, which

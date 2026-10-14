@@ -24,7 +24,7 @@ class IaClientBindings(
     val channel: MethodChannel = MethodChannel(binaryMessenger, "de.ihreapotheken/sdk")
 
     /**
-     * The AppSDK entry point. It's a process-wide object, so it's usable before `register`.
+     * A process-wide object, so it's usable before `register`.
      */
     val sdkModule: IaSdk = IaSdk
     
@@ -68,16 +68,10 @@ class IaClientBindings(
         override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
     }
 
-    /**
-     * Finishes the open SDK screens, see [openSdkScreens].
-     */
     fun finishOpenSdkScreens() {
         openSdkScreens.toList().forEach { if (!it.isFinishing) it.finish() }
     }
 
-    /**
-     * Stops the work that would otherwise outlive the detached Flutter engine.
-     */
     fun dispose() {
         initStateJob?.cancel()
         methodHandler?.dispose()

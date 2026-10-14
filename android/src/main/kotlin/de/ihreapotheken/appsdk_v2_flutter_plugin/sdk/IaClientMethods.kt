@@ -280,16 +280,13 @@ internal class IaClientMethods(
      */
     private val scope = MainScope()
 
-    /**
-     * Cancels pending suspending calls when the Flutter engine detaches.
-     */
     fun dispose() {
         scope.cancel()
     }
 
     /**
      * Opens the SDK cart for a cart button without a Dart tap handler. The SDK's own button opens it without asking
-     * onSdkWillNavigateToTarget, unlike on iOS, so the plugin asks first, with the SDK's 500 ms limit.
+     * onSdkWillNavigateToTarget, so the plugin asks first, with the SDK's 500 ms limit.
      */
     fun openCartFromCartButton(context: Context) {
         scope.launch {

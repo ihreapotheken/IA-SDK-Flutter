@@ -44,7 +44,6 @@ class CardLinkView extends StatefulWidget {
 }
 
 class _CardLinkViewStateData extends State<CardLinkView> {
-  /// ARGB green for the "Custom Colors" launch option.
   static const _customColor = 0xFF2E7D32;
 
   final _data = CardLinkViewStateData();

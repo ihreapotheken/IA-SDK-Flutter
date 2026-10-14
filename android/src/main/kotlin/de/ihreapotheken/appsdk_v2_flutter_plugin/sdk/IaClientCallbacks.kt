@@ -119,7 +119,7 @@ class IaClientCallbacks(
     }
 
     /**
-     * Reports the emptied cart after the plugin cleared it. The SDK reports no cart change then, unlike the iOS SDK.
+     * The SDK doesn't report a cart change when the plugin clears the cart.
      */
     fun reportEmptyCart() {
         sendCartUpdate(totalProducts = 0, totalPrescription = 0, totalItems = 0)
@@ -139,14 +139,8 @@ class IaClientCallbacks(
         )
     }
 
-    /**
-     * Handlers for the next cart change only, see [onNextCartChange].
-     */
     private val nextCartChangeHandlers = mutableListOf<() -> Unit>()
 
-    /**
-     * Calls [handler] once, on the next cart change. A prescription transfer that opens the cart finishes then.
-     */
     fun onNextCartChange(handler: () -> Unit) {
         synchronized(nextCartChangeHandlers) {
             nextCartChangeHandlers.add(handler)

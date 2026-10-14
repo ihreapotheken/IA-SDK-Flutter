@@ -115,8 +115,6 @@ class LaunchHandler {
         environmentSetByLaunch = nil
     }
 
-    /// Handles a launched CardLink flow that closed together with the SDK screen it was shown on, for example
-    /// through `finishAllActivities`.
     func handleClosedWithSdkScreens() {
         Self.finishCardLink { [weak self] in
             self?.reportClosed()
@@ -132,7 +130,6 @@ class LaunchHandler {
     }
 
 
-    /// Closes CardLink, then replies.
     func finish(result: @escaping FlutterResult) {
         // Right after a launch CardLink signs in before it shows anything, and the SDK opens it afterwards anyway, so
         // its closing is only reported for a shown CardLink.

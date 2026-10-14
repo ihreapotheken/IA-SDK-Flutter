@@ -155,7 +155,6 @@ final class IASDKWrapper {
         return nil
     }
 
-    /// Whether a CardLink screen is pushed or presented on the given screen or above it.
     private static func containsCardLink(from viewController: UIViewController) -> Bool {
         var current: UIViewController? = viewController
         while let viewController = current {

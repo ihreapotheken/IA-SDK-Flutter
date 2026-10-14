@@ -501,8 +501,6 @@ class ServicesView extends StatelessWidget {
     ),
   ];
 
-  /// Transfers the example's mock image, PDF and e-prescription data.
-  ///
   static Future<void> _transferMockPrescriptions({
     required IaTransferPrescriptionsFinishAction finishAction,
     required bool showActivityIndicator,

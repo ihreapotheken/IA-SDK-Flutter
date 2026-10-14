@@ -15,7 +15,6 @@ class _ComponentsViewState extends State<ComponentsView> {
 
   final _customPznsController = TextEditingController();
 
-  /// Product the recommendation-based grids are based on.
   final _recommendationPznController = TextEditingController();
 
   List<String> _customPzns = const [];

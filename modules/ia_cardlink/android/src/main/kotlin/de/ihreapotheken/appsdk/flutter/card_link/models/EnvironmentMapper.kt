@@ -5,8 +5,7 @@ import de.ihreapotheken.sdk.core.data.EnvironmentType
 
 object EnvironmentMapper {
     /**
-     * Maps the Dart environment. Without one, CardLink follows the environment the SDK was
-     * initialized with, as on iOS.
+     * Without an environment, CardLink follows the environment the SDK was initialized with.
      */
     fun fromString(environment: String?): CardLinkSdkEnvironmentType {
         return when (environment) {

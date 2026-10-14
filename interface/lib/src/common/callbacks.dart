@@ -5,7 +5,6 @@ part of '_interface.dart';
 class IaBaseCallbacks {
   /// Default callback for receiving method calls on a [MethodChannel] object.
   ///
-  ///
   /// The first subscriber with a matching handler handles the call. Without one, native receives
   /// "not implemented" and falls back to its default. A failing handler is logged with
   /// [FlutterError.presentError] and rethrown, so native receives the error instead of a silent default.

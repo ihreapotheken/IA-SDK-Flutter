@@ -337,9 +337,6 @@ class IaSdkFlutterCardLink :
         }
     }
 
-    /**
-     * Runs a blocking SDK storage call off the main thread and reports its completion to Flutter.
-     */
     private fun runStorageCall(result: Result, errorCode: String, block: (Context) -> Unit) {
         val context = storageContext()
         if (context == null) {

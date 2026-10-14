@@ -16,10 +16,8 @@ public class IaSdkFlutterCardLink: NSObject, FlutterPlugin {
     /// for another Flutter engine, replaces it, like the core plugin replaces the SDK delegate.
     private static var sdkFlowActionObserver: NSObjectProtocol?
 
-    /// Observer of the core plugin's notification that SDK screens closed together with a CardLink flow on them.
     private static var closedWithSdkScreensObserver: NSObjectProtocol?
 
-    /// Observer of the core plugin's notification that `initialize` set the SDK environment.
     private static var environmentWasSetObserver: NSObjectProtocol?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
