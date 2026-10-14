@@ -151,6 +151,8 @@ Native SDK 2.9.0 on both platforms.
     `clearCart`, `transferPrescriptions`, `presentLogs`, `exportLogs`, and the pharmacy ID getter and clearer. The
     SDK used to ignore them or answer with defaults.
   - CardLink without an `environment` follows the SDK's environment.
+- **The Android plugins need API 27 (Android 8.1) instead of 30**, like the native SDK modules. `ia_cardlink` still
+  needs API 30, as the native CardLink module does.
 
 ## 0.0.1
 

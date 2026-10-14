@@ -30,7 +30,7 @@ The library is supported on both of the major mobile operating systems, with con
 
 ### Android
 
-- Minimum SDK Version: `30`
+- Minimum SDK Version: `27` (Android 8.1), or `30` (Android 11) with `ia_cardlink`, like the native CardLink module
 - Target SDK Version: `36`
 - Kotlin `2.1.0`
 - Gradle `8.12.3`
