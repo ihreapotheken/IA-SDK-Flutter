@@ -13,6 +13,17 @@ class ComponentsView extends StatefulWidget {
 class _ComponentsViewState extends State<ComponentsView> {
   IaProductDisplayType _selectedGridType = IaProductDisplayType.currentOffers;
 
+  final _customPznsController = TextEditingController();
+
+  final _recommendationPznController = TextEditingController();
+
+  List<String> _customPzns = const [];
+
+  bool get _needsPzn {
+    return _selectedGridType == IaProductDisplayType.productRecommendations ||
+        _selectedGridType == IaProductDisplayType.customersAlsoBought;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -25,13 +36,33 @@ class _ComponentsViewState extends State<ComponentsView> {
       children: [
         const _SectionHeader('Cart Button'),
         const IaCartButton(),
+        const SizedBox(height: 12),
+        Text('With a host tap handler', style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: 4),
+        IaCartButton(
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Cart button tapped, the host app handles it.')),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        Text('In a row, with a set width for Android', style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: 4),
+        const Row(
+          children: [
+            Text('Your cart'),
+            SizedBox(width: 12),
+            SizedBox(width: 64, child: IaCartButton()),
+          ],
+        ),
         const SizedBox(height: 24),
         const _SectionHeader('Product Grid'),
         Text('Display Type', style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 4),
         Wrap(
           spacing: 8,
-          children: IaProductDisplayType.values.map((type) {
+          children: IaProductDisplayType.values.where((type) => type != IaProductDisplayType.custom).map((type) {
             return ChoiceChip(
               label: Text(type.name),
               selected: _selectedGridType == type,
@@ -40,12 +71,48 @@ class _ComponentsViewState extends State<ComponentsView> {
           }).toList(),
         ),
         const SizedBox(height: 12),
-        IaProductGrid(
-          key: ValueKey(_selectedGridType),
-          type: _selectedGridType,
+        if (_needsPzn) ...[
+          TextField(
+            controller: _recommendationPznController,
+            decoration: const InputDecoration(labelText: 'PZN the recommendations are based on'),
+            onSubmitted: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (!_needsPzn || _recommendationPznController.text.trim().isNotEmpty)
+          IaProductGrid(
+            type: _selectedGridType,
+            pzn: _needsPzn ? _recommendationPznController.text.trim() : null,
+          ),
+        const SizedBox(height: 24),
+        const _SectionHeader('Custom Product Grid'),
+        TextField(
+          controller: _customPznsController,
+          decoration: const InputDecoration(
+            labelText: 'PZNs, comma separated',
+          ),
+          onSubmitted: (value) {
+            setState(() {
+              _customPzns = value.split(',').map((pzn) => pzn.trim()).where((pzn) => pzn.isNotEmpty).toList();
+            });
+          },
         ),
+        const SizedBox(height: 12),
+        if (_customPzns.isNotEmpty)
+          IaProductGrid(
+            type: IaProductDisplayType.custom,
+            title: 'Selected for you',
+            pzns: _customPzns,
+          ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _customPznsController.dispose();
+    _recommendationPznController.dispose();
+    super.dispose();
   }
 }
 

@@ -61,6 +61,21 @@ to check the result.
 
 Requires AppSDK 2.7.0 or newer on both platforms.
 
+### Test switches
+
+These dart-defines turn on SDK options the app leaves off by default, so they can be tested:
+
+| dart-define | Effect | Default |
+|---|---|---|
+| `iaShowDataProcessing=true` | Footer shows "Datenverarbeitung", reported as the `hostAppPrivacyPolicy` navigation target | off |
+| `iaHostImprint=true` | Android: the imprint button is reported as the `imprint` navigation target instead of opening the SDK's page | off |
+| `iaPickupLocker=true` | Checkout offers pickup lockers and courier shipping | SDK default |
+| `iaAnalytics=false` | Android analytics tracking (events show in the Events tab once consent is granted) | on outside production |
+| `iaAppStoreId=…`, `iaPlayStoreId=…` | Store identifiers the SDK links to | unset |
+
+Test pharmacies are listed in Apofinder outside production (`IaSdkConfigurationQa`). CardLink flows the SDK
+starts itself save cards under the CardLink tab's default user ID, and problem reports include a demo host log file.
+
 ## Running the Example
 
 ```bash
@@ -102,7 +117,8 @@ in `CFBundleDisplayName`, which
 
 ## App Structure
 
-The example app contains four main tabs demonstrating different SDK features:
+The example app contains six tabs demonstrating different SDK features. Labels ending in "(iOS)" or
+"(Android)" mark features only one native SDK has; on the other platform they report a `MissingPluginException`.
 
 ### Host App Tab
 Displays a map with pharmacy markers. Tapping a marker shows a bottom sheet where you can:
@@ -112,24 +128,35 @@ Displays a map with pharmacy markers. Tapping a marker shows a bottom sheet wher
 
 ### CardLink Tab
 Demonstrates the CardLink module for NFC-based prescription transfer:
-- Launch CardLink SDK flow
-- Launch Saved Cards flow
-- Get SDK version and environment info
-- Manage saved cards (get/delete)
+- Launch the CardLink and Saved Cards flows, with an illustration color (Android)
+- Get SDK version, environment and log file info
+- Manage saved cards: get (raw and typed), rename (Android), reorder (Android), delete, mock the backend (iOS)
+- Attach a host log file to problem reports
+- A log of all CardLink events, including consent phone number, saved cards, errors and results
 
 ### Services Tab
-Demonstrates various SDK service methods:
-- Clear shopping cart
-- Set guest user data
-- Logout
-- Transfer prescriptions (images, PDFs, codes)
+Demonstrates the SDK service methods:
+- SDK state: initialization state, environment, prerequisites (reset, legal disclaimer, onboarding)
+- Pharmacy: get, save without validation (iOS), clear, details (iOS)
+- Ordering: cart details and state (iOS), clear cart, order history, transfer prescriptions with each finish action
+- User: guest data, billing and delivery addresses (set and clear), delete user, logout
+- Appearance, analytics consent, haptics, logs, user ID and caches
 
 ### Screens Tab
-Demonstrates launching SDK screens directly:
-- Start screen
-- Product search
-- Cart screen
-- Pharmacy details
+Demonstrates launching SDK screens directly: start, product search (also focused), cart, pharmacy details,
+Apofinder (also not cancellable), redeem prescription, the prescription scanners with a scripted camera test
+(iOS), and the prerequisite flow (Android).
+
+### Components Tab
+Embeds the cart button (also with a host tap handler) and the product grids, including a custom one.
+
+### Events Tab
+Lists the SDK callbacks and stream events the app received: navigation targets, back actions, initialization
+state, prerequisites results, cart and order updates, scanned prescriptions, analytics, CardLink events and,
+when switched on, the SDK's own log messages (iOS). Switches at the top change how the app answers:
+- the host handles navigation targets, so the SDK doesn't open the screen,
+- the back action keeps SDK screens open (Android),
+- the answer to scanned prescriptions (perform default, handled, error).
 
 ## E2E Harness
 

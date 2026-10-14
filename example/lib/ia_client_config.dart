@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 /// Includes logic for retrieving of any relevant configuration information.
 ///
 class ExampleAppConfig {
-  const ExampleAppConfig._();
+  ExampleAppConfig._();
 
   /// Globally-accessible singleton class instance.
   ///
@@ -72,6 +72,66 @@ class ExampleAppConfig {
     defaultValue: true,
   );
 
+  /// User identifier the CardLink tab and the CardLink flows the SDK starts itself store saved cards under,
+  /// so cards saved in either show up in the other.
+  ///
+  static const cardLinkUserId = 'test_user_123';
+
+  /// Host app log file attached to problem reports sent from SDK screens, created when the app starts.
+  ///
+  String? hostAppLogFilePath;
+
+  /// Whether the footer shows the "Datenverarbeitung" button, which reports
+  /// `IaSdkNavigationTarget.hostAppPrivacyPolicy`:
+  ///
+  /// ```dart
+  /// flutter run --dart-define iaShowDataProcessing=true
+  /// ```
+  ///
+  final _shouldShowDataProcessing = const bool.fromEnvironment('iaShowDataProcessing');
+
+  /// Whether the host app shows the imprint on Android, so the imprint button reports
+  /// `IaSdkNavigationTarget.imprint` instead of the SDK opening its own page:
+  ///
+  /// ```dart
+  /// flutter run --dart-define iaHostImprint=true
+  /// ```
+  ///
+  final _isImprintHandledByHostApp = const bool.fromEnvironment('iaHostImprint');
+
+  /// Whether checkout offers pickup lockers and courier shipping. Without the flag the SDK default applies:
+  ///
+  /// ```dart
+  /// flutter run --dart-define iaPickupLocker=true
+  /// ```
+  ///
+  final bool? _isPickupLockerAndCourierShippingEnabled = const bool.hasEnvironment('iaPickupLocker')
+      ? const bool.fromEnvironment('iaPickupLocker')
+      : null;
+
+  /// Store identifiers the SDK links to, for example for update prompts:
+  ///
+  /// ```dart
+  /// flutter run --dart-define iaAppStoreId=123456789 --dart-define iaPlayStoreId=de.example.app
+  /// ```
+  ///
+  final _appStoreId = const String.fromEnvironment('iaAppStoreId');
+
+  final _playStoreId = const String.fromEnvironment('iaPlayStoreId');
+
+  /// Whether the SDK tracks analytics events (Android), shown in the Events tab once consent is granted in the
+  /// Services tab. On by default for the internal environments; override with:
+  ///
+  /// ```dart
+  /// flutter run --dart-define iaAnalytics=false
+  /// ```
+  ///
+  bool get isAnalyticsEnabled {
+    return const bool.hasEnvironment('iaAnalytics')
+        ? const bool.fromEnvironment('iaAnalytics')
+        : serverEnvironment != IaSdkConfigurationServerEnvironment.production;
+  }
+
   /// Short tag for the active [serverEnvironment].
   ///
   /// Matches the tag the deploy scripts append to the app launcher label, so an
@@ -103,11 +163,24 @@ class ExampleAppConfig {
       clientId: clientId,
       serverEnvironment: serverEnvironment,
       shouldFetchThemeFromRemote: true,
+      qaConfiguration: serverEnvironment == IaSdkConfigurationServerEnvironment.production
+          ? null
+          : const IaSdkConfigurationQa(showTestPharmaciesInApofinder: true),
       footer: IaSdkConfigurationFooter(
-        shouldShowDataProcessing: false,
+        shouldShowDataProcessing: _shouldShowDataProcessing,
         shouldShowAppSettings: true,
         shouldShowImprint: true,
+        isImprintHandledByHostApp: _isImprintHandledByHostApp,
       ),
+      isPickupLockerAndCourierShippingEnabled: _isPickupLockerAndCourierShippingEnabled,
+      appStoreId: _appStoreId.isEmpty ? null : _appStoreId,
+      playStoreId: _playStoreId.isEmpty ? null : _playStoreId,
+      isAnalyticsEnabled: isAnalyticsEnabled,
+      cardLink: const IaSdkConfigurationCardLink(
+        isSaveCardEnabled: true,
+        userId: cardLinkUserId,
+      ),
+      hostAppLogFilePath: hostAppLogFilePath,
       initialization: IaSdkConfigurationInitialization(
         channelId: 2,
         shouldShowIndicator: false,
