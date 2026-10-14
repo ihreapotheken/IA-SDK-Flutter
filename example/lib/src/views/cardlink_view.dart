@@ -205,7 +205,6 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 cardName: _data.cardNameController.text,
                 canCode: canCode.isNotEmpty ? canCode : null,
                 saveCardEnabled: _data.saveCardEnabled,
-                // Without an environment CardLink follows the SDK's, so it matches the selected server environment.
                 environment: null,
                 finishAction: IaCardLinkFinishAction.uploadPrescriptions,
                 coreAppLogFileURL: logFileURL,
@@ -235,7 +234,6 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 cardName: _data.cardNameController.text,
                 canCode: canCode.isNotEmpty ? canCode : null,
                 saveCardEnabled: _data.saveCardEnabled,
-                // Without an environment CardLink follows the SDK's, so it matches the selected server environment.
                 environment: null,
                 finishAction: IaCardLinkFinishAction.uploadPrescriptions,
                 coreAppLogFileURL: logFileURL,
@@ -487,7 +485,6 @@ class _LaunchSection extends StatelessWidget {
         ),
         SwitchListTile(
           title: Text('Custom Colors'),
-          // On iOS they replace the SDK-wide palette until CardLink closes; SDK screens opened later keep theirs.
           subtitle: Text('Green primary, button, link and navigation colors'),
           dense: true,
           contentPadding: EdgeInsets.zero,

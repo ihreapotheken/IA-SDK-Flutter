@@ -107,7 +107,6 @@ class ScreensView extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         ElevatedButton(
-          // The scanner covers the app, so the camera changes run on a timer while it's open.
           child: Text('Scanner Camera Test (iOS)'),
           onPressed: _runScannerCameraTest,
         ),
@@ -118,7 +117,6 @@ class ScreensView extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         ElevatedButton(
-          // The SDK screen covers the app, so finishAllActivities runs on a timer while it's open.
           child: Text('Finish All Activities Test'),
           onPressed: _runFinishAllActivitiesTest,
         ),

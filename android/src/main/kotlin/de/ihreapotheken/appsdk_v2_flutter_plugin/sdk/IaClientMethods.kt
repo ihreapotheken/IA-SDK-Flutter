@@ -460,18 +460,15 @@ internal class IaClientMethods(
                 }
                 val shouldFetchThemeFromRemote = args["shouldFetchThemeFromRemote"] == true
                 val initializationOptions = args["initialization"] as? Map<*, *>
-                // Dart sends channelId inside the initialization options, not at the top level.
                 val channelId = (initializationOptions?.get("channelId") as? Number)?.toInt()
                 val shouldShowIndicator = initializationOptions?.get("shouldShowIndicator") == true
                 val prerequisites = initializationOptions?.get("prerequisites") as? Map<*, *>
                 val shouldRunLegal = prerequisites?.get("runLegalIfNeeded") == true
                 val shouldRunOnboarding = prerequisites?.get("runOnboardingIfNeeded") == true
-                // Absent value keeps the SDK default (Apofinder runs).
                 val shouldRunApofinder = prerequisites?.get("runApofinderIfNeeded") != false
                 val uiConfiguration = parseUIConfiguration(args["uiConfiguration"] as? Map<*, *>)
                 val footer = args["footer"] as? Map<*, *>
                 val shouldShowDataProcessing = footer?.get("shouldShowDataProcessing") == true
-                // Absent values keep the SDK defaults.
                 val isPickupLockerAndCourierShippingEnabled = args["isPickupLockerAndCourierShippingEnabled"] as? Boolean ?: false
                 val isAnalyticsEnabled = args["isAnalyticsEnabled"] as? Boolean ?: false
                 val isHapticFeedbackEnabled = args["isHapticFeedbackEnabled"] as? Boolean ?: true
@@ -487,7 +484,6 @@ internal class IaClientMethods(
                     IaSdk.setQaConfiguration(parsedQaConfiguration)
                 }
                 val isCardLinkSaveCardEnabled = (args["cardLink"] as? Map<*, *>)?.get("isSaveCardEnabled") as? Boolean ?: false
-                // Footer "Datenverarbeitung" taps are reported like the iOS hostAppPrivacyPolicy navigation target.
                 bindings.sdkModule.setShowDataProcessingClickListener(bindings.callbacks)
                 // A set imprint listener replaces the SDK's own imprint page, so it's only set when the host handles it.
                 if (footer?.get("isImprintHandledByHostApp") == true) {
@@ -566,7 +562,6 @@ internal class IaClientMethods(
                     )
                     return
                 }
-                // Trimmed and checked like on iOS, which rejects other IDs as invalid arguments too.
                 val pharmacyId = (args["pharmacyId"] as? String)?.trim()
                 if (pharmacyId?.toIntOrNull() == null) {
                     result.error(
@@ -599,7 +594,6 @@ internal class IaClientMethods(
 
             FlutterCall.clearCart.name -> {
                 if (!requireInitialized(result)) return
-                // The SDK clears the cart in the background and returns once it has started.
                 val success = bindings.sdkModule.ordering.deleteCart()
                 if (success) {
                     bindings.callbacks.reportEmptyCart()
@@ -724,7 +718,6 @@ internal class IaClientMethods(
                     IaScreen.PrerequisiteFlow::class.simpleName -> IaScreen.PrerequisiteFlow
                     IaScreen.ApofinderScreen::class.simpleName -> IaScreen.ApofinderScreen
                     IaScreen.RedeemPrescription::class.simpleName -> IaScreen.RedeemPrescription
-                    // iOS-only screens, reported like the other platform-only calls.
                     "PrescriptionScanner", "EPrescriptionScanner" -> {
                         result.notImplemented()
                         return
@@ -751,14 +744,11 @@ internal class IaClientMethods(
                 }
                 val activity = activityContext as? Activity
                 if (entryPoint == IaScreen.PrerequisiteFlow && activity != null) {
-                    // The dedicated prerequisites activity reports whether the flow completed or was cancelled.
-                    // Without an activity the flow still opens below, but its result can't be reported.
                     activity.startActivityForResult(
                         IaPrerequisiteActivity.createIntent(activity),
                         REQUEST_CODE_PREREQUISITES,
                     )
                 } else if (entryPoint == IaScreen.ApofinderScreen) {
-                    // Report the selected pharmacy, like the iOS apofinderDidChangePharmacy delegate call.
                     IaSdkActivity.start(
                         context = activityContext ?: bindings.applicationContext,
                         view = IaScreen.ApofinderScreen,
@@ -844,7 +834,6 @@ internal class IaClientMethods(
                 // Note: CheckoutListener is already set globally in init, but we still need to
                 // update orderSignatures for prescription-specific flows
                 // The global listener will handle the Flutter callback
-                // The ordering feature only becomes available during initialization.
                 if (!requireInitialized(result)) return
                 if (SdkFeatureProvider.orderingFeatureProvider == null) {
                     // The SDK would only show a "not included in your subscription" message and never report back.
@@ -859,8 +848,6 @@ internal class IaClientMethods(
                         result.error("METHOD_ERROR", "The transfer screen was closed before the transfer finished.", null)
                     }
                 }
-                // OVERLAY shows a confirmation bottom sheet, every other mode opens the cart.
-                // Android has no counterpart of the iOS noAction finish action.
                 val presentationMode = if (data["finishAction"] == "showBottomSheet") {
                     PresentationMode.OVERLAY
                 } else {
@@ -936,7 +923,6 @@ internal class IaClientMethods(
             }
 
             FlutterCall.getPharmacyId.name -> {
-                // Before its initialization the SDK can't read the stored ID, so null would wrongly mean "none selected".
                 if (!requireInitialized(result)) return
                 respondSuspending(result) {
                     bindings.sdkModule.pharmacy.getPharmacyId().ifEmpty { null }
@@ -968,7 +954,6 @@ internal class IaClientMethods(
             }
 
             FlutterCall.isPrerequisiteFlowCompleted.name -> {
-                // The SDK answers false before its initialization, even for users who completed the flow.
                 if (!requireInitialized(result)) return
                 respondSuspending(result) {
                     bindings.sdkModule.isPrerequisiteFlowCompleted()
@@ -1016,7 +1001,6 @@ internal class IaClientMethods(
                     )
                     return
                 }
-                // Initialization applies IaSdkConfiguration.isHapticFeedbackEnabled, replacing an earlier value.
                 if (!requireInitialized(result)) return
                 bindings.sdkModule.setHapticFeedbackEnabled(enabled)
                 result.success(null)
@@ -1037,7 +1021,6 @@ internal class IaClientMethods(
             }
 
             FlutterCall.presentLogs.name -> {
-                // The SDK installs its log viewer during initialization.
                 if (!requireInitialized(result)) return
                 val provider = SdkFeatureProvider.debugViewerFeatureProvider
                 if (provider == null) {
@@ -1153,11 +1136,8 @@ internal class IaClientMethods(
         val zipCode = map["zipCode"] as? String ?: return null
         val city = map["city"] as? String ?: return null
         val countryCode = (map["phoneNumberCountryCode"] as? Number)?.toInt()
-        // Like iOS, the phone number is only set when both of its parts are present.
         val phoneNumber = (map["phoneNumberWithoutCountryCode"] as? String)?.takeIf { countryCode != null }
         return IaUserAddress(
-            // The AppSDK maps missing address values to empty strings, so an empty
-            // salutation leaves it unset, matching a `nil` salutation on iOS.
             salutation = (map["salutation"] as? String)?.let(::normalizedSalutation) ?: "",
             firstName = firstName,
             lastName = lastName,

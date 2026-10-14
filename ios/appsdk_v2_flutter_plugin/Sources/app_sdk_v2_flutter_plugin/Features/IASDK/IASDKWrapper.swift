@@ -45,7 +45,6 @@ final class IASDKWrapper {
             IASDK.configuration.hostAppLogFileURL = URL(fileURLWithPath: hostAppLogFilePath)
         }
 
-        // Without a QA configuration the SDK keeps its defaults, so production apps don't list test pharmacies.
         if let qaConfiguration = arguments.qaConfiguration {
             IASDK.QA.setQAFeatures(qaConfiguration.mappedToSDK())
         }
@@ -94,7 +93,6 @@ final class IASDKWrapper {
     
     func launchRoute(arguments: Any, delegate: IaClientDelegate) async throws -> Any? {
         let arguments = try argumentDecoder.decode(IaLaunchRouteArguments.self, from: arguments)
-        // Android-only screens, reported like the other platform-only calls.
         if arguments.viewId == "prerequisiteFlow" {
             return FlutterMethodNotImplemented
         }

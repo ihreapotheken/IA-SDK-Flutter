@@ -163,7 +163,6 @@ class ExampleAppConfig {
       clientId: clientId,
       serverEnvironment: serverEnvironment,
       shouldFetchThemeFromRemote: true,
-      // Test pharmacies in Apofinder for the internal environments, on both platforms.
       qaConfiguration: serverEnvironment == IaSdkConfigurationServerEnvironment.production
           ? null
           : const IaSdkConfigurationQa(showTestPharmaciesInApofinder: true),

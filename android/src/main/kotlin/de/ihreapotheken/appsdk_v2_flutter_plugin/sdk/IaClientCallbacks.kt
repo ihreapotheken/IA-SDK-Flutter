@@ -52,8 +52,6 @@ class IaClientCallbacks(
      * @return true if the host app handled the navigation, false to let SDK handle it
      */
     suspend fun handleNavigationTarget(target: SdkNavigationTarget): Boolean {
-        // Convert navigation target to string. SdkNavigationTarget is sealed, so targets added
-        // in a new SDK version fail to compile here until they're mapped.
         val navigationTargetString: String = when (target) {
             IaScreen.CartScreen -> "cart"
             IaScreen.PharmacyScreen -> "pharmacyDetails"
@@ -63,9 +61,6 @@ class IaClientCallbacks(
             IaScreen.SearchScreen -> "search"
             IaScreen.RedeemPrescription -> "redeemPrescription"
             IaScreen.ThankYouScreenCompleted -> "thankYouCompleted"
-            // Note: iOS reports imprint and hostAppPrivacyPolicy as navigation targets,
-            // the Android SDK reports footer taps through dedicated click listeners instead
-            // (onImpressumClick, onShowDataProcessingClick).
         }
 
         // Cancellable, so the SDK's 500 ms timeout stops the wait; a late answer is then ignored
@@ -131,8 +126,6 @@ class IaClientCallbacks(
     }
 
     private fun sendCartUpdate(totalProducts: Int, totalPrescription: Int, totalItems: Int) {
-        // The iOS SDK reports totalAmountInCart and client order IDs. The Android SDK reports the item count,
-        // used as totalAmountInCart, and no client order IDs, so the list stays empty.
         val arguments = mapOf(
             "totalAmountInCart" to totalItems,
             "clientOrderIDs" to emptyList<String>(),
@@ -172,8 +165,7 @@ class IaClientCallbacks(
             hostOrderCode = hostOrderId,
         )
 
-        // Send callback to Flutter. The SDK reports an empty host order ID when the host didn't
-        // pass one, which iOS leaves out of the list.
+        // The SDK reports an empty host order ID when the host didn't pass one.
         val arguments = mapOf(
             "orderCode" to sdkOrderId,
             "orderCodes" to listOf(sdkOrderId),
@@ -422,12 +414,10 @@ class IaClientCallbacks(
                         }
 
                         override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                            // On error, let SDK handle
                             continuation.resume(RedeemPrescriptionDecision.PerformDefault)
                         }
 
                         override fun notImplemented() {
-                            // Not implemented, let SDK handle
                             continuation.resume(RedeemPrescriptionDecision.PerformDefault)
                         }
                     }

@@ -201,7 +201,6 @@ class LaunchHandler {
         self.savedConfiguration = configuration
         self.savedSdkApiKey = args["sdkApiKey"] as? String
 
-        // Without a value the SDK-wide setting from initialize is kept.
         if let supportsLiquidGlass = args["supportsLiquidGlass"] as? Bool {
             IASDK.configuration.uiConfiguration.supportsLiquidGlass = supportsLiquidGlass
         }

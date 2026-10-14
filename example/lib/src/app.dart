@@ -85,7 +85,6 @@ class _ExampleAppState extends State<ExampleApp> {
       (event) => log.add('Analytics', '${event.type} ${event.parameters}'),
     );
 
-    // Attached to problem reports sent from SDK screens, see IaSdkConfiguration.hostAppLogFilePath.
     ExampleAppConfig.instance.hostAppLogFilePath = await FileUtils.createDemoCoreAppLogFile();
 
     await IaSdk.instance.register(

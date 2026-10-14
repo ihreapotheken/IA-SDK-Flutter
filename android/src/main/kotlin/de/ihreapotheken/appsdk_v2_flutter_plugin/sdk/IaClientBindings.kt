@@ -91,7 +91,6 @@ class IaClientBindings(
         val methodHandler = IaClientMethods(this)
         channel.setMethodCallHandler(methodHandler::callHandler)
 
-        // Report initialization state changes, like the iOS initializationStatePublisher.
         initStateJob = MainScope().launch {
             IaSdk.initState.collect { state ->
                 callbacks.onInitStateChanged(state)
