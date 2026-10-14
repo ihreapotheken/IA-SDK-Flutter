@@ -245,18 +245,14 @@ class _HarnessTabBar extends StatelessWidget {
                           Icon(
                             tab.icon,
                             size: 22,
-                            color: index == selectedIndex
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.black54,
+                            color: index == selectedIndex ? Theme.of(context).colorScheme.primary : Colors.black54,
                           ),
                           const SizedBox(height: 2),
                           Text(
                             tab.label,
                             style: TextStyle(
                               fontSize: 12,
-                              color: index == selectedIndex
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.black54,
+                              color: index == selectedIndex ? Theme.of(context).colorScheme.primary : Colors.black54,
                             ),
                           ),
                         ],

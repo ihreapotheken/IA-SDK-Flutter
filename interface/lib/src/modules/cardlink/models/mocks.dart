@@ -55,8 +55,7 @@ class IaCardLinkMocks {
       'isMockingEnabled': isMockingEnabled,
       'sessionResponse': sessionResponse.name,
       'sessionDurationSeconds': sessionDuration == null ? null : sessionDuration!.inMilliseconds / 1000,
-      'sessionWillExpireSoonSeconds':
-          sessionWillExpireSoonInterval == null ? null : sessionWillExpireSoonInterval!.inMilliseconds / 1000,
+      'sessionWillExpireSoonSeconds': sessionWillExpireSoonInterval == null ? null : sessionWillExpireSoonInterval!.inMilliseconds / 1000,
       'verificationResponse': verificationResponse.name,
       'ePrescriptionXmls': ePrescriptionXmls,
       'arePrescriptionsPartiallyMocked': arePrescriptionsPartiallyMocked,

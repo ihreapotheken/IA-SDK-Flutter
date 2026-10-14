@@ -26,10 +26,14 @@ class _RequestModelTransferPrescriptions implements IaBaseRequest {
   Map<String, dynamic> toSupportedType() {
     return {
       'images': images,
-      'pdfs': pdfs?.map((pdf) => {
-        'data': pdf.data,
-        'insuranceType': pdf.insuranceType.rawValue,
-      }).toList(),
+      'pdfs': pdfs
+          ?.map(
+            (pdf) => {
+              'data': pdf.data,
+              'insuranceType': pdf.insuranceType.rawValue,
+            },
+          )
+          .toList(),
       'codes': codes,
       'orderId': orderId,
       'finishAction': finishAction.name,
