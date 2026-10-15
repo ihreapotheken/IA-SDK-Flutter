@@ -29,6 +29,20 @@ abstract mixin class IaBaseViews {
   }
 }
 
+/// How an SDK screen embedded with [IaSdkPlatformView] is shown by the host, which decides the button the SDK puts in
+/// its navigation bar.
+///
+/// Note: Only supported on iOS. The Android SDK has no embed options, so there the screen shows no back or close
+/// button and the system back action closes it.
+///
+enum IaSdkScreenEmbedStyle {
+  /// The host pushed the screen; the SDK shows a back button.
+  navigation,
+
+  /// The host presented the screen; the SDK shows a close button.
+  presentation,
+}
+
 /// Inline platform view widget that hosts a native SDK component.
 ///
 /// Used by the per-component widget classes (e.g. `IaCartButton`,
@@ -43,6 +57,8 @@ class IaSdkPlatformView extends StatefulWidget {
     this.creationParams = const {},
     this.selfSizing = true,
     this.onTap,
+    this.embedStyle,
+    this.onDismiss,
   });
 
   /// Identifier for the currently-specified platform view object.
@@ -70,6 +86,22 @@ class IaSdkPlatformView extends StatefulWidget {
   /// Only used by components that support it (e.g. `IaCartButton`).
   ///
   final VoidCallback? onTap;
+
+  /// How the host shows this SDK screen, see [IaSdkScreenEmbedStyle]. When `null`, the SDK shows no back or close
+  /// button.
+  ///
+  /// Only used by SDK screens (e.g. `searchScreen`), not by components.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  final IaSdkScreenEmbedStyle? embedStyle;
+
+  /// Called when the user taps the SDK's back or close button, shown because of [embedStyle]. The SDK doesn't close
+  /// the screen itself, the host does, typically with `Navigator.of(context).pop()`.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  final VoidCallback? onDismiss;
 
   @override
   State<IaSdkPlatformView> createState() {
@@ -107,6 +139,7 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
   Map<String, dynamic> get _creationParams => {
     'viewId': _platformViewType,
     'hasTapHandler': widget.onTap != null,
+    if (widget.embedStyle != null) 'embedStyle': widget.embedStyle!.name,
     ...widget.creationParams,
   };
 
@@ -118,6 +151,7 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
     // Looked up on each tap, so a rebuilt widget's new callback is used. Whether native reports taps at all
     // is fixed at creation, see IaCartButton.
     _ComponentTapDispatcher.instance.register(id, () => widget.onTap?.call());
+    _ScreenDismissDispatcher.instance.register(id, () => widget.onDismiss?.call());
   }
 
   void _onSizeUpdate(Size size) {
@@ -209,6 +243,7 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
     }
     if (_platformViewId != null) {
       _ComponentTapDispatcher.instance.unregister(_platformViewId!);
+      _ScreenDismissDispatcher.instance.unregister(_platformViewId!);
     }
     super.dispose();
   }
@@ -339,6 +374,42 @@ class _ComponentTapDispatcher implements IaBaseCallbackHandler {
 
   @override
   String get methodId => 'componentTapped';
+
+  @override
+  Future<dynamic> Function(dynamic args) get handler {
+    return (args) async {
+      if (args is! Map) return null;
+      final viewId = (args['viewId'] as num).toInt();
+      _listeners[viewId]?.call();
+      return null;
+    };
+  }
+}
+
+/// Routes the dismiss of an embedded SDK screen to the registered [IaSdkPlatformView.onDismiss].
+///
+/// Listens on the main SDK MethodChannel via the shared [IaBaseCallbacks]
+/// system, like [_ComponentTapDispatcher].
+///
+class _ScreenDismissDispatcher implements IaBaseCallbackHandler {
+  _ScreenDismissDispatcher._() {
+    IaBaseCallbacks(handlers: [this]);
+  }
+
+  static final instance = _ScreenDismissDispatcher._();
+
+  final _listeners = <int, VoidCallback>{};
+
+  void register(int viewId, VoidCallback callback) {
+    _listeners[viewId] = callback;
+  }
+
+  void unregister(int viewId) {
+    _listeners.remove(viewId);
+  }
+
+  @override
+  String get methodId => 'screenDismissed';
 
   @override
   Future<dynamic> Function(dynamic args) get handler {

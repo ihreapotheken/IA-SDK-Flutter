@@ -162,7 +162,7 @@ class ExampleAppConfig {
       accessKey: accessKey,
       clientId: clientId,
       serverEnvironment: serverEnvironment,
-      shouldFetchThemeFromRemote: true,
+      shouldFetchThemeFromRemote: false,
       qaConfiguration: serverEnvironment == IaSdkConfigurationServerEnvironment.production
           ? null
           : const IaSdkConfigurationQa(showTestPharmaciesInApofinder: true),
