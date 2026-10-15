@@ -4,7 +4,7 @@ Point the IA SDK Flutter plugin's Swift packages (main plugin + every module) at
 local IA-SDK-Dev-iOS checkout instead of the released IA-SDK-iOS binaries, so the
 example app builds the native SDK from source. LOCAL ONLY - never commit the result.
 
-    python3 ia_local_spm.py apply /abs/path/to/IA-SDK-Dev-iOS
+    python3 ia_local_spm.py apply [/abs/path/to/IA-SDK-Dev-iOS]   # default: IA_SDK_IOS_APP_PATH in .env.local
     python3 ia_local_spm.py restore       # undo the patch + Package.resolved + Flutter noise
     python3 ia_local_spm.py status
     python3 ia_local_spm.py clean-noise   # revert only Flutter's analysis_options.yaml edits
@@ -24,11 +24,26 @@ RESOLVED = [
 ]
 # What `flutter pub get` / `flutter build` (3.47+) appends to every analysis_options.yaml.
 FLUTTER_ANALYZER_BLOCK = "analyzer:\n  exclude:\n    - build/**\n    - android/**\n    - ios/**"
+ENV_LOCAL = ".env.local"
+ENV_LOCAL_KEY = "IA_SDK_IOS_APP_PATH"
 DEFAULT_REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 
 
 def git(repo, *args):
     return subprocess.run(["git", "-C", repo, *args], capture_output=True, text=True)
+
+
+def sdk_path_from_env_local(repo):
+    """IA_SDK_IOS_APP_PATH from the repo's gitignored .env.local, or None."""
+    path = os.path.join(repo, ENV_LOCAL)
+    if not os.path.isfile(path):
+        return None
+    for line in open(path):
+        key, sep, value = line.strip().partition("=")
+        if sep and key.strip() == ENV_LOCAL_KEY:
+            value = value.strip().strip('"').strip("'")
+            return value if value and value != "..." else None
+    return None
 
 
 def manifests(repo):
@@ -118,13 +133,16 @@ def status(repo):
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("command", choices=["apply", "restore", "status", "clean-noise"])
-    p.add_argument("sdk", nargs="?", help="IA-SDK-Dev-iOS path (apply only)")
+    p.add_argument("sdk", nargs="?", help=f"IA-SDK-Dev-iOS path (apply only; default: {ENV_LOCAL_KEY} in {ENV_LOCAL})")
     p.add_argument("--repo", default=DEFAULT_REPO, help="IA-SDK-Flutter repo root")
     a = p.parse_args()
     repo = os.path.abspath(a.repo)
     if a.command == "apply":
+        sdk = a.sdk or sdk_path_from_env_local(repo)
+        if not sdk:
+            p.error(f"apply needs the IA-SDK-Dev-iOS path (argument, or {ENV_LOCAL_KEY} in {ENV_LOCAL})")
         if not a.sdk:
-            p.error("apply needs the IA-SDK-Dev-iOS path")
-        apply(repo, a.sdk)
+            print(f"using {ENV_LOCAL_KEY} from {ENV_LOCAL}: {sdk}")
+        apply(repo, sdk)
     else:
         {"restore": restore, "status": status, "clean-noise": clean_noise}[a.command](repo)

@@ -19,7 +19,7 @@ Everything mechanical is done by [scripts/ia_local_spm.py](scripts/ia_local_spm.
 
 | Command | What it does |
 |---|---|
-| `python3 .claude/skills/connect-local-spm/scripts/ia_local_spm.py apply <SDK path>` | Patches all 6 manifests (see below). Safe to run again, for example with a different SDK path. Refuses a path whose `Package.swift` isn't the `IASDK` package. |
+| `python3 .claude/skills/connect-local-spm/scripts/ia_local_spm.py apply [SDK path]` | Patches all 6 manifests (see below). Without a path it uses `IA_SDK_IOS_APP_PATH` from `.env.local`. Safe to run again, for example with a different SDK path. Refuses a path whose `Package.swift` isn't the `IASDK` package. |
 | `… restore` | Undoes the patch exactly (byte-identical to before), restores both example `Package.resolved` files from git, and runs `clean-noise`. |
 | `… status` | Prints `LOCAL <path>` or `remote` for each manifest. |
 | `… clean-noise` | Reverts `analysis_options.yaml` files whose only change is the block Flutter adds (see Known issues). |
@@ -37,15 +37,18 @@ Every edited line ends with `// IA_LOCAL_SPM`. That marker is how `restore` and 
 - **A path** (absolute, `~/…`, or relative): connect to that SDK checkout.
 - **`restore` / `disconnect` / `remote` / `undo`** (or the same request in other words): disconnect.
 - **`status`**: run `status` and report.
-- **Empty**: ask for the SDK path. If `../IA-SDK-Dev-iOS/Package.swift` exists next to this repo, use AskUserQuestion: offer that path as the first option, marked (Recommended), and add "Disconnect (restore released binaries)" as a second option. The user can type any other path under "Other". If no sibling checkout exists, ask in plain text for the path and wait.
+- **Empty** (or "connect" with no path): use `IA_SDK_IOS_APP_PATH` from `.env.local` at the repo root. Run `apply` without a path; the script reads it and prints `using IA_SDK_IOS_APP_PATH from .env.local: …`. Mention that path in the report. `.env.local` is gitignored and belongs to each developer; `.env.local.example` is its template.
+- **Empty, and `.env.local` or the variable is missing** (the script exits with "apply needs the IA-SDK-Dev-iOS path"): ask for the path. If `../IA-SDK-Dev-iOS/Package.swift` exists next to this repo, use AskUserQuestion: offer that path as the first option, marked (Recommended), and add "Disconnect (restore released binaries)" as a second option. The user can type any other path under "Other". If no sibling checkout exists, ask in plain text and wait. Then suggest copying `.env.local.example` to `.env.local` and setting the path there for next time.
+
+A path the user gives explicitly always overrides `.env.local`.
 
 ## Connect
 
 1. **Check prerequisites.**
    - `flutter config --list` must show `enable-swift-package-manager: true`. If it doesn't, ask before running `flutter config --enable-swift-package-manager`, because that setting is global.
-   - The SDK path must contain `Package.swift` with `name: "IASDK"` (the script checks this).
+   - The SDK path (given explicitly, or `IA_SDK_IOS_APP_PATH` in `.env.local`) must contain `Package.swift` with `name: "IASDK"` (the script checks this).
    - Report the SDK's branch (`git -C <SDK> rev-parse --abbrev-ref HEAD`). The plugin is written against the SDK version in `.env`. If the SDK has moved on, plugin Swift code may not compile; that is for the user to fix.
-2. **Patch:** run `python3 .claude/skills/connect-local-spm/scripts/ia_local_spm.py apply <SDK path>`.
+2. **Patch:** run `python3 .claude/skills/connect-local-spm/scripts/ia_local_spm.py apply [SDK path]`. Leave out the path when the user didn't give one, so `.env.local` is used.
 3. **Regenerate Flutter's SPM integration:** run `cd example && flutter pub get`. This rewrites `example/ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage` and the `.packages` symlinks.
 4. **Build for the simulator.** It doesn't need signing, so it's the quickest check:
    `cd example && flutter build ios --debug --simulator > <scratchpad>/build_sim.log 2>&1; echo "exit $?" >> <scratchpad>/build_sim.log`
