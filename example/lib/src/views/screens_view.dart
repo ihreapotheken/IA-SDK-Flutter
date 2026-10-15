@@ -4,8 +4,73 @@ import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:appsdk_v2_flutter_plugin_example/src/testing/event_log.dart';
 import 'package:flutter/material.dart';
 
-class ScreensView extends StatelessWidget {
+/// How the Screens tab opens SDK screens.
+///
+enum _ScreensMode {
+  /// The SDK presents the screen itself, through the plugin's launch methods.
+  auto,
+
+  /// The app embeds the screen in its own route with [IaSdkPlatformView].
+  manual,
+}
+
+class ScreensView extends StatefulWidget {
   const ScreensView({super.key});
+
+  @override
+  State<ScreensView> createState() => _ScreensViewState();
+}
+
+class _ScreensViewState extends State<ScreensView> {
+  _ScreensMode _mode = _ScreensMode.auto;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(20, 16 + MediaQuery.of(context).padding.top, 20, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<_ScreensMode>(
+                  segments: const [
+                    ButtonSegment(value: _ScreensMode.auto, label: Text('Auto')),
+                    ButtonSegment(value: _ScreensMode.manual, label: Text('Manual')),
+                  ],
+                  selected: {_mode},
+                  onSelectionChanged: (selection) => setState(() => _mode = selection.first),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                switch (_mode) {
+                  _ScreensMode.auto => 'The SDK presents and dismisses the screens, opened with the plugin\'s launch methods.',
+                  _ScreensMode.manual =>
+                    'The app embeds the screens with IaSdkPlatformView, then pushes or presents them and closes them itself.',
+                },
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: switch (_mode) {
+            _ScreensMode.auto => const _AutoScreensList(),
+            _ScreensMode.manual => const _ManualScreensList(),
+          },
+        ),
+      ],
+    );
+  }
+}
+
+/// Opens SDK screens with the plugin's launch methods, so the SDK presents them itself.
+///
+class _AutoScreensList extends StatelessWidget {
+  const _AutoScreensList();
 
   /// Opens the photo scanner, then turns the flashlight on and off, and pauses and resumes the preview.
   ///
@@ -47,12 +112,7 @@ class ScreensView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        24 + MediaQuery.of(context).padding.top,
-        20,
-        24,
-      ),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
       children: [
         ElevatedButton(
           child: Text('Launch Start screen'),
@@ -134,6 +194,77 @@ class ScreensView extends StatelessWidget {
           child: Text('Finish All Activities Test'),
           onPressed: _runFinishAllActivitiesTest,
         ),
+      ],
+    );
+  }
+}
+
+/// Embeds SDK screens with [IaSdkPlatformView] in a route the app pushes or presents, the way a host app would.
+///
+class _ManualScreensList extends StatelessWidget {
+  const _ManualScreensList();
+
+  /// Platform view ids each platform registers for SDK screens.
+  ///
+  static List<String> get _viewIds => [
+    'startScreen',
+    'searchScreen',
+    'cartScreen',
+    'pharmacyScreen',
+    'apofinderScreen',
+    'redeemPrescription',
+    if (Platform.isIOS) ...['prescriptionScanner', 'ePrescriptionScanner'],
+    if (Platform.isAndroid) ...['prerequisiteFlow', 'transferPrescriptionsScreen'],
+  ];
+
+  /// Opens [viewId] in a new route: pushed onto the app's navigation stack, or presented full screen as a dialog.
+  ///
+  /// The SDK screen shows its own navigation bar. On iOS it adds a back or close button and reports its tap, which
+  /// closes the route; on Android the system back action closes it.
+  ///
+  static void _open(BuildContext context, String viewId, {required bool isPresented}) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: isPresented,
+        builder: (context) => Scaffold(
+          body: IaSdkPlatformView(
+            viewId: viewId,
+            selfSizing: false,
+            embedStyle: isPresented ? IaSdkScreenEmbedStyle.presentation : IaSdkScreenEmbedStyle.navigation,
+            onDismiss: () => Navigator.of(context).pop(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+      children: [
+        for (final viewId in _viewIds) ...[
+          Text(viewId, style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  child: const Text('Push'),
+                  onPressed: () => _open(context, viewId, isPresented: false),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  child: const Text('Present'),
+                  onPressed: () => _open(context, viewId, isPresented: true),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
       ],
     );
   }
