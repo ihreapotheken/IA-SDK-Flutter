@@ -730,7 +730,6 @@ internal class IaClientMethods(
                 val entryPoint = when (viewId) {
                     IaScreen.StartScreen::class.simpleName -> IaScreen.StartScreen
                     IaScreen.CartScreen::class.simpleName -> IaScreen.CartScreen
-                    IaScreen.TransferPrescriptionsScreen::class.simpleName -> IaScreen.TransferPrescriptionsScreen
                     IaScreen.SearchScreen::class.simpleName -> IaScreen.SearchScreen
                     IaScreen.PharmacyScreen::class.simpleName -> IaScreen.PharmacyScreen
                     IaScreen.ApofinderScreen::class.simpleName -> IaScreen.ApofinderScreen

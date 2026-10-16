@@ -43,12 +43,20 @@ enum IASDKViewIdentifier: String, CaseIterable {
      */
     case ePrescriptionScanner = "ePrescriptionScanner"
 
+    /// Whether the screen is registered as a platform view for `IaSdkPlatformView`. Scanners aren't, because the
+    /// Android SDK has no scanner screen; they're only launched with `launchPrescriptionScanner`.
+    var isEmbeddable: Bool {
+        switch self {
+        case .prescriptionScanner, .ePrescriptionScanner: false
+        default: true
+        }
+    }
+
     /**
      * Visual interface representation.
      */
     @MainActor
-    /// - Parameter controlsScannerCamera: Whether scanners take their camera state from `PrescriptionScannerCameraController`,
-    ///   which only applies to scanners launched from Flutter, not to embedded platform views.
+    /// - Parameter controlsScannerCamera: Whether scanners take their camera state from `PrescriptionScannerCameraController`.
     /// - Parameter onApofinderFinish: Called with the selected pharmacy, or `nil` when the user closed Apofinder. The
     ///   screen reports the selection only here, and leaves closing it to the caller.
     func iaScreen(

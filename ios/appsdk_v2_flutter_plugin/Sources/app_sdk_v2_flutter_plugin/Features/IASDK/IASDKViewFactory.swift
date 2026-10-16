@@ -39,11 +39,16 @@ final class IASDKViewFactory: NSObject, FlutterPlatformViewFactory {
 
         // The SDK shows a back or close button for the embed style the host chose, and reports its tap so Dart can
         // close the route. Without an embed style it shows neither.
-        var screen = viewIdentifier.iaScreen()
         let channel = channel
         let onDismiss: EmptyCallback = {
             channel.invokeMethod("screenDismissed", arguments: ["viewId": platformViewId])
         }
+        // Apofinder leaves closing to its caller, so a selection is reported as a dismiss too. Closing it without a
+        // selection already goes through the SDK's close button, so `nil` isn't reported again.
+        var screen = viewIdentifier.iaScreen(onApofinderFinish: { pharmacy in
+            guard pharmacy != nil else { return }
+            onDismiss()
+        })
         switch (args as? [String: Any])?["embedStyle"] as? String {
         case "navigation": screen.hostEmbedStyle = .navigation(onDismiss: onDismiss)
         case "presentation": screen.hostEmbedStyle = .presentation(onDismiss: onDismiss)
