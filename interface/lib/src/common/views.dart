@@ -67,6 +67,8 @@ class IaSdkPlatformView extends StatefulWidget {
 
   /// Additional configuration parameters forwarded to native via creationParams.
   ///
+  /// The keys `viewId`, `hasTapHandler` and `embedStyle` are set by the widget and override the same keys here.
+  ///
   final Map<String, dynamic> creationParams;
 
   /// Whether the native component reports its intrinsic content size back to
@@ -137,11 +139,12 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
     );
   }
 
+  // The plugin's keys come last, so creation params can't replace the view id native resolves the view from.
   Map<String, dynamic> get _creationParams => {
+    ...widget.creationParams,
     'viewId': _platformViewType,
     'hasTapHandler': widget.onTap != null,
     if (widget.embedStyle != null) 'embedStyle': widget.embedStyle!.name,
-    ...widget.creationParams,
   };
 
   void _onPlatformViewCreated(int id) {
