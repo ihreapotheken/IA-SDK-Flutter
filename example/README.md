@@ -98,6 +98,10 @@ flutter run                             # demo
 flutter run --flavor singleEntryPoint
 ```
 
+The IDEs have a run configuration per flavor, and one for the demo's [E2E harness](#e2e-harness), when the repository
+root is opened: VS Code in [.vscode/launch.json](../.vscode/launch.json), Android Studio and IntelliJ in
+[.run/](../.run/).
+
 Each app is a package in [packages/](packages/), resolved together with the app as a pub workspace:
 
 | Package | Contents |
@@ -130,6 +134,7 @@ Every flavor reads the access key as described in [Environment Setup](#environme
 4. Add the iOS configurations and scheme, from the repository root:
    `ruby scripts/add-example-ios-flavor.rb <name> '<display name>'`.
 5. Add the flavor to the `flavor` options of [demo_app_deploy.yml](../.github/workflows/demo_app_deploy.yml).
+6. Add a run configuration for it to [.vscode/launch.json](../.vscode/launch.json) and to [.run/](../.run/).
 
 ## App Identity
 
