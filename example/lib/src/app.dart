@@ -80,14 +80,6 @@ class _ExampleAppState extends State<ExampleApp> {
       (state) => log.add('Initialization', state.name),
     );
 
-    IaSdk.instance.prerequisitesResultListener.stream.listen(
-      (result) => log.add(
-        'Prerequisites',
-        'cancelled: ${result.isCancelled}, onboarding: ${result.onboarding?.name}, '
-            'legal: ${result.legal?.name}, pharmacy: ${result.pharmacyId}',
-      ),
-    );
-
     IaSdk.instance.analyticsEventListener.stream.listen(
       (event) => log.add('Analytics', '${event.type} ${event.parameters}'),
     );

@@ -4,11 +4,9 @@ packages:
   appsdk_v2_flutter_plugin:
     dependency: "direct main"
     description:
-      path: "."
-      ref: develop
-      resolved-ref: "0f96b6ddc79241a012aa094bc86f88df1b588c4f"
-      url: "https://github.com/ihreapotheken/IA-SDK-Flutter"
-    source: git
+      path: "../.."
+      relative: true
+    source: path
     version: "0.0.1"
   async:
     dependency: transitive
@@ -95,29 +93,23 @@ packages:
   ia_interface:
     dependency: transitive
     description:
-      path: interface
-      ref: "0f96b6ddc79241a012aa094bc86f88df1b588c4f"
-      resolved-ref: "0f96b6ddc79241a012aa094bc86f88df1b588c4f"
-      url: "https://github.com/ihreapotheken/IA-SDK-Flutter"
-    source: git
+      path: "../../interface"
+      relative: true
+    source: path
     version: "0.0.1"
   ia_ordering:
     dependency: "direct main"
     description:
-      path: "modules/ia_ordering"
-      ref: develop
-      resolved-ref: "0f96b6ddc79241a012aa094bc86f88df1b588c4f"
-      url: "https://github.com/ihreapotheken/IA-SDK-Flutter"
-    source: git
+      path: "../../modules/ia_ordering"
+      relative: true
+    source: path
     version: "0.0.1"
   ia_over_the_counter:
     dependency: "direct main"
     description:
-      path: "modules/ia_over_the_counter"
-      ref: develop
-      resolved-ref: "0f96b6ddc79241a012aa094bc86f88df1b588c4f"
-      url: "https://github.com/ihreapotheken/IA-SDK-Flutter"
-    source: git
+      path: "../../modules/ia_over_the_counter"
+      relative: true
+    source: path
     version: "0.0.1"
   leak_tracker:
     dependency: transitive

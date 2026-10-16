@@ -228,18 +228,6 @@ class IaClientCallbacks(
     }
 
     /**
-     * Called when the prerequisites activity launched by the host app finishes.
-     *
-     * Equivalent to iOS: sdkDidFinishInitialization with a prerequisites result
-     */
-    fun onPrerequisiteFlowFinished(isCancelled: Boolean) {
-        channel.invokeMethod(
-            "sdkPrerequisitesFinished",
-            mapOf("isCancelled" to isCancelled)
-        )
-    }
-
-    /**
      * Called when the SDK initialization state changes.
      *
      * Equivalent to iOS: IASDK.initializationStatePublisher

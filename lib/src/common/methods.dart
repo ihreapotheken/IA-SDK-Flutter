@@ -37,6 +37,8 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
 
   isPrerequisiteFlowCompleted,
 
+  launchPrerequisiteFlow,
+
   clearUserBillingAddress,
 
   clearUserDeliveryAddress,

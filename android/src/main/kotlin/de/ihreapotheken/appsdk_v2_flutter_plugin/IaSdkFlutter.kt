@@ -24,7 +24,7 @@ class IaSdkFlutter :
 
     private val activityResultListener = PluginRegistry.ActivityResultListener { requestCode, resultCode, _ ->
         if (requestCode == IaClientMethods.REQUEST_CODE_PREREQUISITES) {
-            bindings.callbacks.onPrerequisiteFlowFinished(isCancelled = resultCode != Activity.RESULT_OK)
+            bindings.onPrerequisiteFlowFinished(isCancelled = resultCode != Activity.RESULT_OK)
             true
         } else {
             false
@@ -67,6 +67,8 @@ class IaSdkFlutter :
 
     override fun onDetachedFromActivity() {
         detachFromActivity()
+        // Unlike after a configuration change, no activity comes back to receive the prerequisites result.
+        bindings.onActivityClosed()
     }
 
     private fun detachFromActivity() {

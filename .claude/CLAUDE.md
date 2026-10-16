@@ -2,6 +2,7 @@ References:
 - iOS IA SDK: https://github.com/ihreapotheken/IA-SDK-iOS
 - Android IA SDK: https://github.com/ihreapotheken/IA-SDK-Android
 - Local iOS IA SDK source: if `.env.local` (repo root, gitignored, per developer) defines `IA_SDK_IOS_APP_PATH`, that is the developer's local checkout of the iOS SDK source repo (IA-SDK-Dev-iOS). Read the native iOS SDK code there when you need it. If the file or variable is missing, fall back to the GitHub reference above.
+- Local Android IA SDK source: if `.env.local` (repo root, gitignored, per developer) defines `IA_SDK_ANDROID_APP_PATH`, that is the developer's local checkout of the Android SDK source repo (IA-SDK-Dev-Android). Read the native Android SDK code there when you need it. If the file or variable is missing, fall back to the GitHub reference above.
 - General Flutter packages docs: https://docs.flutter.dev/packages-and-plugins/developing-packages
 - General Flutter platform channels docs: https://docs.flutter.dev/platform-integration/platform-channels
 

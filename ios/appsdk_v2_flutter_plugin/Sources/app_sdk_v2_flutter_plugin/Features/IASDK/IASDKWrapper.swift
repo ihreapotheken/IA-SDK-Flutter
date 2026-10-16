@@ -93,9 +93,6 @@ final class IASDKWrapper {
     
     func launchRoute(arguments: Any, delegate: IaClientDelegate) async throws -> Any? {
         let arguments = try argumentDecoder.decode(IaLaunchRouteArguments.self, from: arguments)
-        if arguments.viewId == "prerequisiteFlow" {
-            return FlutterMethodNotImplemented
-        }
         let view = try arguments.view
         // An SDK screen decides once, when it appears, whether to run the initialization and prerequisites. One that
         // appears while the initialization runs would wait for it forever, so it opens once that's done. A retry
@@ -276,6 +273,15 @@ final class IASDKWrapper {
         try await IASDK.Prerequisites.resetAllPrerequisites()
         Self.cleanPrerequisitesCache()
         return nil
+    }
+
+    /// Initializes the SDK again, now with the prerequisites options `initialize` stored. The SDK keeps the result of
+    /// its initialization, so this runs the prerequisites only, and returns their kept result without showing them
+    /// when they're already completed.
+    func launchPrerequisiteFlow() async throws -> Any? {
+        let result = try await IASDK.initialize(options: IASDK.configuration.defaultInitializationOptions)
+        // The stored options always have prerequisites options, so the SDK always reports a prerequisites result.
+        return ["isCancelled": result.prerequisitesResult?.isCancelled ?? false]
     }
 
     func resetLegalDisclaimer() async throws -> Any? {

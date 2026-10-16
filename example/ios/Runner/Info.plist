@@ -28,6 +28,8 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NFCReaderUsageDescription</key>
+	<string>Auslesen von Rezeptdaten von Ihrer Krankenversicherungskarte.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Kamerazugriff wird für den Rezeptupload benötigt.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
@@ -72,8 +74,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NFCReaderUsageDescription</key>
-	<string>Auslesen von Rezeptdaten von Ihrer Krankenversicherungskarte.</string>
 	<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
 	<array>
 		<string>D2760001448000</string>

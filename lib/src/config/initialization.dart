@@ -57,7 +57,7 @@ class IaSdkConfigurationInitialization {
   ///
   const IaSdkConfigurationInitialization({
     this.channelId,
-    this.shouldShowIndicator = true,
+    this.shouldShowIndicator = false,
     this.prerequisites = const IaPrerequisitesConfiguration(),
   });
 

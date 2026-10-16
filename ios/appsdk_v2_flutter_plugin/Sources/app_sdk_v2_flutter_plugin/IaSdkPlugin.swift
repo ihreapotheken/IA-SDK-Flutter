@@ -123,6 +123,9 @@ final class IASDKPlugin {
             case FlutterCall.resetPrerequisites.name:
                 return try await iaSdkWrapper.resetPrerequisites()
 
+            case FlutterCall.launchPrerequisiteFlow.name:
+                return try await iaSdkWrapper.launchPrerequisiteFlow()
+
             case FlutterCall.clearProductGridCache.name:
                 return try await overTheCounterWrapper.clearProductGridCache()
 

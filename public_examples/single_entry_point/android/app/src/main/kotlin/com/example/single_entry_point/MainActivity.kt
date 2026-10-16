@@ -1,5 +1,6 @@
 package com.example.single_entry_point
 
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity : FlutterActivity()
+// The IA SDK's inline components need a ComponentActivity, which FlutterActivity isn't.
+class MainActivity : FlutterFragmentActivity()

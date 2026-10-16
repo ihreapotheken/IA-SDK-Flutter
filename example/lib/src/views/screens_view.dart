@@ -95,6 +95,16 @@ class _AutoScreensList extends StatelessWidget {
     }
   }
 
+  static Future<void> _launchPrerequisiteFlow() async {
+    final log = ExampleEventLog.instance;
+    try {
+      final result = await IaSdk.instance.launchPrerequisiteFlow();
+      log.add('Prerequisites', 'cancelled: ${result.isCancelled}');
+    } catch (e) {
+      log.add('Prerequisites', 'Failed: $e');
+    }
+  }
+
   /// Opens product search, then closes the SDK screens after a few seconds. Screens the app presented itself stay.
   ///
   static Future<void> _runFinishAllActivitiesTest() async {
@@ -183,13 +193,11 @@ class _AutoScreensList extends StatelessWidget {
           ),
           const SizedBox(height: 16),
         ],
-        if (Platform.isAndroid) ...[
-          ElevatedButton(
-            child: Text('Launch Prerequisite Flow (Android)'),
-            onPressed: () => IaSdk.instance.launchPrerequisiteFlow(),
-          ),
-          const SizedBox(height: 16),
-        ],
+        ElevatedButton(
+          child: Text('Launch Prerequisite Flow'),
+          onPressed: _launchPrerequisiteFlow,
+        ),
+        const SizedBox(height: 16),
         ElevatedButton(
           child: Text('Finish All Activities Test'),
           onPressed: _runFinishAllActivitiesTest,

@@ -11,7 +11,8 @@ Native SDK 2.9.0 on both platforms.
   `launchPrerequisiteFlow`, `clearUserBillingAddress`, `clearUserDeliveryAddress`, `setAnalyticsConsent`,
   `setHapticFeedbackEnabled`, `presentLogs`, `exportLogs`, `getUserId`, `removeAllCachedResponses`,
   `getInitializationState`, `onSdkBackAction`, and the streams `initializationStateListener`,
-  `prerequisitesResultListener`, `analyticsEventListener` and `logMessageListener`.
+  `analyticsEventListener` and `logMessageListener`. `launchPrerequisiteFlow` runs the prerequisites flow on both
+  platforms and returns whether the user cancelled it.
 - `IaSdkConfiguration`: `isPickupLockerAndCourierShippingEnabled`, `appStoreId`, `playStoreId`, `isAnalyticsEnabled`,
   `isHapticFeedbackEnabled`, `qaConfiguration`, `cardLink`, `hostAppLogFilePath`, and
   `IaSdkConfigurationFooter.isImprintHandledByHostApp`.
@@ -84,8 +85,6 @@ Native SDK 2.9.0 on both platforms.
 - Android: closing the transfer screen during the upload left `transferPrescriptions` pending, or completed it later
   without the prescriptions in the cart. The call now fails.
 - iOS: `setGuestUserData` passed the phone country code without "+", so checkout saved addresses with a wrong one.
-- iOS: `transferPrescriptions` replayed the cached prerequisites result through `prerequisitesResultListener`,
-  without dropping a real run after a cancelled one.
 - `initialize` with an empty `accessKey` or `clientId` fails with `ARG_ERROR` on both platforms. Android used to
   leave the initialization state at `uninitialized`.
 - Android: `finishAllActivities` left the overlay of a `showBottomSheet` prescription transfer open.
@@ -145,7 +144,6 @@ Native SDK 2.9.0 on both platforms.
 - **Android inline components need a `ComponentActivity`**, such as `FlutterFragmentActivity`, as the app's activity.
 - **Android:**
   - `onSdkBackAction` is asked before any SDK screen closes, except through `finishAllActivities`.
-  - `launchPrerequisiteFlow` opens the SDK's prerequisites activity.
   - Calls that need an initialized SDK fail before `initialize`: the address setters, `setGuestUserData`, `logout`,
     `resetPrerequisites`, `isPrerequisiteFlowCompleted`, `setAnalyticsConsent`, `setHapticFeedbackEnabled`,
     `clearCart`, `transferPrescriptions`, `presentLogs`, `exportLogs`, and the pharmacy ID getter and clearer. The
