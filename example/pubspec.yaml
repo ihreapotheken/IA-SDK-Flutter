@@ -25,6 +25,8 @@ workspace:
   - packages/single_entry_point
 
 flutter:
+  # Built when no --flavor is passed. The flavors and their packages are listed in lib/flavor.dart.
+  default-flavor: demo
   uses-material-design: true
   assets:
     - .secrets

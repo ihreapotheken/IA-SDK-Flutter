@@ -70,7 +70,6 @@ android {
         applicationId = "de.ihreapotheken.flutter"
         minSdk = 30
         targetSdk = 36
-        resValue("string", "app_name", "AppSDK Flutter Demo $iaEnvLabel")
         versionName = System.getenv("APP_SDK_BUILD_VERSION") ?: "1.0.0"
         versionCode = if (System.getenv("APP_SDK_BUILD_NUMBER") == null) {
             1
@@ -97,10 +96,27 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+
+    // One flavor per app in lib/flavor.dart, with the same names as the iOS schemes. They're all the same app to the
+    // stores and Firebase, with the same application ID and signing, so each can be delivered like the demo.
+    flavorDimensions += "app"
+    productFlavors {
+        create("demo") {
+            dimension = "app"
+            resValue("string", "app_name", "AppSDK Flutter Demo $iaEnvLabel")
+        }
+        create("singleEntryPoint") {
+            dimension = "app"
+            resValue("string", "app_name", "IA SDK Single Entry Point")
+        }
+        all {
+            val flavor = name
             firebaseAppDistribution {
                 appId = "1:805028679903:android:a66b4f3fd9dba27124d96a"
                 artifactType = "APK"
-                artifactPath = rootProject.file("../build/app/outputs/apk/release/app-release.apk").path
+                artifactPath = rootProject.file("../build/app/outputs/apk/$flavor/release/app-$flavor-release.apk").path
                 serviceCredentialsFile = rootProject.file("fb-distribution-service-credentials.json").path
                 testers = arrayOf(
                     "cvitaman@gmail.com",
