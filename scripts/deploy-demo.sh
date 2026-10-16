@@ -5,6 +5,10 @@
 # Usage:
 #
 # sh ./scripts/deploy-demo.sh
+#
+# Deploys the `demo` flavor, or the one in IA_FLAVOR, see dev-env-setup.sh:
+#
+# IA_FLAVOR=singleEntryPoint sh ./scripts/deploy-demo.sh
 
 # Declare script and project paths.
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
@@ -28,4 +32,4 @@ set -a # Automatically export all variables
 source $PROJECT_DIR/.env
 set +a
 sh $SCRIPT_DIR/info.sh \
-    "Demo Flutter apps version $APP_SDK_VERSION have been deployed with Android AppSDK version $ANDROID_APPSDK_VERSION and iOS AppSDK version $IOS_APPSDK_VERSION, targeting the $IA_ENV_LABEL environment."
+    "Flutter $IA_FLAVOR apps version $APP_SDK_VERSION have been deployed with Android AppSDK version $ANDROID_APPSDK_VERSION and iOS AppSDK version $IOS_APPSDK_VERSION, targeting the $IA_ENV_LABEL environment."

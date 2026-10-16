@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Example: demo, E2E harness" type="FlutterRunConfigurationType" factoryName="Flutter">
+    <option name="additionalArgs" value="--dart-define=iaE2E=true" />
+    <option name="buildFlavor" value="demo" />
+    <option name="filePath" value="$PROJECT_DIR$/example/lib/main.dart" />
+    <method v="2" />
+  </configuration>
+</component>
