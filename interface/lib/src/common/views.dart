@@ -144,7 +144,7 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
     ...widget.creationParams,
     'viewId': _platformViewType,
     'hasTapHandler': widget.onTap != null,
-    if (widget.embedStyle != null) 'embedStyle': widget.embedStyle!.name,
+    'embedStyle': widget.embedStyle?.name,
   };
 
   void _onPlatformViewCreated(int id) {

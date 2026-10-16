@@ -843,7 +843,8 @@ class IaSdk {
   ///
   /// Provides the new [pharmacyId] and whether the change was triggered from the prerequisites flow.
   ///
-  /// Note: On Android only pharmacies selected in the screen opened with [launchApofinder] are reported.
+  /// Note: Pharmacies selected in an `apofinderScreen` embedded with `IaSdkPlatformView` aren't reported. On Android
+  /// only pharmacies selected in the screen opened with [launchApofinder] are reported.
   ///
   void Function({
     required String pharmacyId,
