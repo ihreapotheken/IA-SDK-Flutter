@@ -5,6 +5,10 @@
 # Usage:
 #
 # sh ./scripts/deploy-demo.sh
+#
+# Deploys the `demo` flavor, or the one in IA_FLAVOR, see dev-env-setup.sh:
+#
+# IA_FLAVOR=singleEntryPoint sh ./scripts/deploy-demo.sh
 
 # Declare script and project paths.
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
