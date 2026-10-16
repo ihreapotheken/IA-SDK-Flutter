@@ -35,3 +35,10 @@ case "$IA_SERVER_ENV" in
   *) export IA_ENV_LABEL="QA" ;;
 esac
 echo "IA_ENV_LABEL $IA_ENV_LABEL"
+
+# Example app flavor to build, one of the values in example/lib/flavor.dart. Every flavor is the same app to Firebase
+# App Distribution and TestFlight, with the same signing, so any of them is delivered like the demo.
+#
+# Override per deploy, e.g. IA_FLAVOR=singleEntryPoint sh ./scripts/deploy-demo.sh
+export IA_FLAVOR="${IA_FLAVOR:-demo}"
+echo "IA_FLAVOR $IA_FLAVOR"

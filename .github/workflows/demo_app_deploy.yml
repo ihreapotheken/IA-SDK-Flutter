@@ -15,9 +15,18 @@ on:
           - all
           - android
           - ios
+      flavor:
+        description: 'Example app flavor to deploy, see example/lib/flavor.dart'
+        required: true
+        default: 'demo'
+        type: choice
+        options:
+          - demo
+          - singleEntryPoint
 
 env:
   PLATFORM: ${{ github.event.inputs.platform || 'all' }}
+  IA_FLAVOR: ${{ github.event.inputs.flavor || 'demo' }}
 
 jobs:
   build:

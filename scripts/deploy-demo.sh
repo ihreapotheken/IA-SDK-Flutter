@@ -28,4 +28,4 @@ set -a # Automatically export all variables
 source $PROJECT_DIR/.env
 set +a
 sh $SCRIPT_DIR/info.sh \
-    "Demo Flutter apps version $APP_SDK_VERSION have been deployed with Android AppSDK version $ANDROID_APPSDK_VERSION and iOS AppSDK version $IOS_APPSDK_VERSION, targeting the $IA_ENV_LABEL environment."
+    "Flutter $IA_FLAVOR apps version $APP_SDK_VERSION have been deployed with Android AppSDK version $ANDROID_APPSDK_VERSION and iOS AppSDK version $IOS_APPSDK_VERSION, targeting the $IA_ENV_LABEL environment."
