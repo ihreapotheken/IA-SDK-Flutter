@@ -96,8 +96,9 @@ class IaSdkPlatformView extends StatefulWidget {
   ///
   final IaSdkScreenEmbedStyle? embedStyle;
 
-  /// Called when the user taps the SDK's back or close button, shown because of [embedStyle]. The SDK doesn't close
-  /// the screen itself, the host does, typically with `Navigator.of(context).pop()`.
+  /// Called when the user taps the SDK's back or close button, shown because of [embedStyle], and when the user selects
+  /// a pharmacy in the Apofinder screen. The SDK doesn't close the screen itself, the host does, typically with
+  /// `Navigator.of(context).pop()`.
   ///
   /// Note: Only supported on iOS.
   ///
