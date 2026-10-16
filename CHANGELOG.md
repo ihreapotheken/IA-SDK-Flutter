@@ -30,6 +30,9 @@ Native SDK 2.9.0 on both platforms.
 - Navigation targets reported on Android: `start`, `search`, `redeemPrescription`, `thankYouCompleted`.
 - Example app: an Events tab with all callbacks and switchable host answers, and buttons for the new APIs. Buttons
   for single-platform APIs only show on their platform.
+- Example app flavors: `demo`, the default, and `singleEntryPoint`, a public example of a host app that opens the SDK
+  from a single screen. Each app is a local package in `example/packages/`, next to one with what they share. The
+  flavors share the app's signing, so either is delivered like the demo, see `example/README.md`.
 
 ### Fixed
 

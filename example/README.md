@@ -84,6 +84,53 @@ flutter pub get
 flutter run
 ```
 
+## Flavors
+
+The example builds one app per flavor:
+
+| Flavor | App |
+|---|---|
+| `demo` (default) | The demo app this README describes, with every plugin API and the test tools. |
+| `singleEntryPoint` | Public example of a host app that opens the SDK from a single screen. |
+
+```bash
+flutter run                             # demo
+flutter run --flavor singleEntryPoint
+```
+
+Each app is a package in [packages/](packages/), resolved together with the app as a pub workspace:
+
+| Package | Contents |
+|---|---|
+| [packages/demo](packages/demo) (`ia_example_demo`) | The `demo` app. |
+| [packages/single_entry_point](packages/single_entry_point) (`ia_example_single_entry_point`) | The `singleEntryPoint` app. |
+| [packages/shared](packages/shared) (`ia_example_shared`) | What every app shares: loading the `.secrets` and `.env` assets, and the access key. |
+
+The example app itself only holds the entry point: [lib/main.dart](lib/main.dart) loads the shared environment and runs
+the app of the build's flavor, which [lib/flavor.dart](lib/flavor.dart) maps to its package. The Android and iOS
+projects, the assets and the flavors stay in the example app.
+
+All flavors are the same app to the stores: the same application ID, bundle ID and signing, the same Firebase App
+Distribution and TestFlight app. Only the launcher name differs. A flavor is therefore delivered like the demo, with no
+further App IDs, provisioning profiles or keystores, and a device has one flavor installed at a time. The deploy scripts
+and the Demo App Deploy workflow build the flavor in `IA_FLAVOR`, `demo` by default:
+
+```bash
+IA_FLAVOR=singleEntryPoint sh ./scripts/deploy-demo.sh
+```
+
+Every flavor reads the access key as described in [Environment Setup](#environment-setup).
+
+### Adding a public example
+
+1. Add a package for the app under `packages/<name>/`, with `resolution: workspace` in its `pubspec.yaml`, and list
+   it under `workspace` and `dependencies` in the example's [pubspec.yaml](pubspec.yaml).
+2. Add a value for it in [lib/flavor.dart](lib/flavor.dart).
+3. Add an Android product flavor of the same name in [android/app/build.gradle.kts](android/app/build.gradle.kts).
+4. Add the iOS configurations and scheme, from the repository root:
+   `ruby scripts/add-example-ios-flavor.rb <name> '<display name>'`.
+5. Add the flavor to the `flavor` options of [demo_app_deploy.yml](../.github/workflows/demo_app_deploy.yml).
+
 ## App Identity
 
 The demo app carries the same launcher branding as the native demo apps
@@ -111,14 +158,14 @@ IA_SERVER_ENV=production sh ./scripts/deploy-demo.sh
 The deploy scripts pass the same value on as `--dart-define=iaServerEnv`, so the label
 and the app's actual backend can never disagree. Android reads `IA_SERVER_ENV` in
 [app/build.gradle.kts](android/app/build.gradle.kts) to generate the `app_name`
-resource; iOS reads `IA_ENV_LABEL` from [ios/Flutter/IAEnv.xcconfig](ios/Flutter/IAEnv.xcconfig)
-in `CFBundleDisplayName`, which
-[deploy-demo-ios.sh](../scripts/deploy-demo-ios.sh) rewrites before archiving.
+resource; iOS reads `IA_ENV_LABEL` from [ios/Flutter/IAEnv.xcconfig](ios/Flutter/IAEnv.xcconfig),
+which [deploy-demo-ios.sh](../scripts/deploy-demo-ios.sh) rewrites before archiving, in the demo's
+`IA_DISPLAY_NAME` build setting, the `CFBundleDisplayName`.
 
 ## App Structure
 
-The example app contains six tabs demonstrating different SDK features. Labels ending in "(iOS)" or
-"(Android)" mark features only one native SDK has; on the other platform they report a `MissingPluginException`.
+The demo app contains six tabs demonstrating different SDK features. Labels ending in "(iOS)" or
+"(Android)" mark features only one native SDK has; they're only shown on that platform.
 
 ### Host App Tab
 Displays a map with pharmacy markers. Tapping a marker shows a bottom sheet where you can:
@@ -169,7 +216,7 @@ flutter build apk --debug --dart-define=iaE2E=true
 flutter build ios --simulator --debug --dart-define=iaE2E=true
 ```
 
-The harness ([lib/src/e2e/](lib/src/e2e/)) mirrors the native demo apps: a host
+The harness ([packages/demo/lib/src/e2e/](packages/demo/lib/src/e2e/)) mirrors the native demo apps: a host
 tab bar (Start / Search / Cart / Pharmacy / Settings) over full-screen embedded
 SDK screens. Because the SDK content is the same native UI in every host, the test
 flows and their selectors are shared across the native demo app and this one.
@@ -190,7 +237,7 @@ Notes:
 
 ## SDK Initialization
 
-The SDK is initialized in [sdk_initializer.dart](lib/src/services/sdk_initializer.dart). The initialization process includes:
+The demo initializes the SDK in [app.dart](packages/demo/lib/src/app.dart). The initialization process includes:
 
 1. **Setting up callbacks** - Handle SDK navigation events
 2. **Registering modules** - CardLink, Ordering, OverTheCounter, Pharmacy, Prescription
@@ -199,7 +246,7 @@ The SDK is initialized in [sdk_initializer.dart](lib/src/services/sdk_initialize
 
 ## Configuration
 
-SDK configuration is managed in [ia_client_config.dart](lib/ia_client_config.dart). Key configuration options include:
+SDK configuration is managed in [ia_client_config.dart](packages/demo/lib/ia_client_config.dart). Key configuration options include:
 - `accessKey` - Authentication key (from .env or dart-define)
 - `clientId` - Client identifier
 - `serverEnvironment` - Backend environment (debug/production)

@@ -21,7 +21,7 @@ Write a nested-list overview of where code lives in this repo to `generated/PLUG
 1. Check the current layout against the reference map below. Paths may have changed, so confirm them before you answer, for example:
    - `ls ios/*/Sources/*` and `ls -d modules/*/ios/*/Sources/*`
    - `find android/src/main/kotlin modules/*/android/src/main/kotlin -mindepth 4 -maxdepth 5 -type d`
-   - `ls interface/lib/src/common interface/lib/src/modules lib/src example/lib/src example/lib/src/views scripts .github/workflows`
+   - `ls interface/lib/src/common interface/lib/src/modules lib/src example/lib example/packages example/packages/demo/lib/src/views scripts .github/workflows`
    - `cat .env`
 2. Fix any path in the map that no longer matches, and add any new important folders, such as a new module.
 3. Write a nested list in the format below. Make every path a clickable markdown link (with the `../` prefix). Keep the descriptions short.
@@ -82,9 +82,11 @@ Modules: `ia_cardlink`, `ia_ordering`, `ia_over_the_counter`, `ia_pharmacy`, `ia
     - `views.dart` holds the view definitions
     - `callbacks/` and `models/request/` hold the callback handlers and request models
 - **Example project**
-  - `example/lib/main.dart` is the entry point and `example/lib/src/app.dart` is the app with tab navigation
-  - `example/lib/src/views/` holds the home, cardlink, services, screens and components views
-  - `example/lib/src/e2e/` holds e2e code
+  - `example/lib/main.dart` is the entry point and runs the app of the build flavor, which `example/lib/flavor.dart` maps to its package
+  - The apps are local packages in `example/packages/`, a pub workspace with the example: `demo/`, the public examples such as `single_entry_point/`, and `shared/`
+  - `example/packages/demo/lib/src/app.dart` is the demo app with tab navigation
+  - `example/packages/demo/lib/src/views/` holds the home, cardlink, services, screens, components and events views
+  - `example/packages/demo/lib/src/e2e/` holds e2e code
   - Host apps: `example/ios/` (Runner Xcode project / workspace) and `example/android/`
 - **Other**
   - Native SDK versions: `.env` sets `IOS_APPSDK_VERSION` and `ANDROID_APPSDK_VERSION`. `Package.swift`, the podspecs and `build.gradle` all read it.
