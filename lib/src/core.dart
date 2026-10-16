@@ -38,9 +38,9 @@ part 'models/response/prerequisites_result.dart';
 ///
 /// Failed calls throw a [PlatformException]. Its code is `ARG_ERROR` for invalid arguments, and otherwise names the
 /// method, for example `CLEAR_CART_ERROR` for `clearCart`. On Android, calls that need an initialized SDK fail with
-/// `SDK_NOT_INITIALIZED` before [initialize], and `transferPrescriptions` fails with `NO_ACTIVITY` without an attached
-/// activity. Other screens then open in a new task, and [launchPrerequisiteFlow] can't report its result. CardLink
-/// has its own codes, see `IaBaseCardLink`.
+/// `SDK_NOT_INITIALIZED` before [initialize], and `transferPrescriptions` and [launchPrerequisiteFlow] fail with
+/// `NO_ACTIVITY` without an attached activity. Other screens then open in a new task. CardLink has its own codes, see
+/// `IaBaseCardLink`.
 ///
 class IaSdk {
   IaSdk._();
@@ -404,15 +404,40 @@ class IaSdk {
     return result ?? false;
   }
 
-  /// Launches the prerequisites flow (legal documents, onboarding, pharmacy selection) on top of the navigation stack.
+  /// Runs the prerequisites flow (legal documents, onboarding, pharmacy selection) on top of the navigation stack, and
+  /// returns its result once the user finished or cancelled it.
   ///
-  /// The outcome is reported through [prerequisitesResultListener].
+  /// Call it after [initialize] has completed, and don't show SDK screens or components until it has returned.
+  /// Otherwise SDK screens can run the prerequisites themselves at the same time. The flow uses
+  /// [IaSdkConfigurationInitialization.prerequisites] of the configuration passed to [initialize].
   ///
-  /// Note: Only supported on Android. On iOS the prerequisites run automatically when an SDK screen needs them.
+  /// When the prerequisites are already completed, it returns right away without showing anything. A call made while
+  /// the flow runs fails with `PREREQUISITE_FLOW_IN_PROGRESS`.
   ///
-  Future<void> launchPrerequisiteFlow() async {
-    return await _Views.prerequisiteFlow.launch();
+  /// On Android it fails with `SDK_NOT_INITIALIZED` before [initialize] has succeeded. On iOS it runs the
+  /// initialization again first after a failed [initialize].
+  ///
+  Future<IaSdkPrerequisitesResult> launchPrerequisiteFlow() async {
+    if (_isPrerequisiteFlowRunning) {
+      throw PlatformException(
+        code: 'PREREQUISITE_FLOW_IN_PROGRESS',
+        message: 'The prerequisites flow is already running.',
+      );
+    }
+    _isPrerequisiteFlowRunning = true;
+    try {
+      final result = await _Methods.launchPrerequisiteFlow.invoke<Map>();
+      final isCancelled = result?['isCancelled'];
+      if (isCancelled is! bool) {
+        throw Exception('launchPrerequisiteFlow: Missing or invalid isCancelled: $result.');
+      }
+      return IaSdkPrerequisitesResult(isCancelled: isCancelled);
+    } finally {
+      _isPrerequisiteFlowRunning = false;
+    }
   }
+
+  bool _isPrerequisiteFlowRunning = false;
 
   /// Launches the start screen experience on top of the navigation stack.
   ///
@@ -724,7 +749,6 @@ class IaSdk {
       const _AnalyticsEventHandler(),
       const _LogMessageHandler(),
       const _BackActionHandler(),
-      const _PrerequisitesResultHandler(),
     ],
   );
 
@@ -742,13 +766,6 @@ class IaSdk {
   /// Note: Only supported on Android.
   ///
   Future<bool> Function()? onSdkBackAction;
-
-  /// Notifier object informing the client integration of the outcome of the prerequisites flow
-  /// (onboarding, legal documents, pharmacy selection).
-  ///
-  /// On iOS it reports every completed prerequisites run, on Android the runs started with [launchPrerequisiteFlow].
-  ///
-  final prerequisitesResultListener = StreamController<IaSdkPrerequisitesResult>.broadcast();
 
   /// Notifier object informing the client integration of SDK initialization state changes.
   ///

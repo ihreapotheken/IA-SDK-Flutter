@@ -1,0 +1,23 @@
+name: ia_example_single_entry_point
+description: "Public example of a host app that opens the IA SDK from a single screen."
+publish_to: 'none'
+resolution: workspace
+
+environment:
+  sdk: '>=3.10.0'
+  flutter: '>=3.30.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  appsdk_v2_flutter_plugin:
+    path: ../../../
+  ia_ordering:
+    path: ../../../modules/ia_ordering
+  ia_over_the_counter:
+    path: ../../../modules/ia_over_the_counter
+  ia_example_shared:
+    path: ../shared
+
+dev_dependencies:
+  flutter_lints: ^6.0.0

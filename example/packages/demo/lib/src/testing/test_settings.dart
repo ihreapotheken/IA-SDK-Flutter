@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/testing/event_log.dart';
+import 'package:ia_example_demo/src/testing/event_log.dart';
 import 'package:flutter/foundation.dart';
 
 /// How the example answers the prescription scan callbacks.

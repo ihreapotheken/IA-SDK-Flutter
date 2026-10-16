@@ -52,6 +52,7 @@ extension Error {
         case .setShouldShowMascotIllustrations: "SET_SHOULD_SHOW_MASCOT_ILLUSTRATIONS_ERROR"
         case .clearPharmacyId: "CLEAR_PHARMACY_ID_ERROR"
         case .resetPrerequisites: "RESET_PREREQUISITES_ERROR"
+        case .launchPrerequisiteFlow: "LAUNCH_PREREQUISITE_FLOW_ERROR"
         case .clearProductGridCache: "CLEAR_PRODUCT_GRID_CACHE_ERROR"
         case .resetLegalDisclaimer: "RESET_LEGAL_DISCLAIMER_ERROR"
         case .setIsOnboardingShown: "SET_IS_ONBOARDING_SHOWN_ERROR"

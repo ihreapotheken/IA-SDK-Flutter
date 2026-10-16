@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
-import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/file_utils.dart';
+import 'package:ia_example_demo/ia_client_config.dart';
+import 'package:ia_example_demo/src/file_utils.dart';
 import 'package:flutter/material.dart';
 
 class CardLinkViewStateData {

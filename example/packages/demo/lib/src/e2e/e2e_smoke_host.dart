@@ -1,5 +1,5 @@
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
-import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
+import 'package:ia_example_demo/ia_client_config.dart';
 import 'package:flutter/material.dart';
 import 'package:ia_cardlink/ia_cardlink.dart';
 import 'package:ia_ordering/ia_ordering.dart';

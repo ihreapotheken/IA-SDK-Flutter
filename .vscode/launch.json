@@ -1,0 +1,31 @@
+{
+  // One configuration per example app flavor, see example/lib/flavor.dart. Android Studio and IntelliJ have the same
+  // ones in .run/.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Example: demo",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "example",
+      "program": "lib/main.dart",
+      "toolArgs": ["--flavor", "demo"]
+    },
+    {
+      "name": "Example: singleEntryPoint",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "example",
+      "program": "lib/main.dart",
+      "toolArgs": ["--flavor", "singleEntryPoint"]
+    },
+    {
+      "name": "Example: demo, E2E harness",
+      "type": "dart",
+      "request": "launch",
+      "cwd": "example",
+      "program": "lib/main.dart",
+      "toolArgs": ["--flavor", "demo", "--dart-define=iaE2E=true"]
+    }
+  ]
+}

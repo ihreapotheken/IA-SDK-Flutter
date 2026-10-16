@@ -2,6 +2,7 @@ References:
 - iOS IA SDK: https://github.com/ihreapotheken/IA-SDK-iOS
 - Android IA SDK: https://github.com/ihreapotheken/IA-SDK-Android
 - Local iOS IA SDK source: if `.env.local` (repo root, gitignored, per developer) defines `IA_SDK_IOS_APP_PATH`, that is the developer's local checkout of the iOS SDK source repo (IA-SDK-Dev-iOS). Read the native iOS SDK code there when you need it. If the file or variable is missing, fall back to the GitHub reference above.
+- Local Android IA SDK source: if `.env.local` (repo root, gitignored, per developer) defines `IA_SDK_ANDROID_APP_PATH`, that is the developer's local checkout of the Android SDK source repo (IA-SDK-Dev-Android). Read the native Android SDK code there when you need it. If the file or variable is missing, fall back to the GitHub reference above.
 - General Flutter packages docs: https://docs.flutter.dev/packages-and-plugins/developing-packages
 - General Flutter platform channels docs: https://docs.flutter.dev/platform-integration/platform-channels
 
@@ -390,24 +391,30 @@ Each module in `/modules/{module}/android/` contains:
 
 # Example App (`/example`)
 
-## Location: `/example/lib/`
+## Flavors and packages
+The example app is a thin shell; its apps are local packages in `/example/packages/`, resolved with it as a pub workspace:
+- **`lib/main.dart`** - Entry point, loads the shared environment and runs the app of the build flavor
+- **`lib/flavor.dart`** - `ExampleFlavor`, one app per build flavor: `demo` (the default) and public examples such as `singleEntryPoint`. Each has an Android product flavor and an iOS scheme of the same name, and all share the app's signing; `scripts/add-example-ios-flavor.rb` adds a flavor to the iOS project
+- **`packages/demo/`** (`ia_example_demo`) - The demo app, described below
+- **`packages/single_entry_point/`** (`ia_example_single_entry_point`) - Public example: a host app that opens the SDK from a single screen
+- **`packages/shared/`** (`ia_example_shared`) - Loading of the `.secrets` and `.env` assets, and the access key
+
+## Demo app: `/example/packages/demo/lib/`
 
 ### Structure
-- **`main.dart`** - Entry point, loads environment variables
 - **`src/app.dart`** - `ExampleApp` widget with bottom navigation (4 tabs)
   - Tab 0: HomeView (Host app demo)
   - Tab 1: CardLinkView (CardLink demo)
   - Tab 2: ServicesView (SDK services)
   - Tab 3: ScreensView (SDK screens)
 
-### Views (`/example/lib/src/views/`)
+### Views (`/example/packages/demo/lib/src/views/`)
 - **`home_view.dart`** - SDK initialization and basic operations
 - **`cardlink_view.dart`** - CardLink functionality demo
 - **`services_view.dart`** - Available services
 - **`screens_view.dart`** - Available screens to launch
 
-### Services (`/example/lib/src/services/`)
-- **`sdk_initializer.dart`** - SDK initialization logic
+- **`ia_client_config.dart`** - The demo's SDK configuration
 
 # Communication Patterns
 
@@ -548,4 +555,4 @@ Add `Stream<T>` getter to abstract class in `/interface/lib/src/modules/{module}
 | `/ios/.../IaClientDelegate.swift` | Core iOS callback implementation |
 | `/android/.../IaClientBindings.kt` | Core Android setup and method handler routing |
 | `/android/.../IaClientCallbacks.kt` | Core Android callback implementation |
-| `/example/lib/src/app.dart` | Demo app with navigation and feature showcase |
+| `/example/packages/demo/lib/src/app.dart` | Demo app with navigation and feature showcase |

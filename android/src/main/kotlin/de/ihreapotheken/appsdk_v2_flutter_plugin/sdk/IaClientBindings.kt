@@ -120,6 +120,14 @@ class IaClientBindings(
         openSdkScreens.toList().forEach { if (!it.isFinishing) it.finish() }
     }
 
+    fun onPrerequisiteFlowFinished(isCancelled: Boolean) {
+        methodHandler?.onPrerequisiteFlowFinished(isCancelled)
+    }
+
+    fun onActivityClosed() {
+        methodHandler?.failPrerequisiteFlow()
+    }
+
     fun dispose() {
         initStateJob?.cancel()
         methodHandler?.dispose()

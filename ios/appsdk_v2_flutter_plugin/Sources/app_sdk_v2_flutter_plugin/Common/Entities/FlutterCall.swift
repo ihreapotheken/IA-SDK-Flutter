@@ -118,6 +118,11 @@ enum FlutterCall: CaseIterable {
     case resetPrerequisites
 
     /**
+     * Runs the prerequisites flow and returns its result.
+     */
+    case launchPrerequisiteFlow
+
+    /**
      * Clears the cached products of product grids.
      */
     case clearProductGridCache

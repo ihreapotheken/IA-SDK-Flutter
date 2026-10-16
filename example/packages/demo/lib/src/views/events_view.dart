@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:appsdk_v2_flutter_plugin_example/src/testing/event_log.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/testing/test_settings.dart';
+import 'package:ia_example_demo/src/testing/event_log.dart';
+import 'package:ia_example_demo/src/testing/test_settings.dart';
 import 'package:flutter/material.dart';
 
 /// Shows the SDK callbacks and events the example app received, and switches how the app answers them.

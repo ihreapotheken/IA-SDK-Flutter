@@ -202,6 +202,38 @@ IaSdk.instance.cardLink;
 
 For the list of available modules, please visit the [modules](https://github.com/ihreapotheken/IA-SDK-Flutter) directory.
 
+## 5. Demo App Deployment
+
+---
+
+The example app is distributed to testers through Firebase App Distribution (Android) and TestFlight (iOS), by the
+deploy scripts or the [Demo App Deploy](.github/workflows/demo_app_deploy.yml) workflow:
+
+```bash
+sh ./scripts/deploy-demo.sh           # Android and iOS
+sh ./scripts/deploy-demo-android.sh   # Android only
+sh ./scripts/deploy-demo-ios.sh       # iOS only
+```
+
+The scripts take no arguments. Environment variables, set in front of the command, select what's deployed:
+
+| Variable | Values | Default |
+|---|---|---|
+| `IA_FLAVOR` | The [example app flavor](example/README.md#flavors): `demo` or `singleEntryPoint` | `demo` |
+| `IA_SERVER_ENV` | The backend: `development`, `staging` or `production` | `staging` |
+
+```bash
+IA_FLAVOR=singleEntryPoint sh ./scripts/deploy-demo.sh
+IA_SERVER_ENV=production sh ./scripts/deploy-demo-android.sh
+IA_FLAVOR=singleEntryPoint IA_SERVER_ENV=production sh ./scripts/deploy-demo-ios.sh
+```
+
+Every flavor is delivered as the same app, with the same signing and the same Firebase and TestFlight app. Only the
+launcher name tells them apart.
+
+On GitHub, run the Demo App Deploy workflow and choose the platform and the flavor. A pushed tag deploys the `demo`
+flavor to both platforms.
+
 ---
 
 For further information, please see the 

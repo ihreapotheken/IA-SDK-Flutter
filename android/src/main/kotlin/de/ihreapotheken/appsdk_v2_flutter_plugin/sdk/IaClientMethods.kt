@@ -209,6 +209,11 @@ internal class IaClientMethods(
         isPrerequisiteFlowCompleted,
 
         /**
+         * Runs the prerequisites flow and returns its result.
+         */
+        launchPrerequisiteFlow,
+
+        /**
          * Removes the user's billing address.
          */
         clearUserBillingAddress,
@@ -280,8 +285,31 @@ internal class IaClientMethods(
      */
     private val scope = MainScope()
 
+    /**
+     * The call of a running prerequisites flow, answered when its activity returns its result.
+     */
+    private var prerequisiteFlowResult: MethodChannel.Result? = null
+
     fun dispose() {
         scope.cancel()
+        failPrerequisiteFlow()
+    }
+
+    /**
+     * Answers the running prerequisites flow call with the result of its activity.
+     */
+    fun onPrerequisiteFlowFinished(isCancelled: Boolean) {
+        prerequisiteFlowResult?.success(mapOf("isCancelled" to isCancelled))
+        prerequisiteFlowResult = null
+    }
+
+    /**
+     * Fails the running prerequisites flow call when its result can't arrive anymore, as the Flutter activity or
+     * engine is gone.
+     */
+    fun failPrerequisiteFlow() {
+        prerequisiteFlowResult?.error("NO_ACTIVITY", "The Flutter activity closed before the prerequisites flow finished.", null)
+        prerequisiteFlowResult = null
     }
 
     /**
@@ -705,7 +733,6 @@ internal class IaClientMethods(
                     IaScreen.TransferPrescriptionsScreen::class.simpleName -> IaScreen.TransferPrescriptionsScreen
                     IaScreen.SearchScreen::class.simpleName -> IaScreen.SearchScreen
                     IaScreen.PharmacyScreen::class.simpleName -> IaScreen.PharmacyScreen
-                    IaScreen.PrerequisiteFlow::class.simpleName -> IaScreen.PrerequisiteFlow
                     IaScreen.ApofinderScreen::class.simpleName -> IaScreen.ApofinderScreen
                     IaScreen.RedeemPrescription::class.simpleName -> IaScreen.RedeemPrescription
                     "PrescriptionScanner", "EPrescriptionScanner" -> {
@@ -732,13 +759,7 @@ internal class IaClientMethods(
                 val onBackAction: suspend () -> Boolean = {
                     bindings.callbacks.handleBackAction()
                 }
-                val activity = activityContext as? Activity
-                if (entryPoint == IaScreen.PrerequisiteFlow && activity != null) {
-                    activity.startActivityForResult(
-                        IaPrerequisiteActivity.createIntent(activity),
-                        REQUEST_CODE_PREREQUISITES,
-                    )
-                } else if (entryPoint == IaScreen.ApofinderScreen) {
+                if (entryPoint == IaScreen.ApofinderScreen) {
                     IaSdkActivity.start(
                         context = activityContext ?: bindings.applicationContext,
                         view = IaScreen.ApofinderScreen,
@@ -947,6 +968,37 @@ internal class IaClientMethods(
                 if (!requireInitialized(result)) return
                 respondSuspending(result) {
                     bindings.sdkModule.isPrerequisiteFlowCompleted()
+                }
+            }
+
+            FlutterCall.launchPrerequisiteFlow.name -> {
+                // Before initialization the prerequisites activity would show an empty screen until closed.
+                if (!requireInitialized(result)) return
+                if (prerequisiteFlowResult != null) {
+                    result.error("PREREQUISITE_FLOW_IN_PROGRESS", "The prerequisites flow is already running.", null)
+                    return
+                }
+                scope.launch {
+                    try {
+                        // With completed prerequisites the activity would only open and close again.
+                        if (bindings.sdkModule.isPrerequisiteFlowCompleted()) {
+                            result.success(mapOf("isCancelled" to false))
+                            return@launch
+                        }
+                        val activity = bindings.activityContext() as? Activity
+                        if (activity == null) {
+                            result.error("NO_ACTIVITY", "Launching the prerequisites flow needs an activity.", null)
+                            return@launch
+                        }
+                        prerequisiteFlowResult = result
+                        activity.startActivityForResult(
+                            IaPrerequisiteActivity.createIntent(activity),
+                            REQUEST_CODE_PREREQUISITES,
+                        )
+                    } catch (e: Exception) {
+                        prerequisiteFlowResult = null
+                        result.error("METHOD_ERROR", e.message, null)
+                    }
                 }
             }
 

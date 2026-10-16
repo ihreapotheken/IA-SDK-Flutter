@@ -1,0 +1,33 @@
+name: ia_example_demo
+description: "The demo app of the example, with every plugin API and the test tools."
+publish_to: 'none'
+resolution: workspace
+
+environment:
+  sdk: '>=3.10.0'
+  flutter: '>=3.30.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  appsdk_v2_flutter_plugin:
+    path: ../../../
+  ia_cardlink:
+    path: ../../../modules/ia_cardlink
+  ia_ordering:
+    path: ../../../modules/ia_ordering
+  ia_over_the_counter:
+    path: ../../../modules/ia_over_the_counter
+  ia_pharmacy:
+    path: ../../../modules/ia_pharmacy
+  ia_prescription:
+    path: ../../../modules/ia_prescription
+  ia_example_shared:
+    path: ../shared
+  flutter_web_browser: ^0.17.3
+  flutter_map: ^8.2.2
+  latlong2: ^0.9.1
+  flutter_dotenv: ^6.0.0
+
+dev_dependencies:
+  flutter_lints: ^6.0.0

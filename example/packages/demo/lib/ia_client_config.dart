@@ -1,5 +1,5 @@
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:ia_example_shared/ia_example_shared.dart';
 
 /// Example client app ia.de SDK configuration.
 ///
@@ -12,26 +12,9 @@ class ExampleAppConfig {
   ///
   static final instance = ExampleAppConfig._();
 
-  /// Access key data provided with the CLI commands:
+  /// Access key used to authenticate with the ia.de backend services, see [iaAccessKey].
   ///
-  /// ```dart
-  /// flutter run --dart-define iaAccessKey=myKey
-  /// ```
-  ///
-  final _accessKey = const String.fromEnvironment('iaAccessKey');
-
-  /// Access key used to authenticate with the ia.de backend services.
-  ///
-  String get accessKey {
-    if (_accessKey.isNotEmpty) {
-      return _accessKey;
-    }
-    final envKey = dotenv.env['APPSDK_ACCESS_KEY'];
-    if (envKey?.isNotEmpty != true) {
-      throw Exception('Missing .secrets file with APPSDK_ACCESS_KEY entry.');
-    }
-    return envKey!;
-  }
+  String get accessKey => iaAccessKey;
 
   /// Server environment data provided with the CLI commands:
   ///

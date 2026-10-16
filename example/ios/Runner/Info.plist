@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>AppSDK Flutter Demo $(IA_ENV_LABEL)</string>
+	<string>$(IA_DISPLAY_NAME)</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -28,6 +28,8 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NFCReaderUsageDescription</key>
+	<string>Auslesen von Rezeptdaten von Ihrer Krankenversicherungskarte.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Kamerazugriff wird für den Rezeptupload benötigt.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
@@ -72,8 +74,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NFCReaderUsageDescription</key>
-	<string>Auslesen von Rezeptdaten von Ihrer Krankenversicherungskarte.</string>
 	<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
 	<array>
 		<string>D2760001448000</string>

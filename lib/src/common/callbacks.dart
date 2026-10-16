@@ -101,31 +101,3 @@ class _BackActionHandler implements IaBaseCallbackHandler {
   }
 }
 
-class _PrerequisitesResultHandler implements IaBaseCallbackHandler {
-  const _PrerequisitesResultHandler();
-
-  @override
-  String get methodId => 'sdkPrerequisitesFinished';
-
-  @override
-  Future<dynamic> Function(dynamic args) get handler {
-    return (args) async {
-      final isCancelled = args is Map ? args['isCancelled'] : null;
-      if (isCancelled is! bool) {
-        throw Exception(
-          'sdkPrerequisitesFinished: Missing or invalid isCancelled: $args.',
-        );
-      }
-      final map = args as Map;
-      IaSdk.instance.prerequisitesResultListener.add(
-        IaSdkPrerequisitesResult(
-          isCancelled: isCancelled,
-          onboarding: IaSdkOnboardingResult.values.where((value) => value.name == map['onboarding']).firstOrNull,
-          legal: IaSdkLegalResult.values.where((value) => value.name == map['legal']).firstOrNull,
-          pharmacyId: map['pharmacyId'] as String?,
-        ),
-      );
-      return null;
-    };
-  }
-}

@@ -12,10 +12,6 @@ class IaClientDelegate: SDKDelegate {
     /// Static, so a delegate created for another Flutter engine keeps them.
     static var cardLinkConfiguration: IaCardLinkConfigurationArguments?
 
-    /// Whether prerequisites results are a replay of the SDK's cached result rather than a run, see
-    /// `IAOrderingWrapper.transferPrescriptions`.
-    static var skipsPrerequisitesResults = false
-
     /// How long the SDK waits for Flutter's scan decision. Without an answer, for example when the Flutter engine is
     /// gone, it continues with its default handling.
     private static let scanDecisionTimeout: TimeInterval = 120
@@ -124,40 +120,6 @@ class IaClientDelegate: SDKDelegate {
         channel.invokeMethod(
             "orderingDidUpdateCart",
             arguments: arguments
-        )
-    }
-
-    func sdkDidFinishInitialization(
-        result: Result<IASDKInitializationAndPrerequisitesResult, any Error>,
-        type: SDKInitializationType
-    ) {
-        guard !Self.skipsPrerequisitesResults,
-              case .success(let initializationResult) = result,
-              let prerequisites = initializationResult.prerequisitesResult else {
-            return
-        }
-        let onboarding: String = switch prerequisites.onboardingResult {
-        case .notStarted: "notStarted"
-        case .noOnboardingData: "noOnboardingData"
-        case .finished: "finished"
-        case .cancelled: "cancelled"
-        @unknown default: "notStarted"
-        }
-        let legal: String = switch prerequisites.legalResult {
-        case .accepted: "accepted"
-        case .cancelled: "cancelled"
-        case .notStarted: "notStarted"
-        case .noLegalTextFound: "noLegalTextFound"
-        @unknown default: "notStarted"
-        }
-        channel.invokeMethod(
-            "sdkPrerequisitesFinished",
-            arguments: [
-                "isCancelled": prerequisites.isCancelled,
-                "onboarding": onboarding,
-                "legal": legal,
-                "pharmacyId": prerequisites.pharmacyResult.pharmacyID.map { String($0) } ?? NSNull(),
-            ] as [String: Any]
         )
     }
 

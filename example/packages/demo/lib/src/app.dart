@@ -1,18 +1,18 @@
 import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
-import 'package:appsdk_v2_flutter_plugin_example/ia_client_config.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/e2e/e2e_config.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/e2e/e2e_harness.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/file_utils.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/testing/event_log.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/testing/test_settings.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/views/cardlink_view.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/views/home_view.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/views/components_view.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/views/events_view.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/views/screens_view.dart';
-import 'package:appsdk_v2_flutter_plugin_example/src/views/services_view.dart';
+import 'package:ia_example_demo/ia_client_config.dart';
+import 'package:ia_example_demo/src/e2e/e2e_config.dart';
+import 'package:ia_example_demo/src/e2e/e2e_harness.dart';
+import 'package:ia_example_demo/src/file_utils.dart';
+import 'package:ia_example_demo/src/testing/event_log.dart';
+import 'package:ia_example_demo/src/testing/test_settings.dart';
+import 'package:ia_example_demo/src/views/cardlink_view.dart';
+import 'package:ia_example_demo/src/views/home_view.dart';
+import 'package:ia_example_demo/src/views/components_view.dart';
+import 'package:ia_example_demo/src/views/events_view.dart';
+import 'package:ia_example_demo/src/views/screens_view.dart';
+import 'package:ia_example_demo/src/views/services_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:ia_cardlink/ia_cardlink.dart';
@@ -78,14 +78,6 @@ class _ExampleAppState extends State<ExampleApp> {
 
     IaSdk.instance.initializationStateListener.stream.listen(
       (state) => log.add('Initialization', state.name),
-    );
-
-    IaSdk.instance.prerequisitesResultListener.stream.listen(
-      (result) => log.add(
-        'Prerequisites',
-        'cancelled: ${result.isCancelled}, onboarding: ${result.onboarding?.name}, '
-            'legal: ${result.legal?.name}, pharmacy: ${result.pharmacyId}',
-      ),
     );
 
     IaSdk.instance.analyticsEventListener.stream.listen(
