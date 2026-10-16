@@ -1,6 +1,6 @@
 {
-  // One configuration per example app flavor, see example/lib/flavor.dart. Android Studio and IntelliJ have the same
-  // ones in .run/.
+  // One configuration per example app flavor, see example/lib/flavor.dart. example/.vscode/launch.json has the same
+  // ones for opening the example folder on its own, Android Studio and IntelliJ in .run/.
   "version": "0.2.0",
   "configurations": [
     {
