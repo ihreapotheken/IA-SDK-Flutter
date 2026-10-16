@@ -29,8 +29,6 @@ internal class IaClientNativeView(
             IaScreen.CartScreen::class.simpleName -> IaScreen.CartScreen
             IaScreen.SearchScreen::class.simpleName -> IaScreen.SearchScreen
             IaScreen.PharmacyScreen::class.simpleName -> IaScreen.PharmacyScreen
-            IaScreen.PrerequisiteFlow::class.simpleName -> IaScreen.PrerequisiteFlow
-            IaScreen.TransferPrescriptionsScreen::class.simpleName -> IaScreen.TransferPrescriptionsScreen
             IaScreen.ApofinderScreen::class.simpleName -> IaScreen.ApofinderScreen
             IaScreen.RedeemPrescription::class.simpleName -> IaScreen.RedeemPrescription
             else -> throw Exception("Unknown view ID: $viewId")

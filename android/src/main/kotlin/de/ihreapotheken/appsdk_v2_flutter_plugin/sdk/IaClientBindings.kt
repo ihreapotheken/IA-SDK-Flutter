@@ -154,8 +154,6 @@ class IaClientBindings(
             IaScreen.CartScreen,
             IaScreen.SearchScreen,
             IaScreen.PharmacyScreen,
-            IaScreen.PrerequisiteFlow,
-            IaScreen.TransferPrescriptionsScreen,
             IaScreen.ApofinderScreen,
             IaScreen.RedeemPrescription,
         )

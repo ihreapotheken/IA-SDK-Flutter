@@ -212,17 +212,15 @@ class _AutoScreensList extends StatelessWidget {
 class _ManualScreensList extends StatelessWidget {
   const _ManualScreensList();
 
-  /// Platform view ids each platform registers for SDK screens.
+  /// Platform view ids both platforms register for SDK screens.
   ///
-  static List<String> get _viewIds => [
+  static const _viewIds = [
     'startScreen',
     'searchScreen',
     'cartScreen',
     'pharmacyScreen',
     'apofinderScreen',
     'redeemPrescription',
-    if (Platform.isIOS) ...['prescriptionScanner', 'ePrescriptionScanner'],
-    if (Platform.isAndroid) ...['prerequisiteFlow', 'transferPrescriptionsScreen'],
   ];
 
   /// Opens [viewId] in a new route: pushed onto the app's navigation stack, or presented full screen as a dialog.
