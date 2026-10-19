@@ -78,8 +78,10 @@ const IaUIConfiguration(
 
 ## Remote Theme
 
-By default, the SDK loads its theme (e.g. colors) from the server. To use only the local theme and your
-`uiConfiguration`, set `shouldFetchThemeFromRemote` to `false`:
+The theme of SDK screens can be loaded remotely, with `IaSdkConfiguration.shouldFetchThemeFromRemote`. When it's set
+to `true` (the default), `initialize` fetches the whole color palette and the fonts configured for your API key, so the
+SDK screens match your brand without any code changes. To use only the SDK's local theme and your `uiConfiguration`,
+set it to `false`:
 
 ```dart
 IaSdkConfiguration(
