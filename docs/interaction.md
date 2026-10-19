@@ -32,9 +32,6 @@ Available streams:
 | `IaSdk.instance.prescription.scannerCameraErrorListener` | Scanner camera error (iOS only) |
 | `IaSdk.instance.cardLink.*Listener` | CardLink events, e.g. `eventListener` and `prescriptionsRedeemedListener` |
 
-There is also the `IaSdk.instance.onApofinderDidChangePharmacy` callback, called when the user selects a pharmacy in
-Apofinder.
-
 ## Example of overriding default behavior
 `onSdkWillNavigateToTarget` is called when some overridable action is performed. Return `true` to let the SDK perform
 its default behavior, or `false` when your app handled it.
@@ -80,11 +77,12 @@ Navigation targets (`IaSdkNavigationTarget`):
 
 ## Other callbacks
 
-| Callback | Purpose |
+| Callback | Called when |
 |---|---|
-| `IaSdk.instance.prescription.onPrescriptionPhotoScanned` | Take over a photographed paper prescription instead of the SDK |
-| `IaSdk.instance.prescription.onEPrescriptionScanned` | Take over a scanned e-prescription (eRezept) instead of the SDK |
-| `IaSdk.instance.onSdkBackAction` | Decide whether an SDK screen may close on back (Android only) |
+| `IaSdk.instance.onApofinderDidChangePharmacy` | The user selects a pharmacy in Apofinder; gives the `pharmacyId` and `isFromPrerequisites` |
+| `IaSdk.instance.prescription.onPrescriptionPhotoScanned` | A paper prescription is photographed; lets you take it over instead of the SDK |
+| `IaSdk.instance.prescription.onEPrescriptionScanned` | An e-prescription (eRezept) is scanned; lets you take it over instead of the SDK |
+| `IaSdk.instance.onSdkBackAction` | The user goes back on an SDK screen; decides whether the screen may close (Android only) |
 
 ## Platform differences
 - **Imprint:** On Android, `imprint` is only reported when `IaSdkConfigurationFooter.isImprintHandledByHostApp` is
