@@ -9,6 +9,7 @@ await IaSdk.instance.initialize(
     accessKey: 'ENTER YOUR API KEY HERE',
     clientId: 'ENTER YOUR CLIENT ID HERE',
     serverEnvironment: IaSdkConfigurationServerEnvironment.production,
+    shouldFetchThemeFromRemote: false, // See Remote Theme below.
     uiConfiguration: const IaUIConfiguration(
       // Appearance options described below.
     ),
@@ -80,13 +81,13 @@ const IaUIConfiguration(
 
 The theme of SDK screens can be loaded remotely, with `IaSdkConfiguration.shouldFetchThemeFromRemote`. When it's set
 to `true` (the default), `initialize` fetches the whole color palette and the fonts configured for your API key, so the
-SDK screens match your brand without any code changes. To use only the SDK's local theme and your `uiConfiguration`,
-set it to `false`:
+SDK screens match your brand without any code changes. Set it to `false` to use only the SDK's local theme and your
+`uiConfiguration`.
 
 ```dart
 IaSdkConfiguration(
   // ...
-  shouldFetchThemeFromRemote: false,
+  shouldFetchThemeFromRemote: true,
 )
 ```
 
