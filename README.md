@@ -215,6 +215,7 @@ await IaSdk.instance.initialize(
 
 ## 4. Guides
 
+[Public API Overview](docs/public_api_overview.md)  
 [Initialization](docs/initialization.md)  
 [Presentation](docs/presentation.md)  
 [Appearance](docs/appearance.md)  
