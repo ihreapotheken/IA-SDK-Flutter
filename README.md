@@ -190,7 +190,7 @@ Registered modules are then available on `IaSdk.instance`, for example `IaSdk.in
 
 4. **Basic setup and initialize**  
 Next, enter your API key, client ID and other options you might need in `IaSdkConfiguration`, and pass it to
-`initialize`. This fetches all required data and enables your modules. Call it once, right after `register`.
+`initialize`. This fetches all required data and enables your modules.
 ```dart
 await IaSdk.instance.initialize(
   config: IaSdkConfiguration(
@@ -200,8 +200,6 @@ await IaSdk.instance.initialize(
     initialization: const IaSdkConfigurationInitialization(
       shouldShowIndicator: true,
       prerequisites: IaPrerequisitesConfiguration(
-        isCancellable: false,       // iOS only
-        isAnimated: true,           // iOS only
         runLegalIfNeeded: true,
         runOnboardingIfNeeded: true,
         runApofinderIfNeeded: true,
@@ -236,31 +234,9 @@ await IaSdk.instance.initialize(
 The [example app](example) has two flavors:
 - **demo** (default): Internal demo app, used for testing all features of the plugin.
 - **singleEntryPoint**: Shows how to use the plugin in one of the most common scenarios, a host app that opens the SDK
-  from a single screen. Start here if you are new to the plugin.
+  from a single screen.  
 
-To run them with your own credentials:
-1. **App identifier:** Replace `de.ihreapotheken.flutter` with the Bundle ID / Application ID your API key is bound to.
-   On iOS, set `PRODUCT_BUNDLE_IDENTIFIER` of the Runner target, and on Android `applicationId` in
-   [example/android/app/build.gradle.kts](example/android/app/build.gradle.kts). Both flavors use the same identifier.
-2. **API key:** Create an `example/.secrets` file containing `APPSDK_ACCESS_KEY=your_api_key`, or pass it with
-   `--dart-define iaAccessKey=your_api_key`.
-3. **Client ID:** Replace `clientId` in
-   [ia_sdk_page.dart](example/packages/single_entry_point/lib/src/ia_sdk_page.dart) (singleEntryPoint) or
-   [ia_client_config.dart](example/packages/demo/lib/ia_client_config.dart) (demo).
-4. **Server environment:** Use the environment your API key is for, you get separate keys for QA (`staging`) and
-   production. In singleEntryPoint, set `serverEnvironment` in `ia_sdk_page.dart`. In demo, pass it with
-   `--dart-define iaServerEnv=production` (the default is `staging`).
-5. **Run:**
-   ```bash
-   cd example
-   flutter pub get
-   flutter run --flavor singleEntryPoint   # or just flutter run, for demo
-   ```
-
-> [!IMPORTANT]
-> QA (`staging`) is only reachable over VPN.
-
-For more details, see the [example app README](example/README.md).
+To run them with your own API key, Client ID and app identifier, see [Environment Setup](example/README.md#environment-setup) in the example app README.
 
 ## 7. Legal
 
@@ -278,7 +254,7 @@ Third-party licenses:
 For information on server environments, testing credentials, access requirements, and bug reporting guidelines,
 see the [Usage and Testing documentation](https://ihreapotheken.github.io/docs/appsdk/common/usage-and-testing).
 
-## 9. Demo App Deployment
+## 9. Demo App Deployment (Internal)
 
 ---
 
