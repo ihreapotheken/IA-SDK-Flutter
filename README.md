@@ -209,6 +209,8 @@ await IaSdk.instance.initialize(
   ),
 );
 ```
+> [!TIP]
+> To learn more about initialization, see [Initialization](docs/Initialization.md).
 
 ## 4. Guides
 

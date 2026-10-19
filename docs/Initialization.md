@@ -43,7 +43,7 @@ The prerequisites are a flow of screens that runs before the user can use the SD
 * **Onboarding:** An introductory onboarding screen, shown only once. Onboarding is optional, you can set
   `runOnboardingIfNeeded` to `false` to skip it.
 * **Legal Opt-In:** The user must opt in to use the SDK. This is presented the first time and when the version of some
-  legal document changes. Legal screens are optional, you can set `runLegalIfNeeded` to `false` to skip them.
+  legal document changes. If your app has its own legal screens, you can set `runLegalIfNeeded` to `false`.
 * **Apofinder:** The SDK requires a pharmacy to be set. It cannot run without one. You can provide the pharmacy in two
   ways:
     * Manually provide a pharmacy identifier with `IaSdk.instance.pharmacy.setPharmacyId(...)` (from the `ia_pharmacy`
@@ -96,14 +96,6 @@ When `isCancelled` is `false`, the prerequisites are completed and a pharmacy is
 `runApofinderIfNeeded` is `false`). When the user cancelled the flow, you must not show any IA SDK screens or
 components.
 
-## Cancellable and non-cancellable prerequisites
-- Controlled by the `IaPrerequisitesConfiguration.isCancellable` flag. Only used on iOS.
-- Cancellable: There is a dismiss ("X") button on every screen, tapping that button will cancel the prerequisites
-  flow. When you run the flow explicitly, check `isCancelled` on the result, as shown above.
-- Non-cancellable: There is a dismiss ("X") button only on the Onboarding screen, but that doesn't cancel the
-  prerequisites flow, it only skips onboarding. Other screens don't have a dismiss button, meaning the SDK will not
-  allow the user to go back or cancel the prerequisites.
-
 ## Initialization state
 You can check the current state with `getInitializationState()` or `isInitialized()`, and listen to changes with
 `initializationStateListener`:
@@ -112,28 +104,6 @@ You can check the current state with `getInitializationState()` or `isInitialize
 IaSdk.instance.initializationStateListener.stream.listen((state) {
   // uninitialized, initializing, initialized or error.
 });
-```
-
-## Transferring SDKv1 User Data to SDKv2
-If you've used IA SDKv1 before, you can transfer some of the data used in SDKv1 to be later used in SDKv2.
-
-The following list of User Data can be transferred from SDKv1 to SDKv2 (the current SDK version):
-- guest user's salutation, first name, last name, email and telephone number
-- Apofinder and product search history
-- Pharmacy history
-- currently selected Pharmacy.
-
-You do this by calling `transferSDKv1UserData()` **before** you call `initialize`. The transfer is only performed
-once, later calls have no effect.
-
-```dart
-Future<void> setupSdk() async {
-  await IaSdk.instance.register(modules: modules);
-
-  await IaSdk.instance.transferSDKv1UserData();
-
-  await IaSdk.instance.initialize(config: config);
-}
 ```
 
 ## Common scenarios
@@ -183,21 +153,8 @@ final isCompleted = await IaSdk.instance.isPrerequisiteFlowCompleted();
 ## Platform differences
 The plugin keeps both platforms as close as possible, but the native SDKs differ in a few places:
 
-- **Prerequisites in `initialize`:** The native iOS SDK can run the prerequisites inside its `initialize`. The plugin
-  never does that, on either platform, to match Android: the prerequisites run when a screen is shown, or with
-  `launchPrerequisiteFlow`.
 - **Calling `initialize` again:** On iOS, a later call after a failed `initialize` initializes the SDK again. On
-  Android the SDK initializes only once:
-    - When it can't load the permissions, for example for an invalid API key, `initialize` fails, but the SDK still
-      finishes initializing, so a later call completes without loading them again.
-    - When the initialization itself fails, later calls fail too.
-- **Remote configuration:** On iOS, `initialize` fails when the remote configuration can't be loaded. On Android it
-  doesn't; SDK screens show an error with a retry button instead.
-- **Entitlements:** On iOS, `initialize` fails when a registered module isn't covered by your API key's entitlements.
-  On Android, access to that module's features is limited instead.
-- **Force update:** On iOS the force update check runs during initialization, on Android when an SDK screen is shown.
-- **Calls before `initialize`:** On Android, most functions fail with `SDK_NOT_INITIALIZED` before `initialize` has
-  completed.
-- **Prerequisites options:** `isCancellable` and `isAnimated` are only used on iOS.
+  Android the SDK initializes only once.
+- **Cancelling prerequisites:** On iOS they can be made cancellable with `isCancellable`; on Android they always are.
 - **Helpers:** `resetLegalDisclaimer`, `setIsOnboardingShown`, `cleanCache` and `savePharmacyId` are iOS only,
   `isPrerequisiteFlowCompleted` is Android only. They throw a `MissingPluginException` on the other platform.
