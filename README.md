@@ -104,13 +104,12 @@ dependencies:
       path: modules/ia_cardlink
 ```
 
+> [!IMPORTANT]
 > ⚠️ Add only the module packages that you will use and for which your API key has entitlements.
 
-You may reference a specific branch, tag, or commit hash with the `ref` field. Use the same `ref` for the core package
-and all modules.
-
-Version reference numbers can be found by reviewing
-[the package Github repository tags](https://github.com/ihreapotheken/IA-SDK-Flutter/tags).
+> [!IMPORTANT]
+> Set `ref` to the latest version tag, not `main`, and use the same `ref` for the core package and all modules.
+> The available tags are listed in [the package Github repository tags](https://github.com/ihreapotheken/IA-SDK-Flutter/tags).
 
 ### 3.2. iOS Permissions
 
@@ -183,8 +182,7 @@ await IaSdk.instance.register(
 );
 ```
 > [!IMPORTANT]
-> Register all modules in one call, before `initialize`. Later calls can't add modules, and the Android SDK only
-> starts the modules registered before it initializes.
+> Register all modules in one call, before `initialize`. 
 
 Registered modules are then available on `IaSdk.instance`, for example `IaSdk.instance.overTheCounter` and
 `IaSdk.instance.ordering`.
@@ -197,7 +195,7 @@ await IaSdk.instance.initialize(
   config: IaSdkConfiguration(
     accessKey: 'ENTER YOUR API KEY HERE',
     clientId: 'ENTER YOUR CLIENT ID HERE',
-    serverEnvironment: IaSdkConfigurationServerEnvironment.staging,
+    serverEnvironment: IaSdkConfigurationServerEnvironment.production,
     initialization: const IaSdkConfigurationInitialization(
       shouldShowIndicator: true,
       prerequisites: IaPrerequisitesConfiguration(
@@ -211,23 +209,12 @@ await IaSdk.instance.initialize(
   ),
 );
 ```
-> [!NOTE]
-> On Android a failed `initialize` can't be retried until the app restarts. On iOS a later call initializes the SDK
-> again.
 
-5. **Run prerequisites**  
-Before using any SDK features, the user must accept the legal documents, see the onboarding and select a pharmacy.
-Call `launchPrerequisiteFlow` once `initialize` has completed and your UI is ready. It shows only the steps that are
-still needed, using the `prerequisites` options from step 4, and returns right away when all are done. Don't show SDK
-screens or components until it has returned.
-```dart
-final result = await IaSdk.instance.launchPrerequisiteFlow();
-if (!result.isCancelled) {
-  await IaSdk.instance.launchStartRoute();
-}
-```
+## 4. Guides
 
-## 4. Demo App Deployment
+[Initialization](docs/Initialization.md)
+
+## 5. Demo App Deployment
 
 ---
 

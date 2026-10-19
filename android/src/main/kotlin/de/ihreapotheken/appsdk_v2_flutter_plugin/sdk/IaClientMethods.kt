@@ -552,7 +552,7 @@ internal class IaClientMethods(
                                 } else if (!hasReplied.getAndSet(true)) {
                                     result.error(
                                         "INIT_ERROR",
-                                        "An earlier initialization failed, and the SDK can't be initialized again until the app restarts.",
+                                        "An earlier initialization failed, and the Android SDK doesn't initialize again.",
                                         null,
                                     )
                                 }
