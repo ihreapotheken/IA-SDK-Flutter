@@ -1,19 +1,22 @@
-# AppSDK Flutter Plugin
+# IA SDK Flutter
 
-Flutter [Plugin](https://flutter.dev/to/develop-plugins) project implemented with the ia.de AppSDK services.
+IA SDK Flutter is a Flutter plugin that helps integrate IhreApotheken into your app by providing plug-and-play UI and communication with backend services.
 
-## 1. General Info
+The plugin is a thin wrapper around the native IA SDKs for [iOS](https://github.com/ihreapotheken/IA-SDK-iOS) and [Android](https://github.com/ihreapotheken/IA-SDK-Android). It exposes their functionality and screens to Dart.
 
----
+Like the native SDKs, the plugin is split into packages:
+* **appsdk_v2_flutter_plugin**: Core package, required. Legal, onboarding, start screen, Apofinder (pharmacy search with list and map).
+* **ia_over_the_counter**: Product search, product details, inquiry.
+* **ia_ordering**: Cart, checkout, payment.
+* **ia_pharmacy**: Pharmacy details.
+* **ia_prescription**: Prescription scanner.
+* **ia_cardlink**: Scanning prescriptions from electronic health cards.
 
-The plugin implementation is based on the native AppSDK libraries developed by the ia.de team with Kotlin and Swift. 
-
-These native libraries offer both checkout services as well as view components in order to ensure seamless integration 
-with any client setup. 
+To use IA SDK, you will need an API key and Client ID. The API key is bound to specific app Bundle ID(s) / Application ID(s) and comes with a set of entitlements. Each entitlement enables access to certain features or services within the SDK.
 
 Public API Reference: https://ihreapotheken.github.io/docs/appsdk/flutter
 
-## 2. Developer Setup
+## 1. Developer Setup
 
 ---
 
@@ -22,7 +25,7 @@ Public API Reference: https://ihreapotheken.github.io/docs/appsdk/flutter
 - [Swift Package Manager](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers) Flutter SDK Support
 - [Github Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) for native library access
 
-## 3. Platform Support
+## 2. Platform Support
 
 ---
 
@@ -43,7 +46,7 @@ The library is supported on both of the major mobile operating systems, with con
 - Xcode: `16.0`
 - Swift `5.9`
 
-## 4. Client Setup
+## 3. Client Setup
 
 ---
 
@@ -51,9 +54,10 @@ For official reference, please see
 [the Flutter SDK documentation](https://docs.flutter.dev/packages-and-plugins/using-packages) 
 on using Flutter plugins.
 
-### 4.1. Add the dependency to the `pubspec.yaml` file
+### 3.1. Add the dependencies to the `pubspec.yaml` file
 
-The library is accessed from Github as in below example:
+Add the core package, `appsdk_v2_flutter_plugin`, and the module packages you need. All packages are fetched from GitHub;
+the modules live in the [modules](modules) directory:
 
 ```yaml
 # pubspec.yaml
@@ -65,18 +69,50 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  # Core package, required.
   appsdk_v2_flutter_plugin:
     git:
       url: https://github.com/ihreapotheken/IA-SDK-Flutter
       ref: main
+
+  # Module packages, optional. Add only the ones you need.
+  ia_over_the_counter:
+    git:
+      url: https://github.com/ihreapotheken/IA-SDK-Flutter
+      ref: main
+      path: modules/ia_over_the_counter
+  ia_ordering:
+    git:
+      url: https://github.com/ihreapotheken/IA-SDK-Flutter
+      ref: main
+      path: modules/ia_ordering
+  ia_pharmacy:
+    git:
+      url: https://github.com/ihreapotheken/IA-SDK-Flutter
+      ref: main
+      path: modules/ia_pharmacy
+  ia_prescription:
+    git:
+      url: https://github.com/ihreapotheken/IA-SDK-Flutter
+      ref: main
+      path: modules/ia_prescription
+  ia_cardlink:
+    git:
+      url: https://github.com/ihreapotheken/IA-SDK-Flutter
+      ref: main
+      path: modules/ia_cardlink
 ```
 
-You may reference specific branch, tag, or commit hash by specifying the `ref` field.
+> ⚠️ Add only the module packages that you will use and for which your API key has entitlements.
 
-Version reference numbers can be found by reviewing 
+You may reference a specific branch, tag, or commit hash with the `ref` field. Use the same `ref` for the core package
+and all modules.
+
+Version reference numbers can be found by reviewing
 [the package Github repository tags](https://github.com/ihreapotheken/IA-SDK-Flutter/tags).
 
-### 4.2. iOS Permissions
+### 3.2. iOS Permissions
 
 Add the following keys to your `Info.plist` file based on the modules you use:
 
@@ -115,94 +151,83 @@ Add the following keys to your `Info.plist` file based on the modules you use:
 
 **Note:** The `com.apple.developer.nfc.readersession.iso7816.select-identifiers` key with the listed AIDs is required for CardLink to communicate with German health insurance cards (eGK) and related secure messaging protocols.
 
-### 4.3. Plugin usage
+### 3.3. Plugin usage
 
-Methods and properties made available as public APIs implemented with the `IaSdk.instance` object. 
+1. **Set the app identifier**  
+The API key is linked to your app's identifier, so set it on both platforms:
+   - iOS: the bundle identifier, in the Runner target's Build Settings (`PRODUCT_BUNDLE_IDENTIFIER`).
+   - Android: the `applicationId`, in `android/app/build.gradle(.kts)`.
 
-The client setup requires module registration and invocation of the `initialize` method for usage: 
-
+2. **Import the required packages**  
+`appsdk_v2_flutter_plugin` is mandatory, the module packages are optional. In this example we will be using product
+search from `ia_over_the_counter` and cart from `ia_ordering`.
 ```dart
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
+import 'package:ia_over_the_counter/ia_over_the_counter.dart';
+import 'package:ia_ordering/ia_ordering.dart';
+```
 
-Future<void> initIaSdk() {
-  await IaSdk.instance.register(
-    modules: [
-      // Described in the following section.
-    ],
-  );
-  final iaSdkConfig = IaSdkConfiguration(
-    accessKey: 'myAccessKey',
-    clientId: 'myClientId',
-    serverEnvironment: myServerEnvironment,
-  );
-  await IaSdk.instance.initialize(
-    config: iaSdkConfig,
-  );
+3. **Register modules**  
+The first step is to register all the modules you plan to use. This must be done before calling any other function
+or presenting any screens, so we recommend doing it right when the app starts.
+This step is required because modules can be interconnected. For example, registering `IaModuleOrdering` makes the
+**Cart** feature (from `ia_ordering`) internally available to the **Product Search** feature (from
+`ia_over_the_counter`), enabling features like a cart button on the search screen.
+Integrations and Apofinder are part of the core package and are always registered.
+```dart
+await IaSdk.instance.register(
+  modules: [
+    IaModuleOverTheCounter(),
+    IaModuleOrdering(),
+  ],
+);
+```
+> [!IMPORTANT]
+> Register all modules in one call, before `initialize`. Later calls can't add modules, and the Android SDK only
+> starts the modules registered before it initializes.
+
+Registered modules are then available on `IaSdk.instance`, for example `IaSdk.instance.overTheCounter` and
+`IaSdk.instance.ordering`.
+
+4. **Basic setup and initialize**  
+Next, enter your API key, client ID and other options you might need in `IaSdkConfiguration`, and pass it to
+`initialize`. This fetches all required data and enables your modules. Call it once, right after `register`.
+```dart
+await IaSdk.instance.initialize(
+  config: IaSdkConfiguration(
+    accessKey: 'ENTER YOUR API KEY HERE',
+    clientId: 'ENTER YOUR CLIENT ID HERE',
+    serverEnvironment: IaSdkConfigurationServerEnvironment.staging,
+    initialization: const IaSdkConfigurationInitialization(
+      shouldShowIndicator: true,
+      prerequisites: IaPrerequisitesConfiguration(
+        isCancellable: false,       // iOS only
+        isAnimated: true,           // iOS only
+        runLegalIfNeeded: true,
+        runOnboardingIfNeeded: true,
+        runApofinderIfNeeded: true,
+      ),
+    ),
+  ),
+);
+```
+> [!NOTE]
+> On Android a failed `initialize` can't be retried until the app restarts. On iOS a later call initializes the SDK
+> again.
+
+5. **Run prerequisites**  
+Before using any SDK features, the user must accept the legal documents, see the onboarding and select a pharmacy.
+Call `launchPrerequisiteFlow` once `initialize` has completed and your UI is ready. It shows only the steps that are
+still needed, using the `prerequisites` options from step 4, and returns right away when all are done. Don't show SDK
+screens or components until it has returned.
+```dart
+final result = await IaSdk.instance.launchPrerequisiteFlow();
+if (!result.isCancelled) {
+  await IaSdk.instance.launchStartRoute();
 }
 ```
 
-Each of the two methods are expected to only be invoked once during the application runtime.
-
-### 4.4. Module registration
-
-Each of the individual native modules are available for installation from the 
-[modules](https://github.com/ihreapotheken/IA-SDK-Flutter) directory:
-
-```yaml
-# pubspec.yaml
-
-environment:
-  sdk: '>=3.10.0'
-  flutter: '>=3.30.0'
-
-dependencies:
-  flutter:
-    sdk: flutter
-  appsdk_v2_flutter_plugin:
-    git:
-      url: https://github.com/ihreapotheken/IA-SDK-Flutter
-      ref: main
-  ia_cardlink: # Example module dependency.
-    git:
-      url: https://github.com/ihreapotheken/IA-SDK-Flutter
-      ref: main
-      path: modules/ia_cardlink
-```
-
-After implementing the modules with the `pubspec.yaml` file, 
-it's public API declaration object needs to be instantiated, after which it can be forwarded to the `register` method.
-Register all modules in one call, before `initialize`: the Android SDK only starts the modules registered before it initializes.
-
-```dart
-import 'package:appsdk_v2_flutter_plugin/sdk.dart';
-import 'package:ia_cardlink/ia_cardlink.dart';
-
-final cardLinkModule = IaModuleCardLink();
-
-Future<void> initIaSdk() {
-  await IaSdk.instance.register(
-    modules: [
-      cardLinkModule,
-    ],
-  );
-  
-  ...
-
-}
-```
-
-Once this is done, the module and it's respective methods and properties 
-can be accessed from the `IaSdk.instance` object by accessing it's internal state:
-
-```dart
-import 'package:appsdk_v2_flutter_plugin/sdk.dart';
-
-IaSdk.instance.cardLink;
-```
-
-For the list of available modules, please visit the [modules](https://github.com/ihreapotheken/IA-SDK-Flutter) directory.
-
-## 5. Demo App Deployment
+## 4. Demo App Deployment
 
 ---
 
