@@ -57,7 +57,14 @@ on using Flutter plugins.
 ### 3.1. Add the dependencies to the `pubspec.yaml` file
 
 Add the core package, `appsdk_v2_flutter_plugin`, and the module packages you need. All packages are fetched from GitHub;
-the modules live in the [modules](modules) directory:
+the modules live in the [modules](modules) directory.
+
+> [!IMPORTANT]
+> Add only the module packages that you will use and for which your API key has entitlements.
+
+> [!IMPORTANT]
+> Set `ref` to the latest version tag, not `main`, and use the same `ref` for the core package and all modules.
+> The available tags are listed in [the package Github repository tags](https://github.com/ihreapotheken/IA-SDK-Flutter/tags).
 
 ```yaml
 # pubspec.yaml
@@ -104,12 +111,6 @@ dependencies:
       path: modules/ia_cardlink
 ```
 
-> [!IMPORTANT]
-> ⚠️ Add only the module packages that you will use and for which your API key has entitlements.
-
-> [!IMPORTANT]
-> Set `ref` to the latest version tag, not `main`, and use the same `ref` for the core package and all modules.
-> The available tags are listed in [the package Github repository tags](https://github.com/ihreapotheken/IA-SDK-Flutter/tags).
 
 ### 3.2. iOS Permissions
 
@@ -210,11 +211,12 @@ await IaSdk.instance.initialize(
 );
 ```
 > [!TIP]
-> To learn more about initialization, see [Initialization](docs/Initialization.md).
+> To learn more about initialization, see [Initialization](docs/initialization.md).
 
 ## 4. Guides
 
-[Initialization](docs/Initialization.md)
+[Initialization](docs/initialization.md)  
+[Presentation](docs/presentation.md)
 
 ## 5. Demo App Deployment
 
