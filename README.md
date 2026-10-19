@@ -216,7 +216,8 @@ await IaSdk.instance.initialize(
 ## 4. Guides
 
 [Initialization](docs/initialization.md)  
-[Presentation](docs/presentation.md)
+[Presentation](docs/presentation.md)  
+[Appearance](docs/appearance.md)
 
 ## 5. Demo App Deployment
 
