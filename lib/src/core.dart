@@ -257,9 +257,10 @@ class IaSdk {
   /// On iOS, open SDK screens and show inline components after it completed. A screen launched while it runs opens
   /// once it's done, but a screen or component shown before it starts keeps loading.
   ///
-  /// On Android a failed initialization can't be retried: the SDK keeps its error state, so later calls fail too
-  /// until the app restarts. On iOS a later call initializes the SDK again; while an SDK screen runs the
-  /// initialization and prerequisites itself, the call waits until they're done.
+  /// On Android the SDK initializes only once. When it can't load the bundle permissions, for example for an invalid
+  /// access key, this call fails but the SDK still finishes initializing, so a later call completes without loading
+  /// them again. When the initialization itself fails, later calls fail too. On iOS a later call initializes the SDK
+  /// again; while an SDK screen runs the initialization and prerequisites itself, the call waits until they're done.
   ///
   Future<void> initialize({
     required IaSdkConfiguration config,

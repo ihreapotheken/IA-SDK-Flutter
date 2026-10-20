@@ -28,9 +28,31 @@ Pass the access key as a compile-time variable:
 flutter run --dart-define iaAccessKey=your_access_key_here
 ```
 
+### App identifier
+
+The API key is bound to your app's identifier. Replace `de.ihreapotheken.flutter` with your Bundle ID / Application ID:
+- iOS: `PRODUCT_BUNDLE_IDENTIFIER` of the Runner target.
+- Android: `applicationId` in [android/app/build.gradle.kts](android/app/build.gradle.kts).
+
+All flavors use the same identifier.
+
+### Client ID
+
+Replace `clientId` with your Client ID, in
+[ia_sdk_page.dart](packages/single_entry_point/lib/src/ia_sdk_page.dart) for `singleEntryPoint`, or in
+[ia_client_config.dart](packages/demo/lib/ia_client_config.dart) for `demo`.
+
 ### Server environment
 
-The backend the app talks to is selected with the `iaServerEnv` dart-define, using the
+Use the environment your API key is for, there are separate keys for QA (`staging`) and production.
+
+> [!IMPORTANT]
+> QA (`staging`) is only reachable over VPN.
+
+In `singleEntryPoint`, set `serverEnvironment` in
+[ia_sdk_page.dart](packages/single_entry_point/lib/src/ia_sdk_page.dart).
+
+In `demo`, the backend the app talks to is selected with the `iaServerEnv` dart-define, using the
 `IaSdkConfigurationServerEnvironment` value names. It defaults to `staging` (QA):
 
 ```bash
