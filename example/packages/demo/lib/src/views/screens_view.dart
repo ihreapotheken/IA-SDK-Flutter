@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:ia_example_demo/src/testing/event_log.dart';
+import 'package:ia_example_demo/src/views/button_label.dart';
 import 'package:flutter/material.dart';
 
 /// How the Screens tab opens SDK screens.
@@ -106,7 +107,6 @@ class _AutoScreensList extends StatelessWidget {
   }
 
   /// Opens product search, then closes the SDK screens after a few seconds. Screens the app presented itself stay.
-  ///
   static Future<void> _runFinishAllActivitiesTest() async {
     final log = ExampleEventLog.instance;
     await IaSdk.instance.overTheCounter.launchProductSearchRoute();
@@ -199,7 +199,10 @@ class _AutoScreensList extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         ElevatedButton(
-          child: Text('Finish All Activities Test'),
+          child: ButtonLabel(
+            title: 'Finish All Activities Test',
+            description: 'Opens product search, closes it after 4s. Run only if prerequisites finished before.',
+          ),
           onPressed: _runFinishAllActivitiesTest,
         ),
       ],

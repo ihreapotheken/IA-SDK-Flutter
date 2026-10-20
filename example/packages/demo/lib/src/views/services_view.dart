@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:ia_example_demo/ia_client_config.dart';
+import 'package:ia_example_demo/src/views/button_label.dart';
 import 'package:flutter/material.dart';
 
 class ServicesView extends StatelessWidget {
@@ -53,7 +54,7 @@ class ServicesView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         ElevatedButton(
-          child: _ButtonLabel(title: 'Reset Prerequisites', description: 'For testing only, restart needed'),
+          child: ButtonLabel(title: 'Reset Prerequisites', description: 'For testing only, restart needed'),
           onPressed: () async {
             try {
               await IaSdk.instance.resetPrerequisites();
@@ -66,7 +67,7 @@ class ServicesView extends StatelessWidget {
         const SizedBox(height: 8),
         if (Platform.isIOS) ...[
           ElevatedButton(
-            child: _ButtonLabel(title: 'Reset Legal Disclaimer (iOS)', description: 'Restart needed'),
+            child: ButtonLabel(title: 'Reset Legal Disclaimer (iOS)', description: 'Restart needed'),
             onPressed: () async {
               try {
                 await IaSdk.instance.resetLegalDisclaimer();
@@ -80,7 +81,7 @@ class ServicesView extends StatelessWidget {
         ],
         if (Platform.isIOS) ...[
           ElevatedButton(
-            child: _ButtonLabel(title: 'Mark Onboarding Not Shown (iOS)', description: 'Restart needed'),
+            child: ButtonLabel(title: 'Mark Onboarding Not Shown (iOS)', description: 'Restart needed'),
             onPressed: () async {
               try {
                 await IaSdk.instance.setIsOnboardingShown(isOnboardingShown: false);
@@ -156,7 +157,7 @@ class ServicesView extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         ElevatedButton(
-          child: _ButtonLabel(title: 'Clear Pharmacy ID', description: 'Restart needed'),
+          child: ButtonLabel(title: 'Clear Pharmacy ID', description: 'Restart needed'),
           onPressed: () async {
             try {
               await IaSdk.instance.pharmacy.clearPharmacyId();
@@ -467,7 +468,7 @@ class ServicesView extends StatelessWidget {
           _SectionHeader(title: 'Cache'),
           const SizedBox(height: 8),
           ElevatedButton(
-            child: _ButtonLabel(title: 'Clean Cache (iOS)', description: 'For testing only, restart needed'),
+            child: ButtonLabel(title: 'Clean Cache (iOS)', description: 'For testing only, restart needed'),
             onPressed: () async {
               try {
                 await IaSdk.instance.cleanCache(
@@ -482,7 +483,7 @@ class ServicesView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ElevatedButton(
-            child: _ButtonLabel(title: 'Remove All Cached Responses (iOS)', description: 'For testing only, restart needed'),
+            child: ButtonLabel(title: 'Remove All Cached Responses (iOS)', description: 'For testing only, restart needed'),
             onPressed: () async {
               try {
                 await IaSdk.instance.removeAllCachedResponses();
@@ -494,7 +495,7 @@ class ServicesView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ElevatedButton(
-            child: _ButtonLabel(title: 'Clear Product Grid Cache (iOS)', description: 'For testing only, restart needed'),
+            child: ButtonLabel(title: 'Clear Product Grid Cache (iOS)', description: 'For testing only, restart needed'),
             onPressed: () async {
               try {
                 await IaSdk.instance.overTheCounter.clearProductGridCache();
@@ -636,28 +637,6 @@ class _MascotIllustrationsToggleState extends State<_MascotIllustrationsToggle> 
         content: Text(message),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-}
-
-/// Button title with a small description below it.
-class _ButtonLabel extends StatelessWidget {
-  const _ButtonLabel({required this.title, required this.description});
-
-  final String title;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(title),
-          Text(description, style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
-        ],
       ),
     );
   }
