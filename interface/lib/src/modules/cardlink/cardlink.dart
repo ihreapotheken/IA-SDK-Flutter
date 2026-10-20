@@ -28,7 +28,9 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [phoneNumber]: User's phone number.
   /// - [userId]: User identifier for card storage.
   /// - [canCode]: Optional pre-filled CAN code.
-  /// - [cardName]: Optional name for the card being saved.
+  /// - [cardName]: Optional name of a saved card to start with, which must match the name of one of the user's
+  ///   saved cards. Leave it `null` to scan a new card. On Android, a set name always starts with a saved card,
+  ///   even when no saved card has that name, so CardLink skips the consent screen and never offers to save the card.
   /// - [primaryColor]: Optional primary UI color (as integer ARGB value).
   /// - [buttonsColor]: Optional buttons UI color (as integer ARGB value).
   /// - [textLinkColor]: Optional text link UI color (as integer ARGB value).
@@ -37,7 +39,8 @@ abstract class IaBaseCardLink extends IaBase {
   ///   closes, with SDK defaults for the palette colors not passed. Without colors the palette stays unchanged.
   /// - [environment]: Optional CardLink environment. When `null`, the environment `IaSdk` was initialized with
   ///   is used. On iOS, passing it also switches the environment of the whole SDK.
-  /// - [saveCardEnabled]: Optional flag to enable card saving (defaults to true).
+  /// - [saveCardEnabled]: Optional flag to enable card saving (defaults to true). CardLink only offers to save the
+  ///   scanned card when saving cards is also enabled in the CMS, and on Android only when no [cardName] is passed.
   /// - [finishAction]: Determines what happens with prescriptions after NFC scanning. Only used on iOS, where
   ///   [IaCardLinkFinishAction.uploadPrescriptions] needs the Ordering module, an API key entitled to ordering, and
   ///   the SDK's prerequisites to have run in the current app session. On Android

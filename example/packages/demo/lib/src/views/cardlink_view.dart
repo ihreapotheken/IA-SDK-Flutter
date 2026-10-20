@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 
 class CardLinkViewStateData {
   final userIdController = TextEditingController(text: ExampleAppConfig.cardLinkUserId);
-  final cardNameController = TextEditingController(text: 'My Card');
+  final cardNameController = TextEditingController();
   final phoneNumberController = TextEditingController(text: '+491234567890');
   final canCodeController = TextEditingController();
 
@@ -187,6 +187,7 @@ class _CardLinkViewStateData extends State<CardLinkView> {
           onLaunchCardLink: () async {
             try {
               final canCode = _data.canCodeController.text.trim();
+              final cardName = _data.cardNameController.text.trim();
               final logFileURL = await _createCoreAppLogFileIfNeeded();
               await IaSdk.instance.cardLink.launch(
                 sdkApiKey: ExampleAppConfig.instance.accessKey,
@@ -195,7 +196,7 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 consentStatus: _data.consentStatus,
                 phoneNumber: _data.phoneNumberController.text,
                 userId: _data.userIdController.text,
-                cardName: _data.cardNameController.text,
+                cardName: cardName.isNotEmpty ? cardName : null,
                 canCode: canCode.isNotEmpty ? canCode : null,
                 saveCardEnabled: _data.saveCardEnabled,
                 environment: null,
@@ -216,6 +217,7 @@ class _CardLinkViewStateData extends State<CardLinkView> {
           onLaunchSavedCards: () async {
             try {
               final canCode = _data.canCodeController.text.trim();
+              final cardName = _data.cardNameController.text.trim();
               final logFileURL = await _createCoreAppLogFileIfNeeded();
               await IaSdk.instance.cardLink.launch(
                 sdkApiKey: ExampleAppConfig.instance.accessKey,
@@ -224,7 +226,7 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 consentStatus: _data.consentStatus,
                 phoneNumber: _data.phoneNumberController.text,
                 userId: _data.userIdController.text,
-                cardName: _data.cardNameController.text,
+                cardName: cardName.isNotEmpty ? cardName : null,
                 canCode: canCode.isNotEmpty ? canCode : null,
                 saveCardEnabled: _data.saveCardEnabled,
                 environment: null,
@@ -327,7 +329,8 @@ class _PresetDataSection extends StatelessWidget {
         const SizedBox(height: 12),
         _ClearableTextField(
           controller: cardNameController,
-          label: 'Card Name',
+          label: 'Saved Card Name (optional)',
+          hint: 'Starts CardLink with this saved card',
           onCleared: onChanged,
         ),
         const SizedBox(height: 12),

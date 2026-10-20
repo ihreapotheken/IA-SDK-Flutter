@@ -62,6 +62,9 @@ Native SDK 2.9.0 on both platforms.
   - The configured phone number of SDK-started flows wasn't cleaned up like a launched one.
 - CardLink on Android: `getEnvironment` reported production before the first launch, and `willExit` came too early
   when the app was paused while CardLink was signing in.
+- Example app: the CardLink tab sent its card name with every launch. On Android a card name starts CardLink with
+  that saved card, so the tab's "Save Card Enabled" switch never brought up the option to save the card. The name is
+  now only sent when filled in, and the `cardName` docs say it selects a saved card.
 - Module callbacks no longer pile up when a module is created more than once.
 - `ia_cardlink` declares its `ia_interface` dependency.
 - iOS: `launchApofinder` didn't report the selected pharmacy through `onApofinderDidChangePharmacy` and didn't close.
