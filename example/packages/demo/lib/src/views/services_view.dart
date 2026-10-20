@@ -463,9 +463,9 @@ class ServicesView extends StatelessWidget {
           ),
           const SizedBox(height: 24),
         ],
-        _SectionHeader(title: 'Cache'),
-        const SizedBox(height: 8),
         if (Platform.isIOS) ...[
+          _SectionHeader(title: 'Cache'),
+          const SizedBox(height: 8),
           ElevatedButton(
             child: Text('Clean Cache (iOS)'),
             onPressed: () async {
@@ -481,8 +481,6 @@ class ServicesView extends StatelessWidget {
             },
           ),
           const SizedBox(height: 8),
-        ],
-        if (Platform.isIOS) ...[
           ElevatedButton(
             child: Text('Remove All Cached Responses (iOS)'),
             onPressed: () async {
@@ -495,8 +493,6 @@ class ServicesView extends StatelessWidget {
             },
           ),
           const SizedBox(height: 8),
-        ],
-        if (Platform.isIOS) ...[
           ElevatedButton(
             child: Text('Clear Product Grid Cache (iOS)'),
             onPressed: () async {
