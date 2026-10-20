@@ -53,7 +53,7 @@ class ServicesView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         ElevatedButton(
-          child: Text('Reset Prerequisites'),
+          child: _ButtonLabel(title: 'Reset Prerequisites', description: 'For testing only, restart needed'),
           onPressed: () async {
             try {
               await IaSdk.instance.resetPrerequisites();
@@ -66,7 +66,7 @@ class ServicesView extends StatelessWidget {
         const SizedBox(height: 8),
         if (Platform.isIOS) ...[
           ElevatedButton(
-            child: Text('Reset Legal Disclaimer (iOS)'),
+            child: _ButtonLabel(title: 'Reset Legal Disclaimer (iOS)', description: 'Restart needed'),
             onPressed: () async {
               try {
                 await IaSdk.instance.resetLegalDisclaimer();
@@ -80,7 +80,7 @@ class ServicesView extends StatelessWidget {
         ],
         if (Platform.isIOS) ...[
           ElevatedButton(
-            child: Text('Mark Onboarding Not Shown (iOS)'),
+            child: _ButtonLabel(title: 'Mark Onboarding Not Shown (iOS)', description: 'Restart needed'),
             onPressed: () async {
               try {
                 await IaSdk.instance.setIsOnboardingShown(isOnboardingShown: false);
@@ -156,7 +156,7 @@ class ServicesView extends StatelessWidget {
           const SizedBox(height: 8),
         ],
         ElevatedButton(
-          child: Text('Clear Pharmacy ID'),
+          child: _ButtonLabel(title: 'Clear Pharmacy ID', description: 'Restart needed'),
           onPressed: () async {
             try {
               await IaSdk.instance.pharmacy.clearPharmacyId();
@@ -467,7 +467,7 @@ class ServicesView extends StatelessWidget {
           _SectionHeader(title: 'Cache'),
           const SizedBox(height: 8),
           ElevatedButton(
-            child: Text('Clean Cache (iOS)'),
+            child: _ButtonLabel(title: 'Clean Cache (iOS)', description: 'For testing only, restart needed'),
             onPressed: () async {
               try {
                 await IaSdk.instance.cleanCache(
@@ -482,7 +482,7 @@ class ServicesView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ElevatedButton(
-            child: Text('Remove All Cached Responses (iOS)'),
+            child: _ButtonLabel(title: 'Remove All Cached Responses (iOS)', description: 'For testing only, restart needed'),
             onPressed: () async {
               try {
                 await IaSdk.instance.removeAllCachedResponses();
@@ -494,7 +494,7 @@ class ServicesView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ElevatedButton(
-            child: Text('Clear Product Grid Cache (iOS)'),
+            child: _ButtonLabel(title: 'Clear Product Grid Cache (iOS)', description: 'For testing only, restart needed'),
             onPressed: () async {
               try {
                 await IaSdk.instance.overTheCounter.clearProductGridCache();
@@ -636,6 +636,28 @@ class _MascotIllustrationsToggleState extends State<_MascotIllustrationsToggle> 
         content: Text(message),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+}
+
+/// Button title with a small description below it.
+class _ButtonLabel extends StatelessWidget {
+  const _ButtonLabel({required this.title, required this.description});
+
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(title),
+          Text(description, style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
+        ],
       ),
     );
   }
