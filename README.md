@@ -1,4 +1,4 @@
-# IA SDK Flutter
+# IA SDK Flutter Plugin
 
 IA SDK Flutter is a Flutter plugin that helps integrate IhreApotheken into your app by providing plug-and-play UI and communication with backend services.
 
