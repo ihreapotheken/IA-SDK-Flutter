@@ -10,6 +10,7 @@ import 'package:ia_example_demo/src/testing/test_settings.dart';
 import 'package:ia_example_demo/src/views/cardlink_view.dart';
 import 'package:ia_example_demo/src/views/home_view.dart';
 import 'package:ia_example_demo/src/views/components_view.dart';
+import 'package:ia_example_demo/src/views/embedded_view.dart';
 import 'package:ia_example_demo/src/views/events_view.dart';
 import 'package:ia_example_demo/src/views/screens_view.dart';
 import 'package:ia_example_demo/src/views/services_view.dart';
@@ -31,11 +32,12 @@ class ExampleApp extends StatefulWidget {
 class _ExampleAppState extends State<ExampleApp> {
   int _selectedTabIndex = 0;
 
-  /// Built on its first visit: its SDK components start the prerequisites when they're created, which on Android
-  /// happens even while the tab is hidden, so they'd open at app start.
-  bool _hasShownComponentsTab = false;
+  /// Tabs built on their first visit: their SDK components and screens start the prerequisites when they're created,
+  /// which on Android happens even while the tab is hidden, so they'd open at app start.
+  final _shownLazyTabIndexes = <int>{};
 
-  static const _componentsTabIndex = 4;
+  static const _componentsTabIndex = 4, _embeddedTabIndex = 5;
+  static const _lazyTabIndexes = {_componentsTabIndex, _embeddedTabIndex};
   bool _isInitialized = false;
   late Future<void> _initFuture = _initializeSdk();
 
@@ -45,6 +47,7 @@ class _ExampleAppState extends State<ExampleApp> {
     (label: 'Services', icon: Icons.category),
     (label: 'Screens', icon: Icons.screenshot),
     (label: 'Components', icon: Icons.widgets),
+    (label: 'Embedded', icon: Icons.web_asset),
     (label: 'Events', icon: Icons.receipt_long),
   ];
 
@@ -202,18 +205,21 @@ class _ExampleAppState extends State<ExampleApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'AppSDK Flutter Demo'
-            ' | '
-            '${Platform.isIOS ? 'iOS' : 'Android'}'
-            ' ${dotenv.env['${Platform.isIOS ? 'IOS' : 'ANDROID'}_APPSDK_VERSION'] ?? 'N/A'}'
-            ' | '
-            '${ExampleAppConfig.instance.serverEnvironmentLabel}',
-            style: const TextStyle(fontSize: 14),
-          ),
-          centerTitle: true,
-        ),
+        // The embedded SDK screen shows its own header, so the app bar is hidden on its tab.
+        appBar: _selectedTabIndex == _embeddedTabIndex
+            ? null
+            : AppBar(
+                title: Text(
+                  'AppSDK Flutter Demo'
+                  ' | '
+                  '${Platform.isIOS ? 'iOS' : 'Android'}'
+                  ' ${dotenv.env['${Platform.isIOS ? 'IOS' : 'ANDROID'}_APPSDK_VERSION'] ?? 'N/A'}'
+                  ' | '
+                  '${ExampleAppConfig.instance.serverEnvironmentLabel}',
+                  style: const TextStyle(fontSize: 14),
+                ),
+                centerTitle: true,
+              ),
         body: FutureBuilder(
           future: _initFuture,
           builder: (context, snapshot) {
@@ -257,7 +263,10 @@ class _ExampleAppState extends State<ExampleApp> {
                       const CardLinkView(),
                       const ServicesView(),
                       const ScreensView(),
-                      _hasShownComponentsTab ? const ComponentsView() : const SizedBox.shrink(),
+                      _shownLazyTabIndexes.contains(_componentsTabIndex)
+                          ? const ComponentsView()
+                          : const SizedBox.shrink(),
+                      _shownLazyTabIndexes.contains(_embeddedTabIndex) ? const EmbeddedView() : const SizedBox.shrink(),
                       const EventsView(),
                     ],
                   ),
@@ -279,7 +288,7 @@ class _ExampleAppState extends State<ExampleApp> {
                               onTap: () {
                                 setState(() {
                                   _selectedTabIndex = index;
-                                  if (index == _componentsTabIndex) _hasShownComponentsTab = true;
+                                  if (_lazyTabIndexes.contains(index)) _shownLazyTabIndexes.add(index);
                                 });
                               },
                             ),
