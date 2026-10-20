@@ -24,7 +24,6 @@ dependencies:
     path: ../../../modules/ia_prescription
   ia_example_shared:
     path: ../shared
-  flutter_web_browser: ^0.17.3
   flutter_map: ^8.2.2
   latlong2: ^0.9.1
   flutter_dotenv: ^6.0.0

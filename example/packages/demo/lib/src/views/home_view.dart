@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_web_browser/flutter_web_browser.dart';
 import 'package:latlong2/latlong.dart';
 
 class HomeView extends StatelessWidget {
@@ -118,24 +115,5 @@ class _PharmacyMarker extends StatelessWidget {
     Navigator.pop(context);
     await IaSdk.instance.pharmacy.setPharmacyId(pharmacyId);
     await IaSdk.instance.launchStartRoute();
-    if (Platform.isIOS) {
-      await Future.delayed(const Duration(seconds: 1));
-    }
-    await FlutterWebBrowser.openWebPage(
-      url: 'https://example.org/',
-      customTabsOptions: const CustomTabsOptions(
-        colorScheme: CustomTabsColorScheme.dark,
-        shareState: CustomTabsShareState.on,
-        instantAppsEnabled: true,
-        showTitle: true,
-        urlBarHidingEnabled: true,
-      ),
-      safariVCOptions: const SafariViewControllerOptions(
-        barCollapsingEnabled: true,
-        dismissButtonStyle: SafariViewControllerDismissButtonStyle.close,
-        modalPresentationCapturesStatusBarAppearance: true,
-        modalPresentationStyle: UIModalPresentationStyle.fullScreen,
-      ),
-    );
   }
 }
