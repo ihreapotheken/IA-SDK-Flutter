@@ -34,6 +34,7 @@ class _NavigationHandler implements IaBaseCallbackHandler {
 
 /// Navigation targets that the SDK may navigate to, which the host app can optionally override.
 ///
+/// {@category Interaction}
 enum IaSdkNavigationTarget {
   /// SDK intends to open cart screen. This can be called from multiple points in the SDK.
   ///

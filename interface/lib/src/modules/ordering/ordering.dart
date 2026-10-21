@@ -5,6 +5,8 @@ part of '../../common/_interface.dart';
 /// Methods documented as "Only supported on iOS" or "Only supported on Android" throw a
 /// [MissingPluginException] on the other platform. Callbacks and streams with such a note never fire there.
 ///
+/// {@category Interaction}
+/// {@category CartScreen}
 abstract class IaBaseOrdering extends IaBase {
   @override
   IaBaseModule get module {

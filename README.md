@@ -286,6 +286,22 @@ launcher name tells them apart.
 On GitHub, run the Demo App Deploy workflow and choose the platform and the flavor. A pushed tag deploys the `demo`
 flavor to both platforms.
 
+## 10. API Reference Deployment (Internal)
+
+---
+
+The [API reference](https://ihreapotheken.github.io/docs/appsdk/flutter) is generated with `dart doc`. It includes the
+guides in [docs](docs) as topics, see [dartdoc_options.yaml](dartdoc_options.yaml). To generate it into `doc/api`:
+
+```bash
+bash ./scripts/generate-docs.sh
+```
+
+A pushed tag generates it and publishes it to
+[ihreapotheken.github.io](https://github.com/ihreapotheken/ihreapotheken.github.io), by the
+[Publish Docs](.github/workflows/publish_docs.yml) workflow. It can also be run on GitHub, to publish the docs of any
+branch.
+
 ---
 
 For further information, please see the 

@@ -2,6 +2,7 @@ part of '../core.dart';
 
 /// Configuration options for SDK prerequisites.
 ///
+/// {@category Initialization}
 class IaPrerequisitesConfiguration {
   /// Generates an instance of prerequisites configuration.
   ///
@@ -52,6 +53,7 @@ class IaPrerequisitesConfiguration {
 
 /// Configuration options for SDK initialization behavior.
 ///
+/// {@category Initialization}
 class IaSdkConfigurationInitialization {
   /// Generates an instance of initialization configuration.
   ///

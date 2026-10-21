@@ -2,6 +2,7 @@ part of '../core.dart';
 
 /// Header style options for SDK navigation bars and headers.
 ///
+/// {@category Appearance}
 enum IaHeaderStyle {
   /// Uses primary color as background and secondary color for illustration.
   duotone,
@@ -12,6 +13,7 @@ enum IaHeaderStyle {
 
 /// Configuration options for SDK header appearance.
 ///
+/// {@category Appearance}
 class IaHeaderConfiguration {
   /// Generates an instance of header configuration.
   ///
@@ -51,6 +53,7 @@ class IaHeaderConfiguration {
 
 /// Configuration options for SDK primary button appearance.
 ///
+/// {@category Appearance}
 class IaPrimaryButtonConfiguration {
   /// Generates an instance of primary button configuration.
   ///
@@ -111,6 +114,7 @@ class IaPrimaryButtonConfiguration {
 
 /// Configuration options for SDK secondary button appearance.
 ///
+/// {@category Appearance}
 class IaSecondaryButtonConfiguration {
   /// Generates an instance of secondary button configuration.
   ///
@@ -171,6 +175,7 @@ class IaSecondaryButtonConfiguration {
 
 /// Configuration options for SDK UI appearance.
 ///
+/// {@category Appearance}
 class IaUIConfiguration {
   /// Generates an instance of UI configuration.
   ///

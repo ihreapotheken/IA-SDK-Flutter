@@ -2,6 +2,8 @@ part of '../core.dart';
 
 /// Basic definition for the ia.de SDK client configuration.
 ///
+/// {@category Initialization}
+/// {@category Appearance}
 class IaSdkConfiguration {
   /// Generates an instance of the ia.de SDK client configuration.
   ///

@@ -1,0 +1,54 @@
+name: Publish Docs
+run-name: Publish docs from ${{ github.ref_name }}
+
+# Generates the API reference with `scripts/generate-docs.sh` and publishes it to
+# https://ihreapotheken.github.io/docs/appsdk/flutter, replacing the published docs.
+#
+# Requires the `DOCS_DEPLOY_KEY` secret: the private key of a deploy key with write access to
+# ihreapotheken/ihreapotheken.github.io.
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+concurrency:
+  group: publish-docs
+  cancel-in-progress: false
+
+jobs:
+  publish-docs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate docs
+        run: bash scripts/generate-docs.sh
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ihreapotheken/ihreapotheken.github.io
+          ssh-key: ${{ secrets.DOCS_DEPLOY_KEY }}
+          path: pages
+
+      - name: Commit and push docs
+        working-directory: pages
+        run: |
+          rsync -a --delete ../doc/api/ docs/appsdk/flutter/
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A docs/appsdk/flutter
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "Update Flutter docs for ${GITHUB_REF_NAME}"
+          git push
