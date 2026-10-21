@@ -17,5 +17,9 @@ enum IaProductDisplayType {
 
   /// Products that other customers also bought based on a specific product (pzn).
   ///
-  customersAlsoBought;
+  customersAlsoBought,
+
+  /// Your own selection of products, with a title. See `IaProductGrid.title` and `IaProductGrid.pzns`.
+  ///
+  custom,
 }

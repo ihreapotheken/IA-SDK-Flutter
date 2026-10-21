@@ -11,13 +11,14 @@ class _NavigationHandler implements IaBaseCallbackHandler {
   @override
   Future<dynamic> Function(dynamic args) get handler {
     return (args) async {
-      if (args is! String) {
+      final rawTarget = args is Map ? args['navigationTarget'] : args;
+      if (rawTarget is! String) {
         throw Exception(
-          'Arguments not of type String for _NavigationHandler.',
+          'Missing or invalid navigationTarget for _NavigationHandler: $args.',
         );
       }
-      if (IaSdk.instance.onSdkWillNavigateToTarget != null) {
-        final target = IaSdkNavigationTarget.fromRawValue(args);
+      final target = IaSdkNavigationTarget.values.where((value) => value.name == rawTarget).firstOrNull;
+      if (target != null && IaSdk.instance.onSdkWillNavigateToTarget != null) {
         final result = await IaSdk.instance.onSdkWillNavigateToTarget!(target);
         if (result) {
           return _NavigationHandlingDecision.performDefault.name;
@@ -49,16 +50,45 @@ enum IaSdkNavigationTarget {
 
   /// "Impressum" button is tapped on the footer. If not handled it will open webview with content from CMS.
   ///
+  /// Note: On Android only reported with [IaSdkConfigurationFooter.isImprintHandledByHostApp], and the SDK
+  /// then never opens its own imprint page.
+  ///
   imprint,
 
   /// "Datenverarbeitung" button is tapped on the footer. Nothing happens if not handled.
+  ///
+  /// The button is shown when [IaSdkConfigurationFooter.shouldShowDataProcessing] is `true`.
   ///
   hostAppPrivacyPolicy,
 
   /// SDK intends to open Apofinder from an internal flow (not prerequisites).
   /// Triggers include product details ("Apotheke wählen") and pharmacy screen (change pharmacy).
   ///
-  apofinder
+  apofinder,
+
+  /// SDK intends to open the start screen.
+  ///
+  /// Note: Only reported on Android.
+  ///
+  start,
+
+  /// SDK intends to open the product search.
+  ///
+  /// Note: Only reported on Android.
+  ///
+  search,
+
+  /// SDK intends to open the "redeem prescription" screen.
+  ///
+  /// Note: Only reported on Android.
+  ///
+  redeemPrescription,
+
+  /// The SDK finished the thank-you screen shown after an order.
+  ///
+  /// Note: Only reported on Android.
+  ///
+  thankYouCompleted,
   ;
 
   factory IaSdkNavigationTarget.fromRawValue(String value) {
@@ -69,6 +99,10 @@ enum IaSdkNavigationTarget {
       'imprint' => IaSdkNavigationTarget.imprint,
       'hostAppPrivacyPolicy' => IaSdkNavigationTarget.hostAppPrivacyPolicy,
       'apofinder' => IaSdkNavigationTarget.apofinder,
+      'start' => IaSdkNavigationTarget.start,
+      'search' => IaSdkNavigationTarget.search,
+      'redeemPrescription' => IaSdkNavigationTarget.redeemPrescription,
+      'thankYouCompleted' => IaSdkNavigationTarget.thankYouCompleted,
       _ => throw Exception(
         'No navigation target $value found.',
       ),

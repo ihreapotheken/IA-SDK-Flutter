@@ -15,4 +15,5 @@ enum IaSdkModuleArguments: String, Decodable {
     case pharmacyDetails = "pharmacyDetails"
     case prescription = "prescription"
     case cardLink = "cardLink"
+    case appointments = "appointments"
 }

@@ -15,9 +15,13 @@ class IaPrerequisitesConfiguration {
 
   /// Whether the prerequisites flow can be cancelled.
   ///
+  /// Note: Only used on iOS.
+  ///
   final bool isCancellable;
 
   /// Whether to show animations during prerequisites flow.
+  ///
+  /// Note: Only used on iOS.
   ///
   final bool isAnimated;
 
@@ -53,7 +57,7 @@ class IaSdkConfigurationInitialization {
   ///
   const IaSdkConfigurationInitialization({
     this.channelId,
-    this.shouldShowIndicator = true,
+    this.shouldShowIndicator = false,
     this.prerequisites = const IaPrerequisitesConfiguration(),
   });
 

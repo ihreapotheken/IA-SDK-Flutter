@@ -7,7 +7,8 @@ import de.ihreapotheken.sdk.cardlink.domain.model.insurancecard.InsuranceCard
 
 class CardLinkListenerImpl(
     private val phoneNumber: String,
-    private val eventSender: CardLinkEventSender
+    private val eventSender: CardLinkEventSender,
+    private val onFailedToInitialize: () -> Unit = {},
 ) : CardLinkListener {
 
     override fun onConsentAccepted(setPhoneNumber: (String) -> Unit) {
@@ -44,6 +45,7 @@ class CardLinkListenerImpl(
     }
 
     override fun failedToInitializeCardlink() {
+        onFailedToInitialize()
         eventSender.sendFailedToInitializeEvent()
     }
 }

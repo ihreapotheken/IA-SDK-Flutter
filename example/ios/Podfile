@@ -7,11 +7,10 @@ platform :ios, '15.0'
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
-project 'Runner', {
-  'Debug' => :debug,
-  'Profile' => :release,
-  'Release' => :release,
-}
+# Every build configuration of the project, the flavors' Debug-, Release- and Profile-<flavor> ones included, see
+# scripts/add-example-ios-flavor.rb.
+project 'Runner', Xcodeproj::Project.open(File.join(File.dirname(__FILE__), 'Runner.xcodeproj')).build_configurations
+  .to_h { |configuration| [configuration.name, configuration.name.start_with?('Debug') ? :debug : :release] }
 
 def flutter_root
   generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
@@ -42,5 +41,9 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |configuration|
+      next unless configuration.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 15.0
+      configuration.build_settings.delete('IPHONEOS_DEPLOYMENT_TARGET')
+    end
   end
 end

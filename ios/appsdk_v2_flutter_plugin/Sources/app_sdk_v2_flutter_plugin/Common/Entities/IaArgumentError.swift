@@ -18,9 +18,29 @@ enum IaArgumentError: Error {
         case let .decodingArgumentFailed(description):
             return "Failed to decode argument: \(description)"
         case .jsonSerializationFailed:
-            return "Failed to serialize arguments to JSON data"
+            return "Failed to serialize arguments to JSON data. Numbers must be finite."
         case .decodingFailed(let error):
-            return "Failed to decode arguments: \(error.localizedDescription)"
+            return "Failed to decode arguments: \(Self.describe(error))"
+        }
+    }
+
+    /// Names the argument that failed, which `DecodingError.localizedDescription` leaves out.
+    private static func describe(_ error: Error) -> String {
+        guard let decodingError = error as? DecodingError else { return error.localizedDescription }
+        func path(_ codingPath: [CodingKey]) -> String {
+            codingPath.isEmpty ? "arguments" : codingPath.map { $0.intValue.map(String.init) ?? $0.stringValue }.joined(separator: ".")
+        }
+        switch decodingError {
+        case let .keyNotFound(key, context):
+            return "missing value for \(path(context.codingPath + [key]))"
+        case let .valueNotFound(type, context):
+            return "missing \(type) value for \(path(context.codingPath))"
+        case let .typeMismatch(type, context):
+            return "expected \(type) for \(path(context.codingPath))"
+        case let .dataCorrupted(context):
+            return "invalid value for \(path(context.codingPath)): \(context.debugDescription)"
+        @unknown default:
+            return decodingError.localizedDescription
         }
     }
 }

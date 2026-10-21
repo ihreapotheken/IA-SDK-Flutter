@@ -34,6 +34,7 @@ abstract mixin class IaBaseMethods {
     if (args is IaBaseRequest) {
       args = args.toSupportedType();
     }
+    IaBaseCallbacks._ensureSharedChannelHandler();
     return await channel.invokeMethod(methodId, args);
   }
 }

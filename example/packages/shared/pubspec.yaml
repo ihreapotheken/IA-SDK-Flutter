@@ -1,0 +1,16 @@
+name: ia_example_shared
+description: "Resources every app of the example shares."
+publish_to: 'none'
+resolution: workspace
+
+environment:
+  sdk: '>=3.10.0'
+  flutter: '>=3.30.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_dotenv: ^6.0.0
+
+dev_dependencies:
+  flutter_lints: ^6.0.0

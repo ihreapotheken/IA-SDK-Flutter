@@ -1,0 +1,28 @@
+{
+  // One configuration per example app flavor, see lib/flavor.dart. For opening the example folder on its own; the
+  // repository root has the same ones in ../.vscode/launch.json.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Example: demo",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "toolArgs": ["--flavor", "demo"]
+    },
+    {
+      "name": "Example: singleEntryPoint",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "toolArgs": ["--flavor", "singleEntryPoint"]
+    },
+    {
+      "name": "Example: demo, E2E harness",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "toolArgs": ["--flavor", "demo", "--dart-define=iaE2E=true"]
+    }
+  ]
+}
