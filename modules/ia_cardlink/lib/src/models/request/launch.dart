@@ -18,6 +18,9 @@ class _RequestModelLaunch implements IaBaseRequest {
     this.environment,
     this.saveCardEnabled,
     this.appId,
+    this.coreAppLogFileURL,
+    this.supportsLiquidGlass,
+    this.illustrationColor,
   });
 
   final String sdkApiKey;
@@ -36,6 +39,9 @@ class _RequestModelLaunch implements IaBaseRequest {
   final IaCardLinkEnvironment? environment;
   final bool? saveCardEnabled;
   final String? appId;
+  final String? coreAppLogFileURL;
+  final bool? supportsLiquidGlass;
+  final IaCardLinkIllustrationColor? illustrationColor;
 
   @override
   Map<String, dynamic> toSupportedType() {
@@ -56,6 +62,9 @@ class _RequestModelLaunch implements IaBaseRequest {
       'environment': environment?.rawValue,
       'saveCardEnabled': saveCardEnabled,
       'appId': appId,
+      'coreAppLogFileURL': coreAppLogFileURL,
+      'supportsLiquidGlass': supportsLiquidGlass,
+      'illustrationColor': illustrationColor?.rawValue,
     };
   }
 }

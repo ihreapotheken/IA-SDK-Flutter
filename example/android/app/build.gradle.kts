@@ -39,6 +39,19 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+// ia.de server environment the build targets, matching the `iaServerEnv` dart-define
+// read by `ExampleAppConfig`. `staging` is the default on both sides, so an unset
+// value produces the same label the app actually behaves as.
+val iaServerEnv = System.getenv("IA_SERVER_ENV")?.takeIf { it.isNotBlank() } ?: "staging"
+
+// Short environment tag shown to testers in the launcher label, so a Firebase App
+// Distribution build is identifiable without opening the app.
+val iaEnvLabel = when (iaServerEnv) {
+    "production" -> "PROD"
+    "development" -> "DEV"
+    else -> "QA"
+}
+
 android {
     namespace = "com.example.appsdk_v2_flutter_plugin_example"
     compileSdk = 36
@@ -83,10 +96,27 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+
+    // One flavor per app in lib/flavor.dart, with the same names as the iOS schemes. They're all the same app to the
+    // stores and Firebase, with the same application ID and signing, so each can be delivered like the demo.
+    flavorDimensions += "app"
+    productFlavors {
+        create("demo") {
+            dimension = "app"
+            resValue("string", "app_name", "AppSDK Flutter Demo $iaEnvLabel")
+        }
+        create("singleEntryPoint") {
+            dimension = "app"
+            resValue("string", "app_name", "IA SDK Single Entry Point")
+        }
+        all {
+            val flavor = name
             firebaseAppDistribution {
                 appId = "1:805028679903:android:a66b4f3fd9dba27124d96a"
                 artifactType = "APK"
-                artifactPath = rootProject.file("../build/app/outputs/apk/release/app-release.apk").path
+                artifactPath = rootProject.file("../build/app/outputs/apk/$flavor/release/app-$flavor-release.apk").path
                 serviceCredentialsFile = rootProject.file("fb-distribution-service-credentials.json").path
                 testers = arrayOf(
                     "cvitaman@gmail.com",

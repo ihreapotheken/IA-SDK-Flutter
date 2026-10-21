@@ -1,13 +1,16 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin
 
+import android.app.Activity
 import android.content.Context
 import de.ihreapotheken.appsdk_v2_flutter_plugin.sdk.IaClientBindings
+import de.ihreapotheken.appsdk_v2_flutter_plugin.sdk.IaClientMethods
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.PluginRegistry
 
 class IaSdkFlutter :
     FlutterPlugin,
@@ -16,6 +19,17 @@ class IaSdkFlutter :
     lateinit var bindings: IaClientBindings
 
     var activityContext: Context? = null
+
+    private var activityBinding: ActivityPluginBinding? = null
+
+    private val activityResultListener = PluginRegistry.ActivityResultListener { requestCode, resultCode, _ ->
+        if (requestCode == IaClientMethods.REQUEST_CODE_PREREQUISITES) {
+            bindings.onPrerequisiteFlowFinished(isCancelled = resultCode != Activity.RESULT_OK)
+            true
+        } else {
+            false
+        }
+    }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         bindings = IaClientBindings(
@@ -34,22 +48,32 @@ class IaSdkFlutter :
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        // Do nothing.
+        bindings.dispose()
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activityContext = binding.activity
+        activityBinding = binding
+        binding.addActivityResultListener(activityResultListener)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
-        activityContext = null
+        detachFromActivity()
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-        activityContext = binding.activity
+        onAttachedToActivity(binding)
     }
 
     override fun onDetachedFromActivity() {
+        detachFromActivity()
+        // Unlike after a configuration change, no activity comes back to receive the prerequisites result.
+        bindings.onActivityClosed()
+    }
+
+    private fun detachFromActivity() {
+        activityBinding?.removeActivityResultListener(activityResultListener)
+        activityBinding = null
         activityContext = null
     }
 }

@@ -7,12 +7,15 @@ import de.ihreapotheken.appsdk.flutter.card_link.models.ConsentStatusMapper
 import de.ihreapotheken.appsdk.flutter.card_link.models.EnvironmentMapper
 import de.ihreapotheken.sdk.cardlink.api.CardLink
 import de.ihreapotheken.sdk.cardlink.api.CardLinkConfig
+import de.ihreapotheken.sdk.cardlink.api.CardLinkIllustrationColor
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel.Result
 
 class LaunchHandler(
     private val activityProvider: () -> Activity?,
-    private val eventSender: CardLinkEventSender
+    private val eventSender: CardLinkEventSender,
+    private val onLaunched: () -> Unit,
+    private val onFailedToInitialize: () -> Unit,
 ) {
     companion object {
         private const val GUEST_USER_ID = "guest_user_id"
@@ -48,10 +51,14 @@ class LaunchHandler(
         val bottomNavigationColor = (call.argument<Any>("bottomNavigationColor") as? Number)?.toInt()
         val cardLinkSdkEnvironment = EnvironmentMapper.fromString(call.argument<String>("environment"))
         val applicationId = call.argument<String>("appId")
+        val coreAppLogFileURL = call.argument<String>("coreAppLogFileURL")
+        val illustrationColor = CardLinkIllustrationColor.entries
+            .firstOrNull { it.name == call.argument<String>("illustrationColor") }
+            ?: CardLinkIllustrationColor.RED
 
         val flowType = call.argument<String>("flowType") ?: "launchCardLinkSdk"
 
-        val listener = CardLinkListenerImpl(phoneNumber, eventSender)
+        val listener = CardLinkListenerImpl(phoneNumber, eventSender, onFailedToInitialize)
 
         val config = CardLinkConfig(
             sdkApiKey = sdkApiKey,
@@ -68,7 +75,9 @@ class LaunchHandler(
             bottomNavigationColor = bottomNavigationColor,
             cardLinkSdkEnvironment = cardLinkSdkEnvironment,
             listener = listener,
-            applicationId = applicationId
+            applicationId = applicationId,
+            hostAppLogFilePath = coreAppLogFileURL,
+            illustrationColor = illustrationColor,
         )
 
         activityProvider()?.let { activity ->
@@ -77,6 +86,7 @@ class LaunchHandler(
             } else {
                 CardLink.startCardLink(activity, config)
             }
+            onLaunched()
             result.success(null)
         } ?: result.error("NO_ACTIVITY", "Activity not available", null)
     }

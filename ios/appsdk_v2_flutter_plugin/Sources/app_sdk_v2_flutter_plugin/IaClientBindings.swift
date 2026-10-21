@@ -15,8 +15,8 @@ class IaClientBindings {
         let plugin = IASDKPlugin(bindings: self)
         self.channel.setMethodCallHandler(plugin.callHandler)
 
-        let viewFactory = IASDKViewFactory(messenger: messenger)
-        for view in IASDKViewIdentifier.allCases {
+        let viewFactory = IASDKViewFactory(channel: self.channel)
+        for view in IASDKViewIdentifier.allCases where view.isEmbeddable {
             registrar.register(
                 viewFactory,
                 withId: view.rawValue

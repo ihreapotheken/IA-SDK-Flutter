@@ -1,7 +1,7 @@
 part of 'impl.dart';
 
 enum _Methods with IaBaseMethods implements IaBaseMethods {
-  todo,
+  clearProductGridCache,
   ;
 
   @override

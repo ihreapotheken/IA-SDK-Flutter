@@ -1,7 +1,7 @@
 part of 'impl.dart';
 
 enum _Methods with IaBaseMethods implements IaBaseMethods {
-  todo,
+  setPrescriptionScannerCameraState,
   ;
 
   @override
@@ -12,8 +12,8 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
   @override
   Type? get argumentType {
     switch (this) {
-      default:
-        return null;
+      case _Methods.setPrescriptionScannerCameraState:
+        return _RequestModelSetScannerCameraState;
     }
   }
 }

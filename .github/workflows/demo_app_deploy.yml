@@ -1,4 +1,5 @@
 name: Demo App Deploy
+run-name: Deploy ${{ github.event.inputs.flavor || 'demo' }} (${{ github.event.inputs.platform || 'all' }}) from ${{ github.ref_name }}
 
 on:
   push:
@@ -15,9 +16,18 @@ on:
           - all
           - android
           - ios
+      flavor:
+        description: 'Example app flavor to deploy, see example/lib/flavor.dart'
+        required: true
+        default: 'demo'
+        type: choice
+        options:
+          - demo
+          - singleEntryPoint
 
 env:
   PLATFORM: ${{ github.event.inputs.platform || 'all' }}
+  IA_FLAVOR: ${{ github.event.inputs.flavor || 'demo' }}
 
 jobs:
   build:
@@ -35,12 +45,12 @@ jobs:
           echo "${{ secrets.ANDROID_FIREBASE_DISTRIBUTION_SERVICE_CREDENTIALS }}" | base64 --decode > example/android/fb-distribution-service-credentials.json
           echo "${{ secrets.ANDROID_SIGNING_KEY_DATA_BASE64 }}" | base64 --decode > example/android/demo.jks
           echo "${{ secrets.ANDROID_SIGNING_KEY_PROPERTIES }}" > example/android/key.properties
-      - name: Deploy both platforms
+      - name: Deploy ${{ env.IA_FLAVOR }} to Android and iOS
         if: env.PLATFORM == 'all'
         run: sh scripts/deploy-demo.sh
-      - name: Deploy Android
+      - name: Deploy ${{ env.IA_FLAVOR }} to Android
         if: env.PLATFORM == 'android'
         run: sh scripts/deploy-demo-android.sh
-      - name: Deploy iOS
+      - name: Deploy ${{ env.IA_FLAVOR }} to iOS
         if: env.PLATFORM == 'ios'
         run: sh scripts/deploy-demo-ios.sh

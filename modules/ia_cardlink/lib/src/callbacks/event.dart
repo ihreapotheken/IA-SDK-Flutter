@@ -13,5 +13,26 @@ Future<void> _eventHandler(dynamic args) async {
     );
   }
   final event = IaCardLinkEvent.fromRawValue(eventType);
+  // Payload streams first, so listeners of the event can rely on the payload having arrived.
+  switch (event) {
+    case IaCardLinkEvent.cardSaved:
+      final cards = args['cards'];
+      IaModuleCardLink._savedCardsListener.add(
+        cards is Iterable
+            ? cards
+                  .whereType<Map>()
+                  // A card without a name can't be represented, so it's left out instead of dropping the event.
+                  .where((card) => card['name'] is String)
+                  .map((card) => IaCardLinkSavedCard.fromMap(Map<String, dynamic>.from(card)))
+                  .toList()
+            : const [],
+      );
+    case IaCardLinkEvent.failedToInitialize:
+      IaModuleCardLink._initializationErrorListener.add(args['errorMessage'] as String?);
+    case IaCardLinkEvent.finished:
+      IaModuleCardLink._resultListener.add(args['result'] as String?);
+    default:
+      break;
+  }
   IaModuleCardLink._eventListener.add(event);
 }

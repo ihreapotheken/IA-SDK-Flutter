@@ -3,6 +3,11 @@ import 'package:ia_interface/ia_interface.dart';
 
 /// Inline native product grid component.
 ///
+/// Native reads the options once, when it creates the grid, so changing any of them recreates the native grid.
+///
+/// On Android the app's activity must be a `ComponentActivity`, such as `FlutterFragmentActivity`; with
+/// `FlutterActivity` creating the component fails.
+///
 class IaProductGrid extends StatelessWidget {
   /// Default constructor for [IaProductGrid].
   ///
@@ -11,28 +16,45 @@ class IaProductGrid extends StatelessWidget {
     required this.type,
     this.pzn,
     this.shouldShowLoading = true,
-  });
+    this.title,
+    this.pzns,
+  }) : assert(type != IaProductDisplayType.custom || pzns != null, 'The custom type needs pzns.');
 
   /// Product collection to display.
   ///
   final IaProductDisplayType type;
 
-  /// Optional product identifier (pzn) for recommendation-based types.
+  /// Product identifier (pzn) the recommendation-based types are based on. Without one they show no products.
+  ///
+  /// For [IaProductDisplayType.currentOffers] and [IaProductDisplayType.productsOfTheMonth], iOS leaves this
+  /// product out of the grid. Android ignores it for those types.
   ///
   final String? pzn;
 
-  /// Whether to show a loading indicator while products load (iOS only).
+  /// Whether to show a loading indicator while products load.
   ///
   final bool shouldShowLoading;
+
+  /// Title of the grid, for [IaProductDisplayType.custom].
+  ///
+  final String? title;
+
+  /// Product identifiers (pzns) to show, for [IaProductDisplayType.custom].
+  ///
+  final List<String>? pzns;
 
   @override
   Widget build(BuildContext context) {
     return IaSdkPlatformView(
+      // Native reads the creation params once, so changed options need a new native grid.
+      key: ValueKey((type, pzn, shouldShowLoading, title, pzns?.join('\n'))),
       viewId: 'productGrid',
       creationParams: {
         'type': type.name,
         if (pzn != null) 'pzn': pzn,
         'shouldShowLoading': shouldShowLoading,
+        if (title != null) 'title': title,
+        if (pzns != null) 'pzns': pzns,
       },
     );
   }
