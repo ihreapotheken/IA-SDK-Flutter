@@ -42,6 +42,11 @@ part 'models/response/prerequisites_result.dart';
 /// `NO_ACTIVITY` without an attached activity. Other screens then open in a new task. CardLink has its own codes, see
 /// `IaBaseCardLink`.
 ///
+/// {@category Overview}
+/// {@category Initialization}
+/// {@category Interaction}
+/// {@category StartScreen}
+/// {@category ApofinderScreen}
 class IaSdk {
   IaSdk._();
 

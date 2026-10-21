@@ -14,4 +14,7 @@ PROJECT_DIR="$SCRIPT_DIR/.."
 cd "$PROJECT_DIR" 
 
 # Generate the documentation to the `doc` directory.
-dart doc .
+dart doc . || exit 1
+
+# Fix the links of the guides in `docs`, which are included as topics, see `dartdoc_options.yaml`.
+dart run scripts/fix_doc_links.dart

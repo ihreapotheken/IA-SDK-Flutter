@@ -2,6 +2,7 @@ part of '../../core.dart';
 
 /// Outcome of the prerequisites flow, returned by [IaSdk.launchPrerequisiteFlow].
 ///
+/// {@category Initialization}
 class IaSdkPrerequisitesResult {
   /// Constructs a new instance of the [IaSdkPrerequisitesResult] object.
   ///
