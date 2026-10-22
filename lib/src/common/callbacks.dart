@@ -60,6 +60,33 @@ class _AnalyticsEventHandler implements IaBaseCallbackHandler {
   }
 }
 
+class _LoggedAnalyticsEventHandler implements IaBaseCallbackHandler {
+  const _LoggedAnalyticsEventHandler();
+
+  @override
+  String get methodId => 'sdkDidLogAnalyticsEvent';
+
+  @override
+  Future<dynamic> Function(dynamic args) get handler {
+    return (args) async {
+      final name = args is Map ? args['name'] : null;
+      final parameters = args is Map ? args['parameters'] : null;
+      if (name is! String || parameters is! Map) {
+        throw Exception(
+          'sdkDidLogAnalyticsEvent: Missing or incorrect event fields: $args.',
+        );
+      }
+      IaSdk.instance.loggedAnalyticsEventListener.add(
+        IaSdkLoggedAnalyticsEvent(
+          name: name,
+          parameters: Map<String, dynamic>.from(parameters),
+        ),
+      );
+      return null;
+    };
+  }
+}
+
 class _LogMessageHandler implements IaBaseCallbackHandler {
   const _LogMessageHandler();
 

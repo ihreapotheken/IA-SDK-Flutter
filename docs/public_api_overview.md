@@ -27,9 +27,10 @@ streams marked this way are never called on the other platform.
 
 ### Prerequisites
 - `IaSdk.instance.launchPrerequisiteFlow()` - Runs the prerequisites explicitly (optional)
-- `IaSdk.instance.isPrerequisiteFlowCompleted()` - Returns whether the prerequisites are completed (Android only)
+- `IaSdk.instance.isPrerequisiteFlowCompleted()` - Returns whether the prerequisites are completed
 - `IaSdk.instance.resetPrerequisites()` - Resets the prerequisites, including the selected pharmacy
 - `IaSdk.instance.resetLegalDisclaimer()` - Resets the accepted legal documents (iOS only)
+- `IaSdk.instance.resetAnalyticsConsent()` - Resets the user's analytics consent answer (iOS only)
 - `IaSdk.instance.setIsOnboardingShown(isOnboardingShown:)` - Sets whether onboarding was shown (iOS only)
 
 ### Screens
@@ -59,6 +60,7 @@ See [SDK Interaction](interaction.md).
 - `IaSdk.instance.onApofinderDidChangePharmacy` - Called when the user selects a pharmacy in Apofinder
 - `IaSdk.instance.onSdkBackAction` - Decides whether an SDK screen may close on back (Android only)
 - `IaSdk.instance.analyticsEventListener` - Stream of analytics events (Android only)
+- `IaSdk.instance.loggedAnalyticsEventListener` - Stream of analytics events logged for the host app (iOS only)
 
 ### Debugging
 - `IaSdk.instance.presentLogs()` - Shows the SDK's log viewer

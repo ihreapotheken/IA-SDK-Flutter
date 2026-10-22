@@ -55,6 +55,7 @@ class _ExampleAppState extends State<ExampleApp> {
     if (_isInitialized) return;
 
     final log = ExampleEventLog.instance;
+    final analyticsLog = ExampleEventLog.analytics;
     final settings = ExampleTestSettings.instance;
 
     IaSdk.instance.onSdkWillNavigateToTarget = (navigationTarget) async {
@@ -84,7 +85,11 @@ class _ExampleAppState extends State<ExampleApp> {
     );
 
     IaSdk.instance.analyticsEventListener.stream.listen(
-      (event) => log.add('Analytics', '${event.type} ${event.parameters}'),
+      (event) => analyticsLog.add('Android', '${event.type} ${event.parameters}'),
+    );
+
+    IaSdk.instance.loggedAnalyticsEventListener.stream.listen(
+      (event) => analyticsLog.add('Logged', '${event.name} ${event.parameters}'),
     );
 
     ExampleAppConfig.instance.hostAppLogFilePath = await FileUtils.createDemoCoreAppLogFile();
@@ -160,7 +165,7 @@ class _ExampleAppState extends State<ExampleApp> {
       (result) => log.add('CardLink', 'Result: $result'),
     );
     cardLink.analyticsEventListener.stream.listen(
-      (event) => log.add('CardLink', 'Analytics: $event'),
+      (event) => analyticsLog.add('CardLink', event),
     );
 
     if (E2EConfig.enabled && E2EConfig.pharmacyId.isNotEmpty) {

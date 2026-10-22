@@ -7,12 +7,12 @@ Native SDK 2.9.0 on both platforms.
 - Native APIs that weren't proxied yet, on both platforms where the native SDKs have them. Members only one native
   SDK has are documented as "Only supported on iOS/Android"; calling such a method on the other platform throws a
   `MissingPluginException`. See the doc comments of `IaSdk` and the module classes.
-- `IaSdk`: `resetPrerequisites`, `resetLegalDisclaimer`, `setIsOnboardingShown`, `isPrerequisiteFlowCompleted`,
-  `launchPrerequisiteFlow`, `clearUserBillingAddress`, `clearUserDeliveryAddress`, `setAnalyticsConsent`,
-  `setHapticFeedbackEnabled`, `presentLogs`, `exportLogs`, `getUserId`, `removeAllCachedResponses`,
-  `getInitializationState`, `onSdkBackAction`, and the streams `initializationStateListener`,
-  `analyticsEventListener` and `logMessageListener`. `launchPrerequisiteFlow` runs the prerequisites flow on both
-  platforms and returns whether the user cancelled it.
+- `IaSdk`: `resetPrerequisites`, `resetLegalDisclaimer`, `resetAnalyticsConsent`, `setIsOnboardingShown`,
+  `isPrerequisiteFlowCompleted`, `launchPrerequisiteFlow`, `clearUserBillingAddress`, `clearUserDeliveryAddress`,
+  `setAnalyticsConsent`, `setHapticFeedbackEnabled`, `presentLogs`, `exportLogs`, `getUserId`,
+  `removeAllCachedResponses`, `getInitializationState`, `onSdkBackAction`, and the streams
+  `initializationStateListener`, `analyticsEventListener`, `loggedAnalyticsEventListener` and `logMessageListener`.
+  `launchPrerequisiteFlow` runs the prerequisites flow on both platforms and returns whether the user cancelled it.
 - `IaSdkConfiguration`: `isPickupLockerAndCourierShippingEnabled`, `appStoreId`, `playStoreId`, `isAnalyticsEnabled`,
   `isHapticFeedbackEnabled`, `qaConfiguration`, `cardLink`, `hostAppLogFilePath`, and
   `IaSdkConfigurationFooter.isImprintHandledByHostApp`.
@@ -128,7 +128,8 @@ Native SDK 2.9.0 on both platforms.
 - **`onSdkWillNavigateToTarget` now runs.** Return `true` for targets the SDK should handle itself.
 - **iOS no longer lists test pharmacies in Apofinder by default.** Pass
   `IaSdkConfigurationQa(showTestPharmaciesInApofinder: true)` for that.
-- **Android follows `IaSdkConfigurationFooter.shouldShowDataProcessing`**, which defaults to `true`, as on iOS.
+- **`IaSdkConfigurationFooter.shouldShowDataProcessing` and `IaSdkNavigationTarget.hostAppPrivacyPolicy` are
+  removed**, as in the native SDKs. iOS shows its own data processing screen; Android hides the button.
 - **Unknown salutations are stored as "Keine Angabe"** on both platforms. iOS used to reject them.
 - **`setGuestUserData` takes `phoneNumberWithoutCountryCode` as a `String`**, like the address setters, so leading
   zeros are kept.

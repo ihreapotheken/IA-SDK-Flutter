@@ -14,6 +14,10 @@ class ExampleEventLog extends ChangeNotifier {
 
   static final instance = ExampleEventLog._();
 
+  /// Log of the analytics events of all SDK analytics streams, shown in their own section of the Events tab.
+  ///
+  static final analytics = ExampleEventLog._();
+
   static const _maxEntries = 500;
 
   final _entries = <ExampleEvent>[];

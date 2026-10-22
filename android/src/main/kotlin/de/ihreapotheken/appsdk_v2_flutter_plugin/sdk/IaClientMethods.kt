@@ -33,7 +33,6 @@ import de.ihreapotheken.sdk.integrations.api.MockForceUpdateSettings
 import de.ihreapotheken.sdk.integrations.api.MockSdkFeaturesSettings
 import de.ihreapotheken.sdk.integrations.api.QaConfiguration
 import de.ihreapotheken.sdk.debugviewer.DebugViewerModule
-import de.ihreapotheken.sdk.core.ui.theme.HostUiConfig
 import de.ihreapotheken.sdk.core.ui.theme.IAUIConfiguration
 import de.ihreapotheken.sdk.core.ui.theme.IAHeaderConfiguration
 import de.ihreapotheken.sdk.core.ui.theme.IAHeaderStyle
@@ -197,6 +196,11 @@ internal class IaClientMethods(
          * Resets the accepted legal documents. iOS only.
          */
         resetLegalDisclaimer,
+
+        /**
+         * Resets the user's analytics consent answer. iOS only.
+         */
+        resetAnalyticsConsent,
 
         /**
          * Marks the onboarding as shown or not shown. iOS only.
@@ -486,7 +490,6 @@ internal class IaClientMethods(
                 val shouldRunApofinder = prerequisites?.get("runApofinderIfNeeded") != false
                 val uiConfiguration = parseUIConfiguration(args["uiConfiguration"] as? Map<*, *>)
                 val footer = args["footer"] as? Map<*, *>
-                val shouldShowDataProcessing = footer?.get("shouldShowDataProcessing") == true
                 val isPickupLockerAndCourierShippingEnabled = args["isPickupLockerAndCourierShippingEnabled"] as? Boolean ?: false
                 val isAnalyticsEnabled = args["isAnalyticsEnabled"] as? Boolean ?: false
                 val isHapticFeedbackEnabled = args["isHapticFeedbackEnabled"] as? Boolean ?: true
@@ -502,7 +505,6 @@ internal class IaClientMethods(
                     IaSdk.setQaConfiguration(parsedQaConfiguration)
                 }
                 val isCardLinkSaveCardEnabled = (args["cardLink"] as? Map<*, *>)?.get("isSaveCardEnabled") as? Boolean ?: false
-                bindings.sdkModule.setShowDataProcessingClickListener(bindings.callbacks)
                 // A set imprint listener replaces the SDK's own imprint page, so it's only set when the host handles it.
                 if (footer?.get("isImprintHandledByHostApp") == true) {
                     bindings.sdkModule.setImpressumClickListener(bindings.callbacks)
@@ -535,7 +537,7 @@ internal class IaClientMethods(
                         // The listener keeps receiving SDK events after initialization, but Flutter
                         // accepts only one reply per call.
                         if (event is SdkEvent.InitStatus.InitializationCompleted) {
-                            attachSdkListeners(shouldShowDataProcessing)
+                            attachSdkListeners()
                             if (!hasReplied.getAndSet(true)) {
                                 result.success(null)
                             }
@@ -545,7 +547,7 @@ internal class IaClientMethods(
                             scope.launch {
                                 val state = IaSdk.initState.first { it == InitState.INITIALIZED || it == InitState.ERROR }
                                 if (state == InitState.INITIALIZED) {
-                                    attachSdkListeners(shouldShowDataProcessing)
+                                    attachSdkListeners()
                                     if (!hasReplied.getAndSet(true)) {
                                         result.success(null)
                                     }
@@ -1089,6 +1091,7 @@ internal class IaClientMethods(
             FlutterCall.setShouldShowMascotIllustrations.name,
             FlutterCall.clearProductGridCache.name,
             FlutterCall.resetLegalDisclaimer.name,
+            FlutterCall.resetAnalyticsConsent.name,
             FlutterCall.setIsOnboardingShown.name,
             FlutterCall.getUserId.name,
             FlutterCall.savePharmacyId.name,
@@ -1195,14 +1198,12 @@ internal class IaClientMethods(
     }
 
     /**
-     * Attaches the plugin's listeners to the initialized SDK, and applies the settings that need an
-     * initialized SDK.
+     * Attaches the plugin's listeners to the initialized SDK.
      */
-    private fun attachSdkListeners(shouldShowDataProcessing: Boolean) {
+    private fun attachSdkListeners() {
         bindings.sdkModule.ordering.setCartListener(bindings.callbacks)
         bindings.sdkModule.ordering.setCheckoutListener(bindings.callbacks)
         bindings.sdkModule.rx.setRedeemPrescriptionListener(bindings.callbacks)
-        bindings.sdkModule.setHostUiConfig(HostUiConfig(showDataProcessing = shouldShowDataProcessing))
     }
 
     /**
