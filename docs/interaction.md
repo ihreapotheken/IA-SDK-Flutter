@@ -26,6 +26,7 @@ Available streams:
 |---|---|
 | `IaSdk.instance.initializationStateListener` | Initialization state changed |
 | `IaSdk.instance.analyticsEventListener` | Analytics event tracked (Android only) |
+| `IaSdk.instance.loggedAnalyticsEventListener` | Analytics event logged for the host app, e.g. `screen_view` or `purchase` (iOS only) |
 | `IaSdk.instance.logMessageListener` | SDK log message, for debugging (iOS only) |
 | `IaSdk.instance.ordering.orderingDidUpdateCartListener` | Cart updated |
 | `IaSdk.instance.ordering.orderingDidFinishOrderListener` | Order finished |
@@ -69,7 +70,6 @@ Navigation targets (`IaSdkNavigationTarget`):
 | `apofinder` | SDK wants to open Apofinder, e.g. to change the pharmacy | Shows the SDK Apofinder |
 | `thankYou` | Order and payment are processed | Shows the SDK thank you screen |
 | `imprint` | "Impressum" footer button tapped | Shows the imprint from CMS |
-| `hostAppPrivacyPolicy` | "Datenverarbeitung" footer button tapped | Nothing |
 | `start` | SDK wants to open the start screen (Android only) | Shows the SDK start screen |
 | `search` | SDK wants to open the product search (Android only) | Shows the SDK product search |
 | `redeemPrescription` | SDK wants to open the redeem prescription screen (Android only) | Shows the SDK screen |

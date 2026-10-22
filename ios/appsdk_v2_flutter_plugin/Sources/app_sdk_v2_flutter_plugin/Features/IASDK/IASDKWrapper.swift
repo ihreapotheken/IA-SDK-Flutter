@@ -31,7 +31,6 @@ final class IASDKWrapper {
         }
         IASDK.configuration.shouldLoadRemoteStyleConfiguration = arguments.shouldFetchThemeFromRemote
         IASDK.configuration.footer.shouldShowAppSettings = arguments.footer.shouldShowAppSettings
-        IASDK.configuration.footer.shouldShowDataProcessing = arguments.footer.shouldShowDataProcessing
         IASDK.configuration.footer.shouldShowImprint = arguments.footer.shouldShowImprint
         IASDK.configuration.uiConfiguration = arguments.uiConfiguration.mappedToSDK()
         if let isPickupLockerAndCourierShippingEnabled = arguments.isPickupLockerAndCourierShippingEnabled {
@@ -284,8 +283,24 @@ final class IASDKWrapper {
         return ["isCancelled": result.prerequisitesResult?.isCancelled ?? false]
     }
 
+    func isPrerequisiteFlowCompleted() async throws -> Any? {
+        // Checks the prerequisites `launchPrerequisiteFlow` would run, so it's `true` when the flow wouldn't show anything.
+        let prerequisitesOptions = IASDK.configuration.defaultInitializationOptions.prerequisitesOptions
+        let status = try await IASDK.Prerequisites.prerequisitesCompletionStatus(
+            runOnboardingIfNeeded: prerequisitesOptions?.runOnboardingIfNeeded ?? false,
+            runLegalIfNeeded: prerequisitesOptions?.runLegalIfNeeded ?? false
+        )
+        return status.areAllCompleted
+    }
+
     func resetLegalDisclaimer() async throws -> Any? {
         try await IASDK.Prerequisites.resetLegalDisclaimer()
+        Self.cleanPrerequisitesCache()
+        return nil
+    }
+
+    func resetAnalyticsConsent() async -> Any? {
+        await IASDK.Prerequisites.resetAnalyticsConsent()
         Self.cleanPrerequisitesCache()
         return nil
     }

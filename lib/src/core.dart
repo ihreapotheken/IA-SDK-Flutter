@@ -29,6 +29,7 @@ part 'models/request/mascot_illustrations.dart';
 part 'models/response/analytics_event.dart';
 part 'models/response/initialization_state.dart';
 part 'models/response/log_message.dart';
+part 'models/response/logged_analytics_event.dart';
 part 'models/response/prerequisites_result.dart';
 
 /// Main entrypoint for the ia.de AppSDK services and features.
@@ -385,6 +386,14 @@ class IaSdk {
     return await _Methods.resetLegalDisclaimer.invoke();
   }
 
+  /// Resets the user's analytics consent answer, so the prerequisites flow asks for it again.
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  Future<void> resetAnalyticsConsent() async {
+    return await _Methods.resetAnalyticsConsent.invoke();
+  }
+
   /// Marks the onboarding as shown or not shown, which decides whether the prerequisites flow shows it.
   ///
   /// Note: Only supported on iOS.
@@ -399,11 +408,14 @@ class IaSdk {
   }
 
   /// Returns `true` if the user has completed the prerequisites flow (legal documents, onboarding) and a valid
-  /// pharmacy is selected, unless [IaPrerequisitesConfiguration.runApofinderIfNeeded] is `false`.
+  /// pharmacy is selected, so [launchPrerequisiteFlow] would finish without showing a screen. Legal documents and
+  /// onboarding only count when the prerequisites options passed to [initialize] run them.
   ///
   /// Call it after [initialize]; before that the call fails.
   ///
-  /// Note: Only supported on Android.
+  /// Note: On Android the pharmacy isn't needed when [IaPrerequisitesConfiguration.runApofinderIfNeeded] is `false`,
+  /// and counts as selected when it can't be loaded, for example without network. On iOS it's always needed, and
+  /// the call fails when it can't be loaded.
   ///
   Future<bool> isPrerequisiteFlowCompleted() async {
     final result = await _Methods.isPrerequisiteFlowCompleted.invoke<bool>();
@@ -753,6 +765,7 @@ class IaSdk {
       const _ApofinderPharmacyChangedHandler(),
       const _InitializationStateHandler(),
       const _AnalyticsEventHandler(),
+      const _LoggedAnalyticsEventHandler(),
       const _LogMessageHandler(),
       const _BackActionHandler(),
     ],
@@ -796,6 +809,21 @@ class IaSdk {
   /// Note: Only supported on Android.
   ///
   final analyticsEventListener = StreamController<IaSdkAnalyticsEvent>.broadcast();
+
+  /// Notifier object informing the client integration of analytics events the SDK logs for the host app,
+  /// for example to forward them to the host app's own analytics.
+  ///
+  /// Events are only logged when analytics is enabled in the SDK's remote configuration and the user consented to it.
+  ///
+  /// ```dart
+  /// IaSdk.instance.loggedAnalyticsEventListener.stream.listen((event) {
+  ///   // Forward event.name and event.parameters.
+  /// });
+  /// ```
+  ///
+  /// Note: Only supported on iOS.
+  ///
+  final loggedAnalyticsEventListener = StreamController<IaSdkLoggedAnalyticsEvent>.broadcast();
 
   /// Notifier object informing the client integration of messages the SDK logs, for debugging an integration.
   ///

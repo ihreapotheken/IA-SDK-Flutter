@@ -6,15 +6,10 @@ class IaSdkConfigurationFooter {
   /// Generates an instance of footer configuration.
   ///
   const IaSdkConfigurationFooter({
-    this.shouldShowDataProcessing = true,
     this.shouldShowAppSettings = true,
     this.shouldShowImprint = true,
     this.isImprintHandledByHostApp = false,
   });
-
-  /// Whether to show the data processing button in the footer.
-  ///
-  final bool shouldShowDataProcessing;
 
   /// Whether to show the app settings button in the footer.
   ///
@@ -41,7 +36,6 @@ class IaSdkConfigurationFooter {
   ///
   Map<String, dynamic> toJson() {
     return {
-      'shouldShowDataProcessing': shouldShowDataProcessing,
       'shouldShowAppSettings': shouldShowAppSettings,
       'shouldShowImprint': shouldShowImprint,
       'isImprintHandledByHostApp': isImprintHandledByHostApp,

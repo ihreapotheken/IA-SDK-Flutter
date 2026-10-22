@@ -64,15 +64,6 @@ class ExampleAppConfig {
   ///
   String? hostAppLogFilePath;
 
-  /// Whether the footer shows the "Datenverarbeitung" button, which reports
-  /// `IaSdkNavigationTarget.hostAppPrivacyPolicy`:
-  ///
-  /// ```dart
-  /// flutter run --dart-define iaShowDataProcessing=true
-  /// ```
-  ///
-  final _shouldShowDataProcessing = const bool.fromEnvironment('iaShowDataProcessing');
-
   /// Whether the host app shows the imprint on Android, so the imprint button reports
   /// `IaSdkNavigationTarget.imprint` instead of the SDK opening its own page:
   ///
@@ -150,7 +141,6 @@ class ExampleAppConfig {
           ? null
           : const IaSdkConfigurationQa(showTestPharmaciesInApofinder: true),
       footer: IaSdkConfigurationFooter(
-        shouldShowDataProcessing: _shouldShowDataProcessing,
         shouldShowAppSettings: true,
         shouldShowImprint: true,
         isImprintHandledByHostApp: _isImprintHandledByHostApp,

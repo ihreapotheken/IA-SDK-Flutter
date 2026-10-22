@@ -33,6 +33,8 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
 
   resetLegalDisclaimer,
 
+  resetAnalyticsConsent,
+
   setIsOnboardingShown,
 
   isPrerequisiteFlowCompleted,

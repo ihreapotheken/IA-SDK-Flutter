@@ -126,11 +126,17 @@ final class IASDKPlugin {
             case FlutterCall.launchPrerequisiteFlow.name:
                 return try await iaSdkWrapper.launchPrerequisiteFlow()
 
+            case FlutterCall.isPrerequisiteFlowCompleted.name:
+                return try await iaSdkWrapper.isPrerequisiteFlowCompleted()
+
             case FlutterCall.clearProductGridCache.name:
                 return try await overTheCounterWrapper.clearProductGridCache()
 
             case FlutterCall.resetLegalDisclaimer.name:
                 return try await iaSdkWrapper.resetLegalDisclaimer()
+
+            case FlutterCall.resetAnalyticsConsent.name:
+                return await iaSdkWrapper.resetAnalyticsConsent()
 
             case FlutterCall.setIsOnboardingShown.name:
                 return try await iaSdkWrapper.setIsOnboardingShown(arguments: call.arguments)

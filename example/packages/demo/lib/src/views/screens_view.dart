@@ -96,8 +96,22 @@ class _AutoScreensList extends StatelessWidget {
     }
   }
 
-  static Future<void> _launchPrerequisiteFlow() async {
+  static Future<void> _launchPrerequisiteFlow(BuildContext context) async {
     final log = ExampleEventLog.instance;
+    try {
+      // Without this check the button seems to do nothing, as the flow finishes without showing a screen.
+      if (await IaSdk.instance.isPrerequisiteFlowCompleted()) {
+        log.add('Prerequisites', 'Already completed');
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Prerequisites are already completed')),
+          );
+        }
+        return;
+      }
+    } catch (e) {
+      log.add('Prerequisites', 'Completion check failed: $e');
+    }
     try {
       final result = await IaSdk.instance.launchPrerequisiteFlow();
       log.add('Prerequisites', 'cancelled: ${result.isCancelled}');
@@ -195,7 +209,7 @@ class _AutoScreensList extends StatelessWidget {
         ],
         ElevatedButton(
           child: Text('Launch Prerequisite Flow'),
-          onPressed: _launchPrerequisiteFlow,
+          onPressed: () => _launchPrerequisiteFlow(context),
         ),
         const SizedBox(height: 16),
         ElevatedButton(

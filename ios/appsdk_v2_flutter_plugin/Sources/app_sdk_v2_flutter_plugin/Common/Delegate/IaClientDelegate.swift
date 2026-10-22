@@ -46,8 +46,6 @@ class IaClientDelegate: SDKDelegate {
             navigationTargetString = "thankYou"
         case .imprint:
             navigationTargetString = "imprint"
-        case .hostAppPrivacyPolicy:
-            navigationTargetString = "hostAppPrivacyPolicy"
         case .apofinder:
             navigationTargetString = "apofinder"
         }
@@ -160,6 +158,31 @@ class IaClientDelegate: SDKDelegate {
         case .httpClientSuccess: "httpClientSuccess"
         case .httpClientError: "httpClientError"
         default: level.title
+        }
+    }
+
+    func sdkDidLogAnalyticsEvent(_ event: IAAnalyticsEvent) {
+        channel.invokeMethod(
+            "sdkDidLogAnalyticsEvent",
+            arguments: [
+                "name": event.name,
+                "parameters": event.parameters.mapValues(Self.channelValue),
+            ] as [String: Any]
+        )
+    }
+
+    /// The parameter value in a type the method channel can send. Other values are sent as their description, as the
+    /// channel would fail on them.
+    private static func channelValue(_ value: Any) -> Any {
+        switch value {
+        case is String, is NSNumber, is NSNull:
+            value
+        case let array as [Any]:
+            array.map(channelValue)
+        case let dictionary as [String: Any]:
+            dictionary.mapValues(channelValue)
+        default:
+            String(describing: value)
         }
     }
 

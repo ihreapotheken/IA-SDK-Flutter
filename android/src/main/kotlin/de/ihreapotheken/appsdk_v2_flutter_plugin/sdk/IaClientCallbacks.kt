@@ -12,7 +12,6 @@ import de.ihreapotheken.sdk.core.api.listener.RedeemPrescriptionEvent
 import de.ihreapotheken.sdk.core.api.listener.RedeemPrescriptionListener
 import de.ihreapotheken.sdk.core.data.model.analytics.AnalyticsEvent
 import de.ihreapotheken.sdk.core.data.model.listener.SdkImpressumListener
-import de.ihreapotheken.sdk.core.data.model.listener.SdkShowDataProcessingListener
 import de.ihreapotheken.sdk.core.domain.analytics.AnalyticsItem
 import de.ihreapotheken.sdk.integrations.api.InitState
 import de.ihreapotheken.sdk.integrations.api.view.IaScreen
@@ -35,7 +34,7 @@ import kotlin.coroutines.suspendCoroutine
 class IaClientCallbacks(
     private val channel: MethodChannel,
     private val orderSignatures: MutableLiveData<IaClientBindings.SignatureCodes?>,
-) : CartListener, CheckoutListener, RedeemPrescriptionListener, SdkShowDataProcessingListener, SdkImpressumListener,
+) : CartListener, CheckoutListener, RedeemPrescriptionListener, SdkImpressumListener,
     AnalyticsListener {
 
     /**
@@ -256,7 +255,8 @@ class IaClientCallbacks(
     }
 
     /**
-     * Called when the SDK tracks an analytics event. Android only, the iOS AppSDK doesn't report analytics.
+     * Called when the SDK tracks an analytics event. Android only, separate from the analytics
+     * events iOS reports through `sdkDidLogAnalyticsEvent`.
      */
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
         val (type, parameters) = when (event) {
@@ -355,19 +355,6 @@ class IaClientCallbacks(
         channel.invokeMethod(
             "sdkWillNavigateToTarget",
             mapOf("navigationTarget" to "imprint")
-        )
-    }
-
-    /**
-     * Called when the "Datenverarbeitung" footer button is tapped. The SDK has no default action for it,
-     * so the host app's answer is not needed.
-     *
-     * Equivalent to iOS: sdkWillNavigateToTarget(.hostAppPrivacyPolicy)
-     */
-    override fun onShowDataProcessingClick() {
-        channel.invokeMethod(
-            "sdkWillNavigateToTarget",
-            mapOf("navigationTarget" to "hostAppPrivacyPolicy")
         )
     }
 

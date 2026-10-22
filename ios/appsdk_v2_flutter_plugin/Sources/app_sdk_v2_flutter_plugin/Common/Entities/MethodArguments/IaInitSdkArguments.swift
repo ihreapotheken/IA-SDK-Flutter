@@ -162,7 +162,6 @@ struct IaButtonConfigurationArguments: Decodable {
 
 /// Configuration options for SDK footer buttons.
 struct IaFooterConfigurationArguments: Decodable {
-    let shouldShowDataProcessing: Bool
     let shouldShowAppSettings: Bool    
     let shouldShowImprint: Bool
 }

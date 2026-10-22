@@ -12,10 +12,9 @@ class EventsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([ExampleEventLog.instance, ExampleTestSettings.instance]),
+      listenable: Listenable.merge([ExampleEventLog.instance, ExampleEventLog.analytics, ExampleTestSettings.instance]),
       builder: (context, _) {
         final settings = ExampleTestSettings.instance;
-        final entries = ExampleEventLog.instance.entries;
         return ListView(
           padding: EdgeInsets.fromLTRB(
             20,
@@ -59,45 +58,69 @@ class EventsView extends StatelessWidget {
               onSelectionChanged: (selection) => settings.scanDecision = selection.first,
             ),
             const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Events (${entries.length})',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                TextButton(
-                  onPressed: entries.isEmpty ? null : ExampleEventLog.instance.clear,
-                  child: const Text('Clear'),
-                ),
-              ],
+            ..._section(
+              context,
+              title: 'Analytics',
+              log: ExampleEventLog.analytics,
+              emptyText: 'No analytics events yet. They need analytics enabled for the SDK and the user\'s consent.',
             ),
-            if (entries.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Text('No events yet. Use the SDK screens, then come back.'),
-              ),
-            for (final entry in entries)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '${_time(entry.time)}  ${entry.source}  ',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(text: entry.message),
-                    ],
-                  ),
-                  style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-                ),
-              ),
+            const SizedBox(height: 24),
+            ..._section(
+              context,
+              title: 'Events',
+              log: ExampleEventLog.instance,
+              emptyText: 'No events yet. Use the SDK screens, then come back.',
+            ),
           ],
         );
       },
     );
+  }
+
+  static List<Widget> _section(
+    BuildContext context, {
+    required String title,
+    required ExampleEventLog log,
+    required String emptyText,
+  }) {
+    final entries = log.entries;
+    return [
+      Row(
+        children: [
+          Expanded(
+            child: Text(
+              '$title (${entries.length})',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+          TextButton(
+            onPressed: entries.isEmpty ? null : log.clear,
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+      if (entries.isEmpty)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Text(emptyText),
+        ),
+      for (final entry in entries)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: '${_time(entry.time)}  ${entry.source}  ',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                TextSpan(text: entry.message),
+              ],
+            ),
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+          ),
+        ),
+    ];
   }
 
   static String _time(DateTime time) {

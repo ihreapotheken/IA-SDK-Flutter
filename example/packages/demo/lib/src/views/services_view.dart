@@ -93,6 +93,20 @@ class ServicesView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
+        if (Platform.isIOS) ...[
+          ElevatedButton(
+            child: ButtonLabel(title: 'Reset Analytics Consent (iOS)', description: 'Restart needed'),
+            onPressed: () async {
+              try {
+                await IaSdk.instance.resetAnalyticsConsent();
+                if (context.mounted) _showResult(context, 'Analytics consent reset');
+              } catch (e) {
+                if (context.mounted) _showResult(context, 'Error: $e');
+              }
+            },
+          ),
+          const SizedBox(height: 8),
+        ],
         if (Platform.isAndroid) ...[
           ElevatedButton(
             child: Text('Is Prerequisite Flow Completed (Android)'),

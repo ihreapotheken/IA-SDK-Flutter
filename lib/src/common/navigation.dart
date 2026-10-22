@@ -56,12 +56,6 @@ enum IaSdkNavigationTarget {
   ///
   imprint,
 
-  /// "Datenverarbeitung" button is tapped on the footer. Nothing happens if not handled.
-  ///
-  /// The button is shown when [IaSdkConfigurationFooter.shouldShowDataProcessing] is `true`.
-  ///
-  hostAppPrivacyPolicy,
-
   /// SDK intends to open Apofinder from an internal flow (not prerequisites).
   /// Triggers include product details ("Apotheke wählen") and pharmacy screen (change pharmacy).
   ///
@@ -98,7 +92,6 @@ enum IaSdkNavigationTarget {
       'pharmacyDetails' => IaSdkNavigationTarget.pharmacyDetails,
       'thankYou' => IaSdkNavigationTarget.thankYou,
       'imprint' => IaSdkNavigationTarget.imprint,
-      'hostAppPrivacyPolicy' => IaSdkNavigationTarget.hostAppPrivacyPolicy,
       'apofinder' => IaSdkNavigationTarget.apofinder,
       'start' => IaSdkNavigationTarget.start,
       'search' => IaSdkNavigationTarget.search,
