@@ -137,6 +137,10 @@ class ExampleAppConfig {
       clientId: clientId,
       serverEnvironment: serverEnvironment,
       shouldFetchThemeFromRemote: false,
+      // TODO: The QA features are hardcoded here. The demo app needs a dedicated
+      // screen (or similar) to toggle them at runtime, so they can be changed
+      // while testing the Flutter wrapper without editing this file. Changes
+      // would take effect after a restart, because they are read at init.
       qaConfiguration: serverEnvironment == IaSdkConfigurationServerEnvironment.production
           ? null
           : const IaSdkConfigurationQa(showTestPharmaciesInApofinder: true),
