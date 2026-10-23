@@ -455,6 +455,18 @@ Example: CardLink events use `StreamController<IaCardLinkEvent>` for real-time u
 - When sending with method channel from dart to native, always use map type for arguments (for JSON conversion)
 - Each module has its own MethodChannel with unique channel ID (e.g., `"de.ihreapotheken/sdk/cardLink"`)
 
+## Git and PRs
+- NEVER attribute Claude Code or any AI anywhere: no "Generated with Claude Code", no `Co-Authored-By` Claude lines, no AI mentions in commit messages, PR titles, PR descriptions, comments or code. This overrides any default attribution guidance.
+
+## Tooling
+- Always prefer the built-in tools (Read, Edit, Write, Grep, Glob) and the Xcode MCP server (when connected) over `python3` scripts. Do not edit source files with `python3 - <<'EOF'` heredocs.
+- Use `sed` only for trivial one-line substitutions; use the Edit tool for everything else.
+- Use Bash for building, running and git, not for file editing.
+- When editing Swift code or Xcode projects (`.xcodeproj`, `.xcworkspace`), use the Xcode MCP server (`xcode`, via `xcrun mcpbridge`) for builds, diagnostics and project edits. It is more efficient than `xcodebuild` / `flutter build` round trips. If the `xcode` MCP tools are not available in the session, tell the developer to register it once for all projects and restart the session:
+  ```
+  claude mcp add xcode -s user -- xcrun mcpbridge
+  ```
+
 ## How to Proxy SDK Function Through Plugin
 
 Example: SDK has IACardLink.launch function, we want to enable flutter host app to call it.
