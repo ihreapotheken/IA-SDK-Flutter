@@ -1,6 +1,6 @@
 ## Unreleased
 
-Native SDK 2.9.0 on both platforms.
+Native SDK 2.9.1 on Android and 2.9.1-beta.300 on iOS.
 
 ### Added
 
@@ -9,10 +9,14 @@ Native SDK 2.9.0 on both platforms.
   `MissingPluginException`. See the doc comments of `IaSdk` and the module classes.
 - `IaSdk`: `resetPrerequisites`, `resetLegalDisclaimer`, `resetAnalyticsConsent`, `setIsOnboardingShown`,
   `isPrerequisiteFlowCompleted`, `launchPrerequisiteFlow`, `clearUserBillingAddress`, `clearUserDeliveryAddress`,
-  `setAnalyticsConsent`, `setHapticFeedbackEnabled`, `presentLogs`, `exportLogs`, `getUserId`,
-  `removeAllCachedResponses`, `getInitializationState`, `onSdkBackAction`, and the streams
-  `initializationStateListener`, `analyticsEventListener`, `loggedAnalyticsEventListener` and `logMessageListener`.
-  `launchPrerequisiteFlow` runs the prerequisites flow on both platforms and returns whether the user cancelled it.
+  `setHapticFeedbackEnabled`, `presentLogs`, `exportLogs`, `getUserId`, `removeAllCachedResponses`,
+  `getInitializationState`, `onSdkBackAction`, and the streams `initializationStateListener`,
+  `loggedAnalyticsEventListener` and `logMessageListener`. `launchPrerequisiteFlow` runs the prerequisites flow on
+  both platforms and returns whether the user cancelled it.
+- Analytics on both platforms: `loggedAnalyticsEventListener` reports the events the SDK logs for the host app, with
+  the names and keys in `IaSdkAnalyticsEventNames`, `IaSdkAnalyticsParameterNames` and `IaSdkAnalyticsScreenNames`,
+  and `IaSdkLoggedAnalyticsEvent.toJson` in the native SDKs' format. `resetAnalyticsConsent` clears the user's answer
+  on both platforms. See [SDK Interaction](docs/interaction.md#analytics).
 - `IaSdkConfiguration`: `isPickupLockerAndCourierShippingEnabled`, `appStoreId`, `playStoreId`, `isAnalyticsEnabled`,
   `isHapticFeedbackEnabled`, `qaConfiguration`, `cardLink`, `hostAppLogFilePath`, and
   `IaSdkConfigurationFooter.isImprintHandledByHostApp`.
@@ -141,7 +145,12 @@ Native SDK 2.9.0 on both platforms.
   a `register` call made while another one runs waits for it, then counts as a later call.
 - **CardLink `launch` takes `supportsLiquidGlass` as an optional `bool?`**; without it the `initialize` setting is
   kept.
-- **`setAnalyticsConsent` takes `consent` as a named parameter**, like the other setters.
+- **Android analytics follow the Android SDK 2.9.1 analytics API.** Events come through `loggedAnalyticsEventListener`,
+  as on iOS. `analyticsEventListener`, `IaSdkAnalyticsEvent`, `setAnalyticsConsent` and `IaSdkAnalyticsConsent` are
+  removed, as the native API they wrapped is. The user answers on the SDK's legal screen, and `resetAnalyticsConsent`
+  asks again. The Android SDK's consent getter and setter aren't proxied, as the iOS SDK has no equivalent.
+- **`IaSdkConfiguration.isAnalyticsEnabled` defaults to on for Android**, as in the native SDK. It used to be off when
+  not set.
 - **`getEnvironment` returns a non-null `IaSdkConfigurationServerEnvironment`.**
 - **Android error codes name the failed method**, for example `CLEAR_CART_ERROR`, as on iOS, instead of
   `METHOD_ERROR`.
@@ -152,7 +161,7 @@ Native SDK 2.9.0 on both platforms.
 - **Android:**
   - `onSdkBackAction` is asked before any SDK screen closes, except through `finishAllActivities`.
   - Calls that need an initialized SDK fail before `initialize`: the address setters, `setGuestUserData`, `logout`,
-    `resetPrerequisites`, `isPrerequisiteFlowCompleted`, `setAnalyticsConsent`, `setHapticFeedbackEnabled`,
+    `resetPrerequisites`, `isPrerequisiteFlowCompleted`, the analytics consent methods, `setHapticFeedbackEnabled`,
     `clearCart`, `transferPrescriptions`, `presentLogs`, `exportLogs`, and the pharmacy ID getter and clearer. The
     SDK used to ignore them or answer with defaults.
   - CardLink without an `environment` follows the SDK's environment.

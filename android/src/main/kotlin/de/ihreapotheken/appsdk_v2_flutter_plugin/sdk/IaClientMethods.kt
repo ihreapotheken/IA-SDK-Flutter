@@ -16,11 +16,12 @@ import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigListener
 import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigResult
 import de.ihreapotheken.sdk.core.api.listener.TransferPrescriptionEvent
 import de.ihreapotheken.sdk.core.api.listener.TransferPrescriptionListener
-import de.ihreapotheken.sdk.core.data.EnvironmentType
-import de.ihreapotheken.sdk.core.data.PrerequisiteFlowConfiguration
-import de.ihreapotheken.sdk.core.data.model.analytics.AnalyticsConsent
-import de.ihreapotheken.sdk.core.data.model.sdk.SdkEvent
-import de.ihreapotheken.sdk.core.data.model.sdk.SdkEventListener
+import de.ihreapotheken.sdk.core.domain.model.EnvironmentType
+import de.ihreapotheken.sdk.core.domain.session.PrerequisiteFlowConfiguration
+import de.ihreapotheken.sdk.integrations.api.analytics.ExperimentalIaAnalyticsApi
+import de.ihreapotheken.sdk.integrations.api.analytics.IaAnalyticsConsentStatus
+import de.ihreapotheken.sdk.core.domain.model.sdk.SdkEvent
+import de.ihreapotheken.sdk.core.api.listener.SdkEventListener
 import de.ihreapotheken.sdk.core.domain.model.prescription.ImagePrescription
 import de.ihreapotheken.sdk.core.domain.model.prescription.PdfPrescription
 import de.ihreapotheken.sdk.core.domain.model.prescription.PrescriptionInsuranceType
@@ -57,6 +58,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 /**
  * Flutter client service call handler.
  */
+@OptIn(ExperimentalIaAnalyticsApi::class)
 internal class IaClientMethods(
     private val bindings: IaClientBindings,
 ) {
@@ -198,7 +200,7 @@ internal class IaClientMethods(
         resetLegalDisclaimer,
 
         /**
-         * Resets the user's analytics consent answer. iOS only.
+         * Resets the user's analytics consent answer, so the legal screen asks again.
          */
         resetAnalyticsConsent,
 
@@ -226,11 +228,6 @@ internal class IaClientMethods(
          * Removes the user's delivery address.
          */
         clearUserDeliveryAddress,
-
-        /**
-         * Sets the user's consent for the SDK's analytics tracking.
-         */
-        setAnalyticsConsent,
 
         /**
          * Turns haptic feedback in SDK screens on or off.
@@ -491,7 +488,7 @@ internal class IaClientMethods(
                 val uiConfiguration = parseUIConfiguration(args["uiConfiguration"] as? Map<*, *>)
                 val footer = args["footer"] as? Map<*, *>
                 val isPickupLockerAndCourierShippingEnabled = args["isPickupLockerAndCourierShippingEnabled"] as? Boolean ?: false
-                val isAnalyticsEnabled = args["isAnalyticsEnabled"] as? Boolean ?: false
+                val isAnalyticsEnabled = args["isAnalyticsEnabled"] as? Boolean ?: IaSdkConfiguration().analyticsEnabled
                 val isHapticFeedbackEnabled = args["isHapticFeedbackEnabled"] as? Boolean ?: true
                 val playStoreId = args["playStoreId"] as? String
                 val qaConfiguration = args["qaConfiguration"] as? Map<*, *>
@@ -1015,23 +1012,14 @@ internal class IaClientMethods(
                 result.success(null)
             }
 
-            FlutterCall.setAnalyticsConsent.name -> {
-                val consent = when ((call.arguments as? Map<*, *>)?.get("consent")) {
-                    "granted" -> AnalyticsConsent.GRANTED
-                    "denied" -> AnalyticsConsent.DENIED
-                    "unknown" -> AnalyticsConsent.UNKNOWN
-                    else -> {
-                        result.error(
-                            "ARG_ERROR",
-                            "Missing or invalid consent. Expected one of granted, denied or unknown.",
-                            null,
-                        )
-                        return
-                    }
-                }
+            FlutterCall.resetAnalyticsConsent.name -> {
+                // Clearing the answer makes the legal screen ask again, as iOS's resetAnalyticsConsent does. Before
+                // initialization the SDK ignores it.
                 if (!requireInitialized(result)) return
-                bindings.sdkModule.setAnalyticsConsent(consent)
-                result.success(null)
+                respondSuspending(result) {
+                    bindings.sdkModule.setAnalyticsConsentStatus(IaAnalyticsConsentStatus.NOT_ANSWERED)
+                    null
+                }
             }
 
             FlutterCall.setHapticFeedbackEnabled.name -> {
@@ -1091,7 +1079,6 @@ internal class IaClientMethods(
             FlutterCall.setShouldShowMascotIllustrations.name,
             FlutterCall.clearProductGridCache.name,
             FlutterCall.resetLegalDisclaimer.name,
-            FlutterCall.resetAnalyticsConsent.name,
             FlutterCall.setIsOnboardingShown.name,
             FlutterCall.getUserId.name,
             FlutterCall.savePharmacyId.name,

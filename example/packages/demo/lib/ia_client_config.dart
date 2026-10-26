@@ -93,8 +93,8 @@ class ExampleAppConfig {
 
   final _playStoreId = const String.fromEnvironment('iaPlayStoreId');
 
-  /// Whether the SDK tracks analytics events (Android), shown in the Events tab once consent is granted in the
-  /// Services tab. On by default for the internal environments; override with:
+  /// Whether the SDK tracks analytics events (Android), shown in the Events tab once the user accepted analytics on
+  /// the legal screen. On by default for the internal environments; override with:
   ///
   /// ```dart
   /// flutter run --dart-define iaAnalytics=false

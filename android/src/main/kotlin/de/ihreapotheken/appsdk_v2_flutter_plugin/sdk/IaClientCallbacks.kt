@@ -4,16 +4,16 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import androidx.lifecycle.MutableLiveData
-import de.ihreapotheken.sdk.core.api.listener.AnalyticsListener
 import de.ihreapotheken.sdk.core.api.listener.CartListener
 import de.ihreapotheken.sdk.core.api.listener.CheckoutListener
 import de.ihreapotheken.sdk.core.api.listener.RedeemPrescriptionDecision
 import de.ihreapotheken.sdk.core.api.listener.RedeemPrescriptionEvent
 import de.ihreapotheken.sdk.core.api.listener.RedeemPrescriptionListener
-import de.ihreapotheken.sdk.core.data.model.analytics.AnalyticsEvent
-import de.ihreapotheken.sdk.core.data.model.listener.SdkImpressumListener
-import de.ihreapotheken.sdk.core.domain.analytics.AnalyticsItem
+import de.ihreapotheken.sdk.core.api.listener.SdkImpressumListener
 import de.ihreapotheken.sdk.integrations.api.InitState
+import de.ihreapotheken.sdk.integrations.api.analytics.ExperimentalIaAnalyticsApi
+import de.ihreapotheken.sdk.integrations.api.analytics.IaAnalyticsEvent
+import de.ihreapotheken.sdk.integrations.api.analytics.IaAnalyticsListener
 import de.ihreapotheken.sdk.integrations.api.view.IaScreen
 import de.ihreapotheken.sdk.integrations.api.view.SdkNavigationTarget
 import io.flutter.plugin.common.MethodChannel
@@ -31,11 +31,12 @@ import kotlin.coroutines.suspendCoroutine
  * NOTE: This implementation uses suspend functions for async navigation callbacks.
  * This requires the Android SDK to support: onNavigateToTarget: (suspend (SdkNavigationTarget) -> Boolean)?
  */
+@OptIn(ExperimentalIaAnalyticsApi::class)
 class IaClientCallbacks(
     private val channel: MethodChannel,
     private val orderSignatures: MutableLiveData<IaClientBindings.SignatureCodes?>,
 ) : CartListener, CheckoutListener, RedeemPrescriptionListener, SdkImpressumListener,
-    AnalyticsListener {
+    IaAnalyticsListener {
 
     /**
      * Called when the SDK wants to navigate to a specific route.
@@ -255,77 +256,21 @@ class IaClientCallbacks(
     }
 
     /**
-     * Called when the SDK tracks an analytics event. Android only, separate from the analytics
-     * events iOS reports through `sdkDidLogAnalyticsEvent`.
+     * Called when the SDK emits an analytics event for the host app, after the user accepted analytics.
+     *
+     * Equivalent to iOS: sdkDidLogAnalyticsEvent
      */
-    override fun onAnalyticsEvent(event: AnalyticsEvent) {
-        val (type, parameters) = when (event) {
-            is AnalyticsEvent.ScreenView -> "screenView" to mapOf(
-                "screenName" to event.screenName,
-                "featureName" to event.featureName,
-                "properties" to event.properties,
-            )
-            is AnalyticsEvent.ScreenExit -> "screenExit" to mapOf(
-                "screenName" to event.screenName,
-                "featureName" to event.featureName,
-                "durationMs" to event.durationMs,
-                "interactionCount" to event.interactionCount,
-                "properties" to event.properties,
-            )
-            is AnalyticsEvent.UserAction -> "userAction" to mapOf(
-                "actionName" to event.actionName,
-                "screenName" to event.screenName,
-                "properties" to event.properties,
-            )
-            is AnalyticsEvent.Lifecycle -> "lifecycle" to mapOf(
-                "state" to event.state,
-            )
-            is AnalyticsEvent.Ecommerce -> "ecommerce" to mapOf(
-                "eventName" to event.eventName.name,
-                "items" to event.items.map { it.toMap() },
-                "value" to event.value,
-                "currency" to event.currency,
-                "transactionId" to event.transactionId,
-                "coupon" to event.coupon,
-                "screenName" to event.screenName,
-                "properties" to event.properties,
-            )
-            is AnalyticsEvent.Engagement -> "engagement" to mapOf(
-                "eventName" to event.eventName.name,
-                "screenName" to event.screenName,
-                "component" to event.component,
-                "elementId" to event.elementId,
-                "elementLabel" to event.elementLabel,
-                "durationMs" to event.durationMs,
-                "properties" to event.properties,
-            )
-            is AnalyticsEvent.Derived -> "derived" to mapOf(
-                "eventName" to event.eventName.name,
-                "screenName" to event.screenName,
-                "properties" to event.properties,
-            )
-        }
+    override fun onEvent(event: IaAnalyticsEvent) {
         val arguments = mapOf(
-            "type" to type,
-            "eventId" to event.eventId,
-            "sessionId" to event.sessionId,
-            "timestamp" to event.timestamp,
-            "parameters" to parameters,
+            "name" to event.name,
+            "parameters" to event.parameters,
         )
-        // Analytics events aren't guaranteed to arrive on the main thread, which method channel calls require.
+        // The SDK delivers events on the main thread, which method channel calls require; posting keeps that true
+        // should it ever change.
         Handler(Looper.getMainLooper()).post {
-            channel.invokeMethod("sdkAnalyticsEvent", arguments)
+            channel.invokeMethod("sdkDidLogAnalyticsEvent", arguments)
         }
     }
-
-    private fun AnalyticsItem.toMap(): Map<String, Any?> = mapOf(
-        "id" to id,
-        "name" to name,
-        "category" to category,
-        "price" to price,
-        "quantity" to quantity,
-        "manufacturer" to manufacturer,
-    )
 
     /**
      * Called when the user selects a pharmacy in an Apofinder screen launched by the host app.

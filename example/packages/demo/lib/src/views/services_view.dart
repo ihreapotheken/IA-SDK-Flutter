@@ -93,20 +93,21 @@ class ServicesView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: ButtonLabel(title: 'Reset Analytics Consent (iOS)', description: 'Restart needed'),
-            onPressed: () async {
-              try {
-                await IaSdk.instance.resetAnalyticsConsent();
-                if (context.mounted) _showResult(context, 'Analytics consent reset');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
+        ElevatedButton(
+          child: ButtonLabel(
+            title: 'Reset Analytics Consent',
+            description: Platform.isIOS ? 'Restart needed' : 'The legal screen asks again',
           ),
-          const SizedBox(height: 8),
-        ],
+          onPressed: () async {
+            try {
+              await IaSdk.instance.resetAnalyticsConsent();
+              if (context.mounted) _showResult(context, 'Analytics consent reset');
+            } catch (e) {
+              if (context.mounted) _showResult(context, 'Error: $e');
+            }
+          },
+        ),
+        const SizedBox(height: 8),
         if (Platform.isAndroid) ...[
           ElevatedButton(
             child: Text('Is Prerequisite Flow Completed (Android)'),
@@ -412,30 +413,6 @@ class ServicesView extends StatelessWidget {
             ),
             const SizedBox(height: 8),
           ],
-        if (Platform.isAndroid) ...[
-          const SizedBox(height: 24),
-          _SectionHeader(title: 'Analytics'),
-          const SizedBox(height: 8),
-          Text(
-            'Events show in the Events tab. Tracking is on for the internal environments, see iaAnalytics.',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 8),
-          for (final consent in IaSdkAnalyticsConsent.values) ...[
-            ElevatedButton(
-              child: Text('Analytics Consent: ${consent.name} (Android)'),
-              onPressed: () async {
-                try {
-                  await IaSdk.instance.setAnalyticsConsent(consent: consent);
-                  if (context.mounted) _showResult(context, 'Analytics consent ${consent.name}');
-                } catch (e) {
-                  if (context.mounted) _showResult(context, 'Error: $e');
-                }
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
-        ],
         const SizedBox(height: 24),
         _SectionHeader(title: 'Debugging'),
         const SizedBox(height: 8),

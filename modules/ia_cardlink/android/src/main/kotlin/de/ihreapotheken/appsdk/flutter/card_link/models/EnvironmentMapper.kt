@@ -1,7 +1,7 @@
 package de.ihreapotheken.appsdk.flutter.card_link.models
 
 import de.ihreapotheken.sdk.cardlink.CardLinkSdkEnvironmentType
-import de.ihreapotheken.sdk.core.data.EnvironmentType
+import de.ihreapotheken.sdk.core.domain.model.EnvironmentType
 
 object EnvironmentMapper {
     /**

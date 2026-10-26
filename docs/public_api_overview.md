@@ -30,7 +30,7 @@ streams marked this way are never called on the other platform.
 - `IaSdk.instance.isPrerequisiteFlowCompleted()` - Returns whether the prerequisites are completed
 - `IaSdk.instance.resetPrerequisites()` - Resets the prerequisites, including the selected pharmacy
 - `IaSdk.instance.resetLegalDisclaimer()` - Resets the accepted legal documents (iOS only)
-- `IaSdk.instance.resetAnalyticsConsent()` - Resets the user's analytics consent answer (iOS only)
+- `IaSdk.instance.resetAnalyticsConsent()` - Resets the user's analytics consent answer
 - `IaSdk.instance.setIsOnboardingShown(isOnboardingShown:)` - Sets whether onboarding was shown (iOS only)
 
 ### Screens
@@ -51,7 +51,6 @@ streams marked this way are never called on the other platform.
 
 ### Settings
 - `IaSdk.instance.setShouldShowMascotIllustrations(shouldShowMascotIllustrations:)` - Shows or hides the mascot illustrations (iOS only)
-- `IaSdk.instance.setAnalyticsConsent(consent:)` - Sets the user's analytics consent (Android only)
 - `IaSdk.instance.setHapticFeedbackEnabled(isEnabled:)` - Turns haptic feedback on or off (Android only)
 
 ### Callbacks and streams
@@ -59,8 +58,8 @@ See [SDK Interaction](interaction.md).
 - `IaSdk.instance.onSdkWillNavigateToTarget` - Lets your app handle SDK navigation, e.g. to the cart
 - `IaSdk.instance.onApofinderDidChangePharmacy` - Called when the user selects a pharmacy in Apofinder
 - `IaSdk.instance.onSdkBackAction` - Decides whether an SDK screen may close on back (Android only)
-- `IaSdk.instance.analyticsEventListener` - Stream of analytics events (Android only)
-- `IaSdk.instance.loggedAnalyticsEventListener` - Stream of analytics events logged for the host app (iOS only)
+- `IaSdk.instance.loggedAnalyticsEventListener` - Stream of analytics events logged for the host app, named in
+  `IaSdkAnalyticsEventNames`
 
 ### Debugging
 - `IaSdk.instance.presentLogs()` - Shows the SDK's log viewer
