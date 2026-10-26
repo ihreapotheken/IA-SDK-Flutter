@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert' show jsonEncode;
 import 'dart:ui' show Color;
 
 import 'package:flutter/foundation.dart';
@@ -11,14 +12,12 @@ part 'common/methods.dart';
 part 'common/navigation.dart';
 part 'common/views.dart';
 part 'config/_config.dart';
-part 'config/analytics_consent.dart';
 part 'config/card_link.dart';
 part 'config/footer.dart';
 part 'config/initialization.dart';
 part 'config/qa.dart';
 part 'config/server_environment.dart';
 part 'config/ui_configuration.dart';
-part 'models/request/analytics_consent.dart';
 part 'models/request/guest_user_data.dart';
 part 'models/request/init_config.dart';
 part 'models/request/register_modules.dart';
@@ -26,7 +25,7 @@ part 'models/request/clean_cache.dart';
 part 'models/request/set_enabled.dart';
 part 'models/request/set_user_address.dart';
 part 'models/request/mascot_illustrations.dart';
-part 'models/response/analytics_event.dart';
+part 'models/response/analytics_names.dart';
 part 'models/response/initialization_state.dart';
 part 'models/response/log_message.dart';
 part 'models/response/logged_analytics_event.dart';
@@ -388,7 +387,7 @@ class IaSdk {
 
   /// Resets the user's analytics consent answer, so the prerequisites flow asks for it again.
   ///
-  /// Note: Only supported on iOS.
+  /// On Android, call it after [initialize]; before that the call fails.
   ///
   Future<void> resetAnalyticsConsent() async {
     return await _Methods.resetAnalyticsConsent.invoke();
@@ -682,24 +681,6 @@ class IaSdk {
     return await _Methods.clearUserDeliveryAddress.invoke();
   }
 
-  /// Sets the user's consent for the SDK's analytics tracking.
-  ///
-  /// Call it after [initialize]; before that the call fails. Tracking also needs [IaSdkConfiguration.isAnalyticsEnabled].
-  ///
-  /// The SDK doesn't store the consent: it starts as unknown, without tracking, so set it again after every
-  /// [initialize].
-  ///
-  /// Note: Only supported on Android.
-  ///
-  Future<void> setAnalyticsConsent({
-    required IaSdkAnalyticsConsent consent,
-  }) async {
-    final arguments = _RequestModelSetAnalyticsConsent(
-      consent: consent,
-    );
-    return await _Methods.setAnalyticsConsent.invoke(arguments);
-  }
-
   /// Turns haptic feedback in SDK screens on or off.
   ///
   /// Call it after [initialize]; before that the call fails. [IaSdkConfiguration.isHapticFeedbackEnabled] sets the
@@ -764,7 +745,6 @@ class IaSdk {
       const _NavigationHandler(),
       const _ApofinderPharmacyChangedHandler(),
       const _InitializationStateHandler(),
-      const _AnalyticsEventHandler(),
       const _LoggedAnalyticsEventHandler(),
       const _LogMessageHandler(),
       const _BackActionHandler(),
@@ -801,27 +781,21 @@ class IaSdk {
   ///
   final initializationStateListener = StreamController<IaSdkInitializationState>.broadcast();
 
-  /// Notifier object informing the client integration of analytics events tracked by the SDK.
-  ///
-  /// Events are only tracked with [IaSdkConfiguration.isAnalyticsEnabled] and the user's consent,
-  /// see [setAnalyticsConsent].
-  ///
-  /// Note: Only supported on Android.
-  ///
-  final analyticsEventListener = StreamController<IaSdkAnalyticsEvent>.broadcast();
-
   /// Notifier object informing the client integration of analytics events the SDK logs for the host app,
   /// for example to forward them to the host app's own analytics.
   ///
-  /// Events are only logged when analytics is enabled in the SDK's remote configuration and the user consented to it.
+  /// The SDK sends nothing anywhere itself. Events are only logged when the client has analytics enabled in the SDK's
+  /// CMS and the user accepted it, on the legal screen or the "Datenverarbeitung" screen; [resetAnalyticsConsent] asks
+  /// again. On Android they also need [IaSdkConfiguration.isAnalyticsEnabled], which is on by default.
+  ///
+  /// Names are listed in [IaSdkAnalyticsEventNames], parameters in [IaSdkAnalyticsParameterNames]. New events are
+  /// added over time, so code that switches over names needs a default case.
   ///
   /// ```dart
   /// IaSdk.instance.loggedAnalyticsEventListener.stream.listen((event) {
   ///   // Forward event.name and event.parameters.
   /// });
   /// ```
-  ///
-  /// Note: Only supported on iOS.
   ///
   final loggedAnalyticsEventListener = StreamController<IaSdkLoggedAnalyticsEvent>.broadcast();
 

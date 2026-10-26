@@ -84,12 +84,8 @@ class _ExampleAppState extends State<ExampleApp> {
       (state) => log.add('Initialization', state.name),
     );
 
-    IaSdk.instance.analyticsEventListener.stream.listen(
-      (event) => analyticsLog.add('Android', '${event.type} ${event.parameters}'),
-    );
-
     IaSdk.instance.loggedAnalyticsEventListener.stream.listen(
-      (event) => analyticsLog.add('Logged', '${event.name} ${event.parameters}'),
+      (event) => analyticsLog.add('SDK', event.toJson()),
     );
 
     ExampleAppConfig.instance.hostAppLogFilePath = await FileUtils.createDemoCoreAppLogFile();

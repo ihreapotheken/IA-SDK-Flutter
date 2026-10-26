@@ -134,7 +134,7 @@ await IaSdk.instance.resetPrerequisites();
 // Marks the legal documents as not accepted. iOS only.
 await IaSdk.instance.resetLegalDisclaimer();
 
-// Clears the user's analytics consent answer, so it's asked again. iOS only.
+// Clears the user's analytics consent answer, so it's asked again. On Android, after initialize.
 await IaSdk.instance.resetAnalyticsConsent();
 
 // Marks the onboarding step as shown, so it won't be shown again. iOS only.
@@ -159,8 +159,7 @@ The plugin keeps both platforms as close as possible, but the native SDKs differ
 - **Calling `initialize` again:** On iOS, a later call after a failed `initialize` initializes the SDK again. On
   Android the SDK initializes only once.
 - **Cancelling prerequisites:** On iOS they can be made cancellable with `isCancellable`; on Android they always are.
-- **Helpers:** `resetLegalDisclaimer`, `resetAnalyticsConsent`, `setIsOnboardingShown`, `cleanCache` and
-  `savePharmacyId` are iOS only. They throw a `MissingPluginException` on Android.
+- **Helpers:** `resetLegalDisclaimer`, `setIsOnboardingShown`, `cleanCache` and `savePharmacyId` are iOS only. They throw a `MissingPluginException` on Android.
 - **Prerequisites completion:** `isPrerequisiteFlowCompleted` always needs a pharmacy on iOS, and fails when it can't
   be loaded. On Android a pharmacy isn't needed with `runApofinderIfNeeded: false`, and one that can't be loaded
   counts as selected.

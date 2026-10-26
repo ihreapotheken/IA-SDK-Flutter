@@ -22,44 +22,6 @@ class _InitializationStateHandler implements IaBaseCallbackHandler {
   }
 }
 
-class _AnalyticsEventHandler implements IaBaseCallbackHandler {
-  const _AnalyticsEventHandler();
-
-  @override
-  String get methodId => 'sdkAnalyticsEvent';
-
-  @override
-  Future<dynamic> Function(dynamic args) get handler {
-    return (args) async {
-      if (args is! Map) {
-        throw Exception(
-          'sdkAnalyticsEvent: Invalid arguments type.',
-        );
-      }
-      final type = args['type'];
-      final eventId = args['eventId'];
-      final sessionId = args['sessionId'];
-      final timestamp = args['timestamp'];
-      final parameters = args['parameters'];
-      if (type is! String || eventId is! String || sessionId is! String || timestamp is! int || parameters is! Map) {
-        throw Exception(
-          'sdkAnalyticsEvent: Missing or incorrect event fields: $args.',
-        );
-      }
-      IaSdk.instance.analyticsEventListener.add(
-        IaSdkAnalyticsEvent(
-          type: type,
-          eventId: eventId,
-          sessionId: sessionId,
-          timestamp: timestamp,
-          parameters: Map<String, dynamic>.from(parameters),
-        ),
-      );
-      return null;
-    };
-  }
-}
-
 class _LoggedAnalyticsEventHandler implements IaBaseCallbackHandler {
   const _LoggedAnalyticsEventHandler();
 
