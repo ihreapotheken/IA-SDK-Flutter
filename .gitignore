@@ -34,6 +34,8 @@ build/
 
 .build/
 .swiftpm/
+# Swift package lock files. The IA SDK version comes from .env, and apps ignore the lock files of their dependencies.
+Package.resolved
 
 # AI
 **/.claude/settings.local.json

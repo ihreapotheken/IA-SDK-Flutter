@@ -47,6 +47,5 @@ app.*.map.json
 
 pubspec.lock
 ios/Podfile.lock
-ios/**/Package.resolved
 
 .secrets
