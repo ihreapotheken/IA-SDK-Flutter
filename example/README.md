@@ -89,7 +89,6 @@ These dart-defines turn on SDK options the app leaves off by default, so they ca
 
 | dart-define | Effect | Default |
 |---|---|---|
-| `iaShowDataProcessing=true` | Footer shows "Datenverarbeitung", reported as the `hostAppPrivacyPolicy` navigation target | off |
 | `iaHostImprint=true` | Android: the imprint button is reported as the `imprint` navigation target instead of opening the SDK's page | off |
 | `iaPickupLocker=true` | Checkout offers pickup lockers and courier shipping | SDK default |
 | `iaAnalytics=false` | Android analytics tracking (events show in the Events tab once consent is granted) | on outside production |

@@ -64,15 +64,6 @@ class ExampleAppConfig {
   ///
   String? hostAppLogFilePath;
 
-  /// Whether the footer shows the "Datenverarbeitung" button, which reports
-  /// `IaSdkNavigationTarget.hostAppPrivacyPolicy`:
-  ///
-  /// ```dart
-  /// flutter run --dart-define iaShowDataProcessing=true
-  /// ```
-  ///
-  final _shouldShowDataProcessing = const bool.fromEnvironment('iaShowDataProcessing');
-
   /// Whether the host app shows the imprint on Android, so the imprint button reports
   /// `IaSdkNavigationTarget.imprint` instead of the SDK opening its own page:
   ///
@@ -102,8 +93,8 @@ class ExampleAppConfig {
 
   final _playStoreId = const String.fromEnvironment('iaPlayStoreId');
 
-  /// Whether the SDK tracks analytics events (Android), shown in the Events tab once consent is granted in the
-  /// Services tab. On by default for the internal environments; override with:
+  /// Whether the SDK tracks analytics events (Android), shown in the Events tab once the user accepted analytics on
+  /// the legal screen. On by default for the internal environments; override with:
   ///
   /// ```dart
   /// flutter run --dart-define iaAnalytics=false
@@ -146,11 +137,14 @@ class ExampleAppConfig {
       clientId: clientId,
       serverEnvironment: serverEnvironment,
       shouldFetchThemeFromRemote: false,
+      // TODO: The QA features are hardcoded here. The demo app needs a dedicated
+      // screen (or similar) to toggle them at runtime, so they can be changed
+      // while testing the Flutter wrapper without editing this file. Changes
+      // would take effect after a restart, because they are read at init.
       qaConfiguration: serverEnvironment == IaSdkConfigurationServerEnvironment.production
           ? null
           : const IaSdkConfigurationQa(showTestPharmaciesInApofinder: true),
       footer: IaSdkConfigurationFooter(
-        shouldShowDataProcessing: _shouldShowDataProcessing,
         shouldShowAppSettings: true,
         shouldShowImprint: true,
         isImprintHandledByHostApp: _isImprintHandledByHostApp,

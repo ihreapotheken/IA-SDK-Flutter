@@ -22,36 +22,25 @@ class _InitializationStateHandler implements IaBaseCallbackHandler {
   }
 }
 
-class _AnalyticsEventHandler implements IaBaseCallbackHandler {
-  const _AnalyticsEventHandler();
+class _LoggedAnalyticsEventHandler implements IaBaseCallbackHandler {
+  const _LoggedAnalyticsEventHandler();
 
   @override
-  String get methodId => 'sdkAnalyticsEvent';
+  String get methodId => 'sdkDidLogAnalyticsEvent';
 
   @override
   Future<dynamic> Function(dynamic args) get handler {
     return (args) async {
-      if (args is! Map) {
+      final name = args is Map ? args['name'] : null;
+      final parameters = args is Map ? args['parameters'] : null;
+      if (name is! String || parameters is! Map) {
         throw Exception(
-          'sdkAnalyticsEvent: Invalid arguments type.',
+          'sdkDidLogAnalyticsEvent: Missing or incorrect event fields: $args.',
         );
       }
-      final type = args['type'];
-      final eventId = args['eventId'];
-      final sessionId = args['sessionId'];
-      final timestamp = args['timestamp'];
-      final parameters = args['parameters'];
-      if (type is! String || eventId is! String || sessionId is! String || timestamp is! int || parameters is! Map) {
-        throw Exception(
-          'sdkAnalyticsEvent: Missing or incorrect event fields: $args.',
-        );
-      }
-      IaSdk.instance.analyticsEventListener.add(
-        IaSdkAnalyticsEvent(
-          type: type,
-          eventId: eventId,
-          sessionId: sessionId,
-          timestamp: timestamp,
+      IaSdk.instance.loggedAnalyticsEventListener.add(
+        IaSdkLoggedAnalyticsEvent(
+          name: name,
           parameters: Map<String, dynamic>.from(parameters),
         ),
       );

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert' show jsonEncode;
 import 'dart:ui' show Color;
 
 import 'package:flutter/foundation.dart';
@@ -11,14 +12,12 @@ part 'common/methods.dart';
 part 'common/navigation.dart';
 part 'common/views.dart';
 part 'config/_config.dart';
-part 'config/analytics_consent.dart';
 part 'config/card_link.dart';
 part 'config/footer.dart';
 part 'config/initialization.dart';
 part 'config/qa.dart';
 part 'config/server_environment.dart';
 part 'config/ui_configuration.dart';
-part 'models/request/analytics_consent.dart';
 part 'models/request/guest_user_data.dart';
 part 'models/request/init_config.dart';
 part 'models/request/register_modules.dart';
@@ -26,9 +25,10 @@ part 'models/request/clean_cache.dart';
 part 'models/request/set_enabled.dart';
 part 'models/request/set_user_address.dart';
 part 'models/request/mascot_illustrations.dart';
-part 'models/response/analytics_event.dart';
+part 'models/response/analytics_names.dart';
 part 'models/response/initialization_state.dart';
 part 'models/response/log_message.dart';
+part 'models/response/logged_analytics_event.dart';
 part 'models/response/prerequisites_result.dart';
 
 /// Main entrypoint for the ia.de AppSDK services and features.
@@ -42,6 +42,11 @@ part 'models/response/prerequisites_result.dart';
 /// `NO_ACTIVITY` without an attached activity. Other screens then open in a new task. CardLink has its own codes, see
 /// `IaBaseCardLink`.
 ///
+/// {@category Overview}
+/// {@category Initialization}
+/// {@category Interaction}
+/// {@category StartScreen}
+/// {@category ApofinderScreen}
 class IaSdk {
   IaSdk._();
 
@@ -380,6 +385,14 @@ class IaSdk {
     return await _Methods.resetLegalDisclaimer.invoke();
   }
 
+  /// Resets the user's analytics consent answer, so the prerequisites flow asks for it again.
+  ///
+  /// On Android, call it after [initialize]; before that the call fails.
+  ///
+  Future<void> resetAnalyticsConsent() async {
+    return await _Methods.resetAnalyticsConsent.invoke();
+  }
+
   /// Marks the onboarding as shown or not shown, which decides whether the prerequisites flow shows it.
   ///
   /// Note: Only supported on iOS.
@@ -394,11 +407,14 @@ class IaSdk {
   }
 
   /// Returns `true` if the user has completed the prerequisites flow (legal documents, onboarding) and a valid
-  /// pharmacy is selected, unless [IaPrerequisitesConfiguration.runApofinderIfNeeded] is `false`.
+  /// pharmacy is selected, so [launchPrerequisiteFlow] would finish without showing a screen. Legal documents and
+  /// onboarding only count when the prerequisites options passed to [initialize] run them.
   ///
   /// Call it after [initialize]; before that the call fails.
   ///
-  /// Note: Only supported on Android.
+  /// Note: On Android the pharmacy isn't needed when [IaPrerequisitesConfiguration.runApofinderIfNeeded] is `false`,
+  /// and counts as selected when it can't be loaded, for example without network. On iOS it's always needed, and
+  /// the call fails when it can't be loaded.
   ///
   Future<bool> isPrerequisiteFlowCompleted() async {
     final result = await _Methods.isPrerequisiteFlowCompleted.invoke<bool>();
@@ -665,24 +681,6 @@ class IaSdk {
     return await _Methods.clearUserDeliveryAddress.invoke();
   }
 
-  /// Sets the user's consent for the SDK's analytics tracking.
-  ///
-  /// Call it after [initialize]; before that the call fails. Tracking also needs [IaSdkConfiguration.isAnalyticsEnabled].
-  ///
-  /// The SDK doesn't store the consent: it starts as unknown, without tracking, so set it again after every
-  /// [initialize].
-  ///
-  /// Note: Only supported on Android.
-  ///
-  Future<void> setAnalyticsConsent({
-    required IaSdkAnalyticsConsent consent,
-  }) async {
-    final arguments = _RequestModelSetAnalyticsConsent(
-      consent: consent,
-    );
-    return await _Methods.setAnalyticsConsent.invoke(arguments);
-  }
-
   /// Turns haptic feedback in SDK screens on or off.
   ///
   /// Call it after [initialize]; before that the call fails. [IaSdkConfiguration.isHapticFeedbackEnabled] sets the
@@ -747,7 +745,7 @@ class IaSdk {
       const _NavigationHandler(),
       const _ApofinderPharmacyChangedHandler(),
       const _InitializationStateHandler(),
-      const _AnalyticsEventHandler(),
+      const _LoggedAnalyticsEventHandler(),
       const _LogMessageHandler(),
       const _BackActionHandler(),
     ],
@@ -783,14 +781,23 @@ class IaSdk {
   ///
   final initializationStateListener = StreamController<IaSdkInitializationState>.broadcast();
 
-  /// Notifier object informing the client integration of analytics events tracked by the SDK.
+  /// Notifier object informing the client integration of analytics events the SDK logs for the host app,
+  /// for example to forward them to the host app's own analytics.
   ///
-  /// Events are only tracked with [IaSdkConfiguration.isAnalyticsEnabled] and the user's consent,
-  /// see [setAnalyticsConsent].
+  /// The SDK sends nothing anywhere itself. Events are only logged when the client has analytics enabled in the SDK's
+  /// CMS and the user accepted it, on the legal screen or the "Datenverarbeitung" screen; [resetAnalyticsConsent] asks
+  /// again. On Android they also need [IaSdkConfiguration.isAnalyticsEnabled], which is on by default.
   ///
-  /// Note: Only supported on Android.
+  /// Names are listed in [IaSdkAnalyticsEventNames], parameters in [IaSdkAnalyticsParameterNames]. New events are
+  /// added over time, so code that switches over names needs a default case.
   ///
-  final analyticsEventListener = StreamController<IaSdkAnalyticsEvent>.broadcast();
+  /// ```dart
+  /// IaSdk.instance.loggedAnalyticsEventListener.stream.listen((event) {
+  ///   // Forward event.name and event.parameters.
+  /// });
+  /// ```
+  ///
+  final loggedAnalyticsEventListener = StreamController<IaSdkLoggedAnalyticsEvent>.broadcast();
 
   /// Notifier object informing the client integration of messages the SDK logs, for debugging an integration.
   ///

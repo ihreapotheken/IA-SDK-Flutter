@@ -2,6 +2,8 @@ part of '../core.dart';
 
 /// Basic definition for the ia.de SDK client configuration.
 ///
+/// {@category Initialization}
+/// {@category Appearance}
 class IaSdkConfiguration {
   /// Generates an instance of the ia.de SDK client configuration.
   ///
@@ -77,9 +79,9 @@ class IaSdkConfiguration {
   ///
   final String? playStoreId;
 
-  /// Whether the SDK tracks analytics events, reported through [IaSdk.analyticsEventListener].
+  /// Whether the SDK tracks analytics events, reported through [IaSdk.loggedAnalyticsEventListener].
   ///
-  /// `null` keeps the SDK default.
+  /// `null` keeps the SDK default, which is on.
   ///
   /// Note: Only used on Android.
   ///

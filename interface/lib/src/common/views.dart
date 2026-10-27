@@ -35,6 +35,7 @@ abstract mixin class IaBaseViews {
 /// Note: Only supported on iOS. The Android SDK has no embed options, so there the screen shows no back or close
 /// button and the system back action closes it.
 ///
+/// {@category Presentation}
 enum IaSdkScreenEmbedStyle {
   /// The host pushed the screen; the SDK shows a back button.
   navigation,
@@ -48,6 +49,7 @@ enum IaSdkScreenEmbedStyle {
 /// Used by the per-component widget classes (e.g. `IaCartButton`,
 /// `IaProductGrid`) exported by each module.
 ///
+/// {@category Presentation}
 class IaSdkPlatformView extends StatefulWidget {
   /// Default constructor for creating an instance of [IaSdkPlatformView].
   ///

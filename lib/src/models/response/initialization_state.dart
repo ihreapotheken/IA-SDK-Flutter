@@ -2,6 +2,7 @@ part of '../../core.dart';
 
 /// Initialization state of the SDK, reported through [IaSdk.initializationStateListener].
 ///
+/// {@category Initialization}
 enum IaSdkInitializationState {
   /// The SDK hasn't started initializing.
   ///

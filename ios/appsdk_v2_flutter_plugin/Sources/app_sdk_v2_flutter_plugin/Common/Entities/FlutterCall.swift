@@ -123,6 +123,11 @@ enum FlutterCall: CaseIterable {
     case launchPrerequisiteFlow
 
     /**
+     * Returns whether the prerequisites flow would finish without showing a screen.
+     */
+    case isPrerequisiteFlowCompleted
+
+    /**
      * Clears the cached products of product grids.
      */
     case clearProductGridCache
@@ -131,6 +136,11 @@ enum FlutterCall: CaseIterable {
      * Resets the accepted legal documents.
      */
     case resetLegalDisclaimer
+
+    /**
+     * Resets the user's analytics consent answer.
+     */
+    case resetAnalyticsConsent
 
     /**
      * Marks the onboarding as shown or not shown.

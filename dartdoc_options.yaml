@@ -1,0 +1,58 @@
+# https://dart.dev/tools/dart-doc
+#
+# Each category is a page made from a guide in `docs`. It is shown only when at least one public element is tagged
+# with `{@category <key>}`. The key is also the page file name, `topics/<key>-topic.html`.
+#
+# Generate the docs with `scripts/generate-docs.sh`, which also fixes the links between the guides.
+dartdoc:
+  categories:
+    Overview:
+      displayName: Public API Overview
+      markdown: docs/public_api_overview.md
+    Initialization:
+      displayName: Initialization
+      markdown: docs/initialization.md
+    Presentation:
+      displayName: Presentation
+      markdown: docs/presentation.md
+    Interaction:
+      displayName: SDK Interaction
+      markdown: docs/interaction.md
+    Appearance:
+      displayName: Appearance
+      markdown: docs/appearance.md
+    StartScreen:
+      displayName: Start Screen
+      markdown: docs/screens/start_screen.md
+    ApofinderScreen:
+      displayName: Apofinder Screen
+      markdown: docs/screens/apofinder_screen.md
+    ProductSearchScreen:
+      displayName: Product Search Screen
+      markdown: docs/screens/product_search_screen.md
+    CartScreen:
+      displayName: Cart Screen
+      markdown: docs/screens/cart_screen.md
+    PharmacyScreen:
+      displayName: Pharmacy Screen
+      markdown: docs/screens/pharmacy_screen.md
+    RedeemPrescriptionScreen:
+      displayName: Redeem Prescription Screen
+      markdown: docs/screens/redeem_prescription_screen.md
+    PrescriptionScannerScreen:
+      displayName: Prescription Scanner Screen
+      markdown: docs/screens/prescription_scanner_screen.md
+  # The sidebar is sorted by display name.
+  categoryOrder:
+    - Public API Overview
+    - Initialization
+    - Presentation
+    - SDK Interaction
+    - Appearance
+    - Start Screen
+    - Apofinder Screen
+    - Product Search Screen
+    - Cart Screen
+    - Pharmacy Screen
+    - Redeem Prescription Screen
+    - Prescription Scanner Screen

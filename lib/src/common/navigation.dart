@@ -34,6 +34,7 @@ class _NavigationHandler implements IaBaseCallbackHandler {
 
 /// Navigation targets that the SDK may navigate to, which the host app can optionally override.
 ///
+/// {@category Interaction}
 enum IaSdkNavigationTarget {
   /// SDK intends to open cart screen. This can be called from multiple points in the SDK.
   ///
@@ -54,12 +55,6 @@ enum IaSdkNavigationTarget {
   /// then never opens its own imprint page.
   ///
   imprint,
-
-  /// "Datenverarbeitung" button is tapped on the footer. Nothing happens if not handled.
-  ///
-  /// The button is shown when [IaSdkConfigurationFooter.shouldShowDataProcessing] is `true`.
-  ///
-  hostAppPrivacyPolicy,
 
   /// SDK intends to open Apofinder from an internal flow (not prerequisites).
   /// Triggers include product details ("Apotheke wählen") and pharmacy screen (change pharmacy).
@@ -97,7 +92,6 @@ enum IaSdkNavigationTarget {
       'pharmacyDetails' => IaSdkNavigationTarget.pharmacyDetails,
       'thankYou' => IaSdkNavigationTarget.thankYou,
       'imprint' => IaSdkNavigationTarget.imprint,
-      'hostAppPrivacyPolicy' => IaSdkNavigationTarget.hostAppPrivacyPolicy,
       'apofinder' => IaSdkNavigationTarget.apofinder,
       'start' => IaSdkNavigationTarget.start,
       'search' => IaSdkNavigationTarget.search,

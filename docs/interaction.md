@@ -25,7 +25,7 @@ Available streams:
 | Stream | Event |
 |---|---|
 | `IaSdk.instance.initializationStateListener` | Initialization state changed |
-| `IaSdk.instance.analyticsEventListener` | Analytics event tracked (Android only) |
+| `IaSdk.instance.loggedAnalyticsEventListener` | Analytics event logged for the host app, e.g. `screen_view` or `purchase`, see [Analytics](#analytics) |
 | `IaSdk.instance.logMessageListener` | SDK log message, for debugging (iOS only) |
 | `IaSdk.instance.ordering.orderingDidUpdateCartListener` | Cart updated |
 | `IaSdk.instance.ordering.orderingDidFinishOrderListener` | Order finished |
@@ -69,7 +69,6 @@ Navigation targets (`IaSdkNavigationTarget`):
 | `apofinder` | SDK wants to open Apofinder, e.g. to change the pharmacy | Shows the SDK Apofinder |
 | `thankYou` | Order and payment are processed | Shows the SDK thank you screen |
 | `imprint` | "Impressum" footer button tapped | Shows the imprint from CMS |
-| `hostAppPrivacyPolicy` | "Datenverarbeitung" footer button tapped | Nothing |
 | `start` | SDK wants to open the start screen (Android only) | Shows the SDK start screen |
 | `search` | SDK wants to open the product search (Android only) | Shows the SDK product search |
 | `redeemPrescription` | SDK wants to open the redeem prescription screen (Android only) | Shows the SDK screen |
@@ -84,6 +83,31 @@ Navigation targets (`IaSdkNavigationTarget`):
 | `IaSdk.instance.prescription.onEPrescriptionScanned` | An e-prescription (eRezept) is scanned; lets you take it over instead of the SDK |
 | `IaSdk.instance.onSdkBackAction` | The user goes back on an SDK screen; decides whether the screen may close (Android only) |
 
+## Analytics
+The SDK sends no analytics anywhere itself. It logs events for the host app, which forwards them to its own analytics
+tool. Events are only logged when the client has analytics enabled in the SDK's CMS and the user accepted analytics,
+on the legal screen or the "Datenverarbeitung" screen. On Android they also need
+`IaSdkConfiguration.isAnalyticsEnabled`, which is on by default.
+
+Each event has a `name` from `IaSdkAnalyticsEventNames` and `parameters` keyed by `IaSdkAnalyticsParameterNames`.
+No price or order value is included. New events are added over time, so handle unknown names.
+```dart
+IaSdk.instance.loggedAnalyticsEventListener.stream.listen((event) {
+  switch (event.name) {
+    case IaSdkAnalyticsEventNames.screenView:
+      final screenName = event.parameters[IaSdkAnalyticsParameterNames.screenName];
+      // Forward the screen view.
+    default:
+      // Forward event.name and event.parameters, or event.toJson().
+  }
+});
+```
+
+To ask the user again, clear their answer, so the legal screen shows the question the next time it runs:
+```dart
+await IaSdk.instance.resetAnalyticsConsent();
+```
+
 ## Platform differences
 - **Imprint:** On Android, `imprint` is only reported when `IaSdkConfigurationFooter.isImprintHandledByHostApp` is
   `true`, and then the SDK never shows its own imprint.
@@ -91,5 +115,6 @@ Navigation targets (`IaSdkNavigationTarget`):
   `transferPrescriptions` don't call `onSdkWillNavigateToTarget`.
 - **Cart state:** On Android, `orderingDidUpdateCartListener` only carries the counts (`totalProducts`,
   `totalPrescriptions`); on iOS it also carries the `products`.
+- **Analytics events:** On Android, parameter values are always strings.
 - **Pharmacy changes:** `onApofinderDidChangePharmacy` isn't called for Apofinder shown as a platform view. On Android
   it's only called for Apofinder opened with `launchApofinder`.

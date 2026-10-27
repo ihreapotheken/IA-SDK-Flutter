@@ -16,11 +16,12 @@ import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigListener
 import de.ihreapotheken.sdk.core.api.listener.PharmacyConfigResult
 import de.ihreapotheken.sdk.core.api.listener.TransferPrescriptionEvent
 import de.ihreapotheken.sdk.core.api.listener.TransferPrescriptionListener
-import de.ihreapotheken.sdk.core.data.EnvironmentType
-import de.ihreapotheken.sdk.core.data.PrerequisiteFlowConfiguration
-import de.ihreapotheken.sdk.core.data.model.analytics.AnalyticsConsent
-import de.ihreapotheken.sdk.core.data.model.sdk.SdkEvent
-import de.ihreapotheken.sdk.core.data.model.sdk.SdkEventListener
+import de.ihreapotheken.sdk.core.domain.model.EnvironmentType
+import de.ihreapotheken.sdk.core.domain.session.PrerequisiteFlowConfiguration
+import de.ihreapotheken.sdk.integrations.api.analytics.ExperimentalIaAnalyticsApi
+import de.ihreapotheken.sdk.integrations.api.analytics.IaAnalyticsConsentStatus
+import de.ihreapotheken.sdk.core.domain.model.sdk.SdkEvent
+import de.ihreapotheken.sdk.core.api.listener.SdkEventListener
 import de.ihreapotheken.sdk.core.domain.model.prescription.ImagePrescription
 import de.ihreapotheken.sdk.core.domain.model.prescription.PdfPrescription
 import de.ihreapotheken.sdk.core.domain.model.prescription.PrescriptionInsuranceType
@@ -33,7 +34,6 @@ import de.ihreapotheken.sdk.integrations.api.MockForceUpdateSettings
 import de.ihreapotheken.sdk.integrations.api.MockSdkFeaturesSettings
 import de.ihreapotheken.sdk.integrations.api.QaConfiguration
 import de.ihreapotheken.sdk.debugviewer.DebugViewerModule
-import de.ihreapotheken.sdk.core.ui.theme.HostUiConfig
 import de.ihreapotheken.sdk.core.ui.theme.IAUIConfiguration
 import de.ihreapotheken.sdk.core.ui.theme.IAHeaderConfiguration
 import de.ihreapotheken.sdk.core.ui.theme.IAHeaderStyle
@@ -58,6 +58,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 /**
  * Flutter client service call handler.
  */
+@OptIn(ExperimentalIaAnalyticsApi::class)
 internal class IaClientMethods(
     private val bindings: IaClientBindings,
 ) {
@@ -199,6 +200,11 @@ internal class IaClientMethods(
         resetLegalDisclaimer,
 
         /**
+         * Resets the user's analytics consent answer, so the legal screen asks again.
+         */
+        resetAnalyticsConsent,
+
+        /**
          * Marks the onboarding as shown or not shown. iOS only.
          */
         setIsOnboardingShown,
@@ -222,11 +228,6 @@ internal class IaClientMethods(
          * Removes the user's delivery address.
          */
         clearUserDeliveryAddress,
-
-        /**
-         * Sets the user's consent for the SDK's analytics tracking.
-         */
-        setAnalyticsConsent,
 
         /**
          * Turns haptic feedback in SDK screens on or off.
@@ -486,9 +487,8 @@ internal class IaClientMethods(
                 val shouldRunApofinder = prerequisites?.get("runApofinderIfNeeded") != false
                 val uiConfiguration = parseUIConfiguration(args["uiConfiguration"] as? Map<*, *>)
                 val footer = args["footer"] as? Map<*, *>
-                val shouldShowDataProcessing = footer?.get("shouldShowDataProcessing") == true
                 val isPickupLockerAndCourierShippingEnabled = args["isPickupLockerAndCourierShippingEnabled"] as? Boolean ?: false
-                val isAnalyticsEnabled = args["isAnalyticsEnabled"] as? Boolean ?: false
+                val isAnalyticsEnabled = args["isAnalyticsEnabled"] as? Boolean ?: IaSdkConfiguration().analyticsEnabled
                 val isHapticFeedbackEnabled = args["isHapticFeedbackEnabled"] as? Boolean ?: true
                 val playStoreId = args["playStoreId"] as? String
                 val qaConfiguration = args["qaConfiguration"] as? Map<*, *>
@@ -502,7 +502,6 @@ internal class IaClientMethods(
                     IaSdk.setQaConfiguration(parsedQaConfiguration)
                 }
                 val isCardLinkSaveCardEnabled = (args["cardLink"] as? Map<*, *>)?.get("isSaveCardEnabled") as? Boolean ?: false
-                bindings.sdkModule.setShowDataProcessingClickListener(bindings.callbacks)
                 // A set imprint listener replaces the SDK's own imprint page, so it's only set when the host handles it.
                 if (footer?.get("isImprintHandledByHostApp") == true) {
                     bindings.sdkModule.setImpressumClickListener(bindings.callbacks)
@@ -535,7 +534,7 @@ internal class IaClientMethods(
                         // The listener keeps receiving SDK events after initialization, but Flutter
                         // accepts only one reply per call.
                         if (event is SdkEvent.InitStatus.InitializationCompleted) {
-                            attachSdkListeners(shouldShowDataProcessing)
+                            attachSdkListeners()
                             if (!hasReplied.getAndSet(true)) {
                                 result.success(null)
                             }
@@ -545,7 +544,7 @@ internal class IaClientMethods(
                             scope.launch {
                                 val state = IaSdk.initState.first { it == InitState.INITIALIZED || it == InitState.ERROR }
                                 if (state == InitState.INITIALIZED) {
-                                    attachSdkListeners(shouldShowDataProcessing)
+                                    attachSdkListeners()
                                     if (!hasReplied.getAndSet(true)) {
                                         result.success(null)
                                     }
@@ -1013,23 +1012,14 @@ internal class IaClientMethods(
                 result.success(null)
             }
 
-            FlutterCall.setAnalyticsConsent.name -> {
-                val consent = when ((call.arguments as? Map<*, *>)?.get("consent")) {
-                    "granted" -> AnalyticsConsent.GRANTED
-                    "denied" -> AnalyticsConsent.DENIED
-                    "unknown" -> AnalyticsConsent.UNKNOWN
-                    else -> {
-                        result.error(
-                            "ARG_ERROR",
-                            "Missing or invalid consent. Expected one of granted, denied or unknown.",
-                            null,
-                        )
-                        return
-                    }
-                }
+            FlutterCall.resetAnalyticsConsent.name -> {
+                // Clearing the answer makes the legal screen ask again, as iOS's resetAnalyticsConsent does. Before
+                // initialization the SDK ignores it.
                 if (!requireInitialized(result)) return
-                bindings.sdkModule.setAnalyticsConsent(consent)
-                result.success(null)
+                respondSuspending(result) {
+                    bindings.sdkModule.setAnalyticsConsentStatus(IaAnalyticsConsentStatus.NOT_ANSWERED)
+                    null
+                }
             }
 
             FlutterCall.setHapticFeedbackEnabled.name -> {
@@ -1195,14 +1185,12 @@ internal class IaClientMethods(
     }
 
     /**
-     * Attaches the plugin's listeners to the initialized SDK, and applies the settings that need an
-     * initialized SDK.
+     * Attaches the plugin's listeners to the initialized SDK.
      */
-    private fun attachSdkListeners(shouldShowDataProcessing: Boolean) {
+    private fun attachSdkListeners() {
         bindings.sdkModule.ordering.setCartListener(bindings.callbacks)
         bindings.sdkModule.ordering.setCheckoutListener(bindings.callbacks)
         bindings.sdkModule.rx.setRedeemPrescriptionListener(bindings.callbacks)
-        bindings.sdkModule.setHostUiConfig(HostUiConfig(showDataProcessing = shouldShowDataProcessing))
     }
 
     /**

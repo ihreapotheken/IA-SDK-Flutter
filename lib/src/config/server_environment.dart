@@ -10,6 +10,7 @@ part of '../core.dart';
 ///
 /// VPN access can be provided by the ia.de team on inquiry.
 ///
+/// {@category Initialization}
 enum IaSdkConfigurationServerEnvironment {
   /// https://ihreapotheken.de/
   ///
