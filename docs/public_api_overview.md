@@ -31,6 +31,8 @@ streams marked this way are never called on the other platform.
 - `IaSdk.instance.resetPrerequisites()` - Resets the prerequisites, including the selected pharmacy
 - `IaSdk.instance.resetLegalDisclaimer()` - Resets the accepted legal documents (iOS only)
 - `IaSdk.instance.resetAnalyticsConsent()` - Resets the user's analytics consent answer
+- `IaSdk.instance.getAnalyticsConsentStatus()` - Returns the user's analytics consent answer (Android only)
+- `IaSdk.instance.setAnalyticsConsentStatus(status)` - Sets the user's analytics consent answer (Android only)
 - `IaSdk.instance.setIsOnboardingShown(isOnboardingShown:)` - Sets whether onboarding was shown (iOS only)
 
 ### Screens

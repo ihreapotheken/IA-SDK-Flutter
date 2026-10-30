@@ -44,7 +44,8 @@ class LaunchHandler(
         val savedCardName = call.argument<String>("cardName")
         val canCode = call.argument<String>("canCode")
         val consentStatus = ConsentStatusMapper.fromString(call.argument<String>("consentStatus") ?: "SHOW_CONSENT")
-        val saveCardEnabled = call.argument<Boolean>("saveCardEnabled") ?: true
+        // Off unless the host turns it on, as in the native CardLinkConfig.
+        val saveCardEnabled = call.argument<Boolean>("saveCardEnabled") ?: false
         val primaryColor = (call.argument<Any>("primaryColor") as? Number)?.toInt()
         val buttonsColor = (call.argument<Any>("buttonsColor") as? Number)?.toInt()
         val textLinkColor = (call.argument<Any>("textLinkColor") as? Number)?.toInt()
@@ -55,6 +56,7 @@ class LaunchHandler(
         val illustrationColor = CardLinkIllustrationColor.entries
             .firstOrNull { it.name == call.argument<String>("illustrationColor") }
             ?: CardLinkIllustrationColor.RED
+        val isInvalidXmlDataMocked = call.argument<Boolean>("isInvalidXmlDataMocked") ?: false
 
         val flowType = call.argument<String>("flowType") ?: "launchCardLinkSdk"
 
@@ -78,6 +80,7 @@ class LaunchHandler(
             applicationId = applicationId,
             hostAppLogFilePath = coreAppLogFileURL,
             illustrationColor = illustrationColor,
+            mockInvalidXmlDataEnabled = isInvalidXmlDataMocked,
         )
 
         activityProvider()?.let { activity ->

@@ -35,6 +35,10 @@ enum _Methods with IaBaseMethods implements IaBaseMethods {
 
   resetAnalyticsConsent,
 
+  getAnalyticsConsentStatus,
+
+  setAnalyticsConsentStatus,
+
   setIsOnboardingShown,
 
   isPrerequisiteFlowCompleted,

@@ -205,6 +205,17 @@ internal class IaClientMethods(
         resetAnalyticsConsent,
 
         /**
+         * Returns the user's analytics consent answer. Android only, the iOS SDK has no getter.
+         */
+        getAnalyticsConsentStatus,
+
+        /**
+         * Sets the user's analytics consent answer, as the legal or "Datenverarbeitung" screen does. Android only, the
+         * iOS SDK has no setter.
+         */
+        setAnalyticsConsentStatus,
+
+        /**
          * Marks the onboarding as shown or not shown. iOS only.
          */
         setIsOnboardingShown,
@@ -490,6 +501,8 @@ internal class IaClientMethods(
                 val isPickupLockerAndCourierShippingEnabled = args["isPickupLockerAndCourierShippingEnabled"] as? Boolean ?: false
                 val isAnalyticsEnabled = args["isAnalyticsEnabled"] as? Boolean ?: IaSdkConfiguration().analyticsEnabled
                 val isHapticFeedbackEnabled = args["isHapticFeedbackEnabled"] as? Boolean ?: true
+                val isCrashReportingEnabled =
+                    args["isCrashReportingEnabled"] as? Boolean ?: IaSdkConfiguration().crashReportingEnabled
                 val playStoreId = args["playStoreId"] as? String
                 val qaConfiguration = args["qaConfiguration"] as? Map<*, *>
                 if (qaConfiguration != null) {
@@ -528,6 +541,7 @@ internal class IaClientMethods(
                         hapticFeedbackEnabled = isHapticFeedbackEnabled,
                         playStoreId = playStoreId,
                         isSaveCardEnabled = isCardLinkSaveCardEnabled,
+                        crashReportingEnabled = isCrashReportingEnabled,
                     ),
                     environmentType = serverEnv,
                     sdkEventListener = SdkEventListener { event ->
@@ -1022,6 +1036,31 @@ internal class IaClientMethods(
                 }
             }
 
+            FlutterCall.getAnalyticsConsentStatus.name -> {
+                if (!requireInitialized(result)) return
+                respondSuspending(result) {
+                    analyticsConsentStatusName(bindings.sdkModule.getAnalyticsConsentStatus())
+                }
+            }
+
+            FlutterCall.setAnalyticsConsentStatus.name -> {
+                val statusName = (call.arguments as? Map<*, *>)?.get("status") as? String
+                val status = statusName?.let(::analyticsConsentStatus)
+                if (status == null) {
+                    result.error(
+                        "ARG_ERROR",
+                        "Missing or invalid status. Expected one of notAnswered, accepted, declined, got $statusName.",
+                        null,
+                    )
+                    return
+                }
+                if (!requireInitialized(result)) return
+                respondSuspending(result) {
+                    bindings.sdkModule.setAnalyticsConsentStatus(status)
+                    null
+                }
+            }
+
             FlutterCall.setHapticFeedbackEnabled.name -> {
                 val enabled = (call.arguments as? Map<*, *>)?.get("enabled") as? Boolean
                 if (enabled == null) {
@@ -1106,6 +1145,20 @@ internal class IaClientMethods(
             "divers", "diverse" -> "Divers"
             else -> "Keine Angabe"
         }
+    }
+
+    /** Maps an `IaSdkAnalyticsConsentStatus` name from Dart; `null` for unknown names. */
+    private fun analyticsConsentStatus(name: String): IaAnalyticsConsentStatus? = when (name) {
+        "notAnswered" -> IaAnalyticsConsentStatus.NOT_ANSWERED
+        "accepted" -> IaAnalyticsConsentStatus.ACCEPTED
+        "declined" -> IaAnalyticsConsentStatus.DECLINED
+        else -> null
+    }
+
+    private fun analyticsConsentStatusName(status: IaAnalyticsConsentStatus): String = when (status) {
+        IaAnalyticsConsentStatus.NOT_ANSWERED -> "notAnswered"
+        IaAnalyticsConsentStatus.ACCEPTED -> "accepted"
+        IaAnalyticsConsentStatus.DECLINED -> "declined"
     }
 
     private fun parseQaConfiguration(map: Map<*, *>): QaConfiguration {

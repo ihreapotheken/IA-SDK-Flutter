@@ -22,9 +22,11 @@ part 'models/request/guest_user_data.dart';
 part 'models/request/init_config.dart';
 part 'models/request/register_modules.dart';
 part 'models/request/clean_cache.dart';
+part 'models/request/set_analytics_consent_status.dart';
 part 'models/request/set_enabled.dart';
 part 'models/request/set_user_address.dart';
 part 'models/request/mascot_illustrations.dart';
+part 'models/response/analytics_consent_status.dart';
 part 'models/response/analytics_names.dart';
 part 'models/response/initialization_state.dart';
 part 'models/response/log_message.dart';
@@ -391,6 +393,32 @@ class IaSdk {
   ///
   Future<void> resetAnalyticsConsent() async {
     return await _Methods.resetAnalyticsConsent.invoke();
+  }
+
+  /// Returns the user's analytics consent answer.
+  ///
+  /// Call it after [initialize]; before that the call fails.
+  ///
+  /// Note: Only supported on Android.
+  ///
+  Future<IaSdkAnalyticsConsentStatus> getAnalyticsConsentStatus() async {
+    final result = await _Methods.getAnalyticsConsentStatus.invoke<String>();
+    return IaSdkAnalyticsConsentStatus.values.where((status) => status.name == result).firstOrNull ??
+        IaSdkAnalyticsConsentStatus.notAnswered;
+  }
+
+  /// Sets the user's analytics consent answer, for host apps that ask the user themselves.
+  ///
+  /// [IaSdkAnalyticsConsentStatus.notAnswered] clears the answer, like [resetAnalyticsConsent]. Call it after
+  /// [initialize]; before that the call fails.
+  ///
+  /// Note: Only supported on Android.
+  ///
+  Future<void> setAnalyticsConsentStatus(IaSdkAnalyticsConsentStatus status) async {
+    final arguments = _RequestModelSetAnalyticsConsentStatus(
+      status: status,
+    );
+    return await _Methods.setAnalyticsConsentStatus.invoke(arguments);
   }
 
   /// Marks the onboarding as shown or not shown, which decides whether the prerequisites flow shows it.
@@ -786,7 +814,8 @@ class IaSdk {
   ///
   /// The SDK sends nothing anywhere itself. Events are only logged when the client has analytics enabled in the SDK's
   /// CMS and the user accepted it, on the legal screen or the "Datenverarbeitung" screen; [resetAnalyticsConsent] asks
-  /// again. On Android they also need [IaSdkConfiguration.isAnalyticsEnabled], which is on by default.
+  /// again, and on Android [setAnalyticsConsentStatus] sets the answer. On Android they also need
+  /// [IaSdkConfiguration.isAnalyticsEnabled], which is on by default.
   ///
   /// Names are listed in [IaSdkAnalyticsEventNames], parameters in [IaSdkAnalyticsParameterNames]. New events are
   /// added over time, so code that switches over names needs a default case.

@@ -39,8 +39,9 @@ abstract class IaBaseCardLink extends IaBase {
   ///   closes, with SDK defaults for the palette colors not passed. Without colors the palette stays unchanged.
   /// - [environment]: Optional CardLink environment. When `null`, the environment `IaSdk` was initialized with
   ///   is used. On iOS, passing it also switches the environment of the whole SDK.
-  /// - [saveCardEnabled]: Optional flag to enable card saving (defaults to true). CardLink only offers to save the
-  ///   scanned card when saving cards is also enabled in the CMS, and on Android only when no [cardName] is passed.
+  /// - [saveCardEnabled]: Optional flag to enable card saving. When `null`, card saving is off on Android and on on
+  ///   iOS. CardLink only offers to save the scanned card when saving cards is also enabled in the CMS, and on
+  ///   Android only when no [cardName] is passed.
   /// - [finishAction]: Determines what happens with prescriptions after NFC scanning. Only used on iOS, where
   ///   [IaCardLinkFinishAction.uploadPrescriptions] needs the Ordering module, an API key entitled to ordering, and
   ///   the SDK's prerequisites to have run in the current app session. On Android
@@ -55,6 +56,8 @@ abstract class IaBaseCardLink extends IaBase {
   /// - [supportsLiquidGlass]: Optional flag to enable Liquid Glass UI style. Only used on iOS, where it also changes
   ///   the setting for all SDK screens. When `null`, the setting from `IaSdk.initialize` is kept.
   /// - [illustrationColor]: Optional color of the CardLink illustrations (defaults to red). Only used on Android.
+  /// - [isInvalidXmlDataMocked]: Optional QA flag that makes CardLink receive invalid prescription data, to test the
+  ///   error handling. Not meant for production builds. Only used on Android; on iOS use [setMocks].
   ///
   Future<void> launch({
     required String sdkApiKey,
@@ -76,6 +79,7 @@ abstract class IaBaseCardLink extends IaBase {
     String? coreAppLogFileURL,
     bool? supportsLiquidGlass,
     IaCardLinkIllustrationColor? illustrationColor,
+    bool? isInvalidXmlDataMocked,
   });
 
   /// Returns the CardLink SDK version string.

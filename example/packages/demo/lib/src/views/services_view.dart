@@ -110,6 +110,32 @@ class ServicesView extends StatelessWidget {
         const SizedBox(height: 8),
         if (Platform.isAndroid) ...[
           ElevatedButton(
+            child: Text('Get Analytics Consent (Android)'),
+            onPressed: () async {
+              try {
+                final status = await IaSdk.instance.getAnalyticsConsentStatus();
+                if (context.mounted) _showResult(context, 'Analytics consent: ${status.name}');
+              } catch (e) {
+                if (context.mounted) _showResult(context, 'Error: $e');
+              }
+            },
+          ),
+          const SizedBox(height: 8),
+          for (final status in [IaSdkAnalyticsConsentStatus.accepted, IaSdkAnalyticsConsentStatus.declined]) ...[
+            ElevatedButton(
+              child: Text('Set Analytics Consent: ${status.name} (Android)'),
+              onPressed: () async {
+                try {
+                  await IaSdk.instance.setAnalyticsConsentStatus(status);
+                  if (context.mounted) _showResult(context, 'Analytics consent set to ${status.name}');
+                } catch (e) {
+                  if (context.mounted) _showResult(context, 'Error: $e');
+                }
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+          ElevatedButton(
             child: Text('Is Prerequisite Flow Completed (Android)'),
             onPressed: () async {
               try {

@@ -37,6 +37,12 @@ Native SDK 2.9.1 on Android and 2.9.1-beta.300 on iOS.
 - Example app flavors: `demo`, the default, and `singleEntryPoint`, a public example of a host app that opens the SDK
   from a single screen. Each app is a local package in `example/packages/`, next to one with what they share. The
   flavors share the app's signing, so either is delivered like the demo, see `example/README.md`.
+- Android parity with the native Android SDK:
+  - `IaSdk.getAnalyticsConsentStatus` and `setAnalyticsConsentStatus` with `IaSdkAnalyticsConsentStatus`, to read and
+    set the user's analytics answer. Only supported on Android.
+  - `IaSdkConfiguration.isCrashReportingEnabled`, to turn off the SDK's crash reporting. Only used on Android.
+  - CardLink `launch(isInvalidXmlDataMocked:)`, a QA flag that makes CardLink receive invalid prescription data. Only
+    used on Android; iOS uses `setMocks`.
 
 ### Fixed
 
@@ -148,7 +154,7 @@ Native SDK 2.9.1 on Android and 2.9.1-beta.300 on iOS.
 - **Android analytics follow the Android SDK 2.9.1 analytics API.** Events come through `loggedAnalyticsEventListener`,
   as on iOS. `analyticsEventListener`, `IaSdkAnalyticsEvent`, `setAnalyticsConsent` and `IaSdkAnalyticsConsent` are
   removed, as the native API they wrapped is. The user answers on the SDK's legal screen, and `resetAnalyticsConsent`
-  asks again. The Android SDK's consent getter and setter aren't proxied, as the iOS SDK has no equivalent.
+  asks again. On Android, `getAnalyticsConsentStatus` and `setAnalyticsConsentStatus` also read and set the answer.
 - **`IaSdkConfiguration.isAnalyticsEnabled` defaults to on for Android**, as in the native SDK. It used to be off when
   not set.
 - **`getEnvironment` returns a non-null `IaSdkConfigurationServerEnvironment`.**
@@ -167,6 +173,10 @@ Native SDK 2.9.1 on Android and 2.9.1-beta.300 on iOS.
   - CardLink without an `environment` follows the SDK's environment.
 - **The Android plugins need API 27 (Android 8.1) instead of 30**, like the native SDK modules. `ia_cardlink` still
   needs API 30, as the native CardLink module does.
+- **Android: CardLink `launch` without `saveCardEnabled` no longer offers to save the card**, as in the native Android
+  SDK. Pass `saveCardEnabled: true` to keep offering it. iOS still offers it by default.
+- **`IaBaseCardLink.launch` takes the new optional parameter `isInvalidXmlDataMocked`.** Classes implementing it need
+  updating.
 
 ## 0.0.1
 

@@ -108,6 +108,12 @@ To ask the user again, clear their answer, so the legal screen shows the questio
 await IaSdk.instance.resetAnalyticsConsent();
 ```
 
+On Android, a host app that asks the user itself can also read and set the answer, after `initialize`:
+```dart
+final status = await IaSdk.instance.getAnalyticsConsentStatus();
+await IaSdk.instance.setAnalyticsConsentStatus(IaSdkAnalyticsConsentStatus.accepted);
+```
+
 ## Platform differences
 - **Imprint:** On Android, `imprint` is only reported when `IaSdkConfigurationFooter.isImprintHandledByHostApp` is
   `true`, and then the SDK never shows its own imprint.
