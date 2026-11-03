@@ -42,7 +42,8 @@ Native SDK 2.9.1 on Android and 2.9.1-beta.300 on iOS.
     set the user's analytics answer. Only supported on Android.
   - `IaSdkConfiguration.isCrashReportingEnabled`, to turn off the SDK's crash reporting. Only used on Android.
   - CardLink `launch(isInvalidXmlDataMocked:)`, a QA flag that makes CardLink receive invalid prescription data. Only
-    used on Android; iOS uses `setMocks`.
+    used on Android, by debug builds of the CardLink module outside production; released SDK builds ignore it. iOS
+    uses `setMocks`.
 
 ### Fixed
 

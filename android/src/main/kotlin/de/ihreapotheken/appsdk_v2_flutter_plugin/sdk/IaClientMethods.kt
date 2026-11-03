@@ -499,10 +499,11 @@ internal class IaClientMethods(
                 val uiConfiguration = parseUIConfiguration(args["uiConfiguration"] as? Map<*, *>)
                 val footer = args["footer"] as? Map<*, *>
                 val isPickupLockerAndCourierShippingEnabled = args["isPickupLockerAndCourierShippingEnabled"] as? Boolean ?: false
-                val isAnalyticsEnabled = args["isAnalyticsEnabled"] as? Boolean ?: IaSdkConfiguration().analyticsEnabled
+                val defaultConfiguration = IaSdkConfiguration()
+                val isAnalyticsEnabled = args["isAnalyticsEnabled"] as? Boolean ?: defaultConfiguration.analyticsEnabled
                 val isHapticFeedbackEnabled = args["isHapticFeedbackEnabled"] as? Boolean ?: true
                 val isCrashReportingEnabled =
-                    args["isCrashReportingEnabled"] as? Boolean ?: IaSdkConfiguration().crashReportingEnabled
+                    args["isCrashReportingEnabled"] as? Boolean ?: defaultConfiguration.crashReportingEnabled
                 val playStoreId = args["playStoreId"] as? String
                 val qaConfiguration = args["qaConfiguration"] as? Map<*, *>
                 if (qaConfiguration != null) {
@@ -1029,11 +1030,7 @@ internal class IaClientMethods(
             FlutterCall.resetAnalyticsConsent.name -> {
                 // Clearing the answer makes the legal screen ask again, as iOS's resetAnalyticsConsent does. Before
                 // initialization the SDK ignores it.
-                if (!requireInitialized(result)) return
-                respondSuspending(result) {
-                    bindings.sdkModule.setAnalyticsConsentStatus(IaAnalyticsConsentStatus.NOT_ANSWERED)
-                    null
-                }
+                setAnalyticsConsentStatus(IaAnalyticsConsentStatus.NOT_ANSWERED, result)
             }
 
             FlutterCall.getAnalyticsConsentStatus.name -> {
@@ -1054,11 +1051,7 @@ internal class IaClientMethods(
                     )
                     return
                 }
-                if (!requireInitialized(result)) return
-                respondSuspending(result) {
-                    bindings.sdkModule.setAnalyticsConsentStatus(status)
-                    null
-                }
+                setAnalyticsConsentStatus(status, result)
             }
 
             FlutterCall.setHapticFeedbackEnabled.name -> {
@@ -1144,6 +1137,15 @@ internal class IaClientMethods(
             "frau" -> "Frau"
             "divers", "diverse" -> "Divers"
             else -> "Keine Angabe"
+        }
+    }
+
+    /** Sets the user's analytics consent answer, for resetAnalyticsConsent and setAnalyticsConsentStatus. */
+    private fun setAnalyticsConsentStatus(status: IaAnalyticsConsentStatus, result: MethodChannel.Result) {
+        if (!requireInitialized(result)) return
+        respondSuspending(result) {
+            bindings.sdkModule.setAnalyticsConsentStatus(status)
+            null
         }
     }
 

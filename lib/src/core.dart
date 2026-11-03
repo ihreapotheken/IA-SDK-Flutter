@@ -402,9 +402,12 @@ class IaSdk {
   /// Note: Only supported on Android.
   ///
   Future<IaSdkAnalyticsConsentStatus> getAnalyticsConsentStatus() async {
-    final result = await _Methods.getAnalyticsConsentStatus.invoke<String>();
-    return IaSdkAnalyticsConsentStatus.values.where((status) => status.name == result).firstOrNull ??
-        IaSdkAnalyticsConsentStatus.notAnswered;
+    final result = await _Methods.getAnalyticsConsentStatus.invoke<String?>();
+    final status = IaSdkAnalyticsConsentStatus.values.where((status) => status.name == result).firstOrNull;
+    if (status == null) {
+      throw StateError('getAnalyticsConsentStatus: Unknown status $result.');
+    }
+    return status;
   }
 
   /// Sets the user's analytics consent answer, for host apps that ask the user themselves.

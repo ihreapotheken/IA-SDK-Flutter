@@ -57,7 +57,9 @@ abstract class IaBaseCardLink extends IaBase {
   ///   the setting for all SDK screens. When `null`, the setting from `IaSdk.initialize` is kept.
   /// - [illustrationColor]: Optional color of the CardLink illustrations (defaults to red). Only used on Android.
   /// - [isInvalidXmlDataMocked]: Optional QA flag that makes CardLink receive invalid prescription data, to test the
-  ///   error handling. Not meant for production builds. Only used on Android; on iOS use [setMocks].
+  ///   error handling. Not meant for production builds. Only used on Android, and only by a debug build of the
+  ///   Android CardLink module with a non-production [environment]; released SDK builds ignore it. On iOS use
+  ///   [setMocks].
   ///
   Future<void> launch({
     required String sdkApiKey,
@@ -182,7 +184,8 @@ abstract class IaBaseCardLink extends IaBase {
 
   /// Replaces the CardLink backend with simulated responses, for testing CardLink flows. Not meant for production builds.
   ///
-  /// Note: Only supported on iOS. The Android SDK's only CardLink mock is disabled in its release builds.
+  /// Note: Only supported on iOS. The Android SDK's only CardLink mock, [launch] with `isInvalidXmlDataMocked`, works
+  /// only in debug builds of its CardLink module.
   ///
   Future<void> setMocks(IaCardLinkMocks mocks);
 

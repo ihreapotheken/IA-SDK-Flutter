@@ -106,6 +106,16 @@ class ExampleAppConfig {
         : serverEnvironment != IaSdkConfigurationServerEnvironment.production;
   }
 
+  /// Whether the SDK reports its own crashes (Android). Keeps the SDK default, which is on, unless overridden with:
+  ///
+  /// ```dart
+  /// flutter run --dart-define iaCrashReporting=false
+  /// ```
+  ///
+  bool? get isCrashReportingEnabled {
+    return const bool.hasEnvironment('iaCrashReporting') ? const bool.fromEnvironment('iaCrashReporting') : null;
+  }
+
   /// Short tag for the active [serverEnvironment].
   ///
   /// Matches the tag the deploy scripts append to the app launcher label, so an
@@ -153,6 +163,7 @@ class ExampleAppConfig {
       appStoreId: _appStoreId.isEmpty ? null : _appStoreId,
       playStoreId: _playStoreId.isEmpty ? null : _playStoreId,
       isAnalyticsEnabled: isAnalyticsEnabled,
+      isCrashReportingEnabled: isCrashReportingEnabled,
       cardLink: const IaSdkConfigurationCardLink(
         isSaveCardEnabled: true,
         userId: cardLinkUserId,
