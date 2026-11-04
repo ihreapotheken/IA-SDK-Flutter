@@ -38,8 +38,6 @@ Native SDK 2.9.1 on Android and 2.9.1-beta.300 on iOS.
   from a single screen. Each app is a local package in `example/packages/`, next to one with what they share. The
   flavors share the app's signing, so either is delivered like the demo, see `example/README.md`.
 - Android parity with the native Android SDK:
-  - `IaSdk.getAnalyticsConsentStatus` and `setAnalyticsConsentStatus` with `IaSdkAnalyticsConsentStatus`, to read and
-    set the user's analytics answer. Only supported on Android.
   - `IaSdkConfiguration.isCrashReportingEnabled`, to turn off the SDK's crash reporting. Only used on Android.
   - CardLink `launch(isInvalidXmlDataMocked:)`, a QA flag that makes CardLink receive invalid prescription data. Only
     used on Android, by debug builds of the CardLink module outside production; released SDK builds ignore it. iOS
@@ -155,7 +153,7 @@ Native SDK 2.9.1 on Android and 2.9.1-beta.300 on iOS.
 - **Android analytics follow the Android SDK 2.9.1 analytics API.** Events come through `loggedAnalyticsEventListener`,
   as on iOS. `analyticsEventListener`, `IaSdkAnalyticsEvent`, `setAnalyticsConsent` and `IaSdkAnalyticsConsent` are
   removed, as the native API they wrapped is. The user answers on the SDK's legal screen, and `resetAnalyticsConsent`
-  asks again. On Android, `getAnalyticsConsentStatus` and `setAnalyticsConsentStatus` also read and set the answer.
+  asks again.
 - **`IaSdkConfiguration.isAnalyticsEnabled` defaults to on for Android**, as in the native SDK. It used to be off when
   not set.
 - **`getEnvironment` returns a non-null `IaSdkConfigurationServerEnvironment`.**

@@ -19,7 +19,6 @@ import de.ihreapotheken.sdk.core.api.listener.TransferPrescriptionListener
 import de.ihreapotheken.sdk.core.domain.model.EnvironmentType
 import de.ihreapotheken.sdk.core.domain.session.PrerequisiteFlowConfiguration
 import de.ihreapotheken.sdk.integrations.api.analytics.ExperimentalIaAnalyticsApi
-import de.ihreapotheken.sdk.integrations.api.analytics.IaAnalyticsConsentStatus
 import de.ihreapotheken.sdk.core.domain.model.sdk.SdkEvent
 import de.ihreapotheken.sdk.core.api.listener.SdkEventListener
 import de.ihreapotheken.sdk.core.domain.model.prescription.ImagePrescription
@@ -203,17 +202,6 @@ internal class IaClientMethods(
          * Resets the user's analytics consent answer, so the legal screen asks again.
          */
         resetAnalyticsConsent,
-
-        /**
-         * Returns the user's analytics consent answer. Android only, the iOS SDK has no getter.
-         */
-        getAnalyticsConsentStatus,
-
-        /**
-         * Sets the user's analytics consent answer, as the legal or "Datenverarbeitung" screen does. Android only, the
-         * iOS SDK has no setter.
-         */
-        setAnalyticsConsentStatus,
 
         /**
          * Marks the onboarding as shown or not shown. iOS only.
@@ -1028,30 +1016,11 @@ internal class IaClientMethods(
             }
 
             FlutterCall.resetAnalyticsConsent.name -> {
-                // Clearing the answer makes the legal screen ask again, as iOS's resetAnalyticsConsent does. Before
-                // initialization the SDK ignores it.
-                setAnalyticsConsentStatus(IaAnalyticsConsentStatus.NOT_ANSWERED, result)
-            }
-
-            FlutterCall.getAnalyticsConsentStatus.name -> {
                 if (!requireInitialized(result)) return
                 respondSuspending(result) {
-                    analyticsConsentStatusName(bindings.sdkModule.getAnalyticsConsentStatus())
+                    bindings.sdkModule.resetAnalyticsConsent()
+                    null
                 }
-            }
-
-            FlutterCall.setAnalyticsConsentStatus.name -> {
-                val statusName = (call.arguments as? Map<*, *>)?.get("status") as? String
-                val status = statusName?.let(::analyticsConsentStatus)
-                if (status == null) {
-                    result.error(
-                        "ARG_ERROR",
-                        "Missing or invalid status. Expected one of notAnswered, accepted, declined, got $statusName.",
-                        null,
-                    )
-                    return
-                }
-                setAnalyticsConsentStatus(status, result)
             }
 
             FlutterCall.setHapticFeedbackEnabled.name -> {
@@ -1138,29 +1107,6 @@ internal class IaClientMethods(
             "divers", "diverse" -> "Divers"
             else -> "Keine Angabe"
         }
-    }
-
-    /** Sets the user's analytics consent answer, for resetAnalyticsConsent and setAnalyticsConsentStatus. */
-    private fun setAnalyticsConsentStatus(status: IaAnalyticsConsentStatus, result: MethodChannel.Result) {
-        if (!requireInitialized(result)) return
-        respondSuspending(result) {
-            bindings.sdkModule.setAnalyticsConsentStatus(status)
-            null
-        }
-    }
-
-    /** Maps an `IaSdkAnalyticsConsentStatus` name from Dart; `null` for unknown names. */
-    private fun analyticsConsentStatus(name: String): IaAnalyticsConsentStatus? = when (name) {
-        "notAnswered" -> IaAnalyticsConsentStatus.NOT_ANSWERED
-        "accepted" -> IaAnalyticsConsentStatus.ACCEPTED
-        "declined" -> IaAnalyticsConsentStatus.DECLINED
-        else -> null
-    }
-
-    private fun analyticsConsentStatusName(status: IaAnalyticsConsentStatus): String = when (status) {
-        IaAnalyticsConsentStatus.NOT_ANSWERED -> "notAnswered"
-        IaAnalyticsConsentStatus.ACCEPTED -> "accepted"
-        IaAnalyticsConsentStatus.DECLINED -> "declined"
     }
 
     private fun parseQaConfiguration(map: Map<*, *>): QaConfiguration {
