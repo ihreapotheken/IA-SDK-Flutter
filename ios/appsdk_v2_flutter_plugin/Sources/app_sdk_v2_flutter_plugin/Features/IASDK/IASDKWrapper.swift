@@ -32,6 +32,7 @@ final class IASDKWrapper {
         IASDK.configuration.shouldLoadRemoteStyleConfiguration = arguments.shouldFetchThemeFromRemote
         IASDK.configuration.footer.shouldShowAppSettings = arguments.footer.shouldShowAppSettings
         IASDK.configuration.footer.shouldShowImprint = arguments.footer.shouldShowImprint
+        arguments.apofinder.apply(to: &IASDK.configuration.apofinder)
         IASDK.configuration.uiConfiguration = arguments.uiConfiguration.mappedToSDK()
         if let isPickupLockerAndCourierShippingEnabled = arguments.isPickupLockerAndCourierShippingEnabled {
             IASDK.configuration.isPickupLockerAndCourierShippingEnabled = isPickupLockerAndCourierShippingEnabled

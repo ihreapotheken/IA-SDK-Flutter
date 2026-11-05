@@ -102,6 +102,7 @@ Shared model definitions used across implementations:
 - **`_config.dart`** - `IaSdkConfiguration` with accessKey, clientId, serverEnvironment, footer, initialization options
 - **`initialization.dart`** - `IaSdkConfigurationInitialization`
 - **`footer.dart`** - `IaSdkConfigurationFooter`
+- **`apofinder.dart`** - `IaSdkConfigurationApofinder` (delivery quick filter "Botendienst"/"Versand")
 - **`server_environment.dart`** - Environment enum (development, staging, production)
 
 ## Common (`/lib/src/common/`)

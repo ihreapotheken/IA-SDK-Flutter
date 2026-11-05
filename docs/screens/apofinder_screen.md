@@ -39,7 +39,25 @@ Navigator.of(context).push(
 > [!NOTE]
 > Read [Presentation](../presentation.md) in order to understand how IA SDK screens can be presented in your app.
 
+## Delivery quick filter
+Apofinder shows one delivery option as a quick filter: "Botendienst" by default. The other option stays available in
+the filter list. To show "Versand" instead, and to have it selected when Apofinder opens, set it in the configuration
+passed to `initialize`:
+
+```dart
+IaSdkConfiguration(
+  // ...
+  // Needed for "Versand". Without it Apofinder doesn't offer "Versand" and shows "Botendienst" instead.
+  isPickupLockerAndCourierShippingEnabled: true,
+  apofinder: const IaSdkConfigurationApofinder(
+    deliveryQuickFilter: IaSdkApofinderDeliveryQuickFilter.courierShipping,
+    isDeliveryQuickFilterPreselected: true,
+  ),
+);
+```
+
 ## Platform differences
+- **Delivery quick filter:** Only used on iOS. Android always shows "Botendienst".
 - **isCancellable:** Only used on iOS.
 - **onDismiss:** Only used on iOS, where it's also called when the user selects a pharmacy.
 - **onApofinderDidChangePharmacy:** Not called for Apofinder shown as a platform view.

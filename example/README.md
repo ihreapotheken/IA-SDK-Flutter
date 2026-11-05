@@ -90,7 +90,9 @@ These dart-defines turn on SDK options the app leaves off by default, so they ca
 | dart-define | Effect | Default |
 |---|---|---|
 | `iaHostImprint=true` | Android: the imprint button is reported as the `imprint` navigation target instead of opening the SDK's page | off |
-| `iaPickupLocker=true` | Checkout offers pickup lockers and courier shipping | SDK default |
+| `iaPickupLocker=true` | Checkout offers pickup lockers and courier shipping. On iOS, Apofinder also offers the "Versand" filter | SDK default |
+| `iaApofinderQuickFilter=courierShipping` | iOS: Apofinder shows "Versand" instead of "Botendienst" as a quick filter. Needs `iaPickupLocker=true` | `delivery` |
+| `iaApofinderQuickFilterPreselected=true` | iOS: the Apofinder delivery quick filter is selected when Apofinder opens | off |
 | `iaAnalytics=false` | Android analytics tracking (events show in the Events tab once consent is granted) | on outside production |
 | `iaAppStoreId=…`, `iaPlayStoreId=…` | Store identifiers the SDK links to | unset |
 

@@ -512,6 +512,8 @@ internal class IaClientMethods(
                     context = bindings.applicationContext,
                     apiKey = accessKey,
                     clientId = clientId,
+                    // TODO(IASDK-3032): pass args["apofinder"] as apofinderConfiguration once the Android SDK
+                    // ships IaSdkApofinderConfiguration (2.10.0).
                     configuration = IaSdkConfiguration(
                         shouldFetchThemeFromRemote = shouldFetchThemeFromRemote,
                         prerequisiteFlowConfiguration = PrerequisiteFlowConfiguration(
