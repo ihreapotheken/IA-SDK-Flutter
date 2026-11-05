@@ -9,6 +9,7 @@ struct IaInitSdkArguments: Decodable {
     let serverEnvironment: IaEnvironmentArguments
     let shouldFetchThemeFromRemote: Bool
     let footer: IaFooterConfigurationArguments
+    let apofinder: IaApofinderConfigurationArguments
     let initialization: IaInitializationConfigurationArguments
     let uiConfiguration: IaUIConfigurationArguments
     let isPickupLockerAndCourierShippingEnabled: Bool?
@@ -164,6 +165,30 @@ struct IaButtonConfigurationArguments: Decodable {
 struct IaFooterConfigurationArguments: Decodable {
     let shouldShowAppSettings: Bool    
     let shouldShowImprint: Bool
+}
+
+/// Configuration options for Apofinder.
+struct IaApofinderConfigurationArguments: Decodable {
+    let deliveryQuickFilter: DeliveryQuickFilter
+    let isDeliveryQuickFilterPreselected: Bool
+
+    enum DeliveryQuickFilter: String, Decodable {
+        case delivery
+        case courierShipping
+
+        func mappedToSDK() -> SDKApofinderConfiguration.DeliveryQuickFilter {
+            switch self {
+            case .delivery: .delivery
+            case .courierShipping: .courierShipping
+            }
+        }
+    }
+
+    // SDKApofinderConfiguration has no public initializer, so its values are changed in place.
+    func apply(to apofinder: inout SDKApofinderConfiguration) {
+        apofinder.deliveryQuickFilter = deliveryQuickFilter.mappedToSDK()
+        apofinder.isDeliveryQuickFilterPreselected = isDeliveryQuickFilterPreselected
+    }
 }
 
 /// Configuration options for SDK prerequisites.

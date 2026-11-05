@@ -12,6 +12,7 @@ part 'common/methods.dart';
 part 'common/navigation.dart';
 part 'common/views.dart';
 part 'config/_config.dart';
+part 'config/apofinder.dart';
 part 'config/card_link.dart';
 part 'config/footer.dart';
 part 'config/initialization.dart';

@@ -83,6 +83,23 @@ class ExampleAppConfig {
       ? const bool.fromEnvironment('iaPickupLocker')
       : null;
 
+  /// Apofinder's delivery quick filter, `delivery` ("Botendienst", the default) or `courierShipping` ("Versand"),
+  /// and whether it's preselected. "Versand" also needs `iaPickupLocker=true`:
+  ///
+  /// ```dart
+  /// flutter run --dart-define iaPickupLocker=true --dart-define iaApofinderQuickFilter=courierShipping \
+  ///   --dart-define iaApofinderQuickFilterPreselected=true
+  /// ```
+  ///
+  IaSdkConfigurationApofinder get _apofinder {
+    return IaSdkConfigurationApofinder(
+      deliveryQuickFilter:
+          IaSdkApofinderDeliveryQuickFilter.values.asNameMap()[const String.fromEnvironment('iaApofinderQuickFilter')] ??
+          IaSdkApofinderDeliveryQuickFilter.delivery,
+      isDeliveryQuickFilterPreselected: const bool.fromEnvironment('iaApofinderQuickFilterPreselected'),
+    );
+  }
+
   /// Store identifiers the SDK links to, for example for update prompts:
   ///
   /// ```dart
@@ -149,6 +166,7 @@ class ExampleAppConfig {
         shouldShowImprint: true,
         isImprintHandledByHostApp: _isImprintHandledByHostApp,
       ),
+      apofinder: _apofinder,
       isPickupLockerAndCourierShippingEnabled: _isPickupLockerAndCourierShippingEnabled,
       appStoreId: _appStoreId.isEmpty ? null : _appStoreId,
       playStoreId: _playStoreId.isEmpty ? null : _playStoreId,
