@@ -17,6 +17,7 @@ class CardLinkViewStateData {
   bool saveCardEnabled = false;
   bool includeCoreAppLogs = false;
   bool usesCustomColors = false;
+  bool isInvalidXmlDataMocked = false;
   IaCardLinkIllustrationColor illustrationColor = IaCardLinkIllustrationColor.red;
 
   String resultText = '';
@@ -184,6 +185,8 @@ class _CardLinkViewStateData extends State<CardLinkView> {
           onIncludeCoreAppLogsChanged: (value) => setState(() => _data.includeCoreAppLogs = value),
           usesCustomColors: _data.usesCustomColors,
           onUsesCustomColorsChanged: (value) => setState(() => _data.usesCustomColors = value),
+          isInvalidXmlDataMocked: _data.isInvalidXmlDataMocked,
+          onInvalidXmlDataMockedChanged: (value) => setState(() => _data.isInvalidXmlDataMocked = value),
           onLaunchCardLink: () async {
             try {
               final canCode = _data.canCodeController.text.trim();
@@ -208,6 +211,7 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 buttonsColor: _data.usesCustomColors ? _customColor : null,
                 textLinkColor: _data.usesCustomColors ? _customColor : null,
                 bottomNavigationColor: _data.usesCustomColors ? _customColor : null,
+                isInvalidXmlDataMocked: _data.isInvalidXmlDataMocked,
               );
               _showResult('CardLink launched');
             } catch (e) {
@@ -238,6 +242,7 @@ class _CardLinkViewStateData extends State<CardLinkView> {
                 buttonsColor: _data.usesCustomColors ? _customColor : null,
                 textLinkColor: _data.usesCustomColors ? _customColor : null,
                 bottomNavigationColor: _data.usesCustomColors ? _customColor : null,
+                isInvalidXmlDataMocked: _data.isInvalidXmlDataMocked,
               );
               _showResult('Saved Cards launched');
             } catch (e) {
@@ -452,6 +457,8 @@ class _LaunchSection extends StatelessWidget {
     required this.onIncludeCoreAppLogsChanged,
     required this.usesCustomColors,
     required this.onUsesCustomColorsChanged,
+    required this.isInvalidXmlDataMocked,
+    required this.onInvalidXmlDataMockedChanged,
     required this.onLaunchCardLink,
     required this.onLaunchSavedCards,
   });
@@ -462,6 +469,8 @@ class _LaunchSection extends StatelessWidget {
   final ValueChanged<bool> onIncludeCoreAppLogsChanged;
   final bool usesCustomColors;
   final ValueChanged<bool> onUsesCustomColorsChanged;
+  final bool isInvalidXmlDataMocked;
+  final ValueChanged<bool> onInvalidXmlDataMockedChanged;
   final VoidCallback onLaunchCardLink;
   final VoidCallback onLaunchSavedCards;
 
@@ -495,6 +504,14 @@ class _LaunchSection extends StatelessWidget {
           contentPadding: EdgeInsets.zero,
           value: usesCustomColors,
           onChanged: onUsesCustomColorsChanged,
+        ),
+        SwitchListTile(
+          title: Text('Mock Invalid XML Data (Android)'),
+          subtitle: Text('Only with a debug build of the Android CardLink module'),
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          value: isInvalidXmlDataMocked,
+          onChanged: onInvalidXmlDataMockedChanged,
         ),
         const SizedBox(height: 8),
         ElevatedButton.icon(

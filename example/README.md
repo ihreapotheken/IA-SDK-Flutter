@@ -85,13 +85,14 @@ Requires AppSDK 2.7.0 or newer on both platforms.
 
 ### Test switches
 
-These dart-defines turn on SDK options the app leaves off by default, so they can be tested:
+These dart-defines change SDK options from the app's defaults, so they can be tested:
 
 | dart-define | Effect | Default |
 |---|---|---|
 | `iaHostImprint=true` | Android: the imprint button is reported as the `imprint` navigation target instead of opening the SDK's page | off |
 | `iaPickupLocker=true` | Checkout offers pickup lockers and courier shipping | SDK default |
 | `iaAnalytics=false` | Android analytics tracking (events show in the Events tab once consent is granted) | on outside production |
+| `iaCrashReporting=false` | Android: turns off the SDK's crash reporting | on |
 | `iaAppStoreId=…`, `iaPlayStoreId=…` | Store identifiers the SDK links to | unset |
 
 Test pharmacies are listed in Apofinder outside production (`IaSdkConfigurationQa`). CardLink flows the SDK

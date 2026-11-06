@@ -44,6 +44,7 @@ class IaModuleCardLink extends IaBaseCardLink {
     String? coreAppLogFileURL,
     bool? supportsLiquidGlass,
     IaCardLinkIllustrationColor? illustrationColor,
+    bool? isInvalidXmlDataMocked,
   }) async {
     final arguments = _RequestModelLaunch(
       sdkApiKey: sdkApiKey,
@@ -65,6 +66,7 @@ class IaModuleCardLink extends IaBaseCardLink {
       coreAppLogFileURL: coreAppLogFileURL,
       supportsLiquidGlass: supportsLiquidGlass,
       illustrationColor: illustrationColor,
+      isInvalidXmlDataMocked: isInvalidXmlDataMocked,
     );
     return await _Methods.launch.invoke<void>(arguments);
   }

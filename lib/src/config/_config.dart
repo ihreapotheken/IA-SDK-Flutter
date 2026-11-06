@@ -22,6 +22,7 @@ class IaSdkConfiguration {
     this.playStoreId,
     this.isAnalyticsEnabled,
     this.isHapticFeedbackEnabled,
+    this.isCrashReportingEnabled,
     this.qaConfiguration,
     this.cardLink,
     this.hostAppLogFilePath,
@@ -95,6 +96,14 @@ class IaSdkConfiguration {
   ///
   final bool? isHapticFeedbackEnabled;
 
+  /// Whether the SDK reports its own crashes and keeps an encrypted crash log for problem reports.
+  ///
+  /// `null` keeps the SDK default, which is on.
+  ///
+  /// Note: Only used on Android.
+  ///
+  final bool? isCrashReportingEnabled;
+
   /// QA options for testing an integration. Not meant for production builds.
   ///
   /// `null` keeps the SDK defaults, which enable no QA option. See [IaSdkConfigurationQa] for when the SDKs apply
@@ -128,6 +137,7 @@ class IaSdkConfiguration {
       'playStoreId': playStoreId,
       'isAnalyticsEnabled': isAnalyticsEnabled,
       'isHapticFeedbackEnabled': isHapticFeedbackEnabled,
+      'isCrashReportingEnabled': isCrashReportingEnabled,
       'qaConfiguration': qaConfiguration?.toJson(),
       'cardLink': cardLink?.toJson(),
       'hostAppLogFilePath': hostAppLogFilePath,
