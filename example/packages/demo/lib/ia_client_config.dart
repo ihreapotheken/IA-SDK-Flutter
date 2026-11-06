@@ -106,15 +106,16 @@ class ExampleAppConfig {
         : serverEnvironment != IaSdkConfigurationServerEnvironment.production;
   }
 
-  /// Whether the SDK reports its own crashes (Android). Keeps the SDK default, which is on, unless overridden with:
+  /// Whether the SDK reports its own crashes (Android). Defaults to `true`, matching the SDK default; override with:
   ///
   /// ```dart
   /// flutter run --dart-define iaCrashReporting=false
   /// ```
   ///
-  bool? get isCrashReportingEnabled {
-    return const bool.hasEnvironment('iaCrashReporting') ? const bool.fromEnvironment('iaCrashReporting') : null;
-  }
+  final isCrashReportingEnabled = const bool.fromEnvironment(
+    'iaCrashReporting',
+    defaultValue: true,
+  );
 
   /// Short tag for the active [serverEnvironment].
   ///
