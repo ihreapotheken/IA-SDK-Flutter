@@ -40,7 +40,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 // ia.de server environment the build targets, matching the `iaServerEnv` dart-define
-// read by `ExampleAppConfig`. `staging` is the default on both sides, so an unset
+// read by `ExampleStartupSettings`. `staging` is the default on both sides, so an unset
 // value produces the same label the app actually behaves as.
 val iaServerEnv = System.getenv("IA_SERVER_ENV")?.takeIf { it.isNotBlank() } ?: "staging"
 

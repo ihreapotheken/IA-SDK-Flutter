@@ -414,8 +414,10 @@ The example app is a thin shell; its apps are local packages in `/example/packag
 - **`cardlink_view.dart`** - CardLink functionality demo
 - **`services_view.dart`** - Available services
 - **`screens_view.dart`** - Available screens to launch
+- **`startup_settings_view.dart`** - Startup Settings at the top of the Services tab: SDK options read at init (server environment, pickup lockers, Apofinder quick filter, mascot, Android analytics/crash reporting/imprint, store IDs). A change warns, caches the value and exits the app
 
 - **`ia_client_config.dart`** - The demo's SDK configuration
+- **`src/settings/startup_settings.dart`** - `ExampleStartupSettings`, the cached (shared_preferences) startup settings. Demo options are added there and in the view, not as dart-defines. Only `iaServerEnv` (the build's default backend, passed by the deploy scripts), `iaAccessKey` and the E2E flags remain dart-defines
 
 # Communication Patterns
 

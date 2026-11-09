@@ -52,8 +52,8 @@ Use the environment your API key is for, there are separate keys for QA (`stagin
 In `singleEntryPoint`, set `serverEnvironment` in
 [ia_sdk_page.dart](packages/single_entry_point/lib/src/ia_sdk_page.dart).
 
-In `demo`, the backend the app talks to is selected with the `iaServerEnv` dart-define, using the
-`IaSdkConfigurationServerEnvironment` value names. It defaults to `staging` (QA):
+In `demo`, the backend is a startup setting (see below). Its default is the backend the app was built for, set with
+the `iaServerEnv` dart-define using the `IaSdkConfigurationServerEnvironment` value names, `staging` (QA) without it:
 
 ```bash
 flutter run --dart-define iaServerEnv=development   # DEV
@@ -61,44 +61,29 @@ flutter run --dart-define iaServerEnv=staging       # QA  (default)
 flutter run --dart-define iaServerEnv=production    # PROD
 ```
 
-### Pharmi mascot illustrations
+### Startup settings
 
-`IaUIConfiguration.shouldShowMascotIllustrations` controls whether the Pharmi mascot
-is rendered. It defaults to `true` and is read while the SDK initializes:
+SDK options read while the SDK initializes are switched in the demo itself, in the **Startup Settings** at the top of
+the Services tab. Changing one warns that the setting is saved and the app closes: accepting caches it
+(shared_preferences) and exits the app, and it applies once the app is opened again. Cancelling changes nothing.
 
-```bash
-flutter run --dart-define iaShowMascot=false
-```
-
-The two platforms differ in what can be changed afterwards:
-
-- **iOS** — also settable at runtime with `IaSdk.setShouldShowMascotIllustrations`.
-  The Services tab has a "Hide/Show mascot illustrations (iOS)" button for this.
-- **Android** — the native `IAUIConfiguration` is immutable once the SDK is
-  initialized, so `iaShowMascot` is the only way to change it, and the runtime
-  button reports `MissingPluginException` by design.
-
-Either way, CardLink → FAQ is the screen that renders the mascot, so that is where
-to check the result.
-
-Requires AppSDK 2.7.0 or newer on both platforms.
-
-### Test switches
-
-These dart-defines change SDK options from the app's defaults, so they can be tested:
-
-| dart-define | Effect | Default |
+| Setting | Effect | Default |
 |---|---|---|
-| `iaHostImprint=true` | Android: the imprint button is reported as the `imprint` navigation target instead of opening the SDK's page | off |
-| `iaPickupLocker=true` | Checkout offers pickup lockers and courier shipping, and Apofinder the "Versand" filter | SDK default |
-| `iaAnalytics=false` | Android analytics tracking (events show in the Events tab once consent is granted) | on outside production |
-| `iaCrashReporting=false` | Android: turns off the SDK's crash reporting | on |
-| `iaAppStoreId=…`, `iaPlayStoreId=…` | Store identifiers the SDK links to | unset |
+| Server environment | The ia.de backend: DEV, QA or PROD | the build's, see above |
+| Pickup lockers and courier shipping | Checkout offers them, and Apofinder the "Versand" filter | off |
+| Apofinder delivery quick filter | "Botendienst" or "Versand" as the quick filter. "Versand" needs pickup lockers and courier shipping | Botendienst |
+| Quick filter preselected | The delivery quick filter is selected when Apofinder opens | off |
+| Mascot illustrations | Pharmi on CardLink → FAQ and other screens | on |
+| Host app handles the imprint (Android) | The imprint button is reported as the `imprint` navigation target instead of opening the SDK's page | off |
+| Analytics (Android) | Analytics tracking; events show in the Events tab once consent is granted | on outside production |
+| Crash reporting (Android) | The SDK reports its own crashes | on |
+| App Store ID (iOS), Play Store ID (Android) | Store identifiers the SDK links to | unset |
 
-The Apofinder delivery quick filter ("Botendienst" or "Versand") and whether it's preselected are switched in the
-Services tab, under Pharmacy. The SDK reads them only when it initializes, so the app caches the choice and offers
-to close; it applies the next time the app starts. "Versand" also needs `iaPickupLocker=true`. E2E runs ignore the
-cached choice.
+Cached settings survive app updates; **Reset to Defaults** clears them. E2E runs ignore them.
+
+The mascot can also be changed while the app runs on iOS, with `IaSdk.setShouldShowMascotIllustrations`: the
+Services tab has a "Hide/Show mascot illustrations (iOS)" button for it. Android's native `IAUIConfiguration` is
+immutable once the SDK is initialized, so there the startup setting is the only way. Requires AppSDK 2.7.0 or newer.
 
 Test pharmacies are listed in Apofinder outside production (`IaSdkConfigurationQa`). CardLink flows the SDK
 starts itself save cards under the CardLink tab's default user ID, and problem reports include a demo host log file.
@@ -190,7 +175,8 @@ IA_SERVER_ENV=production sh ./scripts/deploy-demo.sh
 ```
 
 The deploy scripts pass the same value on as `--dart-define=iaServerEnv`, so the label
-and the app's actual backend can never disagree. Android reads `IA_SERVER_ENV` in
+matches the backend the app starts with. Switching the server environment in the startup settings changes the
+backend, and the app bar's tag, but not the launcher label. Android reads `IA_SERVER_ENV` in
 [app/build.gradle.kts](android/app/build.gradle.kts) to generate the `app_name`
 resource; iOS reads `IA_ENV_LABEL` from [ios/Flutter/IAEnv.xcconfig](ios/Flutter/IAEnv.xcconfig),
 which [deploy-demo-ios.sh](../scripts/deploy-demo-ios.sh) rewrites before archiving, in the demo's
