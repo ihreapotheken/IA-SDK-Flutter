@@ -56,8 +56,6 @@ class IaSdkConfiguration {
 
   /// Apofinder configuration options, such as the delivery quick filter.
   ///
-  /// Note: Only used on iOS.
-  ///
   final IaSdkConfigurationApofinder apofinder;
 
   /// Initialization configuration options.
@@ -70,7 +68,7 @@ class IaSdkConfiguration {
 
   /// Whether checkout offers pickup locker and courier shipping as delivery options.
   ///
-  /// On iOS it also adds the "Versand" filter to Apofinder, see [apofinder].
+  /// It also adds the "Versand" filter to Apofinder, see [apofinder].
   ///
   /// `null` keeps the SDK default.
   ///

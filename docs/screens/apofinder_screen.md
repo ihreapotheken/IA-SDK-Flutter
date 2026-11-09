@@ -57,7 +57,6 @@ IaSdkConfiguration(
 ```
 
 ## Platform differences
-- **Delivery quick filter:** Only used on iOS. Android always shows "Botendienst".
 - **isCancellable:** Only used on iOS.
 - **onDismiss:** Only used on iOS, where it's also called when the user selects a pharmacy.
 - **onApofinderDidChangePharmacy:** Not called for Apofinder shown as a platform view.

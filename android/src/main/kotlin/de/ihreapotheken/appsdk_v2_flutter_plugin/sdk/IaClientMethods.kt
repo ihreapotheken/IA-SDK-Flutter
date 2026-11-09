@@ -26,6 +26,7 @@ import de.ihreapotheken.sdk.core.domain.model.prescription.ImagePrescription
 import de.ihreapotheken.sdk.core.domain.model.prescription.PdfPrescription
 import de.ihreapotheken.sdk.core.domain.model.prescription.PrescriptionInsuranceType
 import de.ihreapotheken.sdk.integrations.api.IaSdk
+import de.ihreapotheken.sdk.integrations.api.IaSdkApofinderConfiguration
 import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
 import de.ihreapotheken.sdk.integrations.api.IaUserAddress
 import de.ihreapotheken.sdk.integrations.api.IaUserData
@@ -512,8 +513,6 @@ internal class IaClientMethods(
                     context = bindings.applicationContext,
                     apiKey = accessKey,
                     clientId = clientId,
-                    // TODO(IASDK-3032): pass args["apofinder"] as apofinderConfiguration once the Android SDK
-                    // ships IaSdkApofinderConfiguration (2.10.0).
                     configuration = IaSdkConfiguration(
                         shouldFetchThemeFromRemote = shouldFetchThemeFromRemote,
                         prerequisiteFlowConfiguration = PrerequisiteFlowConfiguration(
@@ -530,6 +529,7 @@ internal class IaClientMethods(
                         hapticFeedbackEnabled = isHapticFeedbackEnabled,
                         playStoreId = playStoreId,
                         isSaveCardEnabled = isCardLinkSaveCardEnabled,
+                        apofinderConfiguration = parseApofinderConfiguration(args["apofinder"] as? Map<*, *>),
                     ),
                     environmentType = serverEnv,
                     sdkEventListener = SdkEventListener { event ->
@@ -1227,6 +1227,18 @@ internal class IaClientMethods(
             primaryButton = parsePrimaryButtonConfiguration(primaryMap),
             secondaryButton = parseSecondaryButtonConfiguration(secondaryMap),
             shouldShowMascotIllustrations = shouldShowMascotIllustrations ?: true,
+        )
+    }
+
+    private fun parseApofinderConfiguration(map: Map<*, *>?): IaSdkApofinderConfiguration {
+        if (map == null) return IaSdkApofinderConfiguration()
+        return IaSdkApofinderConfiguration(
+            deliveryQuickFilter = if (map["deliveryQuickFilter"] == "courierShipping") {
+                IaSdkApofinderConfiguration.DeliveryQuickFilter.COURIER_SHIPPING
+            } else {
+                IaSdkApofinderConfiguration.DeliveryQuickFilter.DELIVERY
+            },
+            isDeliveryQuickFilterPreselected = map["isDeliveryQuickFilterPreselected"] == true,
         )
     }
 
