@@ -1,9 +1,12 @@
 ## Unreleased
 
-Native SDK 2.9.1 on Android and 2.9.1-beta.300 on iOS.
+Native SDK 2.10.0.
 
 ### Added
 
+- `IaSdkConfiguration.apofinder`: Apofinder can show "Versand" instead of "Botendienst" as its delivery quick filter,
+  and preselect it (`IaSdkConfigurationApofinder`). "Versand" needs `isPickupLockerAndCourierShippingEnabled`. See
+  [Apofinder Screen](docs/screens/apofinder_screen.md).
 - Native APIs that weren't proxied yet, on both platforms where the native SDKs have them. Members only one native
   SDK has are documented as "Only supported on iOS/Android"; calling such a method on the other platform throws a
   `MissingPluginException`. See the doc comments of `IaSdk` and the module classes.

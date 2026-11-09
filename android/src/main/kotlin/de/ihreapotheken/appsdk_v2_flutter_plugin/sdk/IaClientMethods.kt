@@ -19,12 +19,14 @@ import de.ihreapotheken.sdk.core.api.listener.TransferPrescriptionListener
 import de.ihreapotheken.sdk.core.domain.model.EnvironmentType
 import de.ihreapotheken.sdk.core.domain.session.PrerequisiteFlowConfiguration
 import de.ihreapotheken.sdk.integrations.api.analytics.ExperimentalIaAnalyticsApi
+import de.ihreapotheken.sdk.integrations.api.analytics.IaAnalyticsConsentStatus
 import de.ihreapotheken.sdk.core.domain.model.sdk.SdkEvent
 import de.ihreapotheken.sdk.core.api.listener.SdkEventListener
 import de.ihreapotheken.sdk.core.domain.model.prescription.ImagePrescription
 import de.ihreapotheken.sdk.core.domain.model.prescription.PdfPrescription
 import de.ihreapotheken.sdk.core.domain.model.prescription.PrescriptionInsuranceType
 import de.ihreapotheken.sdk.integrations.api.IaSdk
+import de.ihreapotheken.sdk.integrations.api.IaSdkApofinderConfiguration
 import de.ihreapotheken.sdk.integrations.api.IaSdkConfiguration
 import de.ihreapotheken.sdk.integrations.api.IaUserAddress
 import de.ihreapotheken.sdk.integrations.api.IaUserData
@@ -531,6 +533,7 @@ internal class IaClientMethods(
                         playStoreId = playStoreId,
                         isSaveCardEnabled = isCardLinkSaveCardEnabled,
                         crashReportingEnabled = isCrashReportingEnabled,
+                        apofinderConfiguration = parseApofinderConfiguration(args["apofinder"] as? Map<*, *>),
                     ),
                     environmentType = serverEnv,
                     sdkEventListener = SdkEventListener { event ->
@@ -1018,7 +1021,9 @@ internal class IaClientMethods(
             FlutterCall.resetAnalyticsConsent.name -> {
                 if (!requireInitialized(result)) return
                 respondSuspending(result) {
-                    bindings.sdkModule.resetAnalyticsConsent()
+                    // The Android SDK has no reset. Clearing the answer makes the legal screen ask again, as iOS's
+                    // resetAnalyticsConsent does.
+                    bindings.sdkModule.setAnalyticsConsentStatus(IaAnalyticsConsentStatus.NOT_ANSWERED)
                     null
                 }
             }
@@ -1226,6 +1231,18 @@ internal class IaClientMethods(
             primaryButton = parsePrimaryButtonConfiguration(primaryMap),
             secondaryButton = parseSecondaryButtonConfiguration(secondaryMap),
             shouldShowMascotIllustrations = shouldShowMascotIllustrations ?: true,
+        )
+    }
+
+    private fun parseApofinderConfiguration(map: Map<*, *>?): IaSdkApofinderConfiguration {
+        if (map == null) return IaSdkApofinderConfiguration()
+        return IaSdkApofinderConfiguration(
+            deliveryQuickFilter = if (map["deliveryQuickFilter"] == "courierShipping") {
+                IaSdkApofinderConfiguration.DeliveryQuickFilter.COURIER_SHIPPING
+            } else {
+                IaSdkApofinderConfiguration.DeliveryQuickFilter.DELIVERY
+            },
+            isDeliveryQuickFilterPreselected = map["isDeliveryQuickFilterPreselected"] == true,
         )
     }
 

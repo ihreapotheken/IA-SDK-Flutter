@@ -15,6 +15,7 @@ class IaSdkConfiguration {
     required this.serverEnvironment,
     this.shouldFetchThemeFromRemote = true,
     this.footer = const IaSdkConfigurationFooter(),
+    this.apofinder = const IaSdkConfigurationApofinder(),
     this.initialization = const IaSdkConfigurationInitialization(),
     this.uiConfiguration = const IaUIConfiguration(),
     this.isPickupLockerAndCourierShippingEnabled,
@@ -54,6 +55,10 @@ class IaSdkConfiguration {
   ///
   final IaSdkConfigurationFooter footer;
 
+  /// Apofinder configuration options, such as the delivery quick filter.
+  ///
+  final IaSdkConfigurationApofinder apofinder;
+
   /// Initialization configuration options.
   ///
   final IaSdkConfigurationInitialization initialization;
@@ -63,6 +68,8 @@ class IaSdkConfiguration {
   final IaUIConfiguration uiConfiguration;
 
   /// Whether checkout offers pickup locker and courier shipping as delivery options.
+  ///
+  /// It also adds the "Versand" filter to Apofinder, see [apofinder].
   ///
   /// `null` keeps the SDK default.
   ///
@@ -130,6 +137,7 @@ class IaSdkConfiguration {
       'serverEnvironment': serverEnvironment.name,
       'shouldFetchThemeFromRemote': shouldFetchThemeFromRemote,
       'footer': footer.toJson(),
+      'apofinder': apofinder.toJson(),
       'initialization': initialization.toJson(),
       'uiConfiguration': uiConfiguration.toJson(),
       'isPickupLockerAndCourierShippingEnabled': isPickupLockerAndCourierShippingEnabled,
