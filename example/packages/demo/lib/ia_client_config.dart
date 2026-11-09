@@ -1,5 +1,6 @@
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:ia_example_shared/ia_example_shared.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Example client app ia.de SDK configuration.
 ///
@@ -83,21 +84,37 @@ class ExampleAppConfig {
       ? const bool.fromEnvironment('iaPickupLocker')
       : null;
 
-  /// Apofinder's delivery quick filter, `delivery` ("Botendienst", the default) or `courierShipping` ("Versand"),
-  /// and whether it's preselected. "Versand" also needs `iaPickupLocker=true`:
+  /// Whether checkout offers pickup lockers and courier shipping, `null` when the SDK default applies.
   ///
-  /// ```dart
-  /// flutter run --dart-define iaPickupLocker=true --dart-define iaApofinderQuickFilter=courierShipping \
-  ///   --dart-define iaApofinderQuickFilterPreselected=true
-  /// ```
+  bool? get isPickupLockerAndCourierShippingEnabled => _isPickupLockerAndCourierShippingEnabled;
+
+  /// Apofinder settings the SDK is initialized with, switched in the Services tab. The SDK reads them only when
+  /// it initializes, so they're cached and applied from the next app start, see [loadCachedSettings].
   ///
-  IaSdkConfigurationApofinder get _apofinder {
-    return IaSdkConfigurationApofinder(
-      deliveryQuickFilter:
-          IaSdkApofinderDeliveryQuickFilter.values.asNameMap()[const String.fromEnvironment('iaApofinderQuickFilter')] ??
-          IaSdkApofinderDeliveryQuickFilter.delivery,
-      isDeliveryQuickFilterPreselected: const bool.fromEnvironment('iaApofinderQuickFilterPreselected'),
+  /// "Versand" also needs `iaPickupLocker=true`.
+  ///
+  IaSdkConfigurationApofinder apofinder = const IaSdkConfigurationApofinder();
+
+  static const _apofinderQuickFilterKey = 'apofinderQuickFilter';
+  static const _apofinderQuickFilterPreselectedKey = 'apofinderQuickFilterPreselected';
+
+  /// Reads the settings cached by [cacheApofinder]. Call it before the SDK initializes.
+  ///
+  Future<void> loadCachedSettings() async {
+    final preferences = SharedPreferencesAsync();
+    final quickFilter = await preferences.getString(_apofinderQuickFilterKey);
+    apofinder = IaSdkConfigurationApofinder(
+      deliveryQuickFilter: IaSdkApofinderDeliveryQuickFilter.values.asNameMap()[quickFilter] ?? IaSdkApofinderDeliveryQuickFilter.delivery,
+      isDeliveryQuickFilterPreselected: await preferences.getBool(_apofinderQuickFilterPreselectedKey) ?? false,
     );
+  }
+
+  /// Caches [apofinder] settings for the next app start. The running SDK keeps the ones it was initialized with.
+  ///
+  Future<void> cacheApofinder(IaSdkConfigurationApofinder apofinder) async {
+    final preferences = SharedPreferencesAsync();
+    await preferences.setString(_apofinderQuickFilterKey, apofinder.deliveryQuickFilter.name);
+    await preferences.setBool(_apofinderQuickFilterPreselectedKey, apofinder.isDeliveryQuickFilterPreselected);
   }
 
   /// Store identifiers the SDK links to, for example for update prompts:
@@ -166,7 +183,7 @@ class ExampleAppConfig {
         shouldShowImprint: true,
         isImprintHandledByHostApp: _isImprintHandledByHostApp,
       ),
-      apofinder: _apofinder,
+      apofinder: apofinder,
       isPickupLockerAndCourierShippingEnabled: _isPickupLockerAndCourierShippingEnabled,
       appStoreId: _appStoreId.isEmpty ? null : _appStoreId,
       playStoreId: _playStoreId.isEmpty ? null : _playStoreId,

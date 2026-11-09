@@ -182,6 +182,8 @@ class ServicesView extends StatelessWidget {
             }
           },
         ),
+        const SizedBox(height: 16),
+        const _ApofinderQuickFilterSettings(),
         const SizedBox(height: 24),
         _SectionHeader(title: 'Ordering'),
         const SizedBox(height: 8),
@@ -567,6 +569,110 @@ class ServicesView extends StatelessWidget {
         );
       },
     ).whenComplete(controller.dispose);
+  }
+}
+
+/// Apofinder's delivery quick filter, "Botendienst" or "Versand", and whether it's preselected.
+///
+/// The SDK reads these settings only when it initializes, so a change is cached with
+/// [ExampleAppConfig.cacheApofinder] and the app offers to close, to apply it on the next start.
+///
+class _ApofinderQuickFilterSettings extends StatefulWidget {
+  const _ApofinderQuickFilterSettings();
+
+  @override
+  State<_ApofinderQuickFilterSettings> createState() => _ApofinderQuickFilterSettingsState();
+}
+
+class _ApofinderQuickFilterSettingsState extends State<_ApofinderQuickFilterSettings> {
+  /// The cached settings, starting with the ones the SDK was initialized with.
+  ///
+  IaSdkConfigurationApofinder _settings = ExampleAppConfig.instance.apofinder;
+
+  /// Whether the cached settings differ from the ones the SDK was initialized with.
+  ///
+  bool get _isRestartNeeded {
+    final active = ExampleAppConfig.instance.apofinder;
+    return _settings.deliveryQuickFilter != active.deliveryQuickFilter ||
+        _settings.isDeliveryQuickFilterPreselected != active.isDeliveryQuickFilterPreselected;
+  }
+
+  Future<void> _update({
+    IaSdkApofinderDeliveryQuickFilter? deliveryQuickFilter,
+    bool? isDeliveryQuickFilterPreselected,
+  }) async {
+    final previous = _settings;
+    final settings = IaSdkConfigurationApofinder(
+      deliveryQuickFilter: deliveryQuickFilter ?? previous.deliveryQuickFilter,
+      isDeliveryQuickFilterPreselected: isDeliveryQuickFilterPreselected ?? previous.isDeliveryQuickFilterPreselected,
+    );
+    setState(() => _settings = settings);
+    try {
+      await ExampleAppConfig.instance.cacheApofinder(settings);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _settings = previous);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Setting not saved: $e')));
+      return;
+    }
+    // Switched back to the settings the SDK runs with, nothing to apply.
+    if (!mounted || !_isRestartNeeded) return;
+    final shouldClose = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Restart needed'),
+          content: const Text(
+            'The setting is saved. The SDK reads it only when it initializes, so it applies the next time the app '
+            'starts.\n\nClose the app now?',
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Later')),
+            TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Close App')),
+          ],
+        );
+      },
+    );
+    if (shouldClose ?? false) exit(0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final isPickupLockerMissing =
+        _settings.deliveryQuickFilter == IaSdkApofinderDeliveryQuickFilter.courierShipping &&
+        ExampleAppConfig.instance.isPickupLockerAndCourierShippingEnabled != true;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Apofinder delivery quick filter', style: textTheme.titleSmall),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: SegmentedButton<IaSdkApofinderDeliveryQuickFilter>(
+            segments: const [
+              ButtonSegment(value: IaSdkApofinderDeliveryQuickFilter.delivery, label: Text('Botendienst')),
+              ButtonSegment(value: IaSdkApofinderDeliveryQuickFilter.courierShipping, label: Text('Versand')),
+            ],
+            selected: {_settings.deliveryQuickFilter},
+            onSelectionChanged: (selection) => _update(deliveryQuickFilter: selection.first),
+          ),
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Preselected'),
+          subtitle: const Text('The quick filter is selected when Apofinder opens'),
+          value: _settings.isDeliveryQuickFilterPreselected,
+          onChanged: (value) => _update(isDeliveryQuickFilterPreselected: value),
+        ),
+        if (isPickupLockerMissing)
+          Text(
+            '"Versand" needs --dart-define iaPickupLocker=true. Without it Apofinder shows "Botendienst".',
+            style: textTheme.bodySmall,
+          ),
+        if (_isRestartNeeded) Text('Applies after a restart', style: textTheme.bodySmall),
+      ],
+    );
   }
 }
 

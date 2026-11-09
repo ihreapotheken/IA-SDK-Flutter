@@ -90,11 +90,14 @@ These dart-defines turn on SDK options the app leaves off by default, so they ca
 | dart-define | Effect | Default |
 |---|---|---|
 | `iaHostImprint=true` | Android: the imprint button is reported as the `imprint` navigation target instead of opening the SDK's page | off |
-| `iaPickupLocker=true` | Checkout offers pickup lockers and courier shipping. On iOS, Apofinder also offers the "Versand" filter | SDK default |
-| `iaApofinderQuickFilter=courierShipping` | iOS: Apofinder shows "Versand" instead of "Botendienst" as a quick filter. Needs `iaPickupLocker=true` | `delivery` |
-| `iaApofinderQuickFilterPreselected=true` | iOS: the Apofinder delivery quick filter is selected when Apofinder opens | off |
+| `iaPickupLocker=true` | Checkout offers pickup lockers and courier shipping, and Apofinder the "Versand" filter | SDK default |
 | `iaAnalytics=false` | Android analytics tracking (events show in the Events tab once consent is granted) | on outside production |
 | `iaAppStoreId=…`, `iaPlayStoreId=…` | Store identifiers the SDK links to | unset |
+
+The Apofinder delivery quick filter ("Botendienst" or "Versand") and whether it's preselected are switched in the
+Services tab, under Pharmacy. The SDK reads them only when it initializes, so the app caches the choice and offers
+to close; it applies the next time the app starts. "Versand" also needs `iaPickupLocker=true`. E2E runs ignore the
+cached choice.
 
 Test pharmacies are listed in Apofinder outside production (`IaSdkConfigurationQa`). CardLink flows the SDK
 starts itself save cards under the CardLink tab's default user ID, and problem reports include a demo host log file.
