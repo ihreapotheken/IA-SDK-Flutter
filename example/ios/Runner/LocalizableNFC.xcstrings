@@ -7,13 +7,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "Daten werden gelesen (Schritt 5/5)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Reading data (step 5/5)"
           }
         }
       }
@@ -30,7 +30,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The scan was successful."
+            "value" : "Scan successful."
           }
         }
       }
@@ -58,13 +58,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verbindungsabbruch - sobald die Karte erkannt wird, Karte und Handy nicht mehr bewegen."
+            "value" : "Verbindungsabbruch. Karte oder Handy wurden bewegt."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Disconnection - as soon as the card is recognized, stop moving the card and phone."
+            "value" : "Connection lost. The card or phone was moved."
           }
         }
       }
@@ -75,13 +75,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "eGK gefunden. Karte und iPhone nicht mehr bewegen."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Health card found. Keep the card and iPhone still."
           }
         }
       }
@@ -92,13 +92,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Legen Sie die Karte auf Ihr iPhone."
+            "value" : "Legen Sie die Karte wie angezeigt unter Ihr iPhone."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Place the card on your iPhone."
+            "value" : "Place the card under your iPhone as shown."
           }
         }
       }
@@ -126,13 +126,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Karte wurde noch nicht erkannt - halten Sie sie auch die Rückseite des iPhones."
+            "value" : "eGK nicht erkannt. Bitte wie angezeigt an der Rückseite platzieren."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The card has not been recognized yet - hold it against the back of the iPhone."
+            "value" : "Health card not detected. Please place it on the back of your iPhone as shown."
           }
         }
       }
@@ -143,13 +143,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "Verbindung gesichert."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Connection secured."
           }
         }
       }
@@ -177,13 +177,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "Daten werden gelesen (Schritt 1/5)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Reading data (step 1/5)"
           }
         }
       }
@@ -194,13 +194,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "Daten werden gelesen (Schritt 1/5)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Reading data (step 1/5)"
           }
         }
       }
@@ -211,13 +211,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "Daten werden gelesen (Schritt 1/5)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Reading data (step 1/5)"
           }
         }
       }
@@ -228,13 +228,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "Daten werden gelesen (Schritt 1/5)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Reading data (step 1/5)"
           }
         }
       }
@@ -245,13 +245,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "Daten werden gelesen (Schritt 1/5)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Reading data (step 1/5)"
           }
         }
       }
@@ -262,13 +262,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "Daten werden gelesen (Schritt 1/5)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Reading data (step 1/5)"
           }
         }
       }
@@ -279,13 +279,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "Daten werden gelesen (Schritt 1/5)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Reading data (step 1/5)"
           }
         }
       }
@@ -296,13 +296,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "Daten werden gelesen (Schritt 3/5)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Reading data (step 3/5)"
           }
         }
       }
@@ -313,13 +313,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "Daten werden gelesen (Schritt 2/5)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Reading data (step 2/5)"
           }
         }
       }
@@ -330,13 +330,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "Daten werden gelesen (Schritt 4/5)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Reading data (step 4/5)"
           }
         }
       }
@@ -347,13 +347,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karte und Handy nicht mehr bewegen!"
+            "value" : "Daten werden gelesen (Schritt 4/5)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop moving your card and phone!"
+            "value" : "Reading data (step 4/5)"
           }
         }
       }
