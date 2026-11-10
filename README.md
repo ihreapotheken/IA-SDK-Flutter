@@ -23,7 +23,7 @@ Public API Reference: https://ihreapotheken.github.io/docs/appsdk/flutter
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) 3.30.0 and up
 - [Dart SDK](https://dart.dev/get-dart) 3.10.0 and up
 - [Swift Package Manager](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers) Flutter SDK Support
-- [Github Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) for native library access
+- [Github Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) for Android native library access. Not needed for iOS, the iOS SDK repository is public.
 
 ## 2. Platform Support
 
@@ -43,8 +43,7 @@ The library is supported on both of the major mobile operating systems, with con
 ### iOS
 
 - Minimum iOS Version: `15`
-- Xcode: `16.0`
-- Swift `5.9`
+- Xcode: `26.2`
 
 ## 3. Client Setup
 
@@ -54,7 +53,36 @@ For official reference, please see
 [the Flutter SDK documentation](https://docs.flutter.dev/packages-and-plugins/using-packages) 
 on using Flutter plugins.
 
-### 3.1. Add the dependencies to the `pubspec.yaml` file
+### 3.1. Choose the iOS dependency manager
+
+The plugin and the iOS SDK support both Swift Package Manager (SPM) and CocoaPods.
+
+> [!IMPORTANT]
+> **Swift Package Manager is the preferred way.** Use CocoaPods only if your project can't use SPM yet.
+
+#### Swift Package Manager (recommended)
+
+Enable Flutter's SPM support:
+
+```bash
+flutter config --enable-swift-package-manager
+```
+
+The next `flutter run` or `flutter build ios` adds the plugin, with the iOS SDK packages it depends on, to the Runner
+project as Swift packages. Plugins in your app that don't support SPM yet keep using CocoaPods. For details, see
+[Swift Package Manager for app developers](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers).
+
+#### CocoaPods
+
+With SPM support disabled, Flutter installs the plugins with CocoaPods. The iOS SDK pods are hosted in their own spec
+repository, so add it with the CocoaPods CDN at the top of `ios/Podfile`:
+
+```ruby
+source 'https://cdn.cocoapods.org/'
+source 'https://github.com/ihreapotheken/IA-SDK-iOS/'
+```
+
+### 3.2. Add the dependencies to the `pubspec.yaml` file
 
 Add the core package, `appsdk_v2_flutter_plugin`, and the module packages you need. All packages are fetched from GitHub;
 the modules live in the [modules](modules) directory.
@@ -112,18 +140,18 @@ dependencies:
 ```
 
 
-### 3.2. iOS Permissions
+### 3.3. iOS Project Setup
 
-Add the following keys to your `Info.plist` file based on the modules you use:
+Add the following keys to your `Info.plist` file. Location and camera are always required, NFC only with `ia_cardlink`:
 
 ```xml
-<!-- Location permission - required for Apofinder (pharmacy finder) module -->
+<!-- Location permission - always required, used by Apofinder (part of the core package) -->
 <key>NSLocationWhenInUseUsageDescription</key>
 <string>Used to show pharmacies nearby.</string>
 
-<!-- Camera permission - required for Prescription (RX) module -->
+<!-- Camera permission - always required, used by the Apofinder pharmacy code scanner, product scanner and prescription scanner -->
 <key>NSCameraUsageDescription</key>
-<string>Camera access is needed for prescription upload.</string>
+<string>Camera access is needed to scan pharmacy codes, products and prescriptions.</string>
 
 <!-- NFC permission - required for CardLink module -->
 <key>NFCReaderUsageDescription</key>
@@ -145,13 +173,26 @@ Add the following keys to your `Info.plist` file based on the modules you use:
 
 | Permission | Key | Required For | Purpose |
 |------------|-----|--------------|---------|
-| Location (When In Use) | `NSLocationWhenInUseUsageDescription` | Apofinder module | Find nearby pharmacies and get directions |
-| Camera | `NSCameraUsageDescription` | Prescription (RX) module | Scan and upload prescriptions via camera |
+| Location (When In Use) | `NSLocationWhenInUseUsageDescription` | Always (Apofinder, core package) | Find nearby pharmacies and get directions |
+| Camera | `NSCameraUsageDescription` | Always (Apofinder, `ia_over_the_counter`, `ia_prescription`) | Scan pharmacy codes, products and prescriptions |
 | NFC | `NFCReaderUsageDescription` | CardLink module | Read health insurance cards via NFC for prescription redemption |
 
 **Note:** The `com.apple.developer.nfc.readersession.iso7816.select-identifiers` key with the listed AIDs is required for CardLink to communicate with German health insurance cards (eGK) and related secure messaging protocols.
 
-### 3.3. Plugin usage
+CardLink also needs the following in the Runner target:
+- **NFC capability**: Add the "Near Field Communication Tag Reading" capability in the target's **Signing & Capabilities**.
+  Make sure the reader session formats in the Runner's `.entitlements` file include `TAG`:
+  ```xml
+  <key>com.apple.developer.nfc.readersession.formats</key>
+  <array>
+      <string>TAG</string>
+  </array>
+  ```
+- **Localization**: Add the
+  [`LocalizableNFC.xcstrings`](https://github.com/ihreapotheken/IA-SDK-iOS/blob/main/Docs/resources/LocalizableNFC.xcstrings)
+  file with the strings shown during NFC scanning.
+
+### 3.4. Plugin usage
 
 1. **Set the app identifier**  
 The API key is linked to your app's identifier, so set it on both platforms:

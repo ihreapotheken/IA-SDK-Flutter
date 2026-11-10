@@ -294,14 +294,13 @@ pod install
 
 ### Requirements
 - iOS 15.0 or higher
-- Swift 5.9 or higher
-- Access to the private IA-SDK-iOS repository on GitHub
+- Xcode 26.2 or higher
 
 ### Troubleshooting
 
 **Issue:** Cannot find IA-SDK-iOS pods
 
-**Solution:** Ensure both sources are declared in your Podfile and you have access to the private repository
+**Solution:** Ensure both sources are declared in your Podfile
 
 **Issue:** Version mismatch errors
 
@@ -309,7 +308,7 @@ pod install
 
 **Issue:** Swift version conflicts
 
-**Solution:** Ensure your project uses Swift 5.9 or higher
+**Solution:** Ensure you build with Xcode 26.2 or higher
 
 **Issue:** Error reading .env file
 
@@ -346,10 +345,9 @@ Module Plugin Podspecs:
 - Prevents unexpected version changes during pod install
 - Version is always read from `.env` file dynamically
 
-### Private Spec Repository
-- IA-SDK-iOS pods are hosted in a private GitHub repository
-- Both public CocoaPods CDN and private repo must be specified in Podfile
-- Developers need repository access for pod resolution
+### Spec Repository
+- IA-SDK-iOS pods are hosted in their own public GitHub spec repository
+- Both the CocoaPods CDN and that repo must be specified in Podfile
 
 ### Comparison with SPM
 Both SPM and CocoaPods now work identically:
