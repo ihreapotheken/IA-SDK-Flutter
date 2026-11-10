@@ -54,7 +54,36 @@ For official reference, please see
 [the Flutter SDK documentation](https://docs.flutter.dev/packages-and-plugins/using-packages) 
 on using Flutter plugins.
 
-### 3.1. Add the dependencies to the `pubspec.yaml` file
+### 3.1. Choose the iOS dependency manager
+
+The plugin and the iOS SDK support both Swift Package Manager (SPM) and CocoaPods.
+
+> [!IMPORTANT]
+> **Swift Package Manager is the preferred way.** Use CocoaPods only if your project can't use SPM yet.
+
+#### Swift Package Manager (recommended)
+
+Enable Flutter's SPM support:
+
+```bash
+flutter config --enable-swift-package-manager
+```
+
+The next `flutter run` or `flutter build ios` adds the plugin, with the iOS SDK packages it depends on, to the Runner
+project as Swift packages. Plugins in your app that don't support SPM yet keep using CocoaPods. For details, see
+[Swift Package Manager for app developers](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers).
+
+#### CocoaPods
+
+With SPM support disabled, Flutter installs the plugins with CocoaPods. The iOS SDK pods are hosted in their own spec
+repository, so add it with the CocoaPods CDN at the top of `ios/Podfile`:
+
+```ruby
+source 'https://cdn.cocoapods.org/'
+source 'https://github.com/ihreapotheken/IA-SDK-iOS/'
+```
+
+### 3.2. Add the dependencies to the `pubspec.yaml` file
 
 Add the core package, `appsdk_v2_flutter_plugin`, and the module packages you need. All packages are fetched from GitHub;
 the modules live in the [modules](modules) directory.
@@ -112,7 +141,7 @@ dependencies:
 ```
 
 
-### 3.2. iOS Permissions
+### 3.3. iOS Project Setup
 
 Add the following keys to your `Info.plist` file based on the modules you use:
 
@@ -151,7 +180,13 @@ Add the following keys to your `Info.plist` file based on the modules you use:
 
 **Note:** The `com.apple.developer.nfc.readersession.iso7816.select-identifiers` key with the listed AIDs is required for CardLink to communicate with German health insurance cards (eGK) and related secure messaging protocols.
 
-### 3.3. Plugin usage
+CardLink also needs the following in the Runner target:
+- **NFC capability**: Add the "Near Field Communication Tag Reading" capability in the target's **Signing & Capabilities**.
+- **Localization**: Add the
+  [`LocalizableNFC.xcstrings`](https://github.com/ihreapotheken/IA-SDK-iOS/blob/main/Docs/resources/LocalizableNFC.xcstrings)
+  file with the strings shown during NFC scanning.
+
+### 3.4. Plugin usage
 
 1. **Set the app identifier**  
 The API key is linked to your app's identifier, so set it on both platforms:
