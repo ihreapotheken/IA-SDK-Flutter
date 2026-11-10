@@ -181,6 +181,13 @@ Add the following keys to your `Info.plist` file. Location and camera are always
 
 CardLink also needs the following in the Runner target:
 - **NFC capability**: Add the "Near Field Communication Tag Reading" capability in the target's **Signing & Capabilities**.
+  Make sure the reader session formats in the Runner's `.entitlements` file include `TAG`:
+  ```xml
+  <key>com.apple.developer.nfc.readersession.formats</key>
+  <array>
+      <string>TAG</string>
+  </array>
+  ```
 - **Localization**: Add the
   [`LocalizableNFC.xcstrings`](https://github.com/ihreapotheken/IA-SDK-iOS/blob/main/Docs/resources/LocalizableNFC.xcstrings)
   file with the strings shown during NFC scanning.
