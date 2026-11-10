@@ -294,7 +294,7 @@ pod install
 
 ### Requirements
 - iOS 15.0 or higher
-- Swift 5.10 or higher
+- Xcode 26.2 or higher
 
 ### Troubleshooting
 
@@ -308,7 +308,7 @@ pod install
 
 **Issue:** Swift version conflicts
 
-**Solution:** Ensure your project uses Swift 5.10 or higher
+**Solution:** Ensure you build with Xcode 26.2 or higher
 
 **Issue:** Error reading .env file
 

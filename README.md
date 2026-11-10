@@ -43,8 +43,7 @@ The library is supported on both of the major mobile operating systems, with con
 ### iOS
 
 - Minimum iOS Version: `15`
-- Xcode: `16.0`
-- Swift `5.10`
+- Xcode: `26.2`
 
 ## 3. Client Setup
 
