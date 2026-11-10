@@ -15,6 +15,7 @@ class IaSdkConfiguration {
     required this.serverEnvironment,
     this.shouldFetchThemeFromRemote = true,
     this.footer = const IaSdkConfigurationFooter(),
+    this.apofinder = const IaSdkConfigurationApofinder(),
     this.initialization = const IaSdkConfigurationInitialization(),
     this.uiConfiguration = const IaUIConfiguration(),
     this.isPickupLockerAndCourierShippingEnabled,
@@ -22,6 +23,7 @@ class IaSdkConfiguration {
     this.playStoreId,
     this.isAnalyticsEnabled,
     this.isHapticFeedbackEnabled,
+    this.isCrashReportingEnabled,
     this.qaConfiguration,
     this.cardLink,
     this.hostAppLogFilePath,
@@ -53,6 +55,10 @@ class IaSdkConfiguration {
   ///
   final IaSdkConfigurationFooter footer;
 
+  /// Apofinder configuration options, such as the delivery quick filter.
+  ///
+  final IaSdkConfigurationApofinder apofinder;
+
   /// Initialization configuration options.
   ///
   final IaSdkConfigurationInitialization initialization;
@@ -62,6 +68,8 @@ class IaSdkConfiguration {
   final IaUIConfiguration uiConfiguration;
 
   /// Whether checkout offers pickup locker and courier shipping as delivery options.
+  ///
+  /// It also adds the "Versand" filter to Apofinder, see [apofinder].
   ///
   /// `null` keeps the SDK default.
   ///
@@ -95,6 +103,14 @@ class IaSdkConfiguration {
   ///
   final bool? isHapticFeedbackEnabled;
 
+  /// Whether the SDK reports its own crashes and keeps an encrypted crash log for problem reports.
+  ///
+  /// `null` keeps the SDK default, which is on.
+  ///
+  /// Note: Only used on Android.
+  ///
+  final bool? isCrashReportingEnabled;
+
   /// QA options for testing an integration. Not meant for production builds.
   ///
   /// `null` keeps the SDK defaults, which enable no QA option. See [IaSdkConfigurationQa] for when the SDKs apply
@@ -121,6 +137,7 @@ class IaSdkConfiguration {
       'serverEnvironment': serverEnvironment.name,
       'shouldFetchThemeFromRemote': shouldFetchThemeFromRemote,
       'footer': footer.toJson(),
+      'apofinder': apofinder.toJson(),
       'initialization': initialization.toJson(),
       'uiConfiguration': uiConfiguration.toJson(),
       'isPickupLockerAndCourierShippingEnabled': isPickupLockerAndCourierShippingEnabled,
@@ -128,6 +145,7 @@ class IaSdkConfiguration {
       'playStoreId': playStoreId,
       'isAnalyticsEnabled': isAnalyticsEnabled,
       'isHapticFeedbackEnabled': isHapticFeedbackEnabled,
+      'isCrashReportingEnabled': isCrashReportingEnabled,
       'qaConfiguration': qaConfiguration?.toJson(),
       'cardLink': cardLink?.toJson(),
       'hostAppLogFilePath': hostAppLogFilePath,

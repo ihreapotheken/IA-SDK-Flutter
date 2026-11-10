@@ -1,4 +1,5 @@
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
+import 'package:ia_example_demo/src/settings/startup_settings.dart';
 import 'package:ia_example_shared/ia_example_shared.dart';
 
 /// Example client app ia.de SDK configuration.
@@ -16,44 +17,20 @@ class ExampleAppConfig {
   ///
   String get accessKey => iaAccessKey;
 
-  /// Server environment data provided with the CLI commands:
+  /// Settings the SDK is initialized with, switched in the Services tab and read from the cache before the SDK
+  /// initializes, see [loadStartupSettings].
   ///
-  /// ```dart
-  /// flutter run --dart-define iaServerEnv=staging
-  /// ```
-  ///
-  final _serverEnvironment = const String.fromEnvironment('iaServerEnv');
+  ExampleStartupSettings startupSettings = const ExampleStartupSettings();
 
-  /// Specified ia.de SDK server environment.
+  /// Reads the cached [startupSettings]. Call it before the SDK initializes.
   ///
-  IaSdkConfigurationServerEnvironment get serverEnvironment {
-    try {
-      return IaSdkConfigurationServerEnvironment.values.firstWhere((serverEnv) {
-        return serverEnv.name == _serverEnvironment;
-      });
-    } catch (e) {
-      return IaSdkConfigurationServerEnvironment.staging;
-    }
+  Future<void> loadStartupSettings() async {
+    startupSettings = await ExampleStartupSettings.load();
   }
 
-  /// Whether the Pharmi mascot illustrations are rendered, provided with the
-  /// CLI commands:
+  /// The ia.de SDK server environment, see [ExampleStartupSettings.serverEnvironment].
   ///
-  /// ```dart
-  /// flutter run --dart-define iaShowMascot=false
-  /// ```
-  ///
-  /// Exposed as a build flag because Android reads the setting once, while the
-  /// SDK initializes, and offers no runtime equivalent of the iOS
-  /// `setShouldShowMascotIllustrations`. Without this a mascot-off Android build
-  /// would mean editing source.
-  ///
-  /// Defaults to `true`, matching the SDK default on both platforms.
-  ///
-  final shouldShowMascotIllustrations = const bool.fromEnvironment(
-    'iaShowMascot',
-    defaultValue: true,
-  );
+  IaSdkConfigurationServerEnvironment get serverEnvironment => startupSettings.effectiveServerEnvironment;
 
   /// User identifier the CardLink tab and the CardLink flows the SDK starts itself store saved cards under,
   /// so cards saved in either show up in the other.
@@ -63,48 +40,6 @@ class ExampleAppConfig {
   /// Host app log file attached to problem reports sent from SDK screens, created when the app starts.
   ///
   String? hostAppLogFilePath;
-
-  /// Whether the host app shows the imprint on Android, so the imprint button reports
-  /// `IaSdkNavigationTarget.imprint` instead of the SDK opening its own page:
-  ///
-  /// ```dart
-  /// flutter run --dart-define iaHostImprint=true
-  /// ```
-  ///
-  final _isImprintHandledByHostApp = const bool.fromEnvironment('iaHostImprint');
-
-  /// Whether checkout offers pickup lockers and courier shipping. Without the flag the SDK default applies:
-  ///
-  /// ```dart
-  /// flutter run --dart-define iaPickupLocker=true
-  /// ```
-  ///
-  final bool? _isPickupLockerAndCourierShippingEnabled = const bool.hasEnvironment('iaPickupLocker')
-      ? const bool.fromEnvironment('iaPickupLocker')
-      : null;
-
-  /// Store identifiers the SDK links to, for example for update prompts:
-  ///
-  /// ```dart
-  /// flutter run --dart-define iaAppStoreId=123456789 --dart-define iaPlayStoreId=de.example.app
-  /// ```
-  ///
-  final _appStoreId = const String.fromEnvironment('iaAppStoreId');
-
-  final _playStoreId = const String.fromEnvironment('iaPlayStoreId');
-
-  /// Whether the SDK tracks analytics events (Android), shown in the Events tab once the user accepted analytics on
-  /// the legal screen. On by default for the internal environments; override with:
-  ///
-  /// ```dart
-  /// flutter run --dart-define iaAnalytics=false
-  /// ```
-  ///
-  bool get isAnalyticsEnabled {
-    return const bool.hasEnvironment('iaAnalytics')
-        ? const bool.fromEnvironment('iaAnalytics')
-        : serverEnvironment != IaSdkConfigurationServerEnvironment.production;
-  }
 
   /// Short tag for the active [serverEnvironment].
   ///
@@ -137,22 +72,25 @@ class ExampleAppConfig {
       clientId: clientId,
       serverEnvironment: serverEnvironment,
       shouldFetchThemeFromRemote: false,
-      // TODO: The QA features are hardcoded here. The demo app needs a dedicated
-      // screen (or similar) to toggle them at runtime, so they can be changed
-      // while testing the Flutter wrapper without editing this file. Changes
-      // would take effect after a restart, because they are read at init.
+      // TODO: The QA features are hardcoded here. They could move to the Startup Settings in the Services tab, see
+      // ExampleStartupSettings, so they can be changed while testing the Flutter wrapper without editing this file.
       qaConfiguration: serverEnvironment == IaSdkConfigurationServerEnvironment.production
           ? null
           : const IaSdkConfigurationQa(showTestPharmaciesInApofinder: true),
       footer: IaSdkConfigurationFooter(
         shouldShowAppSettings: true,
         shouldShowImprint: true,
-        isImprintHandledByHostApp: _isImprintHandledByHostApp,
+        isImprintHandledByHostApp: startupSettings.isImprintHandledByHostApp,
       ),
-      isPickupLockerAndCourierShippingEnabled: _isPickupLockerAndCourierShippingEnabled,
-      appStoreId: _appStoreId.isEmpty ? null : _appStoreId,
-      playStoreId: _playStoreId.isEmpty ? null : _playStoreId,
-      isAnalyticsEnabled: isAnalyticsEnabled,
+      apofinder: IaSdkConfigurationApofinder(
+        deliveryQuickFilter: startupSettings.deliveryQuickFilter,
+        isDeliveryQuickFilterPreselected: startupSettings.isDeliveryQuickFilterPreselected,
+      ),
+      isPickupLockerAndCourierShippingEnabled: startupSettings.isPickupLockerAndCourierShippingEnabled,
+      appStoreId: startupSettings.appStoreId,
+      playStoreId: startupSettings.playStoreId,
+      isAnalyticsEnabled: startupSettings.effectiveIsAnalyticsEnabled,
+      isCrashReportingEnabled: startupSettings.isCrashReportingEnabled,
       cardLink: const IaSdkConfigurationCardLink(
         isSaveCardEnabled: true,
         userId: cardLinkUserId,
@@ -171,9 +109,8 @@ class ExampleAppConfig {
       ),
       uiConfiguration: IaUIConfiguration(
         supportsLiquidGlass: true,
-        // Pass --dart-define iaShowMascot=false to drop the Pharmi mascot
-        // illustrations. Honoured on both platforms from AppSDK 2.7.0.
-        shouldShowMascotIllustrations: shouldShowMascotIllustrations,
+        // Honoured on both platforms from AppSDK 2.7.0.
+        shouldShowMascotIllustrations: startupSettings.shouldShowMascotIllustrations,
       ),
     );
   }

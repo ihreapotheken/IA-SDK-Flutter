@@ -90,6 +90,15 @@ class _ExampleAppState extends State<ExampleApp> {
 
     ExampleAppConfig.instance.hostAppLogFilePath = await FileUtils.createDemoCoreAppLogFile();
 
+    // E2E runs keep the defaults, so settings cached by an earlier manual run don't change the flows they drive.
+    if (!E2EConfig.enabled) {
+      try {
+        await ExampleAppConfig.instance.loadStartupSettings();
+      } catch (e) {
+        log.add('Settings', 'Cached settings not loaded, using the defaults: $e');
+      }
+    }
+
     await IaSdk.instance.register(
       modules: [
         IaModuleCardLink(),

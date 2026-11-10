@@ -21,7 +21,7 @@ fi
 
 # ia.de server environment the demo apps are built against. Matches the
 # `IaSdkConfigurationServerEnvironment` value names, and defaults to `staging` just
-# like the `iaServerEnv` dart-define read by `ExampleAppConfig`.
+# like the `iaServerEnv` dart-define read by `ExampleStartupSettings`.
 #
 # Override per deploy, e.g. IA_SERVER_ENV=production sh ./scripts/deploy-demo.sh
 export IA_SERVER_ENV="${IA_SERVER_ENV:-staging}"

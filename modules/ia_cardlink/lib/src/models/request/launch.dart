@@ -21,6 +21,7 @@ class _RequestModelLaunch implements IaBaseRequest {
     this.coreAppLogFileURL,
     this.supportsLiquidGlass,
     this.illustrationColor,
+    this.isInvalidXmlDataMocked,
   });
 
   final String sdkApiKey;
@@ -42,6 +43,7 @@ class _RequestModelLaunch implements IaBaseRequest {
   final String? coreAppLogFileURL;
   final bool? supportsLiquidGlass;
   final IaCardLinkIllustrationColor? illustrationColor;
+  final bool? isInvalidXmlDataMocked;
 
   @override
   Map<String, dynamic> toSupportedType() {
@@ -65,6 +67,7 @@ class _RequestModelLaunch implements IaBaseRequest {
       'coreAppLogFileURL': coreAppLogFileURL,
       'supportsLiquidGlass': supportsLiquidGlass,
       'illustrationColor': illustrationColor?.rawValue,
+      'isInvalidXmlDataMocked': isInvalidXmlDataMocked,
     };
   }
 }

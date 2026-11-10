@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:ia_example_demo/ia_client_config.dart';
 import 'package:ia_example_demo/src/views/button_label.dart';
+import 'package:ia_example_demo/src/views/startup_settings_view.dart';
 import 'package:flutter/material.dart';
 
 class ServicesView extends StatelessWidget {
@@ -19,6 +20,8 @@ class ServicesView extends StatelessWidget {
         24,
       ),
       children: [
+        const StartupSettingsSection(),
+        const SizedBox(height: 24),
         _SectionHeader(title: 'SDK State'),
         const SizedBox(height: 8),
         ElevatedButton(
@@ -577,8 +580,8 @@ class ServicesView extends StatelessWidget {
 /// screen keep the value they were built with.
 ///
 /// iOS only: Android's native UI configuration is immutable after init, so the
-/// mascot is set there through [IaUIConfiguration.shouldShowMascotIllustrations]
-/// in [ExampleAppConfig.pluginConfig] instead.
+/// mascot is set there with the "Mascot illustrations" startup setting instead,
+/// see [StartupSettingsSection].
 class _MascotIllustrationsToggle extends StatefulWidget {
   const _MascotIllustrationsToggle();
 

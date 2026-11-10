@@ -1,0 +1,363 @@
+{
+  "sourceLanguage" : "de",
+  "strings" : {
+    "internal_auth" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    },
+    "internal_auth_done" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Scan war erfolgreich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The scan was successful."
+          }
+        }
+      }
+    },
+    "nfc_error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbindungsabbruch - sobald die Karte erkannt wird, Karte und Handy nicht mehr bewegen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disconnection - as soon as the card is recognized, stop moving the card and phone."
+          }
+        }
+      }
+    },
+    "nfc_txt_connectionErrorMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbindungsabbruch - sobald die Karte erkannt wird, Karte und Handy nicht mehr bewegen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disconnection - as soon as the card is recognized, stop moving the card and phone."
+          }
+        }
+      }
+    },
+    "nfc_txt_connectMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    },
+    "nfc_txt_discoveryMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legen Sie die Karte auf Ihr iPhone."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Place the card on your iPhone."
+          }
+        }
+      }
+    },
+    "nfc_txt_multipleCardsMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es wurden mehrere Karten gefunden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Several cards were found"
+          }
+        }
+      }
+    },
+    "nfc_txt_noCardMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Karte wurde noch nicht erkannt - halten Sie sie auch die Rückseite des iPhones."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The card has not been recognized yet - hold it against the back of the iPhone."
+          }
+        }
+      }
+    },
+    "nfc_txt_secureChannel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    },
+    "nfc_txt_unsupportedCardMessage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte wird nicht unterstützt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Card is not supported"
+          }
+        }
+      }
+    },
+    "read_atr" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    },
+    "read_CCaEgkCsE256" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    },
+    "read_CEgkAutCVCE256" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    },
+    "read_CertE256" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    },
+    "read_CertR2048" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    },
+    "read_ef_version2" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    },
+    "read_gdo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    },
+    "read_MF/DF.HCA/EF.PD" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    },
+    "read_MF/DF.HCA/EF.VD" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    },
+    "select_key" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    },
+    "select_root" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karte und Handy nicht mehr bewegen!"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop moving your card and phone!"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

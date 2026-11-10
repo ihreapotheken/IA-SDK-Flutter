@@ -102,6 +102,7 @@ Shared model definitions used across implementations:
 - **`_config.dart`** - `IaSdkConfiguration` with accessKey, clientId, serverEnvironment, footer, initialization options
 - **`initialization.dart`** - `IaSdkConfigurationInitialization`
 - **`footer.dart`** - `IaSdkConfigurationFooter`
+- **`apofinder.dart`** - `IaSdkConfigurationApofinder` (delivery quick filter "Botendienst"/"Versand")
 - **`server_environment.dart`** - Environment enum (development, staging, production)
 
 ## Common (`/lib/src/common/`)
@@ -293,14 +294,13 @@ pod install
 
 ### Requirements
 - iOS 15.0 or higher
-- Swift 5.9 or higher
-- Access to the private IA-SDK-iOS repository on GitHub
+- Xcode 26.2 or higher
 
 ### Troubleshooting
 
 **Issue:** Cannot find IA-SDK-iOS pods
 
-**Solution:** Ensure both sources are declared in your Podfile and you have access to the private repository
+**Solution:** Ensure both sources are declared in your Podfile
 
 **Issue:** Version mismatch errors
 
@@ -308,7 +308,7 @@ pod install
 
 **Issue:** Swift version conflicts
 
-**Solution:** Ensure your project uses Swift 5.9 or higher
+**Solution:** Ensure you build with Xcode 26.2 or higher
 
 **Issue:** Error reading .env file
 
@@ -345,10 +345,9 @@ Module Plugin Podspecs:
 - Prevents unexpected version changes during pod install
 - Version is always read from `.env` file dynamically
 
-### Private Spec Repository
-- IA-SDK-iOS pods are hosted in a private GitHub repository
-- Both public CocoaPods CDN and private repo must be specified in Podfile
-- Developers need repository access for pod resolution
+### Spec Repository
+- IA-SDK-iOS pods are hosted in their own public GitHub spec repository
+- Both the CocoaPods CDN and that repo must be specified in Podfile
 
 ### Comparison with SPM
 Both SPM and CocoaPods now work identically:
@@ -413,8 +412,10 @@ The example app is a thin shell; its apps are local packages in `/example/packag
 - **`cardlink_view.dart`** - CardLink functionality demo
 - **`services_view.dart`** - Available services
 - **`screens_view.dart`** - Available screens to launch
+- **`startup_settings_view.dart`** - Startup Settings at the top of the Services tab: SDK options read at init (server environment, pickup lockers, Apofinder quick filter, mascot, Android analytics/crash reporting/imprint, store IDs). A change warns, caches the value and exits the app
 
 - **`ia_client_config.dart`** - The demo's SDK configuration
+- **`src/settings/startup_settings.dart`** - `ExampleStartupSettings`, the cached (shared_preferences) startup settings. Demo options are added there and in the view, not as dart-defines. Only `iaServerEnv` (the build's default backend, passed by the deploy scripts), `iaAccessKey` and the E2E flags remain dart-defines
 
 # Communication Patterns
 
