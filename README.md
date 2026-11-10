@@ -23,7 +23,7 @@ Public API Reference: https://ihreapotheken.github.io/docs/appsdk/flutter
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) 3.30.0 and up
 - [Dart SDK](https://dart.dev/get-dart) 3.10.0 and up
 - [Swift Package Manager](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers) Flutter SDK Support
-- [Github Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) for native library access
+- [Github Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) for Android native library access. Not needed for iOS, the iOS SDK repository is public.
 
 ## 2. Platform Support
 
@@ -44,7 +44,7 @@ The library is supported on both of the major mobile operating systems, with con
 
 - Minimum iOS Version: `15`
 - Xcode: `16.0`
-- Swift `5.9`
+- Swift `5.10`
 
 ## 3. Client Setup
 
@@ -143,16 +143,16 @@ dependencies:
 
 ### 3.3. iOS Project Setup
 
-Add the following keys to your `Info.plist` file based on the modules you use:
+Add the following keys to your `Info.plist` file. Location and camera are always required, NFC only with `ia_cardlink`:
 
 ```xml
-<!-- Location permission - required for Apofinder (pharmacy finder) module -->
+<!-- Location permission - always required, used by Apofinder (part of the core package) -->
 <key>NSLocationWhenInUseUsageDescription</key>
 <string>Used to show pharmacies nearby.</string>
 
-<!-- Camera permission - required for Prescription (RX) module -->
+<!-- Camera permission - always required, used by the Apofinder pharmacy code scanner, product scanner and prescription scanner -->
 <key>NSCameraUsageDescription</key>
-<string>Camera access is needed for prescription upload.</string>
+<string>Camera access is needed to scan pharmacy codes, products and prescriptions.</string>
 
 <!-- NFC permission - required for CardLink module -->
 <key>NFCReaderUsageDescription</key>
@@ -174,8 +174,8 @@ Add the following keys to your `Info.plist` file based on the modules you use:
 
 | Permission | Key | Required For | Purpose |
 |------------|-----|--------------|---------|
-| Location (When In Use) | `NSLocationWhenInUseUsageDescription` | Apofinder module | Find nearby pharmacies and get directions |
-| Camera | `NSCameraUsageDescription` | Prescription (RX) module | Scan and upload prescriptions via camera |
+| Location (When In Use) | `NSLocationWhenInUseUsageDescription` | Always (Apofinder, core package) | Find nearby pharmacies and get directions |
+| Camera | `NSCameraUsageDescription` | Always (Apofinder, `ia_over_the_counter`, `ia_prescription`) | Scan pharmacy codes, products and prescriptions |
 | NFC | `NFCReaderUsageDescription` | CardLink module | Read health insurance cards via NFC for prescription redemption |
 
 **Note:** The `com.apple.developer.nfc.readersession.iso7816.select-identifiers` key with the listed AIDs is required for CardLink to communicate with German health insurance cards (eGK) and related secure messaging protocols.
