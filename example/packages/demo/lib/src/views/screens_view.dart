@@ -4,6 +4,10 @@ import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:ia_example_demo/src/testing/event_log.dart';
 import 'package:ia_example_demo/src/views/button_label.dart';
 import 'package:flutter/material.dart';
+import 'package:ia_ordering/ia_ordering.dart';
+import 'package:ia_over_the_counter/ia_over_the_counter.dart';
+import 'package:ia_pharmacy/ia_pharmacy.dart';
+import 'package:ia_prescription/ia_prescription.dart';
 
 /// How the Screens tab opens SDK screens.
 ///
@@ -11,7 +15,7 @@ enum _ScreensMode {
   /// The SDK presents the screen itself, through the plugin's launch methods.
   auto,
 
-  /// The app embeds the screen in its own route with [IaSdkPlatformView].
+  /// The app embeds the screen in its own route with its [IaSdkScreenView] widget.
   manual,
 }
 
@@ -224,37 +228,41 @@ class _AutoScreensList extends StatelessWidget {
   }
 }
 
-/// Embeds SDK screens with [IaSdkPlatformView] in a route the app pushes or presents, the way a host app would.
+/// Builds an SDK screen widget for a route, with the route's embed style and a callback that closes it.
+///
+typedef _ScreenBuilder = IaSdkScreenView Function(IaSdkScreenEmbedStyle embedStyle, VoidCallback onDismiss);
+
+/// Embeds SDK screens with their [IaSdkScreenView] widgets in a route the app pushes or presents, the way a host app
+/// would.
 ///
 class _ManualScreensList extends StatelessWidget {
   const _ManualScreensList();
 
-  /// Platform view ids both platforms register for SDK screens.
+  /// The SDK screens a host app can embed, by widget name.
   ///
-  static const _viewIds = [
-    'startScreen',
-    'searchScreen',
-    'cartScreen',
-    'pharmacyScreen',
-    'apofinderScreen',
-    'redeemPrescription',
-  ];
+  static final _screens = <String, _ScreenBuilder>{
+    'IaStartScreen': (embedStyle, onDismiss) => IaStartScreen(embedStyle: embedStyle, onDismiss: onDismiss),
+    'IaProductSearchScreen': (embedStyle, onDismiss) => IaProductSearchScreen(embedStyle: embedStyle, onDismiss: onDismiss),
+    'IaCartScreen': (embedStyle, onDismiss) => IaCartScreen(embedStyle: embedStyle, onDismiss: onDismiss),
+    'IaPharmacyScreen': (embedStyle, onDismiss) => IaPharmacyScreen(embedStyle: embedStyle, onDismiss: onDismiss),
+    'IaApofinderScreen': (embedStyle, onDismiss) => IaApofinderScreen(embedStyle: embedStyle, onDismiss: onDismiss),
+    'IaRedeemPrescriptionScreen': (embedStyle, onDismiss) => IaRedeemPrescriptionScreen(embedStyle: embedStyle, onDismiss: onDismiss),
+  };
 
-  /// Opens [viewId] in a new route: pushed onto the app's navigation stack, or presented full screen as a dialog.
+  /// Opens the screen of [builder] in a new route: pushed onto the app's navigation stack, or presented full screen as
+  /// a dialog.
   ///
-  /// The SDK screen shows its own navigation bar. On iOS it adds a back or close button and reports its tap, which
-  /// closes the route; on Android the system back action closes it.
+  /// The SDK screen shows its own navigation bar. It adds a back button, or a close button on iOS when presented, and
+  /// asks to close through `onDismiss`, which closes the route.
   ///
-  static void _open(BuildContext context, String viewId, {required bool isPresented}) {
+  static void _open(BuildContext context, _ScreenBuilder builder, {required bool isPresented}) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         fullscreenDialog: isPresented,
         builder: (context) => Scaffold(
-          body: IaSdkPlatformView(
-            viewId: viewId,
-            selfSizing: false,
-            embedStyle: isPresented ? IaSdkScreenEmbedStyle.presentation : IaSdkScreenEmbedStyle.navigation,
-            onDismiss: () => Navigator.of(context).pop(),
+          body: builder(
+            isPresented ? IaSdkScreenEmbedStyle.presentation : IaSdkScreenEmbedStyle.navigation,
+            () => Navigator.of(context).pop(),
           ),
         ),
       ),
@@ -266,22 +274,22 @@ class _ManualScreensList extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
       children: [
-        for (final viewId in _viewIds) ...[
-          Text(viewId, style: Theme.of(context).textTheme.titleSmall),
+        for (final MapEntry(key: name, value: builder) in _screens.entries) ...[
+          Text(name, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
                 child: ElevatedButton(
                   child: const Text('Push'),
-                  onPressed: () => _open(context, viewId, isPresented: false),
+                  onPressed: () => _open(context, builder, isPresented: false),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
                   child: const Text('Present'),
-                  onPressed: () => _open(context, viewId, isPresented: true),
+                  onPressed: () => _open(context, builder, isPresented: true),
                 ),
               ),
             ],

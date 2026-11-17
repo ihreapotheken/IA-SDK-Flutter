@@ -20,14 +20,14 @@ await IaSdk.instance.ordering.launchCartScreen();
 ```
 
 ## Platform view
-The cart screen embedded in a tab bar, `viewId` is `cartScreen`.
+The cart screen embedded in a tab bar with `IaCartScreen`, from `ia_ordering`.
 
 ```dart
 Scaffold(
   body: IndexedStack(
     index: _selectedIndex,
     children: const [
-      IaSdkPlatformView(viewId: 'cartScreen', selfSizing: false),
+      IaCartScreen(),
       // Your other tabs.
     ],
   ),

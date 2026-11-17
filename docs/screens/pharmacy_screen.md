@@ -10,14 +10,14 @@ await IaSdk.instance.pharmacy.launchPharmacyDetails();
 ```
 
 ## Platform view
-The pharmacy screen embedded in a tab bar, `viewId` is `pharmacyScreen`.
+The pharmacy screen embedded in a tab bar with `IaPharmacyScreen`, from `ia_pharmacy`.
 
 ```dart
 Scaffold(
   body: IndexedStack(
     index: _selectedIndex,
     children: const [
-      IaSdkPlatformView(viewId: 'pharmacyScreen', selfSizing: false),
+      IaPharmacyScreen(),
       // Your other tabs.
     ],
   ),

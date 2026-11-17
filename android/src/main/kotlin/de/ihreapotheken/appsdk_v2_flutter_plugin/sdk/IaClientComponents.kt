@@ -1,15 +1,19 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
-import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import android.os.Handler
 import android.os.Looper
 import android.view.View
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
+import kotlin.math.abs
 import de.ihreapotheken.sdk.core.api.featureproviders.ProductType
 import de.ihreapotheken.sdk.integrations.api.view.components.IaCartButton
 import de.ihreapotheken.sdk.integrations.api.view.components.IaProductGrid
@@ -57,35 +61,48 @@ internal class IaClientComponentsViewFactory(
                 "FlutterFragmentActivity; ${activity?.javaClass?.name} isn't one."
         }
         val hasTapHandler = creationParams?.get("hasTapHandler") == true
+        val sizeReporter = IaComponentSizeReporter(viewId, componentsChannel, context.resources.displayMetrics.density)
         val composeView = ComposeView(context).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             setContent {
-                when (identifier) {
-                    IaComponentIdentifier.CartButton -> IaCartButton(
-                        Modifier,
-                        onClick = {
-                            if (hasTapHandler) {
-                                componentsChannel.invokeMethod("componentTapped", mapOf("viewId" to viewId))
+                // Measured in Compose's layout pass, which also runs when the content changes inside a view whose size
+                // stays the same, such as a collapsed one. A layout listener on the view never sees that.
+                Box(
+                    modifier = Modifier.layout { measurable, constraints ->
+                        val isSelfSized = sizeReporter.isSelfSized(constraints)
+                        // A self-sizing component gets its own height, which is reported; one with a height set by the
+                        // app is laid out within it, as in a native layout.
+                        val placeable = measurable.measure(
+                            if (isSelfSized && constraints.hasBoundedHeight) {
+                                constraints.copy(minHeight = 0, maxHeight = Constraints.Infinity)
                             } else {
-                                // The SDK's own click opens the cart without asking onSdkWillNavigateToTarget.
-                                onCartButtonClick(context)
-                            }
-                        },
-                    )
-                    IaComponentIdentifier.ProductGrid -> renderProductGrid(creationParams)
+                                constraints
+                            },
+                        )
+                        if (isSelfSized) sizeReporter.report(placeable.width, placeable.height, constraints.maxWidth)
+                        layout(constraints.constrainWidth(placeable.width), constraints.constrainHeight(placeable.height)) {
+                            placeable.place(0, 0)
+                        }
+                    },
+                ) {
+                    when (identifier) {
+                        IaComponentIdentifier.CartButton -> IaCartButton(
+                            Modifier,
+                            onClick = {
+                                if (hasTapHandler) {
+                                    componentsChannel.invokeMethod("componentTapped", mapOf("viewId" to viewId))
+                                } else {
+                                    // The SDK's own click opens the cart without asking onSdkWillNavigateToTarget.
+                                    onCartButtonClick(context)
+                                }
+                            },
+                        )
+                        IaComponentIdentifier.ProductGrid -> renderProductGrid(creationParams)
+                    }
                 }
             }
         }
-        return IaClientComponentPlatformView(composeView, viewId, componentsChannel)
-    }
-
-    private fun Context.findActivity(): Activity? {
-        var context: Context? = this
-        while (context is ContextWrapper) {
-            if (context is Activity) return context
-            context = context.baseContext
-        }
-        return null
+        return IaClientComponentPlatformView(composeView)
     }
 
     @androidx.compose.runtime.Composable
@@ -108,82 +125,63 @@ internal class IaClientComponentsViewFactory(
 
 private class IaClientComponentPlatformView(
     private val composeView: ComposeView,
-    viewId: Int,
-    componentsChannel: MethodChannel,
 ) : PlatformView {
-    private val sizeReporter = IaComponentSizeReporter(viewId, componentsChannel)
-
-    init {
-        sizeReporter.attachTo(composeView)
-    }
-
     override fun getView(): View = composeView
 
-    override fun dispose() {
-        sizeReporter.detach(composeView)
-    }
+    override fun dispose() {}
 }
 
 /**
- * Measures a [ComposeView] using "fill width, wrap content height" semantics
- * and reports the resulting size to Flutter via the shared components
- * MethodChannel. Sizes are reported in logical pixels (dp). The SDK's components
- * fill the width they're given, the cart button included.
+ * Reports a component's size, as Compose measures it, to Flutter via the shared components MethodChannel, in logical
+ * pixels (dp). The component gets the view's width, which the SDK's components fill, the cart button included, so a
+ * new width Flutter gives the view is reported too; Flutter waits for the size measured against it.
  */
 private class IaComponentSizeReporter(
     private val viewId: Int,
     private val channel: MethodChannel,
+    private val density: Float,
 ) {
     private val mainHandler = Handler(Looper.getMainLooper())
-    private var lastReportedWidth = -1
-    private var lastReportedHeight = -1
-    private var lastParentWidth = -1
 
-    private val layoutListener = View.OnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
-        measureAndReport(v as ComposeView)
+    /** Last reported height in pixels, `null` before the first report. */
+    private var reportedHeight: Int? = null
+    private var reportedWidth = -1
+    private var reportedLayoutWidth = -1
+
+    /**
+     * Whether Flutter lays the view out at the height the component reported: before the first report and while empty
+     * that's a 1px placeholder, otherwise the reported height, give or take rounding. Any other height is set by the
+     * app, for example with a `SizedBox`. While the reported height is pending, Flutter keeps the earlier one, so the
+     * content is laid out within that, as before, until the new height arrives.
+     */
+    fun isSelfSized(constraints: Constraints): Boolean {
+        val reported = reportedHeight ?: return true
+        return reported == 0 || abs(constraints.maxHeight - reported) <= SIZE_TOLERANCE_PX
     }
 
-    fun attachTo(view: ComposeView) {
-        view.addOnLayoutChangeListener(layoutListener)
-        view.post { measureAndReport(view) }
-    }
-
-    fun detach(view: View) {
-        view.removeOnLayoutChangeListener(layoutListener)
-    }
-
-    private fun measureAndReport(view: ComposeView) {
-        val parentWidth = view.width
-        if (parentWidth <= 0) return
-
-        view.measure(
-            View.MeasureSpec.makeMeasureSpec(parentWidth, View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-        )
-        val width = view.measuredWidth
-        val height = view.measuredHeight
+    fun report(width: Int, height: Int, layoutWidth: Int) {
         // A height of 0 is reported too, so an emptied component collapses in Flutter.
         if (width <= 0 || height < 0) return
-        // Also reported again for a new layout width: Flutter widens the view when its available width changes,
-        // and waits for the size measured against it.
-        if (width == lastReportedWidth && height == lastReportedHeight && parentWidth == lastParentWidth) return
-        lastReportedWidth = width
-        lastReportedHeight = height
-        lastParentWidth = parentWidth
-
-        val density = view.resources.displayMetrics.density
-        val widthDp = width / density
-        val heightDp = height / density
-
+        // Also reported again for a new layout width: Flutter waits for the size measured against it.
+        if (width == reportedWidth && height == reportedHeight && layoutWidth == reportedLayoutWidth) return
+        reportedWidth = width
+        reportedHeight = height
+        reportedLayoutWidth = layoutWidth
+        // Posted, as this runs during Compose's layout pass.
         mainHandler.post {
             channel.invokeMethod(
                 "updateComponentSize",
                 mapOf(
                     "viewId" to viewId,
-                    "width" to widthDp.toDouble(),
-                    "height" to heightDp.toDouble(),
+                    "width" to (width / density).toDouble(),
+                    "height" to (height / density).toDouble(),
                 ),
             )
         }
+    }
+
+    private companion object {
+        /** Flutter rounds the reported logical height to whole pixels when it lays out the view. */
+        const val SIZE_TOLERANCE_PX = 2
     }
 }

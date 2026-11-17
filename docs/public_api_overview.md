@@ -37,7 +37,9 @@ streams marked this way are never called on the other platform.
 - `IaSdk.instance.launchStartRoute()` - Shows the [Start Screen](screens/start_screen.md)
 - `IaSdk.instance.launchApofinder(isCancellable:)` - Shows the [Apofinder Screen](screens/apofinder_screen.md)
 - `IaSdk.instance.finishAllActivities()` - Closes all SDK screens
-- `IaSdkPlatformView(viewId:)` - Shows an SDK screen inside your own UI, see [Presentation](presentation.md)
+- `IaStartScreen()` - The [Start Screen](screens/start_screen.md) as a widget for your own UI, see [Presentation](presentation.md)
+- `IaApofinderScreen(isCancellable:)` - The [Apofinder Screen](screens/apofinder_screen.md) as a widget for your own UI
+- `IaSdkPlatformView(viewId:)` - Shows an SDK screen or component by its `viewId`; the screen and component widgets build on it
 
 ### User data
 - `IaSdk.instance.setGuestUserData(...)` - Sets the user's personal data, used in checkout
@@ -73,6 +75,7 @@ See [SDK Interaction](interaction.md).
 - `launchProductSearchRoute(focusesOnAppear:)` - Shows the [Product Search Screen](screens/product_search_screen.md)
 - `clearProductGridCache()` - Clears the cached products of product grids (iOS only)
 - `IaProductGrid(type:)` - Inline component that shows a grid of products
+- `IaProductSearchScreen(focusesOnAppear:)` - The [Product Search Screen](screens/product_search_screen.md) as a widget for your own UI
 
 ## ia_ordering
 
@@ -86,6 +89,7 @@ See [SDK Interaction](interaction.md).
 - `orderingDidUpdateCartListener` - Stream of cart updates
 - `orderingDidFinishOrderListener` - Stream of finished orders
 - `IaCartButton()` - Inline component, a button with the number of items in the cart that opens the cart
+- `IaCartScreen()` - The [Cart Screen](screens/cart_screen.md) as a widget for your own UI
 
 ## ia_pharmacy
 
@@ -96,6 +100,7 @@ See [SDK Interaction](interaction.md).
 - `getPharmacyId()` - Returns the selected pharmacy ID
 - `clearPharmacyId()` - Clears the selected pharmacy and empties the cart
 - `getPharmacy(...)` - Returns the details of the selected pharmacy (iOS only)
+- `IaPharmacyScreen()` - The [Pharmacy Screen](screens/pharmacy_screen.md) as a widget for your own UI
 
 ## ia_prescription
 
@@ -106,6 +111,7 @@ See [SDK Interaction](interaction.md).
 - `scannerCameraErrorListener` - Stream of scanner camera errors (iOS only)
 - `onPrescriptionPhotoScanned` - Lets your app take over a photographed prescription
 - `onEPrescriptionScanned` - Lets your app take over a scanned e-prescription
+- `IaRedeemPrescriptionScreen()` - The [Redeem Prescription Screen](screens/redeem_prescription_screen.md) as a widget for your own UI
 
 ## ia_cardlink
 

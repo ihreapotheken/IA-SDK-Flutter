@@ -23,14 +23,14 @@ await IaSdk.instance.prescription.launchRedeemPrescriptionScreen();
 ```
 
 ## Platform view
-The redeem prescription screen embedded in a tab bar, `viewId` is `redeemPrescription`.
+The redeem prescription screen embedded in a tab bar with `IaRedeemPrescriptionScreen`, from `ia_prescription`.
 
 ```dart
 Scaffold(
   body: IndexedStack(
     index: _selectedIndex,
     children: const [
-      IaSdkPlatformView(viewId: 'redeemPrescription', selfSizing: false),
+      IaRedeemPrescriptionScreen(),
       // Your other tabs.
     ],
   ),

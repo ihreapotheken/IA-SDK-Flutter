@@ -12,7 +12,8 @@ final class IASDKPlugin {
     private let overTheCounterWrapper = IAOverTheCounterWrapper()
     private let prescriptionWrapper = IAPrescriptionWrapper()
     private let integrationsWrapper = IAIntegrationsWrapper()
-    private let delegate: IaClientDelegate
+    /// Also used by the screen platform views, see `IASDKViewFactory`.
+    let delegate: IaClientDelegate
     private var cancellables = Set<AnyCancellable>()
 
     init(bindings: IaClientBindings) {

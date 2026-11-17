@@ -77,25 +77,31 @@ final class IASDKComponentsViewFactory: NSObject, FlutterPlatformViewFactory {
 
 // MARK: - Support -
 
+/// Hosts a component's view controller in the view controller hierarchy, like the screens of `IASDKViewFactory`, and
+/// keeps it alive for as long as Flutter shows the platform view.
 @MainActor
 private final class IASDKComponentPlatformView: NSObject, FlutterPlatformView {
-    private let hostingController: UIViewController
+    private let containerView: UIView
 
     init(
         rootView: AnyView,
         controllerBuilder: (AnyView) -> UIHostingController<AnyView>,
     ) {
-        self.hostingController = controllerBuilder(rootView)
+        // As a child view controller the component gets the safe area of the screen region it's in. Flutter lays out
+        // around the safe area itself, and the component's size is fixed to its measured one, so the content ignores
+        // it; otherwise it would shift while the component scrolls past the screen edges.
+        let hostingController = controllerBuilder(AnyView(rootView.ignoresSafeArea()))
+        self.containerView = IASDKChildViewControllerContainerView(viewController: hostingController)
         super.init()
     }
 
     private init(empty: Void) {
-        self.hostingController = UIViewController()
+        self.containerView = UIView()
         super.init()
     }
 
     func view() -> UIView {
-        return hostingController.view
+        return containerView
     }
 
     static var empty: IASDKComponentPlatformView {

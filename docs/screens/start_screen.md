@@ -17,14 +17,14 @@ await IaSdk.instance.launchStartRoute();
 ```
 
 ## Platform view
-The start screen embedded in a tab bar, `viewId` is `startScreen`.
+The start screen embedded in a tab bar with `IaStartScreen`.
 
 ```dart
 Scaffold(
   body: IndexedStack(
     index: _selectedIndex,
     children: const [
-      IaSdkPlatformView(viewId: 'startScreen', selfSizing: false),
+      IaStartScreen(),
       // Your other tabs.
     ],
   ),
