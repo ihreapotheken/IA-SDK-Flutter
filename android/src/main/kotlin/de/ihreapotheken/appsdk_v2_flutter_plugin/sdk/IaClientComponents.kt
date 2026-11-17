@@ -70,18 +70,19 @@ internal class IaClientComponentsViewFactory(
                 Box(
                     modifier = Modifier.layout { measurable, constraints ->
                         val isSelfSized = sizeReporter.isSelfSized(constraints)
-                        // A self-sizing component gets its own height, which is reported; one with a height set by the
-                        // app is laid out within it, as in a native layout.
+                        // A self-sizing component gets its own size, at most the view's width, which is reported. One
+                        // with a height set by the app is laid out within it, as in a native layout.
                         val placeable = measurable.measure(
                             if (isSelfSized && constraints.hasBoundedHeight) {
-                                constraints.copy(minHeight = 0, maxHeight = Constraints.Infinity)
+                                constraints.copy(minWidth = 0, minHeight = 0, maxHeight = Constraints.Infinity)
                             } else {
                                 constraints
                             },
                         )
                         if (isSelfSized) sizeReporter.report(placeable.width, placeable.height, constraints.maxWidth)
                         layout(constraints.constrainWidth(placeable.width), constraints.constrainHeight(placeable.height)) {
-                            placeable.place(0, 0)
+                            // At the start of a wider view, also for right-to-left layouts.
+                            placeable.placeRelative(0, 0)
                         }
                     },
                 ) {
@@ -133,8 +134,9 @@ private class IaClientComponentPlatformView(
 
 /**
  * Reports a component's size, as Compose measures it, to Flutter via the shared components MethodChannel, in logical
- * pixels (dp). The component gets the view's width, which the SDK's components fill, the cart button included, so a
- * new width Flutter gives the view is reported too; Flutter waits for the size measured against it.
+ * pixels (dp). The component can be as wide as the view; the SDK's components currently fill it, the cart button
+ * included (IASDK-3121). A new width Flutter gives the view is reported too; Flutter waits for the size measured
+ * against it.
  */
 private class IaComponentSizeReporter(
     private val viewId: Int,

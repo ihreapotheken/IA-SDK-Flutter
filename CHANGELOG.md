@@ -104,6 +104,9 @@ Native SDK 2.10.0.
   for example with a `SizedBox`, is laid out within it.
 - Inline components and embedded SDK screens were recreated when they scrolled back into view in a lazy list, page
   view or tab view, which stalled scrolling and reloaded their data. They're now kept alive.
+- An inline component narrower than its space, such as the cart button in a list, was centered on iOS and at the
+  start on Android. It's now centered on both. On Android the SDK's cart button fills its space until the native SDK
+  centers it.
 - iOS: an empty product grid kept its loading height, and components took an endless height while the SDK showed
   its loading or error view.
 - Android: the `IaCartButton` without `onTap` opened the cart without asking `onSdkWillNavigateToTarget`.
