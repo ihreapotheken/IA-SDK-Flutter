@@ -109,6 +109,9 @@ abstract class IaSdkScreenView extends StatelessWidget {
 /// `IaCartButton`, `IaProductGrid`) exported by each package build on it. Prefer them, they name the screen or
 /// component with a type instead of a [viewId] string.
 ///
+/// In lazy lists, page views and tab views the native view is kept alive while it's scrolled out of view, as
+/// recreating it stalls scrolling and reloads its data.
+///
 /// {@category Presentation}
 class IaSdkPlatformView extends StatefulWidget {
   /// Default constructor for creating an instance of [IaSdkPlatformView].
@@ -169,7 +172,14 @@ class IaSdkPlatformView extends StatefulWidget {
   }
 }
 
-class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
+// Kept alive in lazy lists, page views and tab views: recreating the native view when it scrolls back costs the main
+// thread tens of milliseconds, which Flutter's frames share, and reloads the component's data.
+class _IaSdkPlatformViewState extends State<IaSdkPlatformView> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive {
+    return true;
+  }
+
   int? _platformViewId;
   Size? _measuredSize;
 
@@ -227,6 +237,7 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final Widget platformView;
     if (Platform.isAndroid) {
       platformView = PlatformViewLink(
