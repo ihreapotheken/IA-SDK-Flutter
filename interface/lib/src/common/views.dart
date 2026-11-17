@@ -330,6 +330,9 @@ class _IaSdkPlatformViewState extends State<IaSdkPlatformView> with AutomaticKee
 /// The widgets around [child] are the same in every case, as a changed
 /// structure would recreate the native view.
 ///
+/// A component narrower or lower than the space it gets is centered in it, on both platforms. It shrink-wraps under
+/// loose constraints, so an app's own `Align` or `Center` decides where it goes.
+///
 class _MeasuredSizeBox extends StatelessWidget {
   const _MeasuredSizeBox({
     required this.width,
@@ -355,21 +358,25 @@ class _MeasuredSizeBox extends StatelessWidget {
     // height so native can still lay it out and report when content appears.
     final isEmpty = height == 0;
     final layoutHeight = isEmpty ? 1.0 : null;
-    return SizedBox(
-      // Width: null lets the parent's constraint flow through. Height defaults
-      // to 1px before native reports back, which still triggers a layout pass
-      // and lets the native size reporter measure the intrinsic height.
-      width: width,
-      height: height ?? 1,
-      child: ClipRect(
-        clipBehavior: isEmpty || layoutWidth != null ? Clip.hardEdge : Clip.none,
-        child: OverflowBox(
-          alignment: AlignmentDirectional.topStart,
-          minWidth: layoutWidth,
-          maxWidth: layoutWidth,
-          minHeight: layoutHeight,
-          maxHeight: layoutHeight,
-          child: child,
+    return Align(
+      widthFactor: 1,
+      heightFactor: 1,
+      child: SizedBox(
+        // Width: null lets the parent's constraint flow through. Height defaults
+        // to 1px before native reports back, which still triggers a layout pass
+        // and lets the native size reporter measure the intrinsic height.
+        width: width,
+        height: height ?? 1,
+        child: ClipRect(
+          clipBehavior: isEmpty || layoutWidth != null ? Clip.hardEdge : Clip.none,
+          child: OverflowBox(
+            alignment: AlignmentDirectional.topStart,
+            minWidth: layoutWidth,
+            maxWidth: layoutWidth,
+            minHeight: layoutHeight,
+            maxHeight: layoutHeight,
+            child: child,
+          ),
         ),
       ),
     );
