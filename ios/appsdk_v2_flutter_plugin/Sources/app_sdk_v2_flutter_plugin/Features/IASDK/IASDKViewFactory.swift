@@ -8,9 +8,12 @@ import UIKit
 final class IASDKViewFactory: NSObject, FlutterPlatformViewFactory {
     /// Main SDK channel, used to report the SDK's back or close button to Dart (routed via IaBaseCallbacks).
     private let channel: FlutterMethodChannel
+    /// Reports the pharmacy selected in an embedded Apofinder, as for a launched one.
+    private let delegate: IaClientDelegate
 
-    init(channel: FlutterMethodChannel) {
+    init(channel: FlutterMethodChannel, delegate: IaClientDelegate) {
         self.channel = channel
+        self.delegate = delegate
         super.init()
     }
 
@@ -40,16 +43,24 @@ final class IASDKViewFactory: NSObject, FlutterPlatformViewFactory {
         // The SDK shows a back or close button for the embed style the host chose, and reports its tap so Dart can
         // close the route. Without an embed style it shows neither.
         let channel = channel
+        let delegate = delegate
         let onDismiss: EmptyCallback = {
             channel.invokeMethod("screenDismissed", arguments: ["viewId": platformViewId])
         }
+        let params = args as? [String: Any]
         // Apofinder leaves closing to its caller, so a selection is reported as a dismiss too. Closing it without a
-        // selection already goes through the SDK's close button, so `nil` isn't reported again.
-        var screen = viewIdentifier.iaScreen(onApofinderFinish: { pharmacy in
-            guard pharmacy != nil else { return }
-            onDismiss()
-        })
-        switch (args as? [String: Any])?["embedStyle"] as? String {
+        // selection already goes through the SDK's close button, so `nil` isn't reported again. Only the SDK's own
+        // Apofinder flow tells the SDK delegate, so the selection is reported here, like for a launched Apofinder.
+        var screen = viewIdentifier.iaScreen(
+            isCancellable: params?["isCancellable"] as? Bool ?? true,
+            focusesOnAppear: params?["focusesOnAppear"] as? Bool,
+            onApofinderFinish: { [weak delegate] pharmacy in
+                guard let pharmacy else { return }
+                delegate?.apofinderDidChangePharmacy(pharmacy, isFromPrerequisites: false)
+                onDismiss()
+            }
+        )
+        switch params?["embedStyle"] as? String {
         case "navigation": screen.hostEmbedStyle = .navigation(onDismiss: onDismiss)
         case "presentation": screen.hostEmbedStyle = .presentation(onDismiss: onDismiss)
         default: break
@@ -85,51 +96,5 @@ private final class IASDKFlutterPlatformView: NSObject, FlutterPlatformView {
 
     static var empty: IASDKFlutterPlatformView {
         IASDKFlutterPlatformView(viewController: UIViewController())
-    }
-}
-
-/// Flutter only adds the platform view, so a view controller behind it is outside the view controller hierarchy and
-/// UIKit doesn't pass it safe area insets, appearance callbacks or trait changes. This container hosts the view
-/// controller's view and, while in a window, adds the view controller as a child of the nearest view controller
-/// (Flutter's).
-@MainActor
-private final class IASDKChildViewControllerContainerView: UIView {
-    private let viewController: UIViewController
-
-    init(viewController: UIViewController) {
-        self.viewController = viewController
-        super.init(frame: viewController.view.frame)
-        viewController.view.frame = bounds
-        viewController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        addSubview(viewController.view)
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) is not supported")
-    }
-
-    override func didMoveToWindow() {
-        super.didMoveToWindow()
-        if window != nil {
-            guard viewController.parent == nil, let parent = superview?.nearestViewController else { return }
-            parent.addChild(viewController)
-            viewController.didMove(toParent: parent)
-        } else if viewController.parent != nil {
-            viewController.willMove(toParent: nil)
-            viewController.removeFromParent()
-        }
-    }
-}
-
-private extension UIResponder {
-    /// This responder if it's a view controller, otherwise the first view controller up the responder chain.
-    var nearestViewController: UIViewController? {
-        var responder: UIResponder? = self
-        while let current = responder {
-            if let viewController = current as? UIViewController { return viewController }
-            responder = current.next
-        }
-        return nil
     }
 }

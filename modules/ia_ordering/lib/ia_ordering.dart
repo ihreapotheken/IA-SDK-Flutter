@@ -1,2 +1,3 @@
 export 'src/impl.dart';
 export 'src/widgets/cart_button.dart';
+export 'src/widgets/cart_screen.dart';

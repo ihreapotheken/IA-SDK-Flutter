@@ -19,14 +19,14 @@ await IaSdk.instance.overTheCounter.launchProductSearchRoute(focusesOnAppear: tr
     used.
 
 ## Platform view
-The product search screen embedded in a tab bar, `viewId` is `searchScreen`.
+The product search screen embedded in a tab bar with `IaProductSearchScreen`, from `ia_over_the_counter`.
 
 ```dart
 Scaffold(
   body: IndexedStack(
     index: _selectedIndex,
     children: const [
-      IaSdkPlatformView(viewId: 'searchScreen', selfSizing: false),
+      IaProductSearchScreen(),
       // Your other tabs.
     ],
   ),

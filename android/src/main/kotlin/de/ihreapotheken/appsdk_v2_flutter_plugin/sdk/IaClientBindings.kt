@@ -1,6 +1,5 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
-import IaClientFlutterViewFactory
 import android.app.Activity
 import android.app.Application
 import android.content.Context
@@ -158,7 +157,8 @@ class IaClientBindings(
             IaScreen.RedeemPrescription,
         )
 
-        val viewFactory = IaClientFlutterViewFactory(callbacks)
+        // Screens ask Dart to close them over the main SDK channel (routed by Dart via IaBaseCallbacks).
+        val viewFactory = IaClientFlutterViewFactory(callbacks, channel)
         for (view in entryPoints) {
             platformViewRegistry.registerViewFactory(
                 view::class.simpleName!!,

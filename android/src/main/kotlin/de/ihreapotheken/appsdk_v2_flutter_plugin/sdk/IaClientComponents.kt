@@ -1,8 +1,6 @@
 package de.ihreapotheken.appsdk_v2_flutter_plugin.sdk
 
-import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import android.os.Handler
 import android.os.Looper
 import android.view.View
@@ -77,15 +75,6 @@ internal class IaClientComponentsViewFactory(
             }
         }
         return IaClientComponentPlatformView(composeView, viewId, componentsChannel)
-    }
-
-    private fun Context.findActivity(): Activity? {
-        var context: Context? = this
-        while (context is ContextWrapper) {
-            if (context is Activity) return context
-            context = context.baseContext
-        }
-        return null
     }
 
     @androidx.compose.runtime.Composable

@@ -17,16 +17,15 @@ The selected pharmacy is reported through `IaSdk.instance.onApofinderDidChangePh
 [SDK Interaction](../interaction.md).
 
 ## Platform view
-Apofinder presented over your app, `viewId` is `apofinderScreen`.
+Apofinder presented over your app with `IaApofinderScreen`.
 
 ```dart
 Navigator.of(context).push(
   MaterialPageRoute<void>(
     fullscreenDialog: true,
     builder: (context) => Scaffold(
-      body: IaSdkPlatformView(
-        viewId: 'apofinderScreen',
-        selfSizing: false,
+      body: IaApofinderScreen(
+        isCancellable: true,
         embedStyle: IaSdkScreenEmbedStyle.presentation,
         // Called when the user selects a pharmacy or closes Apofinder.
         onDismiss: () => Navigator.of(context).pop(),
@@ -35,6 +34,9 @@ Navigator.of(context).push(
   ),
 );
 ```
+
+`isCancellable` works as for `launchApofinder`, and is only used on iOS. The selected pharmacy is reported through
+`IaSdk.instance.onApofinderDidChangePharmacy` too, before `onDismiss` is called.
 
 > [!NOTE]
 > Read [Presentation](../presentation.md) in order to understand how IA SDK screens can be presented in your app.

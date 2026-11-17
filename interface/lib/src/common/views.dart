@@ -29,25 +29,85 @@ abstract mixin class IaBaseViews {
   }
 }
 
-/// How an SDK screen embedded with [IaSdkPlatformView] is shown by the host, which decides the button the SDK puts in
+/// How an SDK screen embedded with [IaSdkScreenView] is shown by the host, which decides the button the SDK puts in
 /// its navigation bar.
 ///
-/// Note: Only supported on iOS. The Android SDK has no embed options, so there the screen shows no back or close
-/// button and the system back action closes it.
+/// The Android SDK has no close button, so on Android both styles show a back button.
 ///
 /// {@category Presentation}
 enum IaSdkScreenEmbedStyle {
   /// The host pushed the screen; the SDK shows a back button.
   navigation,
 
-  /// The host presented the screen; the SDK shows a close button.
+  /// The host presented the screen; the SDK shows a close button on iOS and a back button on Android.
   presentation,
 }
 
-/// Inline platform view widget that hosts a native SDK component.
+/// Base class of the widgets that embed an SDK screen in the host's UI, such as `IaStartScreen` or `IaCartScreen`.
+/// Each package exports the widgets of its screens.
 ///
-/// Used by the per-component widget classes (e.g. `IaCartButton`,
-/// `IaProductGrid`) exported by each module.
+/// A screen fills the space it's given, so it needs bounded constraints, for example as the body of a `Scaffold`.
+/// Native reads the options, [embedStyle] included, once, when it creates the screen.
+///
+/// When the module of the screen isn't registered, or the backend doesn't allow its feature, the SDK shows a screen
+/// saying that the feature isn't available.
+///
+/// On Android the app's activity must be a `ComponentActivity`, such as `FlutterFragmentActivity`; with
+/// `FlutterActivity` creating the screen fails.
+///
+/// {@category Presentation}
+abstract class IaSdkScreenView extends StatelessWidget {
+  /// Constructor for the subclasses.
+  ///
+  const IaSdkScreenView({
+    super.key,
+    this.embedStyle,
+    this.onDismiss,
+  });
+
+  /// How the host shows this SDK screen, see [IaSdkScreenEmbedStyle]. When `null`, the SDK shows no back or close
+  /// button.
+  ///
+  final IaSdkScreenEmbedStyle? embedStyle;
+
+  /// Called when the SDK asks the host to close the screen. The SDK doesn't close the screen itself, the host does,
+  /// typically with `Navigator.of(context).pop()`.
+  ///
+  /// The SDK asks when the user taps the back or close button shown because of [embedStyle], and when the user
+  /// selects a pharmacy in the Apofinder screen. On Android it also asks when its flow ends in another way, for
+  /// example when the user goes back from the first screen of the flow.
+  ///
+  final VoidCallback? onDismiss;
+
+  /// Identifier native creates the screen from.
+  ///
+  @protected
+  String get viewId;
+
+  /// Options native reads when it creates the screen.
+  ///
+  @protected
+  Map<String, dynamic> get creationParams {
+    return const {};
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IaSdkPlatformView(
+      viewId: viewId,
+      creationParams: creationParams,
+      selfSizing: false,
+      embedStyle: embedStyle,
+      onDismiss: onDismiss,
+    );
+  }
+}
+
+/// Inline platform view widget that hosts a native SDK screen or component.
+///
+/// The screen widgets (subclasses of [IaSdkScreenView], e.g. `IaStartScreen`) and the component widgets (e.g.
+/// `IaCartButton`, `IaProductGrid`) exported by each package build on it. Prefer them, they name the screen or
+/// component with a type instead of a [viewId] string.
 ///
 /// {@category Presentation}
 class IaSdkPlatformView extends StatefulWidget {
@@ -91,20 +151,15 @@ class IaSdkPlatformView extends StatefulWidget {
   ///
   final VoidCallback? onTap;
 
-  /// How the host shows this SDK screen, see [IaSdkScreenEmbedStyle]. When `null`, the SDK shows no back or close
-  /// button.
+  /// See [IaSdkScreenView.embedStyle].
   ///
   /// Only used by SDK screens (e.g. `searchScreen`), not by components.
   ///
-  /// Note: Only supported on iOS.
-  ///
   final IaSdkScreenEmbedStyle? embedStyle;
 
-  /// Called when the user taps the SDK's back or close button, shown because of [embedStyle], and when the user selects
-  /// a pharmacy in the Apofinder screen. The SDK doesn't close the screen itself, the host does, typically with
-  /// `Navigator.of(context).pop()`.
+  /// See [IaSdkScreenView.onDismiss].
   ///
-  /// Note: Only supported on iOS.
+  /// Only used by SDK screens (e.g. `searchScreen`), not by components.
   ///
   final VoidCallback? onDismiss;
 

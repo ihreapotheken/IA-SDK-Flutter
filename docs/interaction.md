@@ -116,5 +116,5 @@ await IaSdk.instance.resetAnalyticsConsent();
 - **Cart state:** On Android, `orderingDidUpdateCartListener` only carries the counts (`totalProducts`,
   `totalPrescriptions`); on iOS it also carries the `products`.
 - **Analytics events:** On Android, parameter values are always strings.
-- **Pharmacy changes:** `onApofinderDidChangePharmacy` isn't called for Apofinder shown as a platform view. On Android
-  it's only called for Apofinder opened with `launchApofinder`.
+- **Pharmacy changes:** On Android `onApofinderDidChangePharmacy` is only called for Apofinder opened with
+  `launchApofinder` or shown with `IaApofinderScreen`, not for Apofinder the SDK opens itself.

@@ -7,6 +7,15 @@ Native SDK 2.10.0.
 - `IaSdkConfiguration.apofinder`: Apofinder can show "Versand" instead of "Botendienst" as its delivery quick filter,
   and preselect it (`IaSdkConfigurationApofinder`). "Versand" needs `isPickupLockerAndCourierShippingEnabled`. See
   [Apofinder Screen](docs/screens/apofinder_screen.md).
+- Screen widgets, to embed an SDK screen without its `IaSdkPlatformView` `viewId` string: `IaStartScreen` and
+  `IaApofinderScreen` in the core package, `IaProductSearchScreen` in `ia_over_the_counter`, `IaCartScreen` in
+  `ia_ordering`, `IaPharmacyScreen` in `ia_pharmacy` and `IaRedeemPrescriptionScreen` in `ia_prescription`, on the
+  common base class `IaSdkScreenView`. `IaApofinderScreen(isCancellable:)` and
+  `IaProductSearchScreen(focusesOnAppear:)` take the options of the launch methods, only used on iOS as there. See
+  [Presentation](docs/presentation.md).
+- Android: `embedStyle` and `onDismiss` of embedded SDK screens. An embed style shows a back button, also for
+  `IaSdkScreenEmbedStyle.presentation`, as the Android SDK has no close button. `onDismiss` is called for it, and when
+  the SDK ends its flow in another way.
 - Native APIs that weren't proxied yet, on both platforms where the native SDKs have them. Members only one native
   SDK has are documented as "Only supported on iOS/Android"; calling such a method on the other platform throws a
   `MissingPluginException`. See the doc comments of `IaSdk` and the module classes.
@@ -82,8 +91,13 @@ Native SDK 2.10.0.
 - iOS: `launchApofinder` didn't report the selected pharmacy through `onApofinderDidChangePharmacy` and didn't close.
 - iOS: `resetPrerequisites`, `resetLegalDisclaimer`, `setIsOnboardingShown` and `clearPharmacyId` only took effect
   after an app restart.
-- Android: inline components crashed in apps using `FlutterActivity`. They now fail with an error instead, see
-  Changed.
+- Android: inline components and embedded SDK screens crashed in apps using `FlutterActivity`. They now fail with an
+  error instead, see Changed.
+- Apofinder embedded with `IaSdkPlatformView` didn't report the selected pharmacy through
+  `onApofinderDidChangePharmacy`. On Android it also didn't call `onDismiss` after a selection.
+- iOS: inline components weren't in the view controller hierarchy, so UIKit didn't pass them appearance callbacks
+  or trait changes. They're now added like embedded SDK screens, and lay out without the safe area, which Flutter
+  handles.
 - Inline components failed to lay out without a width limit, for example in a `Row` or `AppBar.actions`.
 - iOS: an empty product grid kept its loading height, and components took an endless height while the SDK showed
   its loading or error view.
@@ -165,7 +179,8 @@ Native SDK 2.10.0.
 - **`exportLogs` returns a non-null path** and fails when the logs can't be exported.
 - **CardLink error codes name the failed method on both platforms**, for example `GET_SAVED_CARDS_ERROR`, instead of
   `STORAGE_ERROR`, `ENCODING_ERROR` or `JSON_ERROR`.
-- **Android inline components need a `ComponentActivity`**, such as `FlutterFragmentActivity`, as the app's activity.
+- **Android inline components and embedded SDK screens need a `ComponentActivity`**, such as
+  `FlutterFragmentActivity`, as the app's activity.
 - **Android:**
   - `onSdkBackAction` is asked before any SDK screen closes, except through `finishAllActivities`.
   - Calls that need an initialized SDK fail before `initialize`: the address setters, `setGuestUserData`, `logout`,
