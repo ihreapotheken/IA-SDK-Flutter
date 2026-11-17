@@ -99,6 +99,11 @@ Native SDK 2.10.0.
   or trait changes. They're now added like embedded SDK screens, and lay out without the safe area, which Flutter
   handles.
 - Inline components failed to lay out without a width limit, for example in a `Row` or `AppBar.actions`.
+- Android: inline components didn't grow when their content did. A product grid that was empty while it loaded
+  stayed collapsed, and the cart button stayed 40 dp tall instead of 56 dp. A component with a height set by the app,
+  for example with a `SizedBox`, is laid out within it.
+- Inline components and embedded SDK screens were recreated when they scrolled back into view in a lazy list, page
+  view or tab view, which stalled scrolling and reloaded their data. They're now kept alive.
 - iOS: an empty product grid kept its loading height, and components took an endless height while the SDK showed
   its loading or error view.
 - Android: the `IaCartButton` without `onTap` opened the cart without asking `onSdkWillNavigateToTarget`.

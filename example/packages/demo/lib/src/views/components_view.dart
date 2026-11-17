@@ -47,13 +47,20 @@ class _ComponentsViewState extends State<ComponentsView> {
           },
         ),
         const SizedBox(height: 12),
-        Text('In a row, with a set width for Android', style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          'In a row, with a set width and height for Android',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
         const SizedBox(height: 4),
         const Row(
           children: [
             Text('Your cart'),
             SizedBox(width: 12),
-            SizedBox(width: 64, child: IaCartButton()),
+            SizedBox(
+              height: 30,
+              width: 30,
+              child: IaCartButton(),
+            ),
           ],
         ),
         const SizedBox(height: 24),
