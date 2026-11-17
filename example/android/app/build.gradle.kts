@@ -1,4 +1,6 @@
+import com.android.build.api.dsl.ApplicationExtension
 import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.util.Properties
 import java.util.Base64
@@ -52,7 +54,9 @@ val iaEnvLabel = when (iaServerEnv) {
     else -> "QA"
 }
 
-android {
+// Configured by type: the plugins still apply the Kotlin Gradle Plugin, so `gradle.properties` opts out of AGP 9's
+// built-in Kotlin and new DSL, and AGP's `android {}` accessor for the old DSL is deprecated as an error.
+configure<ApplicationExtension> {
     namespace = "com.example.appsdk_v2_flutter_plugin_example"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
@@ -62,8 +66,16 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+    // The flavors set the app name with `resValue`, which AGP 9 turns off by default.
+    buildFeatures {
+        resValues = true
+    }
+
+    // AGP 9 applies its default ignore pattern to Flutter's assets, and its `.*` drops the `.secrets` and `.env` assets
+    // the app loads at startup. Flutter decides which assets ship, so only the version control and OS files stay
+    // ignored, as in AGP 8.
+    androidResources {
+        ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~"
     }
 
     defaultConfig {
@@ -133,6 +145,12 @@ android {
         jniLibs {
             useLegacyPackaging = true
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11
     }
 }
 

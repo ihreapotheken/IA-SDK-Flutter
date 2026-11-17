@@ -77,6 +77,9 @@ Native SDK 2.10.0.
 - Example app: the CardLink tab sent its card name with every launch. On Android a card name starts CardLink with
   that saved card, so the tab's "Save Card Enabled" switch never brought up the option to save the card. The name is
   now only sent when filled in, and the `cardName` docs say it selects a saved card.
+- Example app: the Android build failed with Flutter 3.50, which needs AGP 9. The example now uses AGP 9.3.1, Kotlin
+  2.4.20 and Gradle 9.5.0, and still builds with Flutter 3.44. Its `.secrets` and `.env` assets are kept in the APK,
+  which AGP 9 left out by default, so the app no longer hangs on the launch screen.
 - Module callbacks no longer pile up when a module is created more than once.
 - `ia_cardlink` declares its `ia_interface` dependency.
 - iOS: `launchApofinder` didn't report the selected pharmacy through `onApofinderDidChangePharmacy` and didn't close.
