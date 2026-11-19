@@ -4,6 +4,7 @@ import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:ia_example_demo/ia_client_config.dart';
 import 'package:ia_example_demo/src/settings/startup_settings.dart';
+import 'package:ia_example_shared/ia_example_shared.dart';
 
 /// Switches the settings the SDK reads only when it initializes, see [ExampleStartupSettings].
 ///
@@ -35,9 +36,7 @@ class StartupSettingsSection extends StatelessWidget {
     try {
       await save();
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Setting not saved: $e')));
-      }
+      if (context.mounted) showIaToast(context, 'Setting not saved: $e');
       return;
     }
     exit(0);
@@ -90,137 +89,114 @@ class StartupSettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = _settings;
-    final textTheme = Theme.of(context).textTheme;
     final isVersandWithoutCourierShipping =
         settings.deliveryQuickFilter == IaSdkApofinderDeliveryQuickFilter.courierShipping &&
         !settings.isPickupLockerAndCourierShippingEnabled;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return IaSection(
+      title: 'Startup settings',
       children: [
-        Text('Startup Settings', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 4),
-        Text(
+        const IaHint(
           'The SDK reads these when it initializes. A change is saved and the app closes; it applies when the app is '
           'opened again.',
-          style: textTheme.bodySmall,
         ),
-        const SizedBox(height: 12),
-        Text('Server environment', style: textTheme.bodyMedium),
-        const SizedBox(height: 4),
-        SizedBox(
-          width: double.infinity,
-          child: SegmentedButton<IaSdkConfigurationServerEnvironment>(
-            segments: [
-              for (final environment in IaSdkConfigurationServerEnvironment.values)
-                ButtonSegment(value: environment, label: Text(_serverEnvironmentLabel(environment))),
-            ],
-            selected: {settings.effectiveServerEnvironment},
-            onSelectionChanged: (selection) => _update(context, settings.copyWith(serverEnvironment: () => selection.first)),
-          ),
+        IaChoiceRow(
+          title: 'Server environment',
+          options: [
+            for (final environment in IaSdkConfigurationServerEnvironment.values)
+              (value: environment, label: _serverEnvironmentLabel(environment)),
+          ],
+          selected: settings.effectiveServerEnvironment,
+          onSelected: (environment) {
+            if (environment == settings.effectiveServerEnvironment) return;
+            _update(context, settings.copyWith(serverEnvironment: () => environment));
+          },
+          note: 'Built for ${_serverEnvironmentLabel(ExampleStartupSettings.buildServerEnvironment)}, which the launcher label shows.',
         ),
-        const SizedBox(height: 4),
-        Text(
-          'Built for ${_serverEnvironmentLabel(ExampleStartupSettings.buildServerEnvironment)}, which the launcher '
-          'label shows.',
-          style: textTheme.bodySmall,
-        ),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: const Text('Pickup lockers and courier shipping'),
-          subtitle: const Text('Offered in checkout, and "Versand" in Apofinder'),
+        IaSwitchRow(
+          title: 'Pickup lockers and courier shipping',
+          description: 'Offered in checkout, and "Versand" in Apofinder',
           value: settings.isPickupLockerAndCourierShippingEnabled,
           onChanged: (value) => _update(context, settings.copyWith(isPickupLockerAndCourierShippingEnabled: value)),
         ),
-        Text('Apofinder delivery quick filter', style: textTheme.bodyMedium),
-        const SizedBox(height: 4),
-        SizedBox(
-          width: double.infinity,
-          child: SegmentedButton<IaSdkApofinderDeliveryQuickFilter>(
-            segments: const [
-              ButtonSegment(value: IaSdkApofinderDeliveryQuickFilter.delivery, label: Text('Botendienst')),
-              ButtonSegment(value: IaSdkApofinderDeliveryQuickFilter.courierShipping, label: Text('Versand')),
-            ],
-            selected: {settings.deliveryQuickFilter},
-            onSelectionChanged: (selection) => _update(context, settings.copyWith(deliveryQuickFilter: selection.first)),
-          ),
+        IaChoiceRow(
+          title: 'Apofinder delivery quick filter',
+          options: const [
+            (value: IaSdkApofinderDeliveryQuickFilter.delivery, label: 'Botendienst'),
+            (value: IaSdkApofinderDeliveryQuickFilter.courierShipping, label: 'Versand'),
+          ],
+          selected: settings.deliveryQuickFilter,
+          onSelected: (filter) {
+            if (filter == settings.deliveryQuickFilter) return;
+            _update(context, settings.copyWith(deliveryQuickFilter: filter));
+          },
+          note: isVersandWithoutCourierShipping
+              ? '"Versand" needs pickup lockers and courier shipping. Without them Apofinder shows "Botendienst".'
+              : null,
         ),
-        if (isVersandWithoutCourierShipping) ...[
-          const SizedBox(height: 4),
-          Text(
-            '"Versand" needs pickup lockers and courier shipping. Without them Apofinder shows "Botendienst".',
-            style: textTheme.bodySmall,
-          ),
-        ],
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: const Text('Quick filter preselected'),
-          subtitle: const Text('Selected when Apofinder opens'),
+        IaSwitchRow(
+          title: 'Quick filter preselected',
+          description: 'Selected when Apofinder opens',
           value: settings.isDeliveryQuickFilterPreselected,
           onChanged: (value) => _update(context, settings.copyWith(isDeliveryQuickFilterPreselected: value)),
         ),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: const Text('Mascot illustrations'),
-          subtitle: const Text('Pharmi on the CardLink FAQ screen and others'),
+        IaSwitchRow(
+          title: 'Mascot illustrations',
+          description: 'Pharmi on the CardLink FAQ screen and others',
           value: settings.shouldShowMascotIllustrations,
           onChanged: (value) => _update(context, settings.copyWith(shouldShowMascotIllustrations: value)),
         ),
-        if (Platform.isAndroid) ...[
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Host app handles the imprint (Android)'),
-            subtitle: const Text('The imprint button reports the imprint navigation target'),
-            value: settings.isImprintHandledByHostApp,
-            onChanged: (value) => _update(context, settings.copyWith(isImprintHandledByHostApp: value)),
+        IaSwitchRow(
+          title: 'Host app handles the imprint',
+          description: 'The imprint button reports the imprint navigation target',
+          platform: IaPlatform.android,
+          value: settings.isImprintHandledByHostApp,
+          onChanged: (value) => _update(context, settings.copyWith(isImprintHandledByHostApp: value)),
+        ),
+        IaSwitchRow(
+          title: 'Analytics',
+          description: settings.isAnalyticsEnabled == null
+              ? 'Default: on outside production. Events show in the Events tab after consent'
+              : 'Events show in the Events tab after consent',
+          platform: IaPlatform.android,
+          value: settings.effectiveIsAnalyticsEnabled,
+          onChanged: (value) => _update(context, settings.copyWith(isAnalyticsEnabled: () => value)),
+        ),
+        IaSwitchRow(
+          title: 'Crash reporting',
+          description: 'The SDK reports its own crashes',
+          platform: IaPlatform.android,
+          value: settings.isCrashReportingEnabled,
+          onChanged: (value) => _update(context, settings.copyWith(isCrashReportingEnabled: value)),
+        ),
+        IaValueRow(
+          title: 'Play Store ID',
+          value: settings.playStoreId ?? 'Not set',
+          platform: IaPlatform.android,
+          onTap: () => _editStoreId(
+            context,
+            title: 'Play Store ID',
+            value: settings.playStoreId,
+            update: (value) => settings.copyWith(playStoreId: () => value),
           ),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Analytics (Android)'),
-            subtitle: Text(
-              settings.isAnalyticsEnabled == null
-                  ? 'Default: on outside production. Events show in the Events tab after consent'
-                  : 'Events show in the Events tab after consent',
-            ),
-            value: settings.effectiveIsAnalyticsEnabled,
-            onChanged: (value) => _update(context, settings.copyWith(isAnalyticsEnabled: () => value)),
+        ),
+        IaValueRow(
+          title: 'App Store ID',
+          value: settings.appStoreId ?? 'Not set',
+          platform: IaPlatform.ios,
+          onTap: () => _editStoreId(
+            context,
+            title: 'App Store ID',
+            value: settings.appStoreId,
+            update: (value) => settings.copyWith(appStoreId: () => value),
           ),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Crash reporting (Android)'),
-            subtitle: const Text('The SDK reports its own crashes'),
-            value: settings.isCrashReportingEnabled,
-            onChanged: (value) => _update(context, settings.copyWith(isCrashReportingEnabled: value)),
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Play Store ID (Android)'),
-            subtitle: Text(settings.playStoreId ?? 'Not set'),
-            trailing: const Icon(Icons.edit),
-            onTap: () => _editStoreId(
-              context,
-              title: 'Play Store ID',
-              value: settings.playStoreId,
-              update: (value) => settings.copyWith(playStoreId: () => value),
-            ),
-          ),
-        ],
-        if (Platform.isIOS)
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('App Store ID (iOS)'),
-            subtitle: Text(settings.appStoreId ?? 'Not set'),
-            trailing: const Icon(Icons.edit),
-            onTap: () => _editStoreId(
-              context,
-              title: 'App Store ID',
-              value: settings.appStoreId,
-              update: (value) => settings.copyWith(appStoreId: () => value),
-            ),
-          ),
-        const SizedBox(height: 8),
-        OutlinedButton(
-          onPressed: () => _saveAndExit(context, ExampleStartupSettings.clear, message: 'All startup settings will be reset.'),
-          child: const Text('Reset to Defaults'),
+        ),
+        IaActionRow(
+          title: 'Reset to Defaults',
+          description: 'Resets every startup setting',
+          // Not awaited: the row would show progress behind the dialog.
+          onTap: () {
+            _saveAndExit(context, ExampleStartupSettings.clear, message: 'All startup settings will be reset.');
+          },
         ),
       ],
     );

@@ -1,9 +1,10 @@
 import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
-import 'package:ia_example_demo/src/testing/event_log.dart';
-import 'package:ia_example_demo/src/views/button_label.dart';
 import 'package:flutter/material.dart';
+import 'package:ia_example_demo/src/actions.dart';
+import 'package:ia_example_demo/src/testing/event_log.dart';
+import 'package:ia_example_shared/ia_example_shared.dart';
 import 'package:ia_ordering/ia_ordering.dart';
 import 'package:ia_over_the_counter/ia_over_the_counter.dart';
 import 'package:ia_pharmacy/ia_pharmacy.dart';
@@ -31,51 +32,101 @@ class _ScreensViewState extends State<ScreensView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return IaTabListView(
       children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(20, 16 + MediaQuery.of(context).padding.top, 20, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: double.infinity,
-                child: SegmentedButton<_ScreensMode>(
-                  segments: const [
-                    ButtonSegment(value: _ScreensMode.auto, label: Text('Auto')),
-                    ButtonSegment(value: _ScreensMode.manual, label: Text('Manual')),
-                  ],
-                  selected: {_mode},
-                  onSelectionChanged: (selection) => setState(() => _mode = selection.first),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                switch (_mode) {
-                  _ScreensMode.auto => 'The SDK presents and dismisses the screens, opened with the plugin\'s launch methods.',
-                  _ScreensMode.manual =>
-                    'The app embeds the screens with IaSdkPlatformView, then pushes or presents them and closes them itself.',
-                },
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
+        IaSection(
+          title: 'Presentation',
+          children: [
+            IaChoiceRow(
+              title: 'Opened by',
+              options: const [
+                (value: _ScreensMode.auto, label: 'Auto'),
+                (value: _ScreensMode.manual, label: 'Manual'),
+              ],
+              selected: _mode,
+              onSelected: (mode) => setState(() => _mode = mode),
+              note: switch (_mode) {
+                _ScreensMode.auto => 'The SDK presents and dismisses the screens, opened with the plugin\'s launch methods.',
+                _ScreensMode.manual =>
+                  'The app embeds the screens with IaSdkPlatformView, then pushes or presents them and closes them itself.',
+              },
+            ),
+          ],
         ),
-        Expanded(
-          child: switch (_mode) {
-            _ScreensMode.auto => const _AutoScreensList(),
-            _ScreensMode.manual => const _ManualScreensList(),
-          },
-        ),
+        ...switch (_mode) {
+          _ScreensMode.auto => _autoSections(context),
+          _ScreensMode.manual => [const _ManualScreensSection()],
+        },
       ],
     );
   }
-}
 
-/// Opens SDK screens with the plugin's launch methods, so the SDK presents them itself.
-///
-class _AutoScreensList extends StatelessWidget {
-  const _AutoScreensList();
+  /// Opens SDK screens with the plugin's launch methods, so the SDK presents them itself.
+  ///
+  static List<Widget> _autoSections(BuildContext context) {
+    final sdk = IaSdk.instance;
+    Future<void> launch(Future<void> Function() launch) => runLaunch(context, launch);
+    return [
+      IaSection(
+        title: 'Screens',
+        children: [
+          IaActionRow(title: 'Start', description: 'The SDK\'s start screen', onTap: () => launch(sdk.launchStartRoute)),
+          IaActionRow(title: 'Product Search', onTap: () => launch(sdk.overTheCounter.launchProductSearchRoute)),
+          IaActionRow(
+            title: 'Product Search, Focused',
+            platform: IaPlatform.ios,
+            onTap: () => launch(() => sdk.overTheCounter.launchProductSearchRoute(focusesOnAppear: true)),
+          ),
+          IaActionRow(title: 'Cart', onTap: () => launch(sdk.ordering.launchCartScreen)),
+          IaActionRow(title: 'Pharmacy Details', onTap: () => launch(sdk.pharmacy.launchPharmacyDetails)),
+          IaActionRow(title: 'Apofinder', onTap: () => launch(sdk.launchApofinder)),
+          IaActionRow(
+            title: 'Apofinder, Not Cancellable',
+            platform: IaPlatform.ios,
+            onTap: () => launch(() => sdk.launchApofinder(isCancellable: false)),
+          ),
+          IaActionRow(title: 'Redeem Prescription', onTap: () => launch(sdk.prescription.launchRedeemPrescriptionScreen)),
+        ],
+      ),
+      if (Platform.isIOS)
+        IaSection(
+          title: 'Scanners',
+          children: [
+            IaActionRow(
+              title: 'Prescription Photo Scanner',
+              platform: IaPlatform.ios,
+              onTap: () => launch(() => sdk.prescription.launchPrescriptionScanner(IaPrescriptionScannerType.prescription)),
+            ),
+            IaActionRow(
+              title: 'E-Prescription Scanner',
+              platform: IaPlatform.ios,
+              onTap: () => launch(() => sdk.prescription.launchPrescriptionScanner(IaPrescriptionScannerType.ePrescription)),
+            ),
+            IaActionRow(
+              title: 'Scanner Camera Test',
+              description: 'Opens the photo scanner, then switches the flashlight and pauses the preview',
+              platform: IaPlatform.ios,
+              onTap: () => launch(_runScannerCameraTest),
+            ),
+          ],
+        ),
+      IaSection(
+        title: 'Flows',
+        children: [
+          IaActionRow(
+            title: 'Prerequisite Flow',
+            description: 'Legal documents, onboarding and pharmacy',
+            onTap: () => _launchPrerequisiteFlow(context),
+          ),
+          IaActionRow(
+            title: 'Finish All Activities Test',
+            description: 'Opens product search, closes it after 4s. Run only if prerequisites finished before.',
+            onTap: _runFinishAllActivitiesTest,
+          ),
+        ],
+      ),
+    ];
+  }
 
   /// Opens the photo scanner, then turns the flashlight on and off, and pauses and resumes the preview.
   ///
@@ -106,11 +157,7 @@ class _AutoScreensList extends StatelessWidget {
       // Without this check the button seems to do nothing, as the flow finishes without showing a screen.
       if (await IaSdk.instance.isPrerequisiteFlowCompleted()) {
         log.add('Prerequisites', 'Already completed');
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Prerequisites are already completed')),
-          );
-        }
+        if (context.mounted) showIaToast(context, 'Prerequisites are already completed');
         return;
       }
     } catch (e) {
@@ -136,96 +183,6 @@ class _AutoScreensList extends StatelessWidget {
       log.add('Finish all activities test', 'Failed: $e');
     }
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-      children: [
-        ElevatedButton(
-          child: Text('Launch Start screen'),
-          onPressed: () => IaSdk.instance.launchStartRoute(),
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          child: Text('Launch Product Search'),
-          onPressed: () => IaSdk.instance.overTheCounter.launchProductSearchRoute(),
-        ),
-        const SizedBox(height: 16),
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: Text('Launch Product Search, focused (iOS)'),
-            onPressed: () => IaSdk.instance.overTheCounter.launchProductSearchRoute(focusesOnAppear: true),
-          ),
-          const SizedBox(height: 16),
-        ],
-        ElevatedButton(
-          child: Text('Launch Cart Screen'),
-          onPressed: () => IaSdk.instance.ordering.launchCartScreen(),
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          child: Text('Launch Pharmacy Details'),
-          onPressed: () => IaSdk.instance.pharmacy.launchPharmacyDetails(),
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          child: Text('Launch Apofinder'),
-          onPressed: () => IaSdk.instance.launchApofinder(),
-        ),
-        const SizedBox(height: 16),
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: Text('Launch Apofinder, not cancellable (iOS)'),
-            onPressed: () => IaSdk.instance.launchApofinder(isCancellable: false),
-          ),
-          const SizedBox(height: 16),
-        ],
-        ElevatedButton(
-          child: Text('Launch Redeem Prescription'),
-          onPressed: () => IaSdk.instance.prescription.launchRedeemPrescriptionScreen(),
-        ),
-        const SizedBox(height: 16),
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: Text('Launch Prescription Photo Scanner (iOS)'),
-            onPressed: () => IaSdk.instance.prescription.launchPrescriptionScanner(
-              IaPrescriptionScannerType.prescription,
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: Text('Launch E-Prescription Scanner (iOS)'),
-            onPressed: () => IaSdk.instance.prescription.launchPrescriptionScanner(
-              IaPrescriptionScannerType.ePrescription,
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: Text('Scanner Camera Test (iOS)'),
-            onPressed: _runScannerCameraTest,
-          ),
-          const SizedBox(height: 16),
-        ],
-        ElevatedButton(
-          child: Text('Launch Prerequisite Flow'),
-          onPressed: () => _launchPrerequisiteFlow(context),
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          child: ButtonLabel(
-            title: 'Finish All Activities Test',
-            description: 'Opens product search, closes it after 4s. Run only if prerequisites finished before.',
-          ),
-          onPressed: _runFinishAllActivitiesTest,
-        ),
-      ],
-    );
-  }
 }
 
 /// Builds an SDK screen widget for a route, with the route's embed style and a callback that closes it.
@@ -235,8 +192,8 @@ typedef _ScreenBuilder = IaSdkScreenView Function(IaSdkScreenEmbedStyle embedSty
 /// Embeds SDK screens with their [IaSdkScreenView] widgets in a route the app pushes or presents, the way a host app
 /// would.
 ///
-class _ManualScreensList extends StatelessWidget {
-  const _ManualScreensList();
+class _ManualScreensSection extends StatelessWidget {
+  const _ManualScreensSection();
 
   /// The SDK screens a host app can embed, by widget name.
   ///
@@ -271,31 +228,31 @@ class _ManualScreensList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+    return IaSection(
+      title: 'Embedded screens',
       children: [
-        for (final MapEntry(key: name, value: builder) in _screens.entries) ...[
-          Text(name, style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  child: const Text('Push'),
-                  onPressed: () => _open(context, builder, isPresented: false),
+        for (final MapEntry(key: name, value: builder) in _screens.entries)
+          IaBlock(
+            padding: const EdgeInsets.fromLTRB(IaSpacing.lg, IaSpacing.md, IaSpacing.md, IaSpacing.md),
+            child: Row(
+              spacing: IaSpacing.sm,
+              children: [
+                Expanded(child: Text(name, style: IaTextStyles.headline.copyWith(fontSize: 15))),
+                IaButton(
+                  title: 'Push',
+                  variant: IaButtonVariant.secondary,
+                  isCompact: true,
+                  onTap: () => _open(context, builder, isPresented: false),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  child: const Text('Present'),
-                  onPressed: () => _open(context, builder, isPresented: true),
+                IaButton(
+                  title: 'Present',
+                  variant: IaButtonVariant.secondary,
+                  isCompact: true,
+                  onTap: () => _open(context, builder, isPresented: true),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
-        ],
       ],
     );
   }

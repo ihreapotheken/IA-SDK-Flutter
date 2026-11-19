@@ -1,8 +1,7 @@
-import 'dart:io';
-
+import 'package:flutter/material.dart';
 import 'package:ia_example_demo/src/testing/event_log.dart';
 import 'package:ia_example_demo/src/testing/test_settings.dart';
-import 'package:flutter/material.dart';
+import 'package:ia_example_shared/ia_example_shared.dart';
 
 /// Shows the SDK callbacks and events the example app received, and switches how the app answers them.
 ///
@@ -15,58 +14,45 @@ class EventsView extends StatelessWidget {
       listenable: Listenable.merge([ExampleEventLog.instance, ExampleEventLog.analytics, ExampleTestSettings.instance]),
       builder: (context, _) {
         final settings = ExampleTestSettings.instance;
-        return ListView(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            24 + MediaQuery.of(context).padding.top,
-            20,
-            24,
-          ),
+        return IaTabListView(
           children: [
-            Text('Host Answers', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Host handles navigation targets'),
-              subtitle: const Text('The SDK doesn\'t open the screen, e.g. the cart'),
-              value: settings.handlesNavigation,
-              onChanged: (value) => settings.handlesNavigation = value,
-            ),
-            if (Platform.isAndroid)
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Block the back action (Android)'),
-                subtitle: const Text('SDK screens stay open on system back'),
-                value: settings.blocksBackAction,
-                onChanged: (value) => settings.blocksBackAction = value,
-              ),
-            if (Platform.isIOS)
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Log SDK messages (iOS)'),
-                subtitle: const Text('Adds the SDK\'s own log messages below'),
-                value: settings.logsSdkMessages,
-                onChanged: (value) => settings.logsSdkMessages = value,
-              ),
-            const SizedBox(height: 8),
-            Text('Prescription scan answer', style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 4),
-            SegmentedButton<ExampleScanDecision>(
-              segments: [
-                for (final decision in ExampleScanDecision.values) ButtonSegment(value: decision, label: Text(decision.name)),
+            IaSection(
+              title: 'Host answers',
+              children: [
+                IaSwitchRow(
+                  title: 'Host handles navigation targets',
+                  description: 'The SDK doesn\'t open the screen, e.g. the cart',
+                  value: settings.handlesNavigation,
+                  onChanged: (value) => settings.handlesNavigation = value,
+                ),
+                IaSwitchRow(
+                  title: 'Block the back action',
+                  description: 'SDK screens stay open on system back',
+                  platform: IaPlatform.android,
+                  value: settings.blocksBackAction,
+                  onChanged: (value) => settings.blocksBackAction = value,
+                ),
+                IaSwitchRow(
+                  title: 'Log SDK messages',
+                  description: 'Adds the SDK\'s own log messages below',
+                  platform: IaPlatform.ios,
+                  value: settings.logsSdkMessages,
+                  onChanged: (value) => settings.logsSdkMessages = value,
+                ),
+                IaChoiceRow(
+                  title: 'Prescription scan answer',
+                  options: [for (final decision in ExampleScanDecision.values) (value: decision, label: decision.name)],
+                  selected: settings.scanDecision,
+                  onSelected: (decision) => settings.scanDecision = decision,
+                ),
               ],
-              selected: {settings.scanDecision},
-              onSelectionChanged: (selection) => settings.scanDecision = selection.first,
             ),
-            const SizedBox(height: 24),
-            ..._section(
-              context,
+            _LogSection(
               title: 'Analytics',
               log: ExampleEventLog.analytics,
               emptyText: 'No analytics events yet. They need analytics enabled for the SDK and the user\'s consent.',
             ),
-            const SizedBox(height: 24),
-            ..._section(
-              context,
+            _LogSection(
               title: 'Events',
               log: ExampleEventLog.instance,
               emptyText: 'No events yet. Use the SDK screens, then come back.',
@@ -76,51 +62,56 @@ class EventsView extends StatelessWidget {
       },
     );
   }
+}
 
-  static List<Widget> _section(
-    BuildContext context, {
-    required String title,
-    required ExampleEventLog log,
-    required String emptyText,
-  }) {
+/// A log's entries, newest first, with a button that clears them.
+///
+class _LogSection extends StatelessWidget {
+  const _LogSection({required this.title, required this.log, required this.emptyText});
+
+  final String title;
+  final ExampleEventLog log;
+  final String emptyText;
+
+  @override
+  Widget build(BuildContext context) {
     final entries = log.entries;
-    return [
-      Row(
-        children: [
-          Expanded(
-            child: Text(
-              '$title (${entries.length})',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-          ),
-          TextButton(
-            onPressed: entries.isEmpty ? null : log.clear,
-            child: const Text('Clear'),
-          ),
-        ],
-      ),
-      if (entries.isEmpty)
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Text(emptyText),
-        ),
-      for (final entry in entries)
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: '${_time(entry.time)}  ${entry.source}  ',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+    return IaSection(
+      title: '$title (${entries.length})',
+      trailing: IaLinkButton(title: 'Clear', onTap: entries.isEmpty ? null : log.clear),
+      children: [
+        IaBlock(
+          child: entries.isEmpty
+              ? Text(emptyText, style: IaTextStyles.caption.copyWith(color: IaColors.inkTertiary))
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: IaSpacing.md,
+                  children: [
+                    for (final entry in entries)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 2,
+                        children: [
+                          Text.rich(
+                            TextSpan(
+                              text: '${_time(entry.time)}  ',
+                              children: [
+                                TextSpan(
+                                  text: entry.source,
+                                  style: const TextStyle(fontWeight: FontWeight.w700, color: IaColors.accentOnSoft),
+                                ),
+                              ],
+                            ),
+                            style: IaTextStyles.mono.copyWith(color: IaColors.inkTertiary),
+                          ),
+                          Text(entry.message, style: IaTextStyles.mono.copyWith(color: IaColors.ink)),
+                        ],
+                      ),
+                  ],
                 ),
-                TextSpan(text: entry.message),
-              ],
-            ),
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-          ),
         ),
-    ];
+      ],
+    );
   }
 
   static String _time(DateTime time) {

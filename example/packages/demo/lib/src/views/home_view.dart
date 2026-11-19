@@ -1,8 +1,11 @@
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:ia_example_shared/ia_example_shared.dart';
 import 'package:latlong2/latlong.dart';
 
+/// A host app's own screen, a map of pharmacies, from which it opens the SDK with the pharmacy a user picks.
+///
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
@@ -13,28 +16,49 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlutterMap(
-      options: MapOptions(
-        initialCenter: LatLng(52.52, 13.4050),
-        initialZoom: 9.2,
-      ),
+    return Stack(
       children: [
-        TileLayer(
-          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'de.ihreapotheken.sdk',
-        ),
-        MarkerLayer(
-          markers: [
-            for (final marker in _pharmacyMarkers)
-              Marker(
-                point: marker.point,
-                width: 60,
-                height: 60,
-                child: _PharmacyMarker(
-                  pharmacyId: marker.pharmacyId,
-                ),
-              ),
+        FlutterMap(
+          options: const MapOptions(
+            initialCenter: LatLng(52.52, 13.4050),
+            initialZoom: 9.2,
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'de.ihreapotheken.sdk',
+            ),
+            MarkerLayer(
+              markers: [
+                for (final marker in _pharmacyMarkers)
+                  Marker(
+                    point: marker.point,
+                    width: 48,
+                    height: 48,
+                    child: _PharmacyMarker(pharmacyId: marker.pharmacyId),
+                  ),
+              ],
+            ),
           ],
+        ),
+        const Positioned(
+          left: IaSpacing.lg,
+          right: IaSpacing.lg,
+          top: IaSpacing.sm,
+          child: IaCard(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: IaSpacing.lg, vertical: IaSpacing.md),
+              child: Row(
+                spacing: IaSpacing.md,
+                children: [
+                  Icon(Icons.touch_app_outlined, color: IaColors.accent),
+                  Expanded(
+                    child: Text('Tap a pharmacy to shop there with the SDK.', style: IaTextStyles.caption),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -50,70 +74,58 @@ class _PharmacyMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-        ),
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: Icon(
-            Icons.local_pharmacy,
-            color: Colors.red,
-          ),
-        ),
+    return IaTappable(
+      onTap: () => _showPharmacySheet(context),
+      child: const DecoratedBox(
+        decoration: BoxDecoration(color: IaColors.surface, shape: BoxShape.circle, boxShadow: iaCardShadow),
+        child: Center(child: Icon(Icons.local_pharmacy_rounded, color: IaColors.accent)),
       ),
-      onTap: () => _showPharmacyBottomSheet(context),
     );
   }
 
-  void _showPharmacyBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+  void _showPharmacySheet(BuildContext context) {
+    showModalBottomSheet<void>(
       context: context,
-      barrierColor: Colors.transparent,
-      builder: (context) {
-        return BottomSheet(
-          onClosing: () {},
-          showDragHandle: true,
-          backgroundColor: Colors.white,
-          elevation: 16,
-          builder: (context) {
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                10,
-                16,
-                20 + MediaQuery.of(context).padding.bottom,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.',
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: FilledButton(
-                      child: const Text('Online Shopping'),
-                      onPressed: () => _onOnlineShoppingPressed(context),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+      builder: (context) => _PharmacySheet(pharmacyId: pharmacyId),
     );
   }
+}
 
-  Future<void> _onOnlineShoppingPressed(BuildContext context) async {
-    Navigator.pop(context);
-    await IaSdk.instance.pharmacy.setPharmacyId(pharmacyId);
-    await IaSdk.instance.launchStartRoute();
+/// The pharmacy a marker stands for, with a button that selects it and opens the SDK.
+///
+class _PharmacySheet extends StatelessWidget {
+  const _PharmacySheet({required this.pharmacyId});
+
+  final String pharmacyId;
+
+  Future<void> _shopOnline(BuildContext context) async {
+    try {
+      await IaSdk.instance.pharmacy.setPharmacyId(pharmacyId);
+      await IaSdk.instance.launchStartRoute();
+      if (context.mounted) Navigator.pop(context);
+    } catch (e) {
+      if (context.mounted) showIaToast(context, 'Error: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(IaSpacing.xl, 0, IaSpacing.xl, IaSpacing.xl + MediaQuery.paddingOf(context).bottom),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Pharmacy $pharmacyId', style: IaTextStyles.title),
+          const SizedBox(height: IaSpacing.xs),
+          const Text(
+            'Shopping online selects this pharmacy and opens the SDK, with its products, prescriptions and checkout.',
+            style: IaTextStyles.caption,
+          ),
+          const SizedBox(height: IaSpacing.xl),
+          IaButton(title: 'Online Shopping', icon: Icons.shopping_bag_outlined, onTap: () => _shopOnline(context)),
+        ],
+      ),
+    );
   }
 }

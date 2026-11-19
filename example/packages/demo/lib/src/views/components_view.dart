@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:ia_example_shared/ia_example_shared.dart';
 import 'package:ia_interface/ia_interface.dart';
 import 'package:ia_ordering/ia_ordering.dart';
 import 'package:ia_over_the_counter/ia_over_the_counter.dart';
 
+/// The SDK's widgets a host app embeds in its own screens: the cart button and the product grids.
+///
 class ComponentsView extends StatefulWidget {
   const ComponentsView({super.key});
 
@@ -26,91 +29,86 @@ class _ComponentsViewState extends State<ComponentsView> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        24 + MediaQuery.of(context).padding.top,
-        20,
-        24,
-      ),
+    return IaTabListView(
       children: [
-        const _SectionHeader('Cart Button'),
-        const IaCartButton(),
-        const SizedBox(height: 12),
-        Text('With a host tap handler', style: Theme.of(context).textTheme.bodySmall),
-        const SizedBox(height: 4),
-        IaCartButton(
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Cart button tapped, the host app handles it.')),
-            );
-          },
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'In a row, with a set width and height for Android',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(height: 4),
-        const Row(
+        IaSection(
+          title: 'Cart button',
           children: [
-            Text('Your cart'),
-            SizedBox(width: 12),
-            SizedBox(
-              height: 30,
-              width: 30,
-              child: IaCartButton(),
+            const _LabelledBlock(label: 'The SDK opens the cart', child: IaCartButton()),
+            _LabelledBlock(
+              label: 'With a host tap handler',
+              child: IaCartButton(onTap: () => showIaToast(context, 'Cart button tapped, the host app handles it.')),
+            ),
+            const _LabelledBlock(
+              label: 'In a row, with a set width and height for Android',
+              // Taller than the button, as the iOS one draws beyond the size it's given.
+              child: SizedBox(
+                height: 48,
+                child: Row(
+                  children: [
+                    Text('Your cart', style: IaTextStyles.body),
+                    SizedBox(width: IaSpacing.md),
+                    SizedBox(height: 30, width: 30, child: IaCartButton()),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 24),
-        const _SectionHeader('Product Grid'),
-        Text('Display Type', style: Theme.of(context).textTheme.bodySmall),
-        const SizedBox(height: 4),
-        Wrap(
-          spacing: 8,
-          children: IaProductDisplayType.values.where((type) => type != IaProductDisplayType.custom).map((type) {
-            return ChoiceChip(
-              label: Text(type.name),
-              selected: _selectedGridType == type,
-              onSelected: (_) => setState(() => _selectedGridType = type),
-            );
-          }).toList(),
+        IaSection(
+          title: 'Product grid',
+          children: [
+            IaChoiceRow(
+              title: 'Display type',
+              options: [
+                for (final type in IaProductDisplayType.values)
+                  if (type != IaProductDisplayType.custom) (value: type, label: type.name),
+              ],
+              selected: _selectedGridType,
+              onSelected: (type) => setState(() => _selectedGridType = type),
+            ),
+            if (_needsPzn)
+              IaBlock(
+                child: IaTextField(
+                  label: 'PZN the recommendations are based on',
+                  controller: _recommendationPznController,
+                  keyboardType: TextInputType.number,
+                  onSubmitted: (_) => setState(() {}),
+                ),
+              ),
+            if (!_needsPzn || _recommendationPznController.text.trim().isNotEmpty)
+              IaBlock(
+                child: IaProductGrid(
+                  type: _selectedGridType,
+                  pzn: _needsPzn ? _recommendationPznController.text.trim() : null,
+                ),
+              ),
+          ],
         ),
-        const SizedBox(height: 12),
-        if (_needsPzn) ...[
-          TextField(
-            controller: _recommendationPznController,
-            decoration: const InputDecoration(labelText: 'PZN the recommendations are based on'),
-            onSubmitted: (_) => setState(() {}),
-          ),
-          const SizedBox(height: 12),
-        ],
-        if (!_needsPzn || _recommendationPznController.text.trim().isNotEmpty)
-          IaProductGrid(
-            type: _selectedGridType,
-            pzn: _needsPzn ? _recommendationPznController.text.trim() : null,
-          ),
-        const SizedBox(height: 24),
-        const _SectionHeader('Custom Product Grid'),
-        TextField(
-          controller: _customPznsController,
-          decoration: const InputDecoration(
-            labelText: 'PZNs, comma separated',
-          ),
-          onSubmitted: (value) {
-            setState(() {
-              _customPzns = value.split(',').map((pzn) => pzn.trim()).where((pzn) => pzn.isNotEmpty).toList();
-            });
-          },
+        IaSection(
+          title: 'Custom product grid',
+          children: [
+            IaBlock(
+              child: IaTextField(
+                label: 'PZNs, comma separated',
+                controller: _customPznsController,
+                onSubmitted: (value) {
+                  setState(() {
+                    _customPzns = value.split(',').map((pzn) => pzn.trim()).where((pzn) => pzn.isNotEmpty).toList();
+                  });
+                },
+              ),
+            ),
+            if (_customPzns.isNotEmpty)
+              IaBlock(
+                child: IaProductGrid(
+                  type: IaProductDisplayType.custom,
+                  title: 'Selected for you',
+                  pzns: _customPzns,
+                ),
+              ),
+          ],
         ),
-        const SizedBox(height: 12),
-        if (_customPzns.isNotEmpty)
-          IaProductGrid(
-            type: IaProductDisplayType.custom,
-            title: 'Selected for you',
-            pzns: _customPzns,
-          ),
       ],
     );
   }
@@ -123,16 +121,25 @@ class _ComponentsViewState extends State<ComponentsView> {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader(this.title);
+/// A component in a section, with a caption above it.
+///
+class _LabelledBlock extends StatelessWidget {
+  const _LabelledBlock({required this.label, required this.child});
 
-  final String title;
+  final String label;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+    return IaBlock(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: IaSpacing.sm,
+        children: [
+          Text(label, style: IaTextStyles.caption),
+          child,
+        ],
+      ),
     );
   }
 }
