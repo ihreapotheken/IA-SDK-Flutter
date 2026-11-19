@@ -95,18 +95,22 @@ IaSdkConfiguration(
 
 ### Liquid Glass
 
-IA SDKs support Liquid Glass, starting from iOS 26.0.
+IA SDKs support Liquid Glass, starting from iOS 26.0, and use it by default.
 
-To enable it, make sure you set `UIDesignRequiresCompatibility` to `false` in your `ios/Runner/Info.plist`. Then set
-`supportsLiquidGlass` to `true`:
+If your app runs in compatibility mode (`UIDesignRequiresCompatibility` set to `true` in `ios/Runner/Info.plist`, see
+[Liquid Glass](https://github.com/ihreapotheken/IA-SDK-iOS/blob/main/Docs/iOSProjectSetup.md#4-liquid-glass) in the iOS
+Project Setup guide), set `supportsLiquidGlass` to `false`:
 
 ```dart
 const IaUIConfiguration(
-  supportsLiquidGlass: true,
+  supportsLiquidGlass: false,
 )
 ```
 
-**Note**: If you do not set `supportsLiquidGlass` to `true`, there will be some visual artifacts.
+**Note**: If your app runs in compatibility mode and you do not set `supportsLiquidGlass` to `false`, there will be
+some visual artifacts. Once you build with Xcode 27 or later, remove `UIDesignRequiresCompatibility` from
+`ios/Runner/Info.plist` and keep `supportsLiquidGlass` at its default value `true`, because iOS 27 ignores the key for
+those apps and always uses Liquid Glass.
 
 ### Bouncy ScrollViews
 

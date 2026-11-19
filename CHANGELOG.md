@@ -154,6 +154,9 @@ Native SDK 2.10.0.
 
 ### Changed
 
+- **`IaUIConfiguration.supportsLiquidGlass` defaults to `true`**, so SDK screens use Liquid Glass on iOS 26 and later.
+  Set it to `false` only if your iOS app is built with Xcode 26 and runs in compatibility mode
+  (`UIDesignRequiresCompatibility` set to `true`). See [Appearance](docs/appearance.md).
 - **`IaSdkNavigationTarget`, `IaCardLinkEvent` and `IaProductDisplayType` have new values.** Exhaustive `switch`
   statements over them need the new cases.
 - **The `IaBase*` interfaces have new abstract members**, and `getCartDetails`, `launchProductSearchRoute`,
