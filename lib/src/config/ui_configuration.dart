@@ -180,14 +180,17 @@ class IaUIConfiguration {
   /// Generates an instance of UI configuration.
   ///
   const IaUIConfiguration({
-    this.supportsLiquidGlass = false,
+    this.supportsLiquidGlass = true,
     this.shouldShowMascotIllustrations = true,
     this.header = const IaHeaderConfiguration(),
     this.primaryButton = const IaPrimaryButtonConfiguration(),
     this.secondaryButton = const IaSecondaryButtonConfiguration(),
   });
 
-  /// Whether the host app supports Liquid Glass.
+  /// Whether the host app supports Liquid Glass. Defaults to `true`.
+  ///
+  /// Set it to `false` only if the iOS app is built with the iOS 26 SDK and runs in Liquid Glass compatibility mode
+  /// (`UIDesignRequiresCompatibility` is `true`). Apps built with the iOS 27 SDK or later always use Liquid Glass.
   ///
   /// Only supported on iOS. Ignored on Android.
   ///
