@@ -396,7 +396,7 @@ The example app is a thin shell; its apps are local packages in `/example/packag
 - **`lib/flavor.dart`** - `ExampleFlavor`, one app per build flavor: `demo` (the default) and public examples such as `singleEntryPoint`. Each has an Android product flavor and an iOS scheme of the same name, and all share the app's signing; `scripts/add-example-ios-flavor.rb` adds a flavor to the iOS project
 - **`packages/demo/`** (`ia_example_demo`) - The demo app, described below
 - **`packages/single_entry_point/`** (`ia_example_single_entry_point`) - Public example: a host app that opens the SDK from a single screen
-- **`packages/shared/`** (`ia_example_shared`) - Loading of the `.secrets` and `.env` assets, and the access key
+- **`packages/shared/`** (`ia_example_shared`) - Loading of the `.secrets` and `.env` assets, the access key, and the design system both apps use (`lib/src/ui/`: theme, header, tab bar, sections and rows; the same design as the React Native and NativeScript examples)
 
 ## Demo app: `/example/packages/demo/lib/`
 

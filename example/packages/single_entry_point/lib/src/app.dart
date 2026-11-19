@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:ia_example_shared/ia_example_shared.dart';
 import 'package:ia_example_single_entry_point/src/components/tab_page.dart';
 import 'package:ia_example_single_entry_point/src/ia_sdk_page.dart';
-import 'package:flutter/material.dart';
 
 class SingleEntryPointApp extends StatelessWidget {
   const SingleEntryPointApp({super.key});
@@ -9,10 +11,12 @@ class SingleEntryPointApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'IA SDK Single Entry Point',
-      theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.green),
+      debugShowCheckedModeBanner: false,
+      theme: iaExampleTheme(),
+      home: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
+        child: const MainTabsView(),
       ),
-      home: const MainTabsView(),
     );
   }
 }
@@ -37,14 +41,14 @@ class _MainTabsViewState extends State<MainTabsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(index: _selectedIndex, children: _tabs),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) => setState(() => _selectedIndex = index),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home), label: 'Host home'),
-          NavigationDestination(icon: Icon(Icons.star), label: 'Host feature'),
-          NavigationDestination(icon: Icon(Icons.local_pharmacy), label: 'IA SDK'),
+      bottomNavigationBar: IaTabBar(
+        tabs: const [
+          (label: 'Host home', icon: Icons.home_outlined),
+          (label: 'Host feature', icon: Icons.star_outline_rounded),
+          (label: 'IA SDK', icon: Icons.local_pharmacy_outlined),
         ],
+        selectedIndex: _selectedIndex,
+        onSelected: (index) => setState(() => _selectedIndex = index),
       ),
     );
   }
@@ -57,7 +61,7 @@ class HostHomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return const TabPage(
       title: 'Host home',
-      child: Text('This is the host app home screen.'),
+      child: Text('This is the host app home screen.', textAlign: TextAlign.center, style: IaTextStyles.body),
     );
   }
 }
@@ -69,7 +73,7 @@ class HostFeatureView extends StatelessWidget {
   Widget build(BuildContext context) {
     return const TabPage(
       title: 'Host feature',
-      child: Text('This is a host app feature, unrelated to IA SDK.'),
+      child: Text('This is a host app feature, unrelated to IA SDK.', textAlign: TextAlign.center, style: IaTextStyles.body),
     );
   }
 }

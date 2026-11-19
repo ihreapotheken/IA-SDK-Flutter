@@ -10,7 +10,7 @@ class IaSdkPage extends StatelessWidget {
 
   void showMessage(BuildContext context, String message) {
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    showIaToast(context, message);
   }
 
   Future<void> launchSdk(BuildContext context) async {
@@ -78,17 +78,23 @@ class IaSdkPage extends StatelessWidget {
     return TabPage(
       title: 'IA SDK',
       child: Column(
+        crossAxisAlignment: .stretch,
         mainAxisSize: .min,
-        spacing: 16,
+        spacing: IaSpacing.md,
         children: [
+          const Icon(Icons.local_pharmacy_outlined, size: 40, color: IaColors.accent),
+          const Text('Your pharmacy', textAlign: .center, style: IaTextStyles.title),
           const Text(
             'This screen is the only place from which IA SDK is started.',
             textAlign: .center,
+            style: IaTextStyles.caption,
           ),
-          FilledButton(onPressed: () => launchSdk(context), child: const Text('Launch IA SDK')),
-          OutlinedButton(
-            onPressed: () => resetPrerequisites(context),
-            child: const Text('Reset Initialization and prerequisites'),
+          const SizedBox(height: IaSpacing.sm),
+          IaButton(title: 'Launch IA SDK', onTap: () => launchSdk(context)),
+          IaButton(
+            title: 'Reset Initialization and prerequisites',
+            variant: IaButtonVariant.secondary,
+            onTap: () => resetPrerequisites(context),
           ),
         ],
       ),
