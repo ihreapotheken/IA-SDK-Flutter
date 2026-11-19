@@ -1,5 +1,5 @@
 name: ia_example_shared
-description: "Resources every app of the example shares."
+description: "Resources every app of the example shares: the environment, the access key and the design system."
 publish_to: 'none'
 resolution: workspace
 

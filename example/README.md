@@ -121,7 +121,12 @@ Each app is a package in [packages/](packages/), resolved together with the app 
 |---|---|
 | [packages/demo](packages/demo) (`ia_example_demo`) | The `demo` app. |
 | [packages/single_entry_point](packages/single_entry_point) (`ia_example_single_entry_point`) | The `singleEntryPoint` app. |
-| [packages/shared](packages/shared) (`ia_example_shared`) | What every app shares: loading the `.secrets` and `.env` assets, and the access key. |
+| [packages/shared](packages/shared) (`ia_example_shared`) | What every app shares: loading the `.secrets` and `.env` assets, the access key, and the design system. |
+
+Both apps are built from the design system in [packages/shared/lib/src/ui/](packages/shared/lib/src/ui/), the same
+design as the React Native and NativeScript example apps: the colors and type, the header with the ia.de mark and a
+status, the tab bar, and sections of rows. A row or button that runs an SDK call shows a spinner until the call
+completes and takes no taps meanwhile. Build a new app's screens from it, so all the apps look like one product.
 
 The example app itself only holds the entry point: [lib/main.dart](lib/main.dart) loads the shared environment and runs
 the app of the build's flavor, which [lib/flavor.dart](lib/flavor.dart) maps to its package. The Android and iOS
@@ -163,7 +168,7 @@ The demo app carries the same launcher branding as the native demo apps
 
 The launcher label is `AppSDK Flutter Demo` followed by the environment the build
 targets, so a distributed build is identifiable without opening it — for example
-`AppSDK Flutter Demo QA`. The same tag is shown in the app bar next to the native
+`AppSDK Flutter Demo QA`. The same tag is shown in the header next to the native
 AppSDK version.
 
 The tag is derived from the `IA_SERVER_ENV` shell variable (`production` → `PROD`,
@@ -176,7 +181,7 @@ IA_SERVER_ENV=production sh ./scripts/deploy-demo.sh
 
 The deploy scripts pass the same value on as `--dart-define=iaServerEnv`, so the label
 matches the backend the app starts with. Switching the server environment in the startup settings changes the
-backend, and the app bar's tag, but not the launcher label. Android reads `IA_SERVER_ENV` in
+backend, and the header's tag, but not the launcher label. Android reads `IA_SERVER_ENV` in
 [app/build.gradle.kts](android/app/build.gradle.kts) to generate the `app_name`
 resource; iOS reads `IA_ENV_LABEL` from [ios/Flutter/IAEnv.xcconfig](ios/Flutter/IAEnv.xcconfig),
 which [deploy-demo-ios.sh](../scripts/deploy-demo-ios.sh) rewrites before archiving, in the demo's
@@ -184,14 +189,13 @@ which [deploy-demo-ios.sh](../scripts/deploy-demo-ios.sh) rewrites before archiv
 
 ## App Structure
 
-The demo app contains six tabs demonstrating different SDK features. Labels ending in "(iOS)" or
-"(Android)" mark features only one native SDK has; they're only shown on that platform.
+The demo app's header shows whether the SDK initialized, the platform, the native AppSDK version and the backend. Its
+seven tabs demonstrate different SDK features. Rows badged "iOS" or "Android" are features only one native SDK has;
+they're only shown on that platform. Calls that return something show it in a message at the bottom.
 
 ### Host App Tab
-Displays a map with pharmacy markers. Tapping a marker shows a bottom sheet where you can:
-- Select a pharmacy by ID
-- Launch the SDK start route
-- Open a web browser overlay
+A host app's own screen: a map with two test pharmacies. Tapping one shows a sheet whose Online Shopping button selects
+the pharmacy and opens the SDK's start screen.
 
 ### CardLink Tab
 Demonstrates the CardLink module for NFC-based prescription transfer:
@@ -216,6 +220,9 @@ Apofinder (also not cancellable), redeem prescription, the prescription scanners
 
 ### Components Tab
 Embeds the cart button (also with a host tap handler) and the product grids, including a custom one.
+
+### Embedded Tab
+Embeds the SDK's start screen in the tab with `IaStartScreen`, instead of launching it.
 
 ### Events Tab
 Lists the SDK callbacks and stream events the app received: navigation targets, back actions, initialization

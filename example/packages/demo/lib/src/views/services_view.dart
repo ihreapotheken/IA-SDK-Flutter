@@ -2,532 +2,348 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:appsdk_v2_flutter_plugin/sdk.dart';
-import 'package:ia_example_demo/ia_client_config.dart';
-import 'package:ia_example_demo/src/views/button_label.dart';
-import 'package:ia_example_demo/src/views/startup_settings_view.dart';
 import 'package:flutter/material.dart';
+import 'package:ia_example_demo/ia_client_config.dart';
+import 'package:ia_example_demo/src/actions.dart';
+import 'package:ia_example_demo/src/views/startup_settings_view.dart';
+import 'package:ia_example_shared/ia_example_shared.dart';
 
+/// Calls the SDK's methods that don't open a screen, grouped by area.
+///
 class ServicesView extends StatelessWidget {
   const ServicesView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        24 + MediaQuery.of(context).padding.top,
-        20,
-        24,
-      ),
+    final sdk = IaSdk.instance;
+    Future<void> run(Future<String?> Function() call) => runAction(context, call);
+    return IaTabListView(
       children: [
         const StartupSettingsSection(),
-        const SizedBox(height: 24),
-        _SectionHeader(title: 'SDK State'),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Is Initialized'),
-          onPressed: () async {
-            final result = await IaSdk.instance.isInitialized();
-            if (context.mounted) _showResult(context, 'isInitialized: $result');
-          },
+        IaSection(
+          title: 'SDK state',
+          children: [
+            IaActionRow(
+              title: 'Is Initialized',
+              onTap: () => run(() async => 'isInitialized: ${await sdk.isInitialized()}'),
+            ),
+            IaActionRow(
+              title: 'Get Initialization State',
+              onTap: () => run(() async => 'Initialization state: ${(await sdk.getInitializationState()).name}'),
+            ),
+            IaActionRow(
+              title: 'Get Environment',
+              onTap: () => run(() async => 'Environment: ${(await sdk.getEnvironment()).name}'),
+            ),
+            IaActionRow(
+              title: 'Reset Prerequisites',
+              description: 'For testing only, restart needed',
+              onTap: () => run(() async {
+                await sdk.resetPrerequisites();
+                return 'Prerequisites reset';
+              }),
+            ),
+            IaActionRow(
+              title: 'Reset Legal Disclaimer',
+              description: 'Restart needed',
+              platform: IaPlatform.ios,
+              onTap: () => run(() async {
+                await sdk.resetLegalDisclaimer();
+                return 'Legal disclaimer reset';
+              }),
+            ),
+            IaActionRow(
+              title: 'Mark Onboarding Not Shown',
+              description: 'Restart needed',
+              platform: IaPlatform.ios,
+              onTap: () => run(() async {
+                await sdk.setIsOnboardingShown(isOnboardingShown: false);
+                return 'Onboarding marked as not shown';
+              }),
+            ),
+            IaActionRow(
+              title: 'Reset Analytics Consent',
+              description: Platform.isIOS ? 'Restart needed' : 'The legal screen asks again',
+              onTap: () => run(() async {
+                await sdk.resetAnalyticsConsent();
+                return 'Analytics consent reset';
+              }),
+            ),
+            IaActionRow(
+              title: 'Is Prerequisite Flow Completed',
+              platform: IaPlatform.android,
+              onTap: () => run(() async => 'isPrerequisiteFlowCompleted: ${await sdk.isPrerequisiteFlowCompleted()}'),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Get Initialization State'),
-          onPressed: () async {
-            try {
-              final state = await IaSdk.instance.getInitializationState();
-              if (context.mounted) _showResult(context, 'Initialization state: ${state.name}');
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Get Environment'),
-          onPressed: () async {
-            try {
-              final env = await IaSdk.instance.getEnvironment();
-              if (context.mounted) _showResult(context, 'Environment: ${env.name}');
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          child: ButtonLabel(title: 'Reset Prerequisites', description: 'For testing only, restart needed'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.resetPrerequisites();
-              if (context.mounted) _showResult(context, 'Prerequisites reset');
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 8),
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: ButtonLabel(title: 'Reset Legal Disclaimer (iOS)', description: 'Restart needed'),
-            onPressed: () async {
-              try {
-                await IaSdk.instance.resetLegalDisclaimer();
-                if (context.mounted) _showResult(context, 'Legal disclaimer reset');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: ButtonLabel(title: 'Mark Onboarding Not Shown (iOS)', description: 'Restart needed'),
-            onPressed: () async {
-              try {
-                await IaSdk.instance.setIsOnboardingShown(isOnboardingShown: false);
-                if (context.mounted) _showResult(context, 'Onboarding marked as not shown');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
-        ElevatedButton(
-          child: ButtonLabel(
-            title: 'Reset Analytics Consent',
-            description: Platform.isIOS ? 'Restart needed' : 'The legal screen asks again',
-          ),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.resetAnalyticsConsent();
-              if (context.mounted) _showResult(context, 'Analytics consent reset');
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 8),
-        if (Platform.isAndroid) ...[
-          ElevatedButton(
-            child: Text('Is Prerequisite Flow Completed (Android)'),
-            onPressed: () async {
-              try {
-                final result = await IaSdk.instance.isPrerequisiteFlowCompleted();
-                if (context.mounted) _showResult(context, 'isPrerequisiteFlowCompleted: $result');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 24),
-        ],
-        _SectionHeader(title: 'Pharmacy'),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Get Pharmacy ID'),
-          onPressed: () async {
-            try {
-              final id = await IaSdk.instance.pharmacy.getPharmacyId();
-              if (context.mounted) _showResult(context, 'Pharmacy ID: ${id ?? 'none'}');
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 8),
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: Text('Get Pharmacy (iOS)'),
-            onPressed: () async {
-              try {
-                final pharmacy = await IaSdk.instance.pharmacy.getPharmacy();
-                if (context.mounted) {
-                  _showResult(
-                    context,
-                    pharmacy == null ? 'No pharmacy selected' : '${pharmacy.name}, ${pharmacy.street}, ${pharmacy.city}',
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: Text('Save Pharmacy ID Without Validation (iOS)'),
-            onPressed: () async {
-              final pharmacyId = await _promptForText(context, 'Pharmacy ID', initialValue: '2163');
-              if (pharmacyId == null) return;
-              try {
-                await IaSdk.instance.pharmacy.savePharmacyId(pharmacyId);
-                if (context.mounted) _showResult(context, 'Pharmacy ID $pharmacyId saved');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
-        ElevatedButton(
-          child: ButtonLabel(title: 'Clear Pharmacy ID', description: 'Restart needed'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.pharmacy.clearPharmacyId();
-              if (context.mounted) _showResult(context, 'Pharmacy ID cleared');
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 24),
-        _SectionHeader(title: 'Ordering'),
-        const SizedBox(height: 8),
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: Text('Get Cart Details (iOS)'),
-            onPressed: () async {
-              try {
-                final details = await IaSdk.instance.ordering.getCartDetails();
-                if (context.mounted) {
-                  if (details == null) {
-                    _showResult(context, 'Cart is empty');
-                  } else {
-                    _showResult(context, 'Cart: ${const JsonEncoder.withIndent('  ').convert(details)}');
-                  }
-                }
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: Text('Get Cart State (iOS)'),
-            onPressed: () async {
-              try {
-                final cart = await IaSdk.instance.ordering.getCartState();
-                if (context.mounted) {
-                  _showResult(
-                    context,
-                    cart == null
-                        ? 'Cart is empty'
-                        : '${cart.totalAmountInCart} items: '
-                              '${cart.products?.map((product) => '${product.pzn} x${product.amount}').join(', ')}',
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: Text('Reload Cart and Emit Update (iOS)'),
-            onPressed: () async {
-              try {
-                await IaSdk.instance.ordering.getCartDetails(allowCached: false, shouldEmitCartUpdate: true);
-                if (context.mounted) _showResult(context, 'Cart reloaded, see the Events tab');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
-        ElevatedButton(
-          child: Text('Clear Cart'),
-          onPressed: () => IaSdk.instance.ordering.clearCart(),
-        ),
-        const SizedBox(height: 8),
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: Text('Delete Order History (iOS)'),
-            onPressed: () async {
-              try {
-                await IaSdk.instance.ordering.deleteOrderHistory();
-                if (context.mounted) _showResult(context, 'Order history deleted');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
-        for (final variant in _transferVariants) ...[
-          ElevatedButton(
-            child: Text(variant.label),
-            onPressed: () async {
-              try {
-                await _transferMockPrescriptions(
-                  finishAction: variant.finishAction,
-                  showActivityIndicator: variant.showActivityIndicator,
-                );
-                if (context.mounted) _showResult(context, 'Prescriptions transferred');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
-        const SizedBox(height: 24),
-        _SectionHeader(title: 'User'),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Set guest user data'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.setGuestUserData(
-                salutation: 'Herr',
-                firstName: 'First',
-                lastName: 'Last',
-                email: 'email@example.org',
-                phoneNumberCountryCode: 49,
-                phoneNumberWithoutCountryCode: '432432243',
-              );
-              if (context.mounted) _showResult(context, 'Guest user data set');
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Set billing address'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.setUserBillingAddress(
-                salutation: 'Herr',
-                firstName: 'First',
-                lastName: 'Last',
-                street: 'Musterstraße',
-                houseNumber: '1',
-                zipCode: '10115',
-                city: 'Berlin',
-                phoneNumberCountryCode: 49,
-                phoneNumberWithoutCountryCode: '432432243',
-              );
-              if (context.mounted) _showResult(context, 'Billing address set');
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Set delivery address'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.setUserDeliveryAddress(
-                salutation: 'Herr',
-                firstName: 'First',
-                lastName: 'Last',
-                street: 'Musterstraße',
-                houseNumber: '2',
-                zipCode: '10115',
-                city: 'Berlin',
-              );
-              if (context.mounted) _showResult(context, 'Delivery address set');
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Clear billing and delivery addresses'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.clearUserBillingAddress();
-              await IaSdk.instance.clearUserDeliveryAddress();
-              if (context.mounted) _showResult(context, 'Addresses cleared');
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 8),
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: Text('Delete User (iOS)'),
-            onPressed: () async {
-              try {
-                await IaSdk.instance.deleteUser();
-                if (context.mounted) _showResult(context, 'User deleted');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
-        ElevatedButton(
-          child: Text('Logout'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.logout();
-              if (context.mounted) _showResult(context, 'Logged out');
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
-        ),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Transfer SDK v1 user data'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.transferSDKv1UserData();
-            } catch (e) {
-              debugPrint('ERROR TRANSFER SDK V1 USER DATA');
-              debugPrint('$e', wrapWidth: 999999999999);
-            }
-          },
-        ),
-        const SizedBox(height: 24),
-        _SectionHeader(title: 'Appearance'),
-        const SizedBox(height: 8),
-        if (Platform.isIOS) ...[
-          const _MascotIllustrationsToggle(),
-          const SizedBox(height: 8),
-        ],
-        if (Platform.isAndroid)
-          for (final isEnabled in [false, true]) ...[
-            ElevatedButton(
-              child: Text('${isEnabled ? 'Enable' : 'Disable'} Haptic Feedback (Android)'),
-              onPressed: () async {
-                try {
-                  await IaSdk.instance.setHapticFeedbackEnabled(isEnabled: isEnabled);
-                  if (context.mounted) _showResult(context, 'Haptic feedback ${isEnabled ? 'enabled' : 'disabled'}');
-                } catch (e) {
-                  if (context.mounted) _showResult(context, 'Error: $e');
-                }
+        IaSection(
+          title: 'Pharmacy',
+          children: [
+            IaActionRow(
+              title: 'Get Pharmacy ID',
+              onTap: () => run(() async => 'Pharmacy ID: ${await sdk.pharmacy.getPharmacyId() ?? 'none'}'),
+            ),
+            IaActionRow(
+              title: 'Get Pharmacy',
+              platform: IaPlatform.ios,
+              onTap: () => run(() async {
+                final pharmacy = await sdk.pharmacy.getPharmacy();
+                return pharmacy == null ? 'No pharmacy selected' : '${pharmacy.name}, ${pharmacy.street}, ${pharmacy.city}';
+              }),
+            ),
+            IaActionRow(
+              title: 'Save Pharmacy ID Without Validation',
+              platform: IaPlatform.ios,
+              onTap: () async {
+                final pharmacyId = await _promptForText(context, 'Pharmacy ID', initialValue: '2163');
+                if (pharmacyId == null || !context.mounted) return;
+                await run(() async {
+                  await sdk.pharmacy.savePharmacyId(pharmacyId);
+                  return 'Pharmacy ID $pharmacyId saved';
+                });
               },
             ),
-            const SizedBox(height: 8),
+            IaActionRow(
+              title: 'Clear Pharmacy ID',
+              description: 'Restart needed',
+              onTap: () => run(() async {
+                await sdk.pharmacy.clearPharmacyId();
+                return 'Pharmacy ID cleared';
+              }),
+            ),
           ],
-        const SizedBox(height: 24),
-        _SectionHeader(title: 'Debugging'),
-        const SizedBox(height: 8),
-        ElevatedButton(
-          child: Text('Present Logs'),
-          onPressed: () async {
-            try {
-              await IaSdk.instance.presentLogs();
-            } catch (e) {
-              if (context.mounted) _showResult(context, 'Error: $e');
-            }
-          },
         ),
-        const SizedBox(height: 8),
-        if (Platform.isAndroid) ...[
-          ElevatedButton(
-            child: Text('Export Logs (Android)'),
-            onPressed: () async {
-              try {
-                final path = await IaSdk.instance.exportLogs();
-                if (context.mounted) _showResult(context, 'Logs: $path');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-        ],
-        if (Platform.isIOS) ...[
-          ElevatedButton(
-            child: Text('Get User ID (iOS)'),
-            onPressed: () async {
-              try {
-                final userId = await IaSdk.instance.getUserId();
-                if (context.mounted) _showResult(context, 'User ID: ${userId ?? 'none'}');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 24),
-        ],
-        if (Platform.isIOS) ...[
-          _SectionHeader(title: 'Cache'),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            child: ButtonLabel(title: 'Clean Cache (iOS)', description: 'For testing only, restart needed'),
-            onPressed: () async {
-              try {
-                await IaSdk.instance.cleanCache(
-                  initialization: true,
-                  prerequisites: true,
+        IaSection(
+          title: 'Ordering',
+          children: [
+            IaActionRow(
+              title: 'Get Cart Details',
+              platform: IaPlatform.ios,
+              onTap: () => run(() async {
+                final details = await sdk.ordering.getCartDetails();
+                return details == null ? 'Cart is empty' : 'Cart: ${const JsonEncoder.withIndent('  ').convert(details)}';
+              }),
+            ),
+            IaActionRow(
+              title: 'Get Cart State',
+              platform: IaPlatform.ios,
+              onTap: () => run(() async {
+                final cart = await sdk.ordering.getCartState();
+                return cart == null
+                    ? 'Cart is empty'
+                    : '${cart.totalAmountInCart} items: '
+                          '${cart.products?.map((product) => '${product.pzn} x${product.amount}').join(', ')}';
+              }),
+            ),
+            IaActionRow(
+              title: 'Reload Cart and Emit Update',
+              platform: IaPlatform.ios,
+              onTap: () => run(() async {
+                await sdk.ordering.getCartDetails(allowCached: false, shouldEmitCartUpdate: true);
+                return 'Cart reloaded, see the Events tab';
+              }),
+            ),
+            IaActionRow(
+              title: 'Clear Cart',
+              onTap: () => run(() async {
+                await sdk.ordering.clearCart();
+                return 'Cart cleared';
+              }),
+            ),
+            IaActionRow(
+              title: 'Delete Order History',
+              platform: IaPlatform.ios,
+              onTap: () => run(() async {
+                await sdk.ordering.deleteOrderHistory();
+                return 'Order history deleted';
+              }),
+            ),
+            for (final variant in _transferVariants)
+              IaActionRow(
+                title: variant.label,
+                description: 'Two photos, a PDF and an e-prescription',
+                platform: variant.platform,
+                onTap: () => run(() async {
+                  await _transferMockPrescriptions(
+                    finishAction: variant.finishAction,
+                    showActivityIndicator: variant.showActivityIndicator,
+                  );
+                  return 'Prescriptions transferred';
+                }),
+              ),
+          ],
+        ),
+        IaSection(
+          title: 'User',
+          children: [
+            IaActionRow(
+              title: 'Set Guest User Data',
+              onTap: () => run(() async {
+                await sdk.setGuestUserData(
+                  salutation: 'Herr',
+                  firstName: 'First',
+                  lastName: 'Last',
+                  email: 'email@example.org',
+                  phoneNumberCountryCode: 49,
+                  phoneNumberWithoutCountryCode: '432432243',
                 );
-                if (context.mounted) _showResult(context, 'Cache cleaned');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
+                return 'Guest user data set';
+              }),
+            ),
+            IaActionRow(
+              title: 'Set Billing Address',
+              onTap: () => run(() async {
+                await sdk.setUserBillingAddress(
+                  salutation: 'Herr',
+                  firstName: 'First',
+                  lastName: 'Last',
+                  street: 'Musterstraße',
+                  houseNumber: '1',
+                  zipCode: '10115',
+                  city: 'Berlin',
+                  phoneNumberCountryCode: 49,
+                  phoneNumberWithoutCountryCode: '432432243',
+                );
+                return 'Billing address set';
+              }),
+            ),
+            IaActionRow(
+              title: 'Set Delivery Address',
+              onTap: () => run(() async {
+                await sdk.setUserDeliveryAddress(
+                  salutation: 'Herr',
+                  firstName: 'First',
+                  lastName: 'Last',
+                  street: 'Musterstraße',
+                  houseNumber: '2',
+                  zipCode: '10115',
+                  city: 'Berlin',
+                );
+                return 'Delivery address set';
+              }),
+            ),
+            IaActionRow(
+              title: 'Clear Billing and Delivery Addresses',
+              onTap: () => run(() async {
+                await sdk.clearUserBillingAddress();
+                await sdk.clearUserDeliveryAddress();
+                return 'Addresses cleared';
+              }),
+            ),
+            IaActionRow(
+              title: 'Delete User',
+              platform: IaPlatform.ios,
+              onTap: () => run(() async {
+                await sdk.deleteUser();
+                return 'User deleted';
+              }),
+            ),
+            IaActionRow(
+              title: 'Logout',
+              description: 'Resets the user data, pharmacy and cart',
+              onTap: () => run(() async {
+                await sdk.logout();
+                return 'Logged out';
+              }),
+            ),
+            IaActionRow(
+              title: 'Transfer SDK v1 User Data',
+              onTap: () => run(() async {
+                await sdk.transferSDKv1UserData();
+                return 'SDK v1 user data transferred';
+              }),
+            ),
+          ],
+        ),
+        IaSection(
+          title: 'Appearance',
+          children: [
+            if (Platform.isIOS) const _MascotIllustrationsRow(),
+            for (final isEnabled in [true, false])
+              IaActionRow(
+                title: '${isEnabled ? 'Enable' : 'Disable'} Haptic Feedback',
+                platform: IaPlatform.android,
+                onTap: () => run(() async {
+                  await sdk.setHapticFeedbackEnabled(isEnabled: isEnabled);
+                  return 'Haptic feedback ${isEnabled ? 'enabled' : 'disabled'}';
+                }),
+              ),
+          ],
+        ),
+        IaSection(
+          title: 'Debugging',
+          children: [
+            IaActionRow(title: 'Present Logs', onTap: () => runLaunch(context, sdk.presentLogs)),
+            IaActionRow(
+              title: 'Export Logs',
+              platform: IaPlatform.android,
+              onTap: () => run(() async => 'Logs: ${await sdk.exportLogs()}'),
+            ),
+            IaActionRow(
+              title: 'Get User ID',
+              platform: IaPlatform.ios,
+              onTap: () => run(() async => 'User ID: ${await sdk.getUserId() ?? 'none'}'),
+            ),
+          ],
+        ),
+        if (Platform.isIOS)
+          IaSection(
+            title: 'Cache',
+            children: [
+              IaActionRow(
+                title: 'Clean Cache',
+                description: 'For testing only, restart needed',
+                platform: IaPlatform.ios,
+                onTap: () => run(() async {
+                  await sdk.cleanCache(initialization: true, prerequisites: true);
+                  return 'Cache cleaned';
+                }),
+              ),
+              IaActionRow(
+                title: 'Remove All Cached Responses',
+                description: 'For testing only, restart needed',
+                platform: IaPlatform.ios,
+                onTap: () => run(() async {
+                  await sdk.removeAllCachedResponses();
+                  return 'Cached responses removed';
+                }),
+              ),
+              IaActionRow(
+                title: 'Clear Product Grid Cache',
+                description: 'For testing only, restart needed',
+                platform: IaPlatform.ios,
+                onTap: () => run(() async {
+                  await sdk.overTheCounter.clearProductGridCache();
+                  return 'Product grid cache cleared';
+                }),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            child: ButtonLabel(title: 'Remove All Cached Responses (iOS)', description: 'For testing only, restart needed'),
-            onPressed: () async {
-              try {
-                await IaSdk.instance.removeAllCachedResponses();
-                if (context.mounted) _showResult(context, 'Cached responses removed');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            child: ButtonLabel(title: 'Clear Product Grid Cache (iOS)', description: 'For testing only, restart needed'),
-            onPressed: () async {
-              try {
-                await IaSdk.instance.overTheCounter.clearProductGridCache();
-                if (context.mounted) _showResult(context, 'Product grid cache cleared');
-              } catch (e) {
-                if (context.mounted) _showResult(context, 'Error: $e');
-              }
-            },
-          ),
-        ],
       ],
     );
   }
 
-  void _showResult(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
-  static final _transferVariants = <({String label, IaTransferPrescriptionsFinishAction finishAction, bool showActivityIndicator})>[
-    (label: 'Transfer Prescriptions, Open Cart', finishAction: IaTransferPrescriptionsFinishAction.openCart, showActivityIndicator: true),
-    (
-      label: 'Transfer Prescriptions, Bottom Sheet',
-      finishAction: IaTransferPrescriptionsFinishAction.showBottomSheet,
-      showActivityIndicator: true,
-    ),
-    if (Platform.isIOS)
-      (
-        label: 'Transfer Prescriptions, No Action or Indicator (iOS)',
-        finishAction: IaTransferPrescriptionsFinishAction.noAction,
-        showActivityIndicator: false,
-      ),
-  ];
+  static const _transferVariants =
+      <({String label, IaTransferPrescriptionsFinishAction finishAction, bool showActivityIndicator, IaPlatform? platform})>[
+        (
+          label: 'Transfer Prescriptions, Open Cart',
+          finishAction: IaTransferPrescriptionsFinishAction.openCart,
+          showActivityIndicator: true,
+          platform: null,
+        ),
+        (
+          label: 'Transfer Prescriptions, Bottom Sheet',
+          finishAction: IaTransferPrescriptionsFinishAction.showBottomSheet,
+          showActivityIndicator: true,
+          platform: null,
+        ),
+        (
+          label: 'Transfer Prescriptions, No Action or Indicator',
+          finishAction: IaTransferPrescriptionsFinishAction.noAction,
+          showActivityIndicator: false,
+          platform: IaPlatform.ios,
+        ),
+      ];
 
   static Future<void> _transferMockPrescriptions({
     required IaTransferPrescriptionsFinishAction finishAction,
@@ -573,7 +389,7 @@ class ServicesView extends StatelessWidget {
   }
 }
 
-/// Runtime toggle for the Pharmi mascot illustrations.
+/// Runtime switch for the Pharmi mascot illustrations.
 ///
 /// The mascot renders on the CardLink FAQ screen, so flip this and then open
 /// CardLink → Launch CardLink → FAQ to see the change. Screens already on
@@ -582,72 +398,34 @@ class ServicesView extends StatelessWidget {
 /// iOS only: Android's native UI configuration is immutable after init, so the
 /// mascot is set there with the "Mascot illustrations" startup setting instead,
 /// see [StartupSettingsSection].
-class _MascotIllustrationsToggle extends StatefulWidget {
-  const _MascotIllustrationsToggle();
+class _MascotIllustrationsRow extends StatefulWidget {
+  const _MascotIllustrationsRow();
 
   @override
-  State<_MascotIllustrationsToggle> createState() {
-    return _MascotIllustrationsToggleState();
-  }
+  State<_MascotIllustrationsRow> createState() => _MascotIllustrationsRowState();
 }
 
-class _MascotIllustrationsToggleState extends State<_MascotIllustrationsToggle> {
-  /// Seeded from the value the SDK was initialized with, so the button label
+class _MascotIllustrationsRowState extends State<_MascotIllustrationsRow> {
+  /// Seeded from the value the SDK was initialized with, so the switch
   /// starts out reflecting the SDK's actual state.
   bool _shouldShow = ExampleAppConfig.instance.pluginConfig.uiConfiguration.shouldShowMascotIllustrations;
 
-  Future<void> _toggle() async {
-    final next = !_shouldShow;
-    try {
-      await IaSdk.instance.setShouldShowMascotIllustrations(
-        shouldShowMascotIllustrations: next,
-      );
-      setState(() => _shouldShow = next);
-      if (mounted) {
-        _showResult(
-          context,
-          'Mascot illustrations ${next ? 'enabled' : 'disabled'}. '
-          'Open CardLink → FAQ to see the change.',
-        );
-      }
-    } catch (e) {
-      if (mounted) _showResult(context, 'Error: $e');
-    }
+  Future<void> _setShouldShow(bool shouldShow) {
+    return runAction(context, () async {
+      await IaSdk.instance.setShouldShowMascotIllustrations(shouldShowMascotIllustrations: shouldShow);
+      if (mounted) setState(() => _shouldShow = shouldShow);
+      return 'Mascot illustrations ${shouldShow ? 'enabled' : 'disabled'}. Open CardLink → FAQ to see the change.';
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: _toggle,
-      child: Text(
-        _shouldShow ? 'Hide mascot illustrations (iOS)' : 'Show mascot illustrations (iOS)',
-      ),
-    );
-  }
-
-  void _showResult(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.bold,
-      ),
+    return IaSwitchRow(
+      title: 'Mascot illustrations',
+      description: 'Pharmi on the CardLink FAQ screen',
+      platform: IaPlatform.ios,
+      value: _shouldShow,
+      onChanged: _setShouldShow,
     );
   }
 }

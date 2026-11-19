@@ -15,8 +15,10 @@ import 'package:ia_example_demo/src/views/events_view.dart';
 import 'package:ia_example_demo/src/views/screens_view.dart';
 import 'package:ia_example_demo/src/views/services_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:ia_cardlink/ia_cardlink.dart';
+import 'package:ia_example_shared/ia_example_shared.dart';
 import 'package:ia_ordering/ia_ordering.dart';
 import 'package:ia_over_the_counter/ia_over_the_counter.dart';
 import 'package:ia_pharmacy/ia_pharmacy.dart';
@@ -42,14 +44,19 @@ class _ExampleAppState extends State<ExampleApp> {
   late Future<void> _initFuture = _initializeSdk();
 
   static const _navigationItems = <({String label, IconData icon})>[
-    (label: 'Host App', icon: Icons.home),
-    (label: 'CardLink', icon: Icons.nfc),
-    (label: 'Services', icon: Icons.category),
-    (label: 'Screens', icon: Icons.screenshot),
-    (label: 'Components', icon: Icons.widgets),
-    (label: 'Embedded', icon: Icons.web_asset),
-    (label: 'Events', icon: Icons.receipt_long),
+    (label: 'Host App', icon: Icons.map_outlined),
+    (label: 'CardLink', icon: Icons.nfc_rounded),
+    (label: 'Services', icon: Icons.tune_rounded),
+    (label: 'Screens', icon: Icons.layers_outlined),
+    (label: 'Components', icon: Icons.widgets_outlined),
+    (label: 'Embedded', icon: Icons.web_asset_rounded),
+    (label: 'Events', icon: Icons.receipt_long_outlined),
   ];
+
+  static final _platformLine =
+      'Flutter · ${Platform.isIOS ? 'iOS' : 'Android'} AppSDK '
+      '${dotenv.env['${Platform.isIOS ? 'IOS' : 'ANDROID'}_APPSDK_VERSION'] ?? 'N/A'} · '
+      '${ExampleAppConfig.instance.serverEnvironmentLabel}';
 
   Future<void> _initializeSdk() async {
     if (_isInitialized) return;
@@ -214,100 +221,77 @@ class _ExampleAppState extends State<ExampleApp> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        // The embedded SDK screen shows its own header, so the app bar is hidden on its tab.
-        appBar: _selectedTabIndex == _embeddedTabIndex
-            ? null
-            : AppBar(
-                title: Text(
-                  'AppSDK Flutter Demo'
-                  ' | '
-                  '${Platform.isIOS ? 'iOS' : 'Android'}'
-                  ' ${dotenv.env['${Platform.isIOS ? 'IOS' : 'ANDROID'}_APPSDK_VERSION'] ?? 'N/A'}'
-                  ' | '
-                  '${ExampleAppConfig.instance.serverEnvironmentLabel}',
-                  style: const TextStyle(fontSize: 14),
-                ),
-                centerTitle: true,
-              ),
-        body: FutureBuilder(
+      theme: iaExampleTheme(),
+      home: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
+        child: FutureBuilder(
           future: _initFuture,
           builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (snapshot.hasError) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        snapshot.error.toString(),
-                        textAlign: TextAlign.center,
+            final isDone = snapshot.connectionState == ConnectionState.done;
+            final isReady = isDone && !snapshot.hasError;
+            // The embedded SDK screen shows its own header, so the app's is hidden on its tab.
+            final isHeaderHidden = isReady && _selectedTabIndex == _embeddedTabIndex;
+            return Scaffold(
+              body: Column(
+                children: [
+                  // Kept in the tree when hidden, so the tabs below keep their state.
+                  if (isHeaderHidden)
+                    const SizedBox.shrink()
+                  else
+                    IaBrandHeader(
+                      product: 'AppSDK Demo',
+                      subtitle: _platformLine,
+                      status: IaStatusPill(
+                        label: !isDone
+                            ? 'Initializing'
+                            : isReady
+                            ? 'Initialized'
+                            : 'Error',
+                        isReady: isReady,
                       ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _initFuture = _initializeSdk();
-                          });
-                        },
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            return Column(
-              children: [
-                Expanded(
-                  child: IndexedStack(
-                    index: _selectedTabIndex,
-                    children: [
-                      const HomeView(),
-                      const CardLinkView(),
-                      const ServicesView(),
-                      const ScreensView(),
-                      _shownLazyTabIndexes.contains(_componentsTabIndex)
-                          ? const ComponentsView()
-                          : const SizedBox.shrink(),
-                      _shownLazyTabIndexes.contains(_embeddedTabIndex) ? const EmbeddedView() : const SizedBox.shrink(),
-                      const EventsView(),
-                    ],
-                  ),
-                ),
-                DecoratedBox(
-                  decoration: BoxDecoration(border: Border(top: BorderSide())),
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).padding.bottom + 16,
                     ),
-                    child: Row(
-                      children: [
-                        for (final (index, item) in _navigationItems.indexed)
-                          Expanded(
-                            child: _NavigationButton(
-                              label: item.label,
-                              icon: item.icon,
-                              isSelected: _selectedTabIndex == index,
-                              onTap: () {
-                                setState(() {
-                                  _selectedTabIndex = index;
-                                  if (_lazyTabIndexes.contains(index)) _shownLazyTabIndexes.add(index);
-                                });
-                              },
-                            ),
-                          ),
-                      ],
+                  Expanded(
+                    // A context in the body, whose padding excludes the tab bar's.
+                    child: Builder(
+                      builder: (context) => MediaQuery.removePadding(
+                        context: context,
+                        removeTop: !isHeaderHidden,
+                        child: !isDone
+                            ? const Center(child: CircularProgressIndicator())
+                            : snapshot.hasError
+                            ? _InitializationError(
+                                error: snapshot.error!,
+                                onRetry: () => setState(() => _initFuture = _initializeSdk()),
+                              )
+                            : IndexedStack(
+                                index: _selectedTabIndex,
+                                children: [
+                                  const HomeView(),
+                                  const CardLinkView(),
+                                  const ServicesView(),
+                                  const ScreensView(),
+                                  _shownLazyTabIndexes.contains(_componentsTabIndex) ? const ComponentsView() : const SizedBox.shrink(),
+                                  _shownLazyTabIndexes.contains(_embeddedTabIndex) ? const EmbeddedView() : const SizedBox.shrink(),
+                                  const EventsView(),
+                                ],
+                              ),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
+              bottomNavigationBar: isReady
+                  ? IaTabBar(
+                      tabs: _navigationItems,
+                      selectedIndex: _selectedTabIndex,
+                      onSelected: (index) {
+                        setState(() {
+                          _selectedTabIndex = index;
+                          if (_lazyTabIndexes.contains(index)) _shownLazyTabIndexes.add(index);
+                        });
+                      },
+                    )
+                  : null,
             );
           },
         ),
@@ -316,34 +300,26 @@ class _ExampleAppState extends State<ExampleApp> {
   }
 }
 
-class _NavigationButton extends StatelessWidget {
-  const _NavigationButton({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-  });
+/// Why the SDK didn't initialize, with a button that tries again.
+///
+class _InitializationError extends StatelessWidget {
+  const _InitializationError({required this.error, required this.onRetry});
 
-  final String label;
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
+  final Object error;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final color = isSelected ? Theme.of(context).primaryColor : null;
-
-    return InkWell(
-      onTap: onTap,
+    return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.all(IaSpacing.xxl),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: IaSpacing.lg,
           children: [
-            Icon(icon, color: color),
-            Text(
-              label,
-              style: TextStyle(fontSize: 10, color: color),
-            ),
+            const Text('The SDK didn\'t initialize', style: IaTextStyles.title),
+            Text(error.toString(), textAlign: TextAlign.center, style: IaTextStyles.caption),
+            IaButton(title: 'Retry', onTap: onRetry),
           ],
         ),
       ),
