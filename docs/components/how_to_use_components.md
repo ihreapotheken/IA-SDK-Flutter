@@ -41,17 +41,8 @@ Call `initialize` once when your app starts. After that, components and screens 
 > [!TIP]
 > If you want the prerequisites to run before any component or screen is shown, call `launchPrerequisiteFlow`, and
 > show the component only if the flow wasn't cancelled. This also lets you handle errors yourself, instead of the SDK
-> showing its own error screen.
-> ```dart
-> try {
->   final result = await IaSdk.instance.launchPrerequisiteFlow();
->   if (!result.isCancelled) {
->     // Show IaProductGrid
->   }
-> } catch (error) {
->   // Handle error
-> }
-> ```
+> showing its own error screen. See
+> [Running prerequisites explicitly](../initialization.md#running-prerequisites-explicitly-optional).
 
 ## Prerequisites check
 

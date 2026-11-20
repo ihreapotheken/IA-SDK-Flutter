@@ -224,7 +224,8 @@ await IaSdk.instance.initialize(
 
 ## 6. Components
 
-[How to use components](docs/components/how_to_use_components.md)
+[How to use components](docs/components/how_to_use_components.md)  
+[Product Grid](docs/components/product_grid.md)
 
 ## 7. Example projects
 

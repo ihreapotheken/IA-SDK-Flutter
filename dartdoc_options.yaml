@@ -45,6 +45,9 @@ dartdoc:
     HowToUseComponents:
       displayName: How to use components
       markdown: docs/components/how_to_use_components.md
+    ProductGrid:
+      displayName: Product Grid
+      markdown: docs/components/product_grid.md
   # The sidebar is sorted by display name.
   categoryOrder:
     - Public API Overview
@@ -60,3 +63,4 @@ dartdoc:
     - Redeem Prescription Screen
     - Prescription Scanner Screen
     - How to use components
+    - Product Grid

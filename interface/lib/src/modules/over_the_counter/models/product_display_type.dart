@@ -2,6 +2,7 @@ part of '_models.dart';
 
 /// Product display type determining which product collection to show.
 ///
+/// {@category ProductGrid}
 enum IaProductDisplayType {
   /// Currently active pharmacy offers.
   ///

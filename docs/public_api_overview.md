@@ -74,7 +74,7 @@ See [SDK Interaction](interaction.md).
 - `IaModuleOverTheCounter()` - The module, pass it to `register`
 - `launchProductSearchRoute(focusesOnAppear:)` - Shows the [Product Search Screen](screens/product_search_screen.md)
 - `clearProductGridCache()` - Clears the cached products of product grids (iOS only)
-- `IaProductGrid(type:)` - Inline component that shows a grid of products
+- `IaProductGrid(type:)` - Inline component that shows a grid of products, see [Product Grid](components/product_grid.md)
 - `IaProductSearchScreen(focusesOnAppear:)` - The [Product Search Screen](screens/product_search_screen.md) as a widget for your own UI
 
 ## ia_ordering
