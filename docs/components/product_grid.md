@@ -21,6 +21,18 @@
   - `ia_ordering` (Optional):
     - Add product to the cart.
 
+## Parameters
+- `type`: Product collection to display, see `IaProductDisplayType`.
+- `pzn`: Product identifier the recommendation-based types (`productRecommendations`, `customersAlsoBought`) are based
+  on. Without one they show no products.
+- `shouldShowLoading`: Whether to show a loading indicator while products load. Defaults to `true`.
+- `title`: Title of the grid, for the `custom` type.
+- `pzns`: Product identifiers to show, required for the `custom` type.
+
+> [!NOTE]
+> The native grid reads its parameters once, when it's created, so changing any of them recreates it and loads the
+> products again.
+
 ## Example
 
 `IaProductGrid` with current offers.
@@ -47,18 +59,6 @@ const IaProductGrid(
   pzns: ['12345678', '87654321'],
 )
 ```
-
-**Parameters**
-  - **type**: Product collection to display.
-  - **pzn**: Product identifier the recommendation-based types (`productRecommendations`, `customersAlsoBought`) are
-    based on. Without one they show no products.
-  - **shouldShowLoading**: Whether to show a loading indicator while products load. Defaults to `true`.
-  - **title**: Title of the grid, for the `custom` type.
-  - **pzns**: Product identifiers to show, for the `custom` type. Required for the `custom` type.
-
-> [!NOTE]
-> The native grid reads its parameters once, when it's created, so changing any of them recreates it and loads the
-> products again.
 
 ## Platform differences
 - **pzn:** For `currentOffers` and `productsOfTheMonth`, iOS leaves this product out of the grid. Android ignores it
