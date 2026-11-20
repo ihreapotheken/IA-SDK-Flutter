@@ -1,4 +1,4 @@
-# Product Grid
+# IaProductGrid
 
 * `IaProductGrid` is a UI component that embeds a grid of pharmacy products directly into your layout.
 * Supports multiple product types: current offers, products of the month, product recommendations, customers also
