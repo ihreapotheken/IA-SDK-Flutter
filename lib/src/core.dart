@@ -48,6 +48,7 @@ part 'models/response/prerequisites_result.dart';
 /// {@category Interaction}
 /// {@category StartScreen}
 /// {@category ApofinderScreen}
+/// {@category HowToUseComponents}
 class IaSdk {
   IaSdk._();
 

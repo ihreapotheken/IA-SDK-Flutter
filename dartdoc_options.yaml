@@ -42,6 +42,9 @@ dartdoc:
     PrescriptionScannerScreen:
       displayName: Prescription Scanner Screen
       markdown: docs/screens/prescription_scanner_screen.md
+    HowToUseComponents:
+      displayName: How to use components
+      markdown: docs/components/how_to_use_components.md
   # The sidebar is sorted by display name.
   categoryOrder:
     - Public API Overview
@@ -56,3 +59,4 @@ dartdoc:
     - Pharmacy Screen
     - Redeem Prescription Screen
     - Prescription Scanner Screen
+    - How to use components
