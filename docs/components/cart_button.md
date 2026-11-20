@@ -43,6 +43,4 @@ IaCartButton(
 ```
 
 ## Platform differences
-- **Size:** On iOS the button takes its own size. On Android it fills the width it's given, so give it a width, e.g.
-  with a `SizedBox`.
 - **Activity:** On Android the app's activity must be a `ComponentActivity`, such as `FlutterFragmentActivity`.
