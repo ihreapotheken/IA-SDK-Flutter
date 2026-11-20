@@ -38,12 +38,6 @@ await IaSdk.instance.initialize(config: config);
 ### Option 2: Call `initialize` once at app start
 Call `initialize` once when your app starts. After that, components and screens can be used anywhere in the app.
 
-## Prerequisites
-
-When a component is shown, it runs the prerequisites that are still needed, with the options you passed in
-`IaSdkConfigurationInitialization.prerequisites`. Prerequisites screens are presented only if needed (the first time,
-or when something changed, e.g. a new version of a legal document).
-
 > [!TIP]
 > If you want the prerequisites to run before any component or screen is shown, call `launchPrerequisiteFlow`, and
 > show the component only if the flow wasn't cancelled. This also lets you handle errors yourself, instead of the SDK
