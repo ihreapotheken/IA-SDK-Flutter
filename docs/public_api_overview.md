@@ -88,7 +88,7 @@ See [SDK Interaction](interaction.md).
 - `deleteOrderHistory()` - Deletes the order history (iOS only)
 - `orderingDidUpdateCartListener` - Stream of cart updates
 - `orderingDidFinishOrderListener` - Stream of finished orders
-- `IaCartButton()` - Inline component, a button with the number of items in the cart that opens the cart
+- `IaCartButton()` - Inline component, a button with the number of items in the cart that opens the cart, see [IaCartButton](components/cart_button.md)
 - `IaCartScreen()` - The [Cart Screen](screens/cart_screen.md) as a widget for your own UI
 
 ## ia_pharmacy

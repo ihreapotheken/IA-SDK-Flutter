@@ -48,6 +48,9 @@ dartdoc:
     ProductGrid:
       displayName: IaProductGrid
       markdown: docs/components/product_grid.md
+    CartButton:
+      displayName: IaCartButton
+      markdown: docs/components/cart_button.md
   # The sidebar is sorted by display name.
   categoryOrder:
     - Public API Overview
@@ -64,3 +67,4 @@ dartdoc:
     - Prescription Scanner Screen
     - How to use components
     - IaProductGrid
+    - IaCartButton
