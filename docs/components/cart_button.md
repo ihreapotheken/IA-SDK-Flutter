@@ -21,8 +21,7 @@
   - None
 
 ## Parameters
-- `onTap`: Called when the button is tapped. If set, the cart is not opened automatically. Switching between `null`
-  and a callback recreates the button.
+- `onTap`: Called when the button is tapped. If set, the cart is not opened automatically.
 
 ## Example
 

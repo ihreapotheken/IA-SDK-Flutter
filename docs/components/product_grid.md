@@ -29,10 +29,6 @@
 - `title`: Title of the grid, for the `custom` type.
 - `pzns`: Product identifiers to show, required for the `custom` type.
 
-> [!NOTE]
-> The native grid reads its parameters once, when it's created, so changing any of them recreates it and loads the
-> products again.
-
 ## Example
 
 `IaProductGrid` with current offers.
