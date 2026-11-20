@@ -7,11 +7,10 @@ require:
 
 Until both are done, a component shows only a loading indicator.
 
-This is easy to handle if you call `initialize` before any component is shown, e.g. when your app starts, and the
-prerequisites screens may appear where the component is shown.
+This is easy to handle if you call `initialize` before any component is shown, e.g. when your app starts.
 
 It gets trickier when a component can be shown before you call `initialize`, or you don't want the prerequisites
-screens to appear there, for example:
+screens to appear where the component is shown, for example:
 
 > Your app has a single SDK entry point on the third tab, where you call `initialize`. Now you want to add
 > `IaProductGrid` to the first tab, which the user sees first.
