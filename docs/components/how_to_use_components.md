@@ -58,9 +58,11 @@ Call `initialize` once when your app starts. After that, components and screens 
 ## Prerequisites check
 
 If you don't want prerequisites screens (e.g. onboarding) to appear where the component is shown, e.g. on the first
-tab, you can show the component only if the user has already completed prerequisites in your SDK entry point.
+tab, you can:
+* Run prerequisites yourself before the component is shown, by calling `launchPrerequisiteFlow` (explained above), or
+* Show the component only if the user has already completed prerequisites in your SDK entry point.
 
-Use `isPrerequisiteFlowCompleted` and show the component only if it returns `true`.
+For the second option, use `isPrerequisiteFlowCompleted` and show the component only if it returns `true`.
 * It is a one-time check that returns the current state. Call it every time the screen with the component is shown
   (e.g. when the user switches to its tab), so the component shows up once the user has completed prerequisites in
   your SDK entry point.
