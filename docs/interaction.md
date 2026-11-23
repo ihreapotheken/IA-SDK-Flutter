@@ -20,17 +20,7 @@ IaSdk.instance.ordering.orderingDidUpdateCartListener.stream.listen((cartState) 
 });
 ```
 
-Available streams:
-
-| Stream | Event |
-|---|---|
-| `IaSdk.instance.initializationStateListener` | Initialization state changed |
-| `IaSdk.instance.loggedAnalyticsEventListener` | Analytics event logged for the host app, e.g. `screen_view` or `purchase`, see [Analytics](#analytics) |
-| `IaSdk.instance.logMessageListener` | SDK log message, for debugging (iOS only) |
-| `IaSdk.instance.ordering.orderingDidUpdateCartListener` | Cart updated |
-| `IaSdk.instance.ordering.orderingDidFinishOrderListener` | Order finished |
-| `IaSdk.instance.prescription.scannerCameraErrorListener` | Scanner camera error (iOS only) |
-| `IaSdk.instance.cardLink.*Listener` | CardLink events, e.g. `eventListener` and `prescriptionsRedeemedListener` |
+All streams are listed in the [Public API Overview](public_api_overview.md).
 
 ## Example of overriding default behavior
 `onSdkWillNavigateToTarget` is called when some overridable action is performed. Return `true` to let the SDK perform
