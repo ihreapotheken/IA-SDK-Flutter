@@ -222,7 +222,13 @@ await IaSdk.instance.initialize(
 [Prescription Scanner Screen](docs/screens/prescription_scanner_screen.md)  
 [Redeem Prescription Screen](docs/screens/redeem_prescription_screen.md)
 
-## 6. Example projects
+## 6. Components
+
+[How to use components](docs/components/how_to_use_components.md)  
+[IaProductGrid](docs/components/product_grid.md)  
+[IaCartButton](docs/components/cart_button.md)
+
+## 7. Example projects
 
 The [example app](example) has two flavors:
 - **demo** (default): Internal demo app, used for testing all features of the plugin.
@@ -231,7 +237,7 @@ The [example app](example) has two flavors:
 
 To run them with your own API key, Client ID and app identifier, see [Environment Setup](example/README.md#environment-setup) in the example app README.
 
-## 7. Legal
+## 8. Legal
 
 Legal documents, the same for all platforms:
 - [Legal Musterformulierungen](legal/Legal_Musterformulierungen.docx)
@@ -242,12 +248,12 @@ Third-party licenses:
 - [iOS SDK](https://github.com/ihreapotheken/IA-SDK-iOS/blob/main/licenses.html)
 - [Android SDK](https://github.com/ihreapotheken/IA-SDK-Android/blob/main/app/licenses/licenses.html)
 
-## 8. Usage and Testing FAQ
+## 9. Usage and Testing FAQ
 
 For information on server environments, testing credentials, access requirements, and bug reporting guidelines,
 see the [Usage and Testing documentation](https://ihreapotheken.github.io/docs/appsdk/common/usage-and-testing).
 
-## 9. Demo App Deployment (Internal)
+## 10. Demo App Deployment (Internal)
 
 ---
 
@@ -279,7 +285,7 @@ launcher name tells them apart.
 On GitHub, run the Demo App Deploy workflow and choose the platform and the flavor. A pushed tag deploys the `demo`
 flavor to both platforms.
 
-## 10. API Reference Deployment (Internal)
+## 11. API Reference Deployment (Internal)
 
 ---
 

@@ -74,7 +74,7 @@ See [SDK Interaction](interaction.md).
 - `IaModuleOverTheCounter()` - The module, pass it to `register`
 - `launchProductSearchRoute(focusesOnAppear:)` - Shows the [Product Search Screen](screens/product_search_screen.md)
 - `clearProductGridCache()` - Clears the cached products of product grids (iOS only)
-- `IaProductGrid(type:)` - Inline component that shows a grid of products
+- `IaProductGrid(type:)` - Inline component that shows a grid of products, see [IaProductGrid](components/product_grid.md)
 - `IaProductSearchScreen(focusesOnAppear:)` - The [Product Search Screen](screens/product_search_screen.md) as a widget for your own UI
 
 ## ia_ordering
@@ -88,7 +88,7 @@ See [SDK Interaction](interaction.md).
 - `deleteOrderHistory()` - Deletes the order history (iOS only)
 - `orderingDidUpdateCartListener` - Stream of cart updates
 - `orderingDidFinishOrderListener` - Stream of finished orders
-- `IaCartButton()` - Inline component, a button with the number of items in the cart that opens the cart
+- `IaCartButton()` - Inline component, a button with the number of items in the cart that opens the cart, see [IaCartButton](components/cart_button.md)
 - `IaCartScreen()` - The [Cart Screen](screens/cart_screen.md) as a widget for your own UI
 
 ## ia_pharmacy

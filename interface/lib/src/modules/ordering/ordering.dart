@@ -7,6 +7,7 @@ part of '../../common/_interface.dart';
 ///
 /// {@category Interaction}
 /// {@category CartScreen}
+/// {@category CartButton}
 abstract class IaBaseOrdering extends IaBase {
   @override
   IaBaseModule get module {

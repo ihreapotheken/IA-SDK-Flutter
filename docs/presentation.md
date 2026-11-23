@@ -24,34 +24,15 @@ await IaSdk.instance.overTheCounter.launchProductSearchRoute();
 await IaSdk.instance.ordering.launchCartScreen();
 ```
 
-Available launch methods:
-
-| Method | Package |
-|---|---|
-| `IaSdk.instance.launchStartRoute()` | `appsdk_v2_flutter_plugin` |
-| `IaSdk.instance.launchApofinder()` | `appsdk_v2_flutter_plugin` |
-| `IaSdk.instance.overTheCounter.launchProductSearchRoute()` | `ia_over_the_counter` |
-| `IaSdk.instance.ordering.launchCartScreen()` | `ia_ordering` |
-| `IaSdk.instance.pharmacy.launchPharmacyDetails()` | `ia_pharmacy` |
-| `IaSdk.instance.prescription.launchRedeemPrescriptionScreen()` | `ia_prescription` |
-| `IaSdk.instance.prescription.launchPrescriptionScanner(type)` (iOS only) | `ia_prescription` |
-| `IaSdk.instance.cardLink.launch(...)` | `ia_cardlink` |
+All launch methods are listed in the [Public API Overview](public_api_overview.md).
 
 The SDK handles the navigation of launched screens, including closing them. To close all SDK screens from your code,
 call `IaSdk.instance.finishAllActivities()`.
 
 ## Screen widgets
 Use a screen widget when you need to control how the screen is shown: push it to your navigation, present it
-yourself, or embed it into your UI. Each package exports the widgets of its screens:
-
-| Widget | Screen | Package |
-|---|---|---|
-| `IaStartScreen` | Start screen | `appsdk_v2_flutter_plugin` |
-| `IaApofinderScreen` | Apofinder | `appsdk_v2_flutter_plugin` |
-| `IaProductSearchScreen` | Product search | `ia_over_the_counter` |
-| `IaCartScreen` | Cart | `ia_ordering` |
-| `IaPharmacyScreen` | Pharmacy details | `ia_pharmacy` |
-| `IaRedeemPrescriptionScreen` | Redeem prescription | `ia_prescription` |
+yourself, or embed it into your UI. Each package exports the widgets of its screens, e.g. `IaCartScreen` from
+`ia_ordering`. All screen widgets are listed in the [Public API Overview](public_api_overview.md).
 
 Screens fill the space you give them, so give them bounded constraints, e.g. as the body of a `Scaffold`. Each screen
 is a native platform view; the widgets build on `IaSdkPlatformView`, which you can also use directly with the screen's

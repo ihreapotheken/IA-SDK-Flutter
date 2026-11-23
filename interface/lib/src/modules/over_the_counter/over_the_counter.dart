@@ -6,6 +6,7 @@ part of '../../common/_interface.dart';
 /// [MissingPluginException] on the other platform. Callbacks and streams with such a note never fire there.
 ///
 /// {@category ProductSearchScreen}
+/// {@category ProductGrid}
 abstract class IaBaseOverTheCounter extends IaBase {
   @override
   IaBaseModule get module {
