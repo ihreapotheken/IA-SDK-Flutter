@@ -22,10 +22,11 @@ screens to appear where the component is shown, for example:
 
 This guide shows how to handle initialization and prerequisites in such cases.
 
-## Initialization
+## Initialization and prerequisites
 
-Components don't initialize the SDK themselves, so you must call `initialize` before a component is shown. Choose one
-of the following options.
+Components don't initialize the SDK themselves, so you must call `initialize` before a component is shown. `initialize`
+never presents prerequisites screens. Instead, the first component or screen that is shown runs the prerequisites that
+are still needed. Choose one of the following options.
 
 ### Option 1: Call `initialize` in every place that uses the SDK
 Call `initialize` both in your SDK entry point and before showing the component. This is safe because only the first
@@ -37,8 +38,16 @@ await IaSdk.instance.initialize(config: config);
 // Show IaProductGrid
 ```
 
+> [!NOTE]
+> Prerequisites screens are presented as soon as the component appears (only if needed). If you don't want that, see
+> [Prerequisites check](#prerequisites-check) below.
+
 ### Option 2: Call `initialize` once at app start
 Call `initialize` once when your app starts. After that, components and screens can be used anywhere in the app.
+
+> [!NOTE]
+> Prerequisites screens are presented as soon as the first component or screen appears (only if needed), e.g. the
+> component on the first tab. If you don't want that, see [Prerequisites check](#prerequisites-check) below.
 
 > [!TIP]
 > If you want the prerequisites to run before any component or screen is shown, call `launchPrerequisiteFlow`, and
