@@ -2,8 +2,13 @@
 
 IA SDK components (e.g. `IaProductGrid`) can be embedded anywhere in your app's UI. Like every IA SDK screen, they
 require:
-* **SDK initialization** to be finished.
-* **Prerequisites** (e.g. pharmacy selection) to be completed.
+* **SDK initialization** to be finished. It fetches the data the SDK needs and has no UI, except for an optional
+  loading indicator.
+* **Prerequisites** to be completed. They are a flow of screens (onboarding, legal opt-in and pharmacy selection in
+  Apofinder), presented only when needed.
+
+> [!TIP]
+> To learn more about initialization and prerequisites in general, see [Initialization](../initialization.md).
 
 Until both are done, a component shows only a loading indicator.
 
@@ -16,9 +21,6 @@ screens to appear where the component is shown, for example:
 > `IaProductGrid` to the first tab, which the user sees first.
 
 This guide shows how to handle initialization and prerequisites in such cases.
-
-> [!TIP]
-> To learn more about initialization and prerequisites in general, see [Initialization](../initialization.md).
 
 ## Initialization
 
